@@ -1,0 +1,74 @@
+[
+  {
+    "id": "client-server",
+    "term": "Client-Server Model",
+    "shortDefinition": "A way of organizing software where one program (the client) requests services from another program (the server).",
+    "analogy": "Like a restaurant: the customer (client) orders food, and the kitchen (server) prepares and delivers it. The customer never needs to know how the kitchen works — they just place orders and get results.",
+    "relatedConcepts": ["server", "api", "http"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-1" }
+  },
+  {
+    "id": "server",
+    "term": "Server",
+    "shortDefinition": "A computer (or program) that receives requests from clients and sends back responses. It runs 24/7 so your app is always available.",
+    "analogy": "Think of a server as a restaurant kitchen that never closes. Orders come in from customers all over the world, and the kitchen processes them and sends back results. The kitchen doesn't care who's ordering — it just handles requests.",
+    "relatedConcepts": ["client-server", "load-balancer", "horizontal-scaling"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-1" }
+  },
+  {
+    "id": "database",
+    "term": "Database",
+    "shortDefinition": "A system for storing and retrieving data permanently. Unlike memory (RAM), data in a database survives restarts and crashes.",
+    "analogy": "A database is like a library's filing system. Every piece of data has a specific shelf and label so you can always find it again — even years later. Memory (RAM) is more like a sticky note: fast to read, but lost as soon as you clean up.",
+    "relatedConcepts": ["relational-database", "persistence", "sql"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-2" }
+  },
+  {
+    "id": "relational-database",
+    "term": "Relational Database",
+    "shortDefinition": "A database that stores data in tables (rows and columns) with defined relationships between them. Examples: PostgreSQL, MySQL.",
+    "analogy": "Like a well-organized spreadsheet where each sheet represents a type of data (users, messages, chat rooms), and you can link rows across sheets. 'Show me all messages sent by user #42 in the general chat room' — a relational database handles that naturally.",
+    "relatedConcepts": ["database", "sql", "persistence"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-2" }
+  },
+  {
+    "id": "persistence",
+    "term": "Persistence",
+    "shortDefinition": "Storing data so it survives beyond the current session. Persistent data doesn't disappear when the program stops.",
+    "analogy": "The difference between writing on a whiteboard (non-persistent — erased at end of day) and writing in a notebook (persistent — stays there until you choose to erase it).",
+    "relatedConcepts": ["database", "memory"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-2" }
+  },
+  {
+    "id": "polling",
+    "term": "Polling",
+    "shortDefinition": "A technique where a client repeatedly asks the server 'do you have anything new?' at regular intervals.",
+    "analogy": "Like checking your mailbox every 5 minutes to see if anything arrived. Simple and reliable, but wastes a lot of trips when there's usually nothing there.",
+    "relatedConcepts": ["websockets", "real-time", "http"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-3" }
+  },
+  {
+    "id": "websockets",
+    "term": "WebSockets",
+    "shortDefinition": "A technology that creates a persistent, two-way connection between client and server. Either side can send data at any time without waiting for a request.",
+    "analogy": "If HTTP (regular web requests) is like sending letters back and forth, WebSockets are like a phone call — once connected, both sides can talk whenever they want. No need to hang up and dial again for each message.",
+    "relatedConcepts": ["polling", "real-time", "client-server"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-3" }
+  },
+  {
+    "id": "real-time",
+    "term": "Real-Time",
+    "shortDefinition": "Data that is delivered immediately as it's created, with no noticeable delay. Chat messages, live scores, and collaborative editing are all real-time features.",
+    "analogy": "The difference between watching a live sports game (real-time) and reading the score in tomorrow's newspaper (batch). Real-time means you see it as it happens.",
+    "relatedConcepts": ["websockets", "polling"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-3" }
+  },
+  {
+    "id": "pagination",
+    "term": "Pagination",
+    "shortDefinition": "Loading data in small chunks instead of all at once. Show 50 items, then load the next 50 when needed.",
+    "analogy": "Like a book divided into pages. You don't print the entire book on one giant scroll — you break it into manageable pages. Google search results (page 1, 2, 3) and Twitter's infinite scroll are both forms of pagination.",
+    "relatedConcepts": ["database", "api"],
+    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-2" }
+  }
+]

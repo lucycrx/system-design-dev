@@ -1,0 +1,116 @@
+import { notFound } from "next/navigation";
+import { getStory, getGlossaryMap } from "@/lib/content";
+import { BlockRenderer } from "@/components/blocks/BlockRenderer";
+import { StoryProgressBar } from "@/components/ui/StoryProgressBar";
+import { StageNavigation } from "@/components/ui/StageNavigation";
+import Link from "next/link";
+
+interface Props {
+  params: Promise<{ storySlug: string; stageId: string }>;
+}
+
+export default async function StagePage({ params }: Props) {
+  const { storySlug, stageId } = await params;
+  const story = getStory(storySlug);
+  if (!story) notFound();
+
+  const stageIndex = story.stages.findIndex((s) => s.id === stageId);
+  if (stageIndex === -1) notFound();
+
+  const stage = story.stages[stageIndex];
+  const glossaryMap = getGlossaryMap();
+
+  const prevStage = stageIndex > 0 ? story.stages[stageIndex - 1] : undefined;
+  const nextStage =
+    stageIndex < story.stages.length - 1
+      ? story.stages[stageIndex + 1]
+      : undefined;
+
+  return (
+    <div className="min-h-screen bg-bg">
+      {/* Top bar */}
+      <header className="sticky top-0 z-40 bg-bg/90 backdrop-blur-md border-b border-border">
+        <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
+          <Link
+            href={`/stories/${story.slug}`}
+            className="text-sm text-text-muted hover:text-text transition-colors flex items-center gap-2"
+          >
+            <span>&larr;</span>
+            <span className="hidden sm:inline">{story.title}</span>
+            <span className="sm:hidden">Back</span>
+          </Link>
+          <span className="text-xs font-mono text-text-dim">
+            {stage.userScale}
+          </span>
+        </div>
+      </header>
+
+      <main className="max-w-3xl mx-auto px-6 py-8">
+        <StoryProgressBar
+          currentStage={stageIndex + 1}
+          totalStages={story.stages.length}
+          stageTitle={stage.title}
+        />
+
+        {/* Stage header */}
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-accent-dim text-accent border border-accent/20">
+              {stage.userScale}
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold text-text mb-3">{stage.title}</h1>
+          <p className="text-text-muted leading-relaxed">
+            {stage.narrative.setup}
+          </p>
+        </div>
+
+        {/* Problem callout (if this stage has one) */}
+        {stage.narrative.problem && (
+          <div className="bg-pink-dim border-l-[3px] border-l-pink rounded-r-xl p-5 mb-8">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-pink mb-2">
+              The Problem
+            </div>
+            <p className="text-[14px] text-text/80 leading-relaxed">
+              {stage.narrative.problem}
+            </p>
+          </div>
+        )}
+
+        {/* Resolution teaser */}
+        {stage.narrative.resolution && (
+          <div className="bg-green-dim border-l-[3px] border-l-green rounded-r-xl p-5 mb-8">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-green mb-2">
+              The Solution
+            </div>
+            <p className="text-[14px] text-text/80 leading-relaxed">
+              {stage.narrative.resolution}
+            </p>
+          </div>
+        )}
+
+        {/* Content blocks */}
+        <BlockRenderer blocks={stage.blocks} glossaryMap={glossaryMap} />
+
+        {/* Navigation */}
+        <StageNavigation
+          storySlug={story.slug}
+          prevStage={prevStage}
+          nextStage={nextStage}
+        />
+      </main>
+    </div>
+  );
+}
+
+export async function generateStaticParams() {
+  const { getAllStories } = await import("@/lib/content");
+  const stories = getAllStories();
+  const params: { storySlug: string; stageId: string }[] = [];
+  for (const story of stories) {
+    for (const stage of story.stages) {
+      params.push({ storySlug: story.slug, stageId: stage.id });
+    }
+  }
+  return params;
+}

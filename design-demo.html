@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design School — Accent Color Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #FAFAF8;
+    --surface: #FFFFFF;
+    --text: #1A1A1A;
+    --text-muted: #666666;
+    --text-dim: #999999;
+    --border: #E5E2DE;
+    --border-hover: #D0CDC8;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Top nav */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .top-bar h1 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .top-bar p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* Palette selector */
+  .palette-selector {
+    display: flex;
+    gap: 12px;
+    padding: 24px 48px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 61px;
+    z-index: 10;
+  }
+  .palette-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--surface);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+  }
+  .palette-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .palette-btn.active { border-color: var(--text); color: var(--text); }
+  .palette-btn .swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+
+  /* Main content */
+  .content { max-width: 860px; margin: 0 auto; padding: 64px 48px 120px; }
+
+  /* Hero */
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+  .hero h2 {
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+  .hero h2 span { color: var(--text-muted); }
+  .hero p {
+    font-size: 18px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    max-width: 540px;
+  }
+
+  /* Section label */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    margin-top: 56px;
+  }
+
+  /* Story cards */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+  }
+  .card:hover { border-color: var(--border-hover); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .card-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid;
+  }
+  .card-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    transition: color 0.2s ease;
+  }
+  .card:hover h3 { color: var(--accent); }
+  .card .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
+  .card .desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; margin-top: 12px; }
+  .card-tags { display: flex; gap: 6px; margin-top: 16px; flex-wrap: wrap; }
+  .card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  /* Callout blocks */
+  .callouts { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+  .callout {
+    border-left: 3px solid;
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+  }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .callout-body {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* Progress bar */
+  .progress-section { margin-top: 56px; }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress-header span {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .progress-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    width: 60%;
+    transition: background 0.3s ease;
+  }
+
+  /* Button */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 32px;
+    color: white;
+  }
+  .btn:hover { opacity: 0.88; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    margin-left: 12px;
+  }
+  .btn-outline:hover { border-color: var(--text); opacity: 1; }
+
+  /* Color swatches */
+  .swatch-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    align-items: center;
+  }
+  .swatch-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .swatch-large {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .swatch-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>System Design School</h1>
+  <p>Accent Color Exploration</p>
+</div>
+
+<div class="palette-selector" id="palette-selector">
+  <button class="palette-btn active" data-palette="terracotta">
+    <span class="swatch" style="background: #C4654A;"></span>
+    Terracotta
+  </button>
+  <button class="palette-btn" data-palette="ochre">
+    <span class="swatch" style="background: #B8945A;"></span>
+    Sand / Ochre
+  </button>
+  <button class="palette-btn" data-palette="coral">
+    <span class="swatch" style="background: #D4826A;"></span>
+    Coral
+  </button>
+  <button class="palette-btn" data-palette="blue">
+    <span class="swatch" style="background: #4A6FA5;"></span>
+    Deep Blue
+  </button>
+</div>
+
+<div class="content">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-label" id="hero-label">System Design for Builders</div>
+    <h2>Learn why systems work<br><span>(and why they break)</span></h2>
+    <p>Interactive stories that teach system design through scaling journeys. Built for vibecoders, PMs, and founders — not just engineers.</p>
+    <div>
+      <button class="btn" id="hero-btn">Start Learning</button>
+      <button class="btn btn-outline">Browse Stories</button>
+    </div>
+  </div>
+
+  <!-- Swatches -->
+  <div class="swatch-row" id="swatch-row"></div>
+
+  <!-- Story cards -->
+  <div class="section-label">Build Stories</div>
+  <div class="cards">
+    <div class="card" id="card-1">
+      <div class="card-meta">
+        <span class="card-badge" id="badge-1">Beginner</span>
+        <span class="card-time">~25 min</span>
+      </div>
+      <h3>The Coffee Shop Queue</h3>
+      <p class="subtitle">From single barista to distributed system</p>
+      <p class="desc">Your coffee shop is getting popular. Learn how real systems handle growing demand through the lens of espresso drinks and impatient customers.</p>
+      <div class="card-tags">
+        <span class="card-tag">queues</span>
+        <span class="card-tag">load balancing</span>
+        <span class="card-tag">scaling</span>
+      </div>
+    </div>
+    <div class="card" id="card-2">
+      <div class="card-meta">
+        <span class="card-badge" id="badge-2">Intermediate</span>
+        <span class="card-time">~40 min</span>
+      </div>
+      <h3>Scaling the Chat App</h3>
+      <p class="subtitle">When messages start getting lost</p>
+      <p class="desc">Your group chat app just went viral. Now messages are arriving out of order, some are vanishing, and users are frustrated.</p>
+      <div class="card-tags">
+        <span class="card-tag">websockets</span>
+        <span class="card-tag">consistency</span>
+        <span class="card-tag">databases</span>
+        <span class="card-tag">+2 more</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Callout blocks -->
+  <div class="section-label">Component Samples</div>
+  <div class="callouts">
+    <div class="callout" id="callout-insight">
+      <div class="callout-label" id="callout-insight-label">Key Insight</div>
+      <div class="callout-body">Adding more servers doesn't automatically solve your problem. You need to think about how work gets <strong>distributed</strong> across them.</div>
+    </div>
+    <div class="callout" id="callout-analogy">
+      <div class="callout-label" id="callout-analogy-label">Real-World Analogy</div>
+      <div class="callout-body">Think of a load balancer like the host at a restaurant — they don't cook food, but they make sure no single waiter gets overwhelmed.</div>
+    </div>
+    <div class="callout" id="callout-warning">
+      <div class="callout-label" id="callout-warning-label">Watch Out</div>
+      <div class="callout-body">Caching can introduce stale data. If a user updates their profile but sees the old version, that's a cache consistency problem.</div>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-section">
+    <div class="section-label">Progress Bar</div>
+    <div class="progress-header">
+      <span>Stage 3 of 5</span>
+      <span>The Breaking Point</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const palettes = {
+  terracotta: {
+    accent: '#C4654A',
+    accentHover: '#B55A40',
+    accentDim: 'rgba(196, 101, 74, 0.08)',
+    accentBorder: 'rgba(196, 101, 74, 0.2)',
+    // Supporting muted tones
+    blue: '#6B8EAE',
+    blueDim: 'rgba(107, 142, 174, 0.08)',
+    blueBorder: 'rgba(107, 142, 174, 0.25)',
+    orange: '#C49A5A',
+    orangeDim: 'rgba(196, 154, 90, 0.08)',
+    orangeBorder: 'rgba(196, 154, 90, 0.25)',
+    green: '#6BA88E',
+    greenDim: 'rgba(107, 168, 142, 0.08)',
+    greenBorder: 'rgba(107, 168, 142, 0.25)',
+  },
+  ochre: {
+    accent: '#B8945A',
+    accentHover: '#A8864E',
+    accentDim: 'rgba(184, 148, 90, 0.08)',
+    accentBorder: 'rgba(184, 148, 90, 0.2)',
+    blue: '#6B8EAE',
+    blueDim: 'rgba(107, 142, 174, 0.08)',
+    blueBorder: 'rgba(107, 142, 174, 0.25)',
+    orange: '#C4876A',
+    orangeDim: 'rgba(196, 135, 106, 0.08)',
+    orangeBorder: 'rgba(196, 135, 106, 0.25)',
+    green: '#6BA88E',
+    greenDim: 'rgba(107, 168, 142, 0.08)',
+    greenBorder: 'rgba(107, 168, 142, 0.25)',
+  },
+  coral: {
+    accent: '#D4826A',
+    accentHover: '#C47560',
+    accentDim: 'rgba(212, 130, 106, 0.08)',
+    accentBorder: 'rgba(212, 130, 106, 0.2)',
+    blue: '#6B8EAE',
+    blueDim: 'rgba(107, 142, 174, 0.08)',
+    blueBorder: 'rgba(107, 142, 174, 0.25)',
+    orange: '#C49A5A',
+    orangeDim: 'rgba(196, 154, 90, 0.08)',
+    orangeBorder: 'rgba(196, 154, 90, 0.25)',
+    green: '#6BA88E',
+    greenDim: 'rgba(107, 168, 142, 0.08)',
+    greenBorder: 'rgba(107, 168, 142, 0.25)',
+  },
+  blue: {
+    accent: '#4A6FA5',
+    accentHover: '#3F6196',
+    accentDim: 'rgba(74, 111, 165, 0.08)',
+    accentBorder: 'rgba(74, 111, 165, 0.2)',
+    blue: '#6B8EAE',
+    blueDim: 'rgba(107, 142, 174, 0.08)',
+    blueBorder: 'rgba(107, 142, 174, 0.25)',
+    orange: '#C49A5A',
+    orangeDim: 'rgba(196, 154, 90, 0.08)',
+    orangeBorder: 'rgba(196, 154, 90, 0.25)',
+    green: '#6BA88E',
+    greenDim: 'rgba(107, 168, 142, 0.08)',
+    greenBorder: 'rgba(107, 168, 142, 0.25)',
+  }
+};
+
+function applyPalette(name) {
+  const p = palettes[name];
+
+  // Hero label
+  document.getElementById('hero-label').style.color = p.accent;
+
+  // Hero button
+  const btn = document.getElementById('hero-btn');
+  btn.style.background = p.accent;
+
+  // Progress
+  document.getElementById('progress-fill').style.background = p.accent;
+
+  // Badge 1 — green (beginner)
+  const b1 = document.getElementById('badge-1');
+  b1.style.background = p.greenDim;
+  b1.style.color = p.green;
+  b1.style.borderColor = p.greenBorder;
+
+  // Badge 2 — accent (intermediate)
+  const b2 = document.getElementById('badge-2');
+  b2.style.background = p.accentDim;
+  b2.style.color = p.accent;
+  b2.style.borderColor = p.accentBorder;
+
+  // Callout: insight — accent
+  const ci = document.getElementById('callout-insight');
+  ci.style.borderLeftColor = p.accent;
+  ci.style.background = p.accentDim;
+  document.getElementById('callout-insight-label').style.color = p.accent;
+
+  // Callout: analogy — blue
+  const ca = document.getElementById('callout-analogy');
+  ca.style.borderLeftColor = p.blue;
+  ca.style.background = p.blueDim;
+  document.getElementById('callout-analogy-label').style.color = p.blue;
+
+  // Callout: warning — orange
+  const cw = document.getElementById('callout-warning');
+  cw.style.borderLeftColor = p.orange;
+  cw.style.background = p.orangeDim;
+  document.getElementById('callout-warning-label').style.color = p.orange;
+
+  // Card hover accent
+  document.querySelectorAll('.card').forEach(card => {
+    card.onmouseenter = () => card.querySelector('h3').style.color = p.accent;
+    card.onmouseleave = () => card.querySelector('h3').style.color = '';
+  });
+
+  // Swatches
+  const row = document.getElementById('swatch-row');
+  row.innerHTML = '';
+  const swatches = [
+    { color: '#FAFAF8', label: 'bg' },
+    { color: '#FFFFFF', label: 'surface' },
+    { color: '#1A1A1A', label: 'text' },
+    { color: '#666666', label: 'muted' },
+    { color: '#E5E2DE', label: 'border' },
+    { color: p.accent, label: 'accent' },
+    { color: p.green, label: 'green' },
+    { color: p.blue, label: 'blue' },
+    { color: p.orange, label: 'orange' },
+  ];
+  swatches.forEach(s => {
+    const block = document.createElement('div');
+    block.className = 'swatch-block';
+    block.innerHTML = `<div class="swatch-large" style="background:${s.color}"></div><span class="swatch-label">${s.label}</span>`;
+    row.appendChild(block);
+  });
+
+  // Selector buttons
+  document.querySelectorAll('.palette-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.palette === name);
+  });
+}
+
+// Init
+document.querySelectorAll('.palette-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyPalette(btn.dataset.palette));
+});
+applyPalette('terracotta');
+</script>
+
+</body>
+</html>

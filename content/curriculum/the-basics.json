@@ -1,0 +1,265 @@
+{
+  "id": "the-basics",
+  "slug": "the-basics",
+  "title": "The Basics",
+  "subtitle": "The foundation everything else builds on",
+  "description": "Before you can understand system design, you need to know how the pieces of a web application fit together. This module covers the five concepts that every app — from a simple to-do list to Instagram — relies on.",
+  "moduleNumber": 1,
+  "icon": "🧱",
+  "color": "accent",
+  "lessons": [
+    {
+      "id": "client-and-server",
+      "title": "What is a server and what is a client?",
+      "description": "The two halves of every app: the part you see (client) and the part you don't (server).",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Every app has two parts:\n\n- The **client** (or \"front end\") is what you see and interact with — the buttons, text, images, and forms in your browser or phone app.\n- The **server** (or \"back end\") is a computer sitting somewhere in a data center that does the behind-the-scenes work — storing data, running logic, sending emails, processing payments.\n\nWhen you use an app, your client talks to the server over the internet. The client asks for things (\"show me my messages\"), and the server responds (\"here are your 12 unread messages\")."
+        },
+        {
+          "heading": "why",
+          "content": "If you're building with AI tools, you'll constantly hear \"that's a front-end issue\" or \"the back end needs to handle that.\" Understanding this split helps you:\n\n- Know **where a bug lives** — is the screen not showing data (front end) or is the data missing entirely (back end)?\n- Give AI tools **better instructions** — \"Build me a React component that calls the /messages endpoint\" is much more useful than \"build me a chat feature.\"\n- Understand **security boundaries** — anything running on the client can be seen and modified by users. Sensitive logic (authentication, payments) must live on the server."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a restaurant:\n\n- **The dining room** is the client. It's where customers sit, read the menu, and place orders. It's designed to look nice and be easy to use.\n- **The kitchen** is the server. It receives orders, has access to all the ingredients (data), does the actual cooking (logic), and sends the finished dish back.\n- **The waiter** is the internet — carrying requests from the dining room to the kitchen and bringing back responses.\n\nThe customer never walks into the kitchen. They don't need to know how the food is made — they just need the right dish to show up. That's exactly how clients and servers work."
+        },
+        {
+          "heading": "when",
+          "content": "Every web or mobile app uses this model. Even \"static\" websites that look simple often have a server behind them for things like:\n\n- Saving form submissions\n- Loading user-specific content\n- Processing payments\n- Sending notifications\n\nThe only exceptions are purely static sites (like a digital business card) that have no dynamic behavior — no logins, no saved data, no personalization."
+        }
+      ],
+      "quiz": {
+        "question": "Where does the bug live?",
+        "scenario": "A user reports: \"When I click the 'Send Message' button, nothing happens. The button doesn't even look like it's loading.\" You check the server logs and there are no incoming requests from that user.",
+        "options": [
+          {
+            "id": "a",
+            "text": "This is a front-end (client) issue",
+            "correct": true,
+            "explanation": "The server never received a request, which means the client never sent one. The button click handler is either broken or not wired up correctly. This is a client-side bug — the request never left the browser."
+          },
+          {
+            "id": "b",
+            "text": "This is a back-end (server) issue",
+            "correct": false,
+            "explanation": "If the server has no record of the request, it never arrived. The problem is upstream — on the client side. If it were a server issue, you'd see the request arrive but fail to process."
+          },
+          {
+            "id": "c",
+            "text": "This is a network issue",
+            "correct": false,
+            "explanation": "Possible but unlikely for a single user, and the clue is that the button doesn't even look like it's loading — suggesting the click handler itself isn't triggering the request. A network issue would typically show a loading state followed by an error."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "chat-app",
+          "stageId": "stage-1",
+          "label": "See this in action: Building a Chat App → Just You and a Friend"
+        }
+      ],
+      "relatedGlossary": ["client-server", "server"]
+    },
+    {
+      "id": "apis",
+      "title": "What is an API and why does everything use them?",
+      "description": "The contract between systems — how your front end talks to your back end (and how apps talk to each other).",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "An **API** (Application Programming Interface) is a set of rules for how two pieces of software talk to each other. It defines:\n\n- What you can **ask for** (\"get my messages,\" \"create a new user,\" \"delete this post\")\n- **How** to ask (what URL to call, what data to send)\n- What you'll **get back** (the format of the response)\n\nWhen your front end needs data from your back end, it doesn't reach into the database directly — it calls an API endpoint. When your app needs to send an email via SendGrid or charge a card via Stripe, it calls their APIs."
+        },
+        {
+          "heading": "why",
+          "content": "APIs are everywhere because they solve a fundamental problem: **different parts of a system need to communicate without knowing each other's internal details.**\n\nAs a builder, APIs matter because:\n\n- Your front end talks to your back end through an API\n- You'll integrate third-party services (Stripe, Twilio, OpenAI) through their APIs\n- When AI tools generate code for you, understanding the API contract helps you verify it's correct\n- When something breaks between systems, the API is usually where you look first"
+        },
+        {
+          "heading": "how",
+          "content": "Think of an API like a **restaurant menu**:\n\n- The menu lists **what's available** (endpoints): appetizers, mains, desserts\n- Each item has a **name and description** (documentation): \"Caesar Salad — romaine, parmesan, croutons\"\n- You **order by name** (make a request): \"I'll have the Caesar Salad\"\n- The kitchen **makes it and sends it back** (response): your salad arrives in a predictable format\n\nYou don't need to know how the kitchen makes the salad. You just need to know what's on the menu and how to order. That's an API.\n\nIn practice, an API call looks like this: your browser sends a request to `GET /api/messages?room=general` and your server responds with a list of messages in JSON format."
+        },
+        {
+          "heading": "when",
+          "content": "You use APIs in almost every app:\n\n- **Internal APIs**: Your front end calling your own back end\n- **Third-party APIs**: Integrating external services (payment processing, email, AI models, maps)\n- **Public APIs**: Letting other developers build on your platform (like Twitter's API or Stripe's API)\n\nIf two pieces of software need to exchange data, there's an API in between."
+        }
+      ],
+      "quiz": {
+        "question": "Which is the API call?",
+        "scenario": "You're building a weather app. You need to show the current temperature for a user's city. Your app doesn't have weather data — it needs to get it from a weather service.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Your app calls GET api.weather.com/current?city=seattle and displays the result",
+            "correct": true,
+            "explanation": "This is an API call to a third-party service. Your app asks the weather API for data (the request), gets back a structured response (temperature, conditions, etc.), and displays it. Your app doesn't need to know how they measure weather — it just uses the API."
+          },
+          {
+            "id": "b",
+            "text": "Your app looks up the temperature in its own database",
+            "correct": false,
+            "explanation": "Your app doesn't have weather data — that's the whole point. You need an external API to get it. This is a common pattern: your app combines data from your own database with data from external APIs."
+          },
+          {
+            "id": "c",
+            "text": "Your app scrapes the weather website and extracts the number",
+            "correct": false,
+            "explanation": "Web scraping (reading a website's HTML to extract data) technically works but is fragile, unreliable, and often against a site's terms of service. APIs exist specifically so you don't have to do this — they give you structured data in a predictable format."
+          }
+        ]
+      },
+      "relatedGlossary": ["client-server"]
+    },
+    {
+      "id": "databases",
+      "title": "What is a database and why can't I just use a spreadsheet?",
+      "description": "Where your app's data lives permanently — and why it's not just a fancy spreadsheet.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **database** is a system for storing, organizing, and retrieving data. It's where your app keeps everything that needs to persist: user accounts, messages, orders, settings, content.\n\nUnlike a spreadsheet, a database is designed to:\n- Handle **thousands of simultaneous readers and writers** without corrupting data\n- Find specific data **instantly** even among millions of records\n- Ensure data is **never lost**, even if the power goes out mid-write\n- Enforce **rules about your data** (e.g., \"every user must have a unique email\")"
+        },
+        {
+          "heading": "why",
+          "content": "If your app stores any user data at all, it needs a database. Understanding databases helps you:\n\n- **Design your data model** — what tables/collections do you need? What fields? AI tools can generate this, but you need to verify it makes sense.\n- **Diagnose slow pages** — often the fix is a database issue (missing index, loading too much data, N+1 queries)\n- **Choose the right database** — not all databases work the same way, and the wrong choice can be painful to fix later\n- **Talk to engineers credibly** — \"the query is slow because there's no index on the user_id column\" earns a lot of respect"
+        },
+        {
+          "heading": "how",
+          "content": "Think of a database like a **library**:\n\n- **Tables** are like different sections (Fiction, Science, History) — each one holds a specific type of data\n- **Rows** are like individual books — each one is a record (a user, an order, a message)\n- **Columns** are like the properties of each book (title, author, ISBN, publish date)\n- **Indexes** are like the card catalog — they let you find a specific book without searching every shelf\n- **Queries** are like asking the librarian: \"Find me all science books published after 2020, sorted by author name\"\n\nA spreadsheet is like a library with one room, no catalog, and one librarian. It works great for 100 books. But add 100,000 books and 50 people all asking for different ones simultaneously? You need a real library system. That's a database."
+        },
+        {
+          "heading": "when",
+          "content": "Use a database when your app needs to:\n\n- **Remember things between sessions** (user accounts, saved preferences)\n- **Share data between users** (messages, posts, comments)\n- **Handle multiple users at once** (any multi-user app)\n- **Query data flexibly** (\"show me all orders over $50 from last month\")\n\nYou might NOT need a database for: a static landing page, a calculator tool, or a single-user app that only needs browser storage."
+        }
+      ],
+      "quiz": {
+        "question": "Spreadsheet or database?",
+        "scenario": "You're building a marketplace app where sellers list products and buyers purchase them. At launch you expect 500 sellers and 5,000 products, growing to 10,000 sellers in a year. Multiple people will be browsing, searching, and buying simultaneously.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Database — concurrent access, search, and data relationships require it",
+            "correct": true,
+            "explanation": "A marketplace has concurrent users reading and writing data simultaneously (buyers browsing while sellers update listings), complex queries (search, filter, sort), and relationships between data (users ↔ orders ↔ products). This is exactly what databases are built for."
+          },
+          {
+            "id": "b",
+            "text": "Spreadsheet — 5,000 products isn't that much data",
+            "correct": false,
+            "explanation": "It's not about the amount of data — it's about concurrency and complexity. Even 100 products would need a database if 50 people are simultaneously browsing, searching, filtering, and purchasing. A spreadsheet can't handle multiple writers safely, and searching is slow."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "chat-app",
+          "stageId": "stage-2",
+          "label": "See this in action: Building a Chat App → 100 Friends Join"
+        }
+      ],
+      "relatedGlossary": ["database", "relational-database", "persistence"]
+    },
+    {
+      "id": "http-requests",
+      "title": "HTTP requests: What happens when you type a URL?",
+      "description": "The invisible conversation your browser has every time you visit a website.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**HTTP** (HyperText Transfer Protocol) is the set of rules your browser uses to communicate with servers. Every time you visit a website, click a link, or submit a form, your browser sends an **HTTP request** and the server sends back an **HTTP response**.\n\nThe main types of HTTP requests (called \"methods\") are:\n\n- **GET** — \"Give me something\" (loading a page, fetching data)\n- **POST** — \"Here's something new\" (submitting a form, creating a record)\n- **PUT/PATCH** — \"Update this\" (editing a profile, changing settings)\n- **DELETE** — \"Remove this\" (deleting a post, removing a friend)"
+        },
+        {
+          "heading": "why",
+          "content": "HTTP is the language of the web. Understanding it helps you:\n\n- **Debug API issues** — \"I'm getting a 404\" means the URL is wrong. \"I'm getting a 500\" means the server crashed. These numbers are HTTP status codes and they tell you *exactly* what went wrong.\n- **Understand what AI builds** — when AI generates code that calls `fetch('/api/users', { method: 'POST' })`, you know it's creating a new user, not reading one.\n- **Read documentation** — every API's docs describe endpoints using HTTP methods: `GET /users`, `POST /orders`, `DELETE /posts/:id`."
+        },
+        {
+          "heading": "how",
+          "content": "When you type `google.com` into your browser, here's the invisible conversation:\n\n1. **Your browser** sends a request: \"Hey google.com, GET me your homepage\"\n2. The request travels across the internet to **Google's server**\n3. Google's server processes the request and sends back a **response**: the HTML, CSS, and JavaScript that make up the page\n4. **Your browser** receives the response and renders it on screen\n\nThis whole round trip takes milliseconds. And it happens hundreds of times as the page loads — for images, fonts, scripts, and data.\n\nThe key status codes to know:\n- **200** — OK, here's what you asked for\n- **301/302** — This moved, go look over there (redirect)\n- **400** — You sent a bad request (missing data, wrong format)\n- **401** — You're not logged in\n- **403** — You're logged in but don't have permission\n- **404** — This doesn't exist\n- **500** — The server broke (not your fault)"
+        },
+        {
+          "heading": "when",
+          "content": "Every web interaction uses HTTP:\n\n- Loading any webpage → GET requests\n- Submitting a signup form → POST request\n- Updating your profile → PUT/PATCH request\n- Clicking \"Delete my account\" → DELETE request\n- Your app calling Stripe's API to charge a card → POST request to Stripe's server\n\nUnderstanding HTTP methods and status codes is like understanding road signs — you need them to navigate."
+        }
+      ],
+      "quiz": {
+        "question": "What's the status code telling you?",
+        "scenario": "You're testing your app and try to load a user's profile page. The browser shows a blank page. You open the developer console and see: `GET /api/users/42 → 401 Unauthorized`.",
+        "options": [
+          {
+            "id": "a",
+            "text": "The user isn't logged in or the authentication token is missing/expired",
+            "correct": true,
+            "explanation": "A 401 means the server doesn't know who you are. The request reached the server fine, but you didn't prove your identity. Either the user isn't logged in, or the auth token in the request is missing, expired, or invalid."
+          },
+          {
+            "id": "b",
+            "text": "User #42 doesn't exist in the database",
+            "correct": false,
+            "explanation": "That would be a 404 (Not Found). A 401 is specifically about authentication — the server is saying \"I don't know who's asking,\" not \"I can't find what you're asking for.\""
+          },
+          {
+            "id": "c",
+            "text": "The server crashed while processing the request",
+            "correct": false,
+            "explanation": "A server crash would return a 500 (Internal Server Error). A 401 is a deliberate response — the server is working correctly and intentionally rejecting the request because authentication is missing."
+          }
+        ]
+      },
+      "relatedGlossary": ["client-server"]
+    },
+    {
+      "id": "json",
+      "title": "JSON: The language computers use to talk to each other",
+      "description": "The simple data format that powers almost every API on the internet.",
+      "estimatedMinutes": 4,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**JSON** (JavaScript Object Notation) is a text format for representing structured data. It's how your front end and back end exchange information, and it's what almost every API in the world uses.\n\nJSON looks like this:\n\n```json\n{\n  \"name\": \"Lucy\",\n  \"role\": \"Product Manager\",\n  \"skills\": [\"strategy\", \"design\", \"vibe-coding\"],\n  \"isAwesome\": true\n}\n```\n\nThat's it. Curly braces for objects, square brackets for lists, quotes around text, and simple values like numbers and true/false. If you can read a form, you can read JSON."
+        },
+        {
+          "heading": "why",
+          "content": "JSON is the lingua franca of the web. When you:\n\n- Call an API → you get JSON back\n- Send data to a server → you send JSON\n- Read configuration files → often JSON\n- Look at AI model responses → JSON\n\nBeing comfortable reading JSON means you can inspect API responses, debug data issues, and understand what your app is actually sending and receiving. When AI generates an API for you, the data flowing through it is almost certainly JSON."
+        },
+        {
+          "heading": "how",
+          "content": "Think of JSON as a **standardized form** that any computer can read:\n\n- **Objects** (in `{ }`) are like labeled containers — each field has a name and a value\n- **Arrays** (in `[ ]`) are like numbered lists — ordered collections of things\n- **Strings** (in `\" \"`) are text\n- **Numbers** are just numbers (no quotes)\n- **Booleans** are `true` or `false`\n- **null** means \"no value\"\n\nJSON can nest — objects inside objects, arrays inside objects, objects inside arrays. That's how you represent complex data:\n\n```json\n{\n  \"user\": {\n    \"name\": \"Lucy\",\n    \"messages\": [\n      { \"text\": \"Hello!\", \"timestamp\": \"2024-01-15T09:00:00Z\" },\n      { \"text\": \"How's it going?\", \"timestamp\": \"2024-01-15T09:01:00Z\" }\n    ]\n  }\n}\n```"
+        },
+        {
+          "heading": "when",
+          "content": "You encounter JSON constantly:\n\n- **API responses**: `fetch('/api/user')` returns JSON\n- **Configuration**: `package.json`, `tsconfig.json` — your project's settings\n- **AI model APIs**: When you call Claude's API, you send and receive JSON\n- **Database exports**: Data dumps are often in JSON format\n\nYou don't need to write JSON from scratch often (AI tools handle that), but you need to **read** it to verify things are working and debug when they're not."
+        }
+      ],
+      "quiz": {
+        "question": "Read the JSON",
+        "scenario": "Your app calls an API and gets this response:\n\n```json\n{ \"status\": \"error\", \"code\": 422, \"message\": \"Email already exists\", \"field\": \"email\" }\n```\n\nA user reports they can't sign up. What's the issue?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Someone already registered with that email address",
+            "correct": true,
+            "explanation": "The JSON tells you exactly what happened: status is \"error\", the message says \"Email already exists\", and the problematic field is \"email\". The 422 status code means \"the data you sent is valid format but can't be processed\" — in this case, because the email is taken. You could show the user a helpful message or suggest they try logging in instead."
+          },
+          {
+            "id": "b",
+            "text": "The server is down",
+            "correct": false,
+            "explanation": "If the server were down, you wouldn't get a structured JSON response at all — you'd get a connection error or a 500 status code. This is a 422, which means the server is working fine but rejecting the data for a specific reason."
+          },
+          {
+            "id": "c",
+            "text": "The email format is invalid",
+            "correct": false,
+            "explanation": "Close, but read the message carefully — it says \"Email already exists,\" not \"Email is invalid.\" The format is fine; the email just belongs to an existing account. JSON gives you precise error information if you read it."
+          }
+        ]
+      },
+      "relatedGlossary": []
+    }
+  ]
+}

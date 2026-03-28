@@ -1,0 +1,283 @@
+{
+  "id": "building-blocks",
+  "slug": "building-blocks",
+  "title": "Building Blocks",
+  "subtitle": "The tools and frameworks that make apps work",
+  "description": "Now that you understand how clients, servers, APIs, and databases fit together, let's look at the specific tools developers use to build each piece — and how to choose between them.",
+  "moduleNumber": 2,
+  "icon": "🔧",
+  "color": "blue",
+  "lessons": [
+    {
+      "id": "frontend-frameworks",
+      "title": "Front-end frameworks: React, HTML, CSS, JS",
+      "description": "What are they, why do they exist, and why does everyone argue about them?",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Every webpage is built with three core technologies:\n\n- **HTML** — the structure (headings, paragraphs, buttons, forms). Think of it as the blueprint of a house.\n- **CSS** — the styling (colors, fonts, spacing, layout). Think of it as the paint, furniture, and decor.\n- **JavaScript (JS)** — the behavior (what happens when you click a button, type in a form, or scroll). Think of it as the plumbing and electrical.\n\nA **front-end framework** (like React, Vue, or Svelte) is a toolkit that makes building complex user interfaces easier. Instead of writing raw HTML/CSS/JS for every button and form, you build reusable **components** — self-contained pieces of UI that you can mix and match.\n\nReact (by Meta) is the most popular, which is why AI tools generate React code by default."
+        },
+        {
+          "heading": "why",
+          "content": "Understanding front-end frameworks helps you:\n\n- **Make sense of AI-generated code** — when Cursor writes a React component, you'll know what `useState`, `props`, and `return <div>...</div>` mean\n- **Debug visual bugs** — is the layout wrong (CSS), the content wrong (HTML), or the interaction wrong (JS)?\n- **Communicate with engineers** — \"Can we make this component reusable across the dashboard and the settings page?\" shows you understand the architecture\n- **Choose the right tool** — for a simple landing page, you don't need React. For a complex interactive app, you probably do."
+        },
+        {
+          "heading": "how",
+          "content": "Think of building a UI like building with **LEGO**:\n\n- **Without a framework**: You're carving each piece from scratch. Need a button? Write the HTML, style it with CSS, add click behavior with JS. Need another button? Do it all again.\n- **With React**: You build a `Button` component once, and reuse it everywhere. Change the color? Update it in one place and every button updates. Need a complex page? Snap together your `Header`, `Sidebar`, `MessageList`, and `ChatInput` components.\n\nA React component is just a JavaScript function that returns what should appear on screen:\n\n```jsx\nfunction WelcomeMessage({ name }) {\n  return <h1>Hello, {name}!</h1>;\n}\n```\n\nThat's a complete component. You use it like `<WelcomeMessage name=\"Lucy\" />` and it renders \"Hello, Lucy!\" on the page."
+        },
+        {
+          "heading": "when",
+          "content": "- **Simple landing page or blog**: Plain HTML + CSS is fine. Maybe a tiny bit of JS.\n- **Interactive app with forms, lists, real-time updates**: Use React (or Vue/Svelte)\n- **Full web app with routing, auth, SEO**: Use a meta-framework like Next.js (React-based) that adds server rendering, routing, and more\n\nMost AI coding tools default to React + Next.js because it handles the widest range of use cases."
+        }
+      ],
+      "quiz": {
+        "question": "Which layer is the bug in?",
+        "scenario": "Your app's signup form looks perfect on desktop, but on mobile the \"Sign Up\" button is cut off — you can only see the top half of it. The button still works if you manage to tap it.",
+        "options": [
+          {
+            "id": "a",
+            "text": "CSS (styling) — the layout isn't responsive",
+            "correct": true,
+            "explanation": "The button works (JS is fine) and it exists on the page (HTML is fine) — it's just visually cut off on small screens. This is a CSS layout/responsive design issue. The fix would be adjusting the CSS to handle smaller viewports (using media queries, flexbox, or adjusting padding/margins)."
+          },
+          {
+            "id": "b",
+            "text": "HTML (structure) — the button element is wrong",
+            "correct": false,
+            "explanation": "If the HTML were wrong, the button wouldn't render at all or wouldn't be clickable. Since it works when tapped, the HTML structure is fine — the button just isn't visible due to styling."
+          },
+          {
+            "id": "c",
+            "text": "JavaScript — the click handler has a mobile bug",
+            "correct": false,
+            "explanation": "The button works when tapped — the JS is fine. The issue is purely visual: the button is being clipped by its container on smaller screens. That's CSS territory."
+          }
+        ]
+      },
+      "relatedGlossary": ["client-server"]
+    },
+    {
+      "id": "backend-frameworks",
+      "title": "Backend frameworks: Node.js, Python, and friends",
+      "description": "The server-side code that handles your app's logic, data, and integrations.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **backend framework** is a toolkit for building the server side of your app. It handles:\n\n- **Routing**: Which code runs when someone hits `/api/users` vs. `/api/messages`\n- **Request handling**: Parsing incoming data, validating it, processing it\n- **Database interaction**: Reading and writing data\n- **Authentication**: Verifying who's making a request\n- **Integrations**: Calling other services (Stripe, email, AI APIs)\n\nPopular choices:\n- **Node.js + Express**: JavaScript on the server. Popular because you use the same language as the front end.\n- **Python + Flask/Django**: Python on the server. Popular in data/AI-heavy apps.\n- **Next.js API Routes**: If you're using Next.js for your front end, you can write backend code in the same project."
+        },
+        {
+          "heading": "why",
+          "content": "Even if AI writes your backend code, understanding the framework helps you:\n\n- **Know where to look** when something breaks — is the bug in the route handler, the database query, or the middleware?\n- **Understand project structure** — why are there folders called `routes/`, `middleware/`, `controllers/`?\n- **Make architecture decisions** — should this logic run on the server or the client? What needs to be an API endpoint?\n- **Review AI-generated code** — AI might put sensitive logic (like admin checks) in the wrong place"
+        },
+        {
+          "heading": "how",
+          "content": "Think of a backend framework like a **post office**:\n\n- **Routes** are like sorting rules: \"Letters with this ZIP code go to this delivery truck\"\n- **Handlers** are the workers at each stop: they open the letter, do what's asked, and send a response\n- **Middleware** is like the security checkpoint at the door: every letter passes through it (checking authentication, logging, etc.) before reaching a handler\n\nA simple API endpoint looks like:\n\n```js\n// When someone asks for messages in a room\napp.get('/api/messages/:room', async (req, res) => {\n  const messages = await db.getMessages(req.params.room);\n  res.json(messages);\n});\n```\n\nThat's it: receive a request, get data from the database, send it back."
+        },
+        {
+          "heading": "when",
+          "content": "- **Simple API + database**: Express or Next.js API Routes are great starting points\n- **Data science or AI-heavy**: Python (Flask/FastAPI) is natural\n- **Full-featured app with admin panel, ORM, auth built in**: Django (Python) or Rails (Ruby)\n- **Using Next.js already**: Just use its built-in API Routes — no need for a separate server\n\nFor vibe-coding with AI tools, **Next.js API Routes** are the fastest path since your front end and back end live in the same project."
+        }
+      ],
+      "quiz": {
+        "question": "Where does this logic belong?",
+        "scenario": "Your app lets users upload profile photos. You need to check that the uploaded file is actually an image (not a virus disguised as a .jpg) and that it's under 5MB.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Server-side (backend) — file validation must happen server-side for security",
+            "correct": true,
+            "explanation": "Anything running on the client can be bypassed by a malicious user (they can modify the JavaScript). File validation, especially security checks, MUST happen on the server. You can also add client-side validation for better UX (instant feedback), but never trust it as your only check."
+          },
+          {
+            "id": "b",
+            "text": "Client-side (frontend) — check before uploading to save bandwidth",
+            "correct": false,
+            "explanation": "Client-side validation is great for UX (fast feedback), but it can be bypassed. A malicious user could skip the JavaScript entirely and send a dangerous file directly to your server. You need server-side validation as the authoritative check."
+          }
+        ]
+      },
+      "relatedGlossary": ["server", "client-server"]
+    },
+    {
+      "id": "sql-vs-nosql",
+      "title": "SQL vs. NoSQL: When to use which?",
+      "description": "The two main families of databases and how to choose between them.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Databases come in two big families:\n\n**SQL (Relational) databases** — PostgreSQL, MySQL, SQLite\n- Store data in **tables** with rows and columns (like spreadsheets)\n- Data has a **fixed schema** — you define the structure upfront\n- Great at **relationships** — linking users to orders to products\n- You query them with **SQL** (Structured Query Language): `SELECT * FROM users WHERE email = 'lucy@example.com'`\n\n**NoSQL databases** — MongoDB, Firebase/Firestore, DynamoDB\n- Store data as **flexible documents** (like JSON blobs)\n- **No fixed schema** — different records can have different fields\n- Great at **speed and simplicity** for certain patterns\n- You query them differently (usually method calls, not SQL)"
+        },
+        {
+          "heading": "why",
+          "content": "Choosing the wrong database early is one of the most expensive mistakes in software. It's painful to migrate later. Understanding the tradeoff helps you:\n\n- **Pick correctly at the start** (or verify AI's choice makes sense)\n- **Understand why an app slows down** — some queries are natural in SQL but painful in NoSQL (and vice versa)\n- **Have informed conversations** about data architecture"
+        },
+        {
+          "heading": "how",
+          "content": "**SQL is like a filing cabinet with labeled folders:**\n- Every document goes in the right folder (table)\n- Every document has the same form fields filled out (schema)\n- You can easily cross-reference: \"Find all invoices from the customer in folder #42\"\n- Adding a new field means updating every document's form\n\n**NoSQL is like a box of labeled envelopes:**\n- Each envelope can contain whatever you want\n- Some might have 3 fields, others might have 30\n- Fast to throw something in, fast to grab by label\n- But finding \"all envelopes where the third page mentions 'urgent'\" is harder\n\nThe key tradeoff: SQL gives you **structure and relationships** at the cost of flexibility. NoSQL gives you **flexibility and speed** at the cost of structure."
+        },
+        {
+          "heading": "when",
+          "content": "**Use SQL (PostgreSQL) when:**\n- Your data has clear relationships (users → orders → products)\n- You need complex queries (\"total revenue by product category last quarter\")\n- Data consistency is critical (financial transactions, inventory)\n- You're not sure — **SQL is the safer default** for most apps\n\n**Use NoSQL (MongoDB/Firestore) when:**\n- Your data structure varies a lot (different users have different profile fields)\n- You need extreme write speed (logging, real-time analytics)\n- Your data is naturally document-shaped (content management, product catalogs with varying attributes)\n\n**For most apps you're vibe-coding: start with PostgreSQL** (via Supabase or similar). You can always add a NoSQL layer later for specific needs."
+        }
+      ],
+      "quiz": {
+        "question": "SQL or NoSQL?",
+        "scenario": "You're building an e-commerce app. You have users, products, orders, and reviews. An order contains multiple products, and each product can appear in many orders. You need to generate reports like 'top-selling products this month' and 'average review score by category'.",
+        "options": [
+          {
+            "id": "a",
+            "text": "SQL — the data is highly relational and you need complex queries",
+            "correct": true,
+            "explanation": "This is a textbook SQL use case. You have clear entities (users, products, orders, reviews) with relationships between them (many-to-many between orders and products). The reporting queries ('top-selling by month', 'average score by category') are exactly what SQL excels at with GROUP BY, JOIN, and aggregation functions."
+          },
+          {
+            "id": "b",
+            "text": "NoSQL — for flexibility as the product catalog evolves",
+            "correct": false,
+            "explanation": "While product catalogs can vary (a t-shirt has sizes, a laptop has specs), the core data model here is deeply relational — orders reference products and users, reviews reference both. The complex reporting queries would be very difficult in NoSQL. You could use NoSQL for the product attribute details while keeping the core in SQL, but SQL should be the primary database here."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "chat-app",
+          "stageId": "stage-2",
+          "label": "See databases in action: Building a Chat App → 100 Friends Join"
+        }
+      ],
+      "relatedGlossary": ["database", "relational-database"]
+    },
+    {
+      "id": "authentication",
+      "title": "Authentication: How does 'Login with Google' work?",
+      "description": "How apps verify who you are — and why it's harder than it sounds.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Authentication** is how your app verifies a user's identity — confirming they are who they claim to be. There are several approaches:\n\n- **Email + password**: The classic. User creates an account, sets a password, logs in with both.\n- **OAuth / Social login**: \"Login with Google/GitHub/Apple.\" The user proves their identity through a trusted third party.\n- **Magic links**: No password. User enters email, gets a login link, clicks it to authenticate.\n- **Passkeys**: The newest approach. Uses your device's biometrics (fingerprint, face) instead of passwords.\n\n**Authorization** is different — it's what a verified user is *allowed* to do. Authentication = who are you? Authorization = what can you access?"
+        },
+        {
+          "heading": "why",
+          "content": "Almost every app needs auth. Getting it wrong is one of the most dangerous mistakes:\n\n- **Leaked passwords** can lead to lawsuits and lost trust\n- **Broken auth logic** can let users see each other's data\n- **Session management bugs** can let attackers hijack accounts\n\nThis is why most developers don't build auth from scratch anymore — they use services like **Supabase Auth**, **Clerk**, **Auth0**, or **NextAuth**. Understanding how auth works helps you choose the right service and verify the AI-generated auth code is secure."
+        },
+        {
+          "heading": "how",
+          "content": "**\"Login with Google\" works like using your ID at a bar:**\n\n1. You (the user) walk up to the bar (your app) and say \"I want to come in\"\n2. The bar says \"Show me proof of identity\" and sends you to the bouncer (Google)\n3. Google checks your identity (you're already logged into Google, or you enter your Google password)\n4. Google gives you a **wristband** (a token) that says \"This person is verified\"\n5. You bring the wristband back to the bar\n6. The bar checks the wristband is real (verifies the token with Google)\n7. You're in! The bar gives you a **membership card** (a session token) so you don't have to repeat this every time\n\nFrom then on, every request your browser makes includes that session token — like flashing your membership card at the door."
+        },
+        {
+          "heading": "when",
+          "content": "- **Use a hosted auth service** (Supabase Auth, Clerk) for most apps — they handle passwords, tokens, OAuth, and security best practices\n- **Add social login** (Google, GitHub) when you want frictionless signups\n- **Add email/password** when users need accounts that aren't tied to a social provider\n- **Never** build your own password storage or encryption unless you're a security expert. Use established libraries and services."
+        }
+      ],
+      "quiz": {
+        "question": "Authentication or authorization?",
+        "scenario": "A user is logged into your project management app. They try to view a project they weren't invited to and see a 'You don't have permission to view this project' message.",
+        "options": [
+          {
+            "id": "a",
+            "text": "This is an authorization issue — they're verified but not permitted",
+            "correct": true,
+            "explanation": "The user is logged in (authenticated), so the app knows who they are. But they don't have permission to access that specific project (authorization). Authentication = proving identity. Authorization = checking permissions. Here, authentication passed but authorization failed."
+          },
+          {
+            "id": "b",
+            "text": "This is an authentication issue — their login is invalid",
+            "correct": false,
+            "explanation": "They're already logged in, so authentication succeeded. The issue is that their identity doesn't have the right permissions for this specific resource. That's authorization, not authentication."
+          }
+        ]
+      },
+      "relatedGlossary": []
+    },
+    {
+      "id": "env-variables",
+      "title": "Environment variables and secrets",
+      "description": "Why you never put passwords in your code — and what to use instead.",
+      "estimatedMinutes": 4,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Environment variables** are configuration values that live *outside* your code. Instead of writing `const API_KEY = \"sk-abc123\"` directly in your code, you store it in a separate file (`.env`) or in your hosting platform's settings, and your code reads it at runtime.\n\nCommon things stored as environment variables:\n- API keys (Stripe, OpenAI, SendGrid)\n- Database connection strings\n- Secret tokens for authentication\n- Configuration that changes per environment (development vs. production URLs)"
+        },
+        {
+          "heading": "why",
+          "content": "This is one of the most important security practices in software:\n\n- **Code is shared.** If you put a secret in your code and push it to GitHub, anyone with access to the repo can see it — including AI tools that train on public repos.\n- **Credentials get leaked.** Bots actively scan GitHub for exposed API keys. A leaked Stripe key could lead to fraudulent charges on your account *within minutes*.\n- **Different environments need different values.** Your development database URL is different from your production one. Environment variables let you use the same code with different configs.\n\nIf you're vibe-coding, this is a common AI mistake to watch for — AI tools sometimes hardcode secrets into files."
+        },
+        {
+          "heading": "how",
+          "content": "Think of environment variables like the **contacts in your phone**:\n\n- Your code says \"call Mom\" (reference the variable name)\n- Your phone knows Mom's actual number (the value stored in the environment)\n- If Mom changes her number, you update it in one place — you don't rewrite every app that calls her\n\nIn practice:\n\n1. Create a `.env` file (which is in `.gitignore` so it's never pushed to GitHub):\n```\nSTRIPE_SECRET_KEY=sk_live_abc123\nDATABASE_URL=postgresql://user:pass@host/db\n```\n\n2. Read it in your code:\n```js\nconst stripe = new Stripe(process.env.STRIPE_SECRET_KEY);\n```\n\n3. On your hosting platform (Vercel, Railway), set the same variables in their dashboard."
+        },
+        {
+          "heading": "when",
+          "content": "**Always use environment variables for:**\n- API keys and secret tokens\n- Database connection strings\n- Any credentials or passwords\n- URLs that change per environment\n\n**You don't need them for:**\n- Public configuration (app name, public feature flags)\n- Constants that never change across environments\n\n**Rule of thumb: if leaking it would be bad, it goes in an env variable.**"
+        }
+      ],
+      "quiz": {
+        "question": "Spot the security risk",
+        "scenario": "You ask AI to add Stripe payments to your app. The AI generates this code and you're about to push it to GitHub:\n\n```js\nconst stripe = new Stripe('sk_live_51abc123def456');\n```",
+        "options": [
+          {
+            "id": "a",
+            "text": "The API key is hardcoded — it'll be exposed on GitHub",
+            "correct": true,
+            "explanation": "This is the #1 AI coding mistake to watch for. That 'sk_live_' key is a live Stripe secret key. Pushing this to GitHub (even a private repo) is dangerous. It should be: `new Stripe(process.env.STRIPE_SECRET_KEY)` with the actual key stored in a .env file that's git-ignored."
+          },
+          {
+            "id": "b",
+            "text": "This looks fine — the key is needed for Stripe to work",
+            "correct": false,
+            "explanation": "The key IS needed, but it should never be in the source code. Store it in an environment variable. If this gets pushed to GitHub, bots can find it within minutes and use your Stripe account to make fraudulent charges."
+          }
+        ]
+      },
+      "relatedGlossary": []
+    },
+    {
+      "id": "package-managers",
+      "title": "Package managers: How you install other people's code",
+      "description": "npm, pip, and the ecosystem of open-source packages your app depends on.",
+      "estimatedMinutes": 4,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **package manager** is a tool that lets you download and use code that other developers have written and shared. Instead of building everything from scratch, you install **packages** (also called libraries or dependencies) that solve common problems.\n\n- **npm** (Node Package Manager) — for JavaScript/TypeScript projects\n- **pip** — for Python projects\n- **cargo** — for Rust projects\n\nWhen you run `npm install stripe`, it downloads Stripe's official JavaScript library and all of *its* dependencies into a `node_modules` folder in your project."
+        },
+        {
+          "heading": "why",
+          "content": "Understanding package managers helps you:\n\n- **Know what your project depends on** — `package.json` is the manifest of every library your app uses\n- **Debug installation issues** — \"It works on my machine but not in production\" is often a dependency problem\n- **Evaluate AI suggestions** — when AI adds `npm install some-obscure-package`, you should ask: Is this well-maintained? Does it have security issues? Is there a simpler alternative?\n- **Understand security risks** — your app inherits the security of every package it uses. A compromised package can affect thousands of apps."
+        },
+        {
+          "heading": "how",
+          "content": "Think of npm like an **app store for code**:\n\n- **npm registry** is the store — millions of free packages anyone can publish or download\n- **`npm install`** is like downloading an app — it fetches the package and its dependencies\n- **`package.json`** is your installed apps list — it records what you've installed and what version\n- **`package-lock.json`** is the exact receipt — it records the precise version of every sub-dependency so your teammate gets identical code\n- **`node_modules/`** is where the downloaded code lives — it can be huge (memes exist about this) but is re-downloadable, so it's never committed to Git\n\nA typical project might have 20-50 direct dependencies and hundreds of transitive dependencies (dependencies of dependencies)."
+        },
+        {
+          "heading": "when",
+          "content": "**Use a package when:**\n- The problem is well-solved (dates, HTTP requests, database drivers, auth)\n- The package is actively maintained and widely used\n- Writing it yourself would take significant time\n\n**Be cautious when:**\n- The package has few downloads or no recent updates\n- It solves a trivial problem you could write in 10 lines\n- It pulls in dozens of its own dependencies\n\n**Commands you'll see most:**\n- `npm install` — install all dependencies listed in package.json\n- `npm install <package>` — add a new package\n- `npm run dev` — start the development server\n- `npm run build` — build for production"
+        }
+      ],
+      "quiz": {
+        "question": "What do you check?",
+        "scenario": "AI suggests adding a package called `super-easy-auth` to handle your app's authentication. Before installing it, what should you check?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Weekly downloads, last update date, and GitHub stars/issues",
+            "correct": true,
+            "explanation": "For a security-critical feature like auth, you want a well-maintained, widely-used package. Check: npm weekly downloads (popular = battle-tested), last publish date (active maintenance), GitHub issues (are bugs being fixed?), and whether it's from a known org. For auth specifically, Supabase Auth, Clerk, or NextAuth are the trusted choices."
+          },
+          {
+            "id": "b",
+            "text": "Nothing — if AI suggested it, it's probably fine",
+            "correct": false,
+            "explanation": "AI models can suggest outdated, unmaintained, or even non-existent packages (they hallucinate package names). For security-sensitive features like auth, always verify the package is legitimate, actively maintained, and widely used. A compromised auth package could expose all your users' data."
+          }
+        ]
+      },
+      "relatedGlossary": []
+    }
+  ]
+}

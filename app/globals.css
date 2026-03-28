@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Colors — light, minimal, warm neutral palette */
+  --color-bg: #FAFAF8;
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F5F4F1;
+  --color-accent: #C4654A;
+  --color-accent-dim: rgba(196, 101, 74, 0.08);
+  --color-accent-mid: rgba(196, 101, 74, 0.15);
+  --color-text: #1A1A1A;
+  --color-text-muted: #666666;
+  --color-text-dim: #999999;
+  --color-border: #E5E2DE;
+  --color-blue: #6B8EAE;
+  --color-blue-dim: rgba(107, 142, 174, 0.08);
+  --color-pink: #B85C5C;
+  --color-pink-dim: rgba(184, 92, 92, 0.08);
+  --color-green: #6BA88E;
+  --color-green-dim: rgba(107, 168, 142, 0.08);
+  --color-orange: #C49A5A;
+  --color-orange-dim: rgba(196, 154, 90, 0.08);
+  --color-purple: #8B7BAE;
+  --color-purple-dim: rgba(139, 123, 174, 0.08);
+
+  /* Fonts */
+  --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
+  --font-mono: var(--font-dm-mono), "DM Mono", monospace;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-dim);
+}
