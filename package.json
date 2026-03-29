@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:story": "npx tsx scripts/generate.ts story",
+    "generate:diagram": "npx tsx scripts/generate.ts diagram",
+    "generate:curriculum": "npx tsx scripts/generate.ts curriculum",
+    "generate:glossary": "npx tsx scripts/generate.ts glossary",
+    "validate": "npx tsx scripts/validate.ts",
+    "promote": "npx tsx scripts/promote.ts"
   },
   "dependencies": {
     "@xyflow/react": "^12.10.2",
@@ -17,6 +23,7 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -24,6 +31,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
