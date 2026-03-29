@@ -1,3 +1,9 @@
+---
+name: architecture-review
+description: Scan a codebase and generate an interactive HTML architecture diagram with plain-English explanations and risk analysis. Use when the user wants to understand a system's structure, review architecture, or see what a codebase looks like.
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
+---
+
 # Architecture Review
 
 Scan a codebase and produce an interactive architecture map with plain-English explanations and risk analysis. Designed for PMs, founders, and vibecoders who need to understand a system without reading the code.
