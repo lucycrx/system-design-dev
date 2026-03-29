@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Story, Diagram, GlossaryTerm } from "@/types/story";
 import { StoryHero } from "./StoryHero";
@@ -14,6 +14,9 @@ interface Props {
   glossaryMap: Record<string, GlossaryTerm>;
 }
 
+/** Height of site nav + journey header + stage tabs (approx) */
+const STICKY_HEADER_HEIGHT = 140;
+
 export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
   const searchParams = useSearchParams();
   const initialStage = searchParams.get("stage");
@@ -22,31 +25,85 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
     : 0;
 
   const [activeStageIndex, setActiveStageIndex] = useState(initialIndex);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const stageRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const isScrollingToStage = useRef(false);
 
-  const stage = story.stages[activeStageIndex];
-  const hasDiagrams = stage.blocks.some((b) => b.type === "diagram");
+  // Compute diagrams for each stage once
+  const allStageDiagrams = useMemo(() => {
+    return story.stages.map((stage) => {
+      const diagramIds = stage.blocks
+        .filter((b): b is Extract<typeof b, { type: "diagram" }> => b.type === "diagram")
+        .map((b) => b.diagramId);
+      const result: Record<string, Diagram> = {};
+      for (const id of diagramIds) {
+        if (allDiagrams[id]) result[id] = allDiagrams[id];
+      }
+      return result;
+    });
+  }, [story.stages, allDiagrams]);
 
-  const stageDiagrams = useMemo(() => {
-    const diagramIds = stage.blocks
-      .filter((b): b is Extract<typeof b, { type: "diagram" }> => b.type === "diagram")
-      .map((b) => b.diagramId);
-    const result: Record<string, Diagram> = {};
-    for (const id of diagramIds) {
-      if (allDiagrams[id]) result[id] = allDiagrams[id];
+  // Track which stage is in view via IntersectionObserver
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isScrollingToStage.current) return;
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const index = Number(entry.target.getAttribute("data-stage-index"));
+            if (!isNaN(index)) {
+              setActiveStageIndex(index);
+            }
+          }
+        }
+      },
+      {
+        rootMargin: `-${STICKY_HEADER_HEIGHT}px 0px -50% 0px`,
+        threshold: 0.01,
+      }
+    );
+
+    stageRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [story.stages]);
+
+  // Scroll to a specific stage on initial load if ?stage= param is set
+  useEffect(() => {
+    if (initialIndex > 0) {
+      const el = stageRefs.current.get(initialIndex);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
     }
-    return result;
-  }, [stage.blocks, allDiagrams]);
+    // Only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleStageSelect = useCallback(
     (index: number) => {
       setActiveStageIndex(index);
-      const stageId = story.stages[index].id;
-      window.history.replaceState(null, "", `?stage=${stageId}`);
-      contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = stageRefs.current.get(index);
+      if (el) {
+        isScrollingToStage.current = true;
+        const top = el.getBoundingClientRect().top + window.scrollY - STICKY_HEADER_HEIGHT;
+        window.scrollTo({ top, behavior: "smooth" });
+        // Re-enable observer after scroll settles
+        setTimeout(() => {
+          isScrollingToStage.current = false;
+        }, 800);
+      }
     },
-    [story.stages]
+    []
   );
+
+  const registerStageRef = useCallback((index: number, el: HTMLElement | null) => {
+    if (el) {
+      stageRefs.current.set(index, el);
+    } else {
+      stageRefs.current.delete(index);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-bg">
@@ -68,58 +125,73 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
         </div>
       </div>
 
-      {/* Stage content */}
-      <div ref={contentRef} className="max-w-6xl mx-auto px-6 py-8">
-        <div key={activeStageIndex}>
-          {/* Stage header */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-accent-dim text-accent border border-accent/20">
-                {stage.userScale}
-              </span>
-            </div>
-            <h2 className="text-3xl font-bold text-text mb-3">{stage.title}</h2>
-            <p className="text-text-muted leading-relaxed">
-              {stage.narrative.setup}
-            </p>
-          </div>
+      {/* All stages rendered vertically */}
+      <div className="max-w-6xl mx-auto px-6">
+        {story.stages.map((stage, i) => {
+          const hasDiagrams = stage.blocks.some((b) => b.type === "diagram");
+          return (
+            <section
+              key={stage.id}
+              ref={(el) => registerStageRef(i, el)}
+              data-stage-index={i}
+              className="py-12 first:pt-8"
+            >
+              {/* Stage divider (not on first stage) */}
+              {i > 0 && (
+                <div className="border-t border-border mb-12" />
+              )}
 
-          {/* Problem callout */}
-          {stage.narrative.problem && (
-            <div className="bg-pink-dim border-l-[3px] border-l-pink rounded-r-xl p-5 mb-8">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-pink mb-2">
-                The Problem
+              {/* Stage header */}
+              <div className="mb-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-accent-dim text-accent border border-accent/20">
+                    {stage.userScale}
+                  </span>
+                </div>
+                <h2 className="text-3xl font-bold text-text mb-3">{stage.title}</h2>
+                <p className="text-text-muted leading-relaxed">
+                  {stage.narrative.setup}
+                </p>
               </div>
-              <p className="text-[14px] text-text/80 leading-relaxed">
-                {stage.narrative.problem}
-              </p>
-            </div>
-          )}
 
-          {/* Resolution teaser */}
-          {stage.narrative.resolution && (
-            <div className="bg-green-dim border-l-[3px] border-l-green rounded-r-xl p-5 mb-8">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-green mb-2">
-                The Solution
-              </div>
-              <p className="text-[14px] text-text/80 leading-relaxed">
-                {stage.narrative.resolution}
-              </p>
-            </div>
-          )}
+              {/* Problem callout */}
+              {stage.narrative.problem && (
+                <div className="bg-pink-dim border-l-[3px] border-l-pink rounded-r-xl p-5 mb-8">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-pink mb-2">
+                    The Problem
+                  </div>
+                  <p className="text-[14px] text-text/80 leading-relaxed">
+                    {stage.narrative.problem}
+                  </p>
+                </div>
+              )}
 
-          {/* Content blocks */}
-          {hasDiagrams ? (
-            <ScrollytellingLayout
-              blocks={stage.blocks}
-              diagrams={stageDiagrams}
-              glossaryMap={glossaryMap}
-              stickyTop={140}
-            />
-          ) : (
-            <BlockRenderer blocks={stage.blocks} glossaryMap={glossaryMap} />
-          )}
-        </div>
+              {/* Resolution teaser */}
+              {stage.narrative.resolution && (
+                <div className="bg-green-dim border-l-[3px] border-l-green rounded-r-xl p-5 mb-8">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-green mb-2">
+                    The Solution
+                  </div>
+                  <p className="text-[14px] text-text/80 leading-relaxed">
+                    {stage.narrative.resolution}
+                  </p>
+                </div>
+              )}
+
+              {/* Content blocks */}
+              {hasDiagrams ? (
+                <ScrollytellingLayout
+                  blocks={stage.blocks}
+                  diagrams={allStageDiagrams[i]}
+                  glossaryMap={glossaryMap}
+                  stickyTop={STICKY_HEADER_HEIGHT}
+                />
+              ) : (
+                <BlockRenderer blocks={stage.blocks} glossaryMap={glossaryMap} />
+              )}
+            </section>
+          );
+        })}
       </div>
     </div>
   );
