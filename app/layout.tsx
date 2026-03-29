@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
+import { StickyTabsWrapper } from "@/components/ui/StickyTabsWrapper";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${dmMono.variable}`}>
       <body className="min-h-screen bg-bg text-text font-sans antialiased">
+        <StickyTabsWrapper />
         {children}
       </body>
     </html>

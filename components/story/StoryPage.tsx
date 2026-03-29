@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import type { Story, Diagram, GlossaryTerm } from "@/types/story";
 import { StoryHero } from "./StoryHero";
 import { StageTabs } from "./StageTabs";
-import { StickyTabs } from "@/components/ui/StickyTabs";
 import { ScrollytellingLayout } from "@/components/scrollytelling/ScrollytellingLayout";
 import { BlockRenderer } from "@/components/blocks/BlockRenderer";
 
@@ -108,7 +107,6 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
 
   return (
     <div className="min-h-screen bg-bg">
-      <StickyTabs />
       <StoryHero story={story} />
 
       {/* Sticky container: journey header + stage tabs */}
