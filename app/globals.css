@@ -5,23 +5,23 @@
   --color-bg: #FAFAF8;
   --color-surface: #FFFFFF;
   --color-surface-hover: #F5F4F1;
-  --color-accent: #C4654A;
-  --color-accent-dim: #C4654A14;
-  --color-accent-mid: #C4654A26;
+  --color-accent: #AB4F35;
+  --color-accent-dim: #AB4F3514;
+  --color-accent-mid: #AB4F3526;
   --color-text: #1A1A1A;
   --color-text-muted: #666666;
-  --color-text-dim: #999999;
+  --color-text-dim: #737373;
   --color-border: #E5E2DE;
-  --color-blue: #6B8EAE;
-  --color-blue-dim: #6B8EAE14;
-  --color-pink: #B85C5C;
-  --color-pink-dim: #B85C5C14;
-  --color-green: #6BA88E;
-  --color-green-dim: #6BA88E14;
-  --color-orange: #C49A5A;
-  --color-orange-dim: #C49A5A14;
-  --color-purple: #8B7BAE;
-  --color-purple-dim: #8B7BAE14;
+  --color-blue: #4A7191;
+  --color-blue-dim: #4A719114;
+  --color-pink: #A04040;
+  --color-pink-dim: #A0404014;
+  --color-green: #3D8B6E;
+  --color-green-dim: #3D8B6E14;
+  --color-orange: #96722E;
+  --color-orange-dim: #96722E14;
+  --color-purple: #6B5C91;
+  --color-purple-dim: #6B5C9114;
 
   /* Fonts */
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
