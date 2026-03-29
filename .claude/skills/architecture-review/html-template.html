@@ -6,10 +6,6 @@
 <title>Architecture Review — <!-- PROJECT_NAME --></title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ========================================
-   DESIGN TOKENS
-   ======================================== */
-
 :root {
   --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, 'Cascadia Code', monospace;
@@ -22,6 +18,7 @@
   --text-dim: hsl(0, 0%, 45%);
   --border: hsl(40, 8%, 88%);
   --border-hover: hsl(40, 8%, 78%);
+  --highlight: hsl(215, 20%, 38%);
 
   --risk-critical: hsl(4, 65%, 42%);
   --risk-critical-bg: hsl(4, 65%, 95%);
@@ -44,10 +41,6 @@
   --max-width: 1280px;
 }
 
-/* ========================================
-   RESET & BASE
-   ======================================== */
-
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -64,9 +57,7 @@ body {
   padding: 0 2rem 4rem;
 }
 
-/* ========================================
-   HEADER
-   ======================================== */
+/* ---- HEADER ---- */
 
 .header {
   border-bottom: 1px solid var(--border);
@@ -86,12 +77,7 @@ body {
   gap: 2rem;
 }
 
-.header-left {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  min-width: 0;
-}
+.header-left { display: flex; align-items: baseline; gap: 1rem; min-width: 0; }
 
 .project-name {
   font-family: var(--font-mono);
@@ -99,21 +85,12 @@ body {
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text);
   white-space: nowrap;
 }
 
-.project-meta {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  white-space: nowrap;
-}
+.project-meta { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
 
-.risk-counts {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
+.risk-counts { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
 .risk-chip {
   font-family: var(--font-mono);
@@ -132,26 +109,12 @@ body {
 .risk-chip[data-severity="high"] { color: var(--risk-high); border-color: var(--risk-high); background: var(--risk-high-bg); }
 .risk-chip[data-severity="medium"] { color: var(--risk-medium); border-color: var(--risk-medium); background: var(--risk-medium-bg); }
 .risk-chip[data-severity="low"] { color: var(--risk-low); border-color: var(--risk-low); background: var(--risk-low-bg); }
-
 .risk-chip .count { font-weight: 700; font-size: 0.85rem; }
 
-/* ========================================
-   SUMMARY STRIP
-   ======================================== */
+/* ---- SUMMARY ---- */
 
-.summary-strip {
-  padding: 1.5rem 0;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 2rem;
-}
-
-.summary-text {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: var(--text);
-  max-width: 48rem;
-}
-
+.summary-strip { padding: 1.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+.summary-text { font-size: 1.05rem; line-height: 1.6; max-width: 48rem; }
 .summary-text strong { font-weight: 600; }
 
 .section-label {
@@ -164,95 +127,53 @@ body {
   margin-bottom: 1rem;
 }
 
-/* ========================================
-   ARCHITECTURE DIAGRAM
-   Positioned nodes with SVG connections
-   ======================================== */
+/* ---- ARCHITECTURE DIAGRAM ---- */
 
 .map-section { margin-bottom: 3rem; }
 
-.architecture-map {
+.diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2rem 2.5rem;
+}
+
+/* Each layer is a row of nodes */
+.diagram-layer {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
   position: relative;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  overflow: visible;
 }
 
-/* SVG connection layer */
-.connection-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
+/* Vertical flow indicator between layers */
+.layer-separator {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0;
+  color: var(--border-hover);
+  font-size: 1.1rem;
+  letter-spacing: 0.25rem;
+  user-select: none;
 }
 
-.conn-path {
-  fill: none;
-  stroke: var(--border-hover);
-  stroke-width: 1.5;
-  transition: stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease;
-}
-
-.conn-path.highlighted {
-  stroke: var(--text-muted);
-  stroke-width: 2;
-}
-
-.conn-path.dimmed {
-  opacity: 0.15;
-}
-
-.conn-arrowhead {
-  fill: var(--border-hover);
-  transition: fill 0.2s ease, opacity 0.2s ease;
-}
-
-.conn-arrowhead.highlighted { fill: var(--text-muted); }
-.conn-arrowhead.dimmed { opacity: 0.15; }
-
-.conn-label-text {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  fill: var(--text-dim);
-  letter-spacing: 0.03em;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.conn-label-text.dimmed { opacity: 0.1; }
-
-/* Diagram nodes — absolutely positioned */
+/* Nodes */
 .diagram-node {
-  position: absolute;
-  z-index: 2;
+  flex: 0 0 auto;
+  width: 220px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   padding: 0.85rem 1rem;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
-  min-width: 160px;
-  max-width: 220px;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+  position: relative;
 }
 
-.diagram-node:hover {
-  border-color: var(--border-hover);
-  z-index: 3;
-}
+.diagram-node:hover { border-color: var(--border-hover); }
+.diagram-node.selected { border-color: var(--highlight); box-shadow: 0 0 0 1px var(--highlight); }
+.diagram-node.peer { border-color: var(--highlight); }
+.diagram-node.dimmed { opacity: 0.2; }
 
-.diagram-node.selected {
-  border-color: var(--text-muted);
-  box-shadow: 0 0 0 1px var(--text-muted);
-  z-index: 4;
-}
-
-.diagram-node.dimmed {
-  opacity: 0.25;
-}
-
-/* Risk left-border on nodes */
+/* Risk left-border */
 .diagram-node.risk-critical { border-left: 3px solid var(--risk-critical); }
 .diagram-node.risk-high { border-left: 3px solid var(--risk-high); }
 .diagram-node.risk-medium { border-left: 3px solid var(--risk-medium); }
@@ -279,20 +200,33 @@ body {
 .node-category[data-cat="background-jobs"] { background: var(--cat-jobs); }
 .node-category[data-cat="storage"] { background: var(--cat-storage); }
 
-.node-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  line-height: 1.3;
+.node-label { font-size: 0.88rem; font-weight: 600; line-height: 1.3; }
+.node-sublabel { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+/* Connection tags inside node */
+.node-conn-tags {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
 }
 
-.node-sublabel {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-top: 0.15rem;
-  line-height: 1.35;
+.conn-tag {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.3rem;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Risk dot */
+.conn-tag.lit {
+  border-color: var(--highlight);
+  color: var(--highlight);
+}
+
 .risk-dot {
   position: absolute;
   top: 0.6rem;
@@ -306,9 +240,7 @@ body {
 .risk-dot.medium { background: var(--risk-medium); }
 .risk-dot.low { background: var(--risk-low); }
 
-/* ========================================
-   DETAIL PANEL — below diagram
-   ======================================== */
+/* ---- DETAIL PANEL ---- */
 
 .detail-panel {
   display: none;
@@ -335,11 +267,9 @@ body {
   border: 1px solid var(--border);
   background: none;
   padding: 0.2rem 0.5rem;
-  transition: border-color 0.15s ease;
 }
 
 .detail-close:hover { border-color: var(--text-muted); }
-
 .detail-title { font-size: 1.05rem; font-weight: 600; }
 
 .detail-description {
@@ -350,14 +280,9 @@ body {
   max-width: 48rem;
 }
 
-.detail-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-}
+.detail-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
 
-.detail-files-title,
-.detail-connections-title {
+.detail-col-title {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   letter-spacing: 0.12em;
@@ -366,24 +291,12 @@ body {
   margin-bottom: 0.4rem;
 }
 
-.detail-file {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  padding: 0.15rem 0;
-}
+.detail-file { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); padding: 0.15rem 0; }
 
-.detail-connection {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  padding: 0.2rem 0;
-}
-
+.detail-connection { font-size: 0.82rem; color: var(--text-muted); padding: 0.2rem 0; }
 .detail-connection-target { font-weight: 500; color: var(--text); }
 
-/* ========================================
-   RISK REPORT
-   ======================================== */
+/* ---- RISK REPORT ---- */
 
 .risk-section { margin-bottom: 3rem; }
 
@@ -395,12 +308,7 @@ body {
   border: 1px solid var(--border);
 }
 
-.risk-card {
-  background: var(--surface);
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
+.risk-card { background: var(--surface); cursor: pointer; transition: background 0.15s ease; }
 .risk-card:hover { background: var(--surface-raised); }
 
 .risk-card-header {
@@ -437,13 +345,7 @@ body {
 }
 
 .risk-card.expanded .risk-toggle { transform: rotate(90deg); }
-
-.risk-detail {
-  display: none;
-  padding: 0 1.25rem 1.5rem;
-  padding-left: calc(5rem + 1.25rem + 1rem);
-}
-
+.risk-detail { display: none; padding: 0 1.25rem 1.5rem; padding-left: calc(5rem + 2.25rem); }
 .risk-card.expanded .risk-detail { display: block; }
 
 .risk-analogy {
@@ -456,12 +358,7 @@ body {
   font-style: italic;
 }
 
-.risk-consequence {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-  margin-bottom: 0.75rem;
-}
+.risk-consequence { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem; }
 
 .risk-evidence {
   font-family: var(--font-mono);
@@ -491,7 +388,6 @@ body {
 }
 
 .risk-fix-summary { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.35rem; }
-
 .risk-fix-detail { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
 
 .risk-meta {
@@ -514,12 +410,7 @@ body {
 
 .risk-meta-value { color: var(--text-muted); font-size: 0.78rem; }
 
-.risk-learn-more {
-  margin-top: 0.75rem;
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
+.risk-learn-more { margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
 .learn-more-link {
   font-family: var(--font-mono);
@@ -529,14 +420,11 @@ body {
   text-decoration: none;
   border: 1px solid var(--border);
   padding: 0.2rem 0.5rem;
-  transition: border-color 0.15s ease;
 }
 
 .learn-more-link:hover { border-color: var(--cat-frontend); }
 
-/* ========================================
-   FOOTER
-   ======================================== */
+/* ---- FOOTER ---- */
 
 .footer {
   padding-top: 2rem;
@@ -546,20 +434,12 @@ body {
   align-items: baseline;
 }
 
-.footer-left {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  letter-spacing: 0.05em;
-}
-
+.footer-left { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.05em; }
 .footer-right { font-size: 0.78rem; color: var(--text-dim); }
 .footer-right a { color: var(--cat-frontend); text-decoration: none; }
 .footer-right a:hover { text-decoration: underline; }
 
-/* ========================================
-   ANIMATIONS
-   ======================================== */
+/* ---- ANIMATIONS ---- */
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
@@ -568,7 +448,6 @@ body {
 
 .diagram-node { animation: fadeIn 0.3s ease-out both; }
 .risk-card { animation: fadeIn 0.3s ease-out both; }
-
 .risk-list .risk-card:nth-child(1) { animation-delay: 0.1s; }
 .risk-list .risk-card:nth-child(2) { animation-delay: 0.15s; }
 .risk-list .risk-card:nth-child(3) { animation-delay: 0.2s; }
@@ -576,23 +455,16 @@ body {
 .risk-list .risk-card:nth-child(5) { animation-delay: 0.3s; }
 .risk-list .risk-card:nth-child(6) { animation-delay: 0.35s; }
 
-/* ========================================
-   RESPONSIVE
-   ======================================== */
-
 @media (max-width: 768px) {
   .header-inner { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .diagram-layer { flex-wrap: wrap; }
+  .diagram-node { width: 100%; }
   .risk-card-header { grid-template-columns: auto 1fr auto; gap: 0.75rem; }
   .risk-detail { padding-left: 1.25rem; }
   .risk-meta { flex-direction: column; gap: 0.75rem; }
   .detail-columns { grid-template-columns: 1fr; }
   .footer { flex-direction: column; gap: 0.5rem; }
-  .architecture-map { overflow-x: auto; }
 }
-
-/* ========================================
-   PRINT
-   ======================================== */
 
 @media print {
   .header { position: static; border-bottom: 2px solid var(--text); }
@@ -600,7 +472,6 @@ body {
   .risk-card .risk-detail { display: block; }
   .risk-toggle, .detail-close { display: none; }
   body { background: white; }
-  .architecture-map { border: 2px solid var(--text); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -628,9 +499,7 @@ body {
 
   <section class="map-section">
     <div class="section-label">Architecture Diagram</div>
-    <div class="architecture-map" id="archMap">
-      <svg class="connection-layer" id="connLayer"></svg>
-    </div>
+    <div class="diagram" id="diagram"></div>
     <div class="detail-panel" id="detailPanel">
       <div class="detail-panel-header">
         <div>
@@ -693,9 +562,19 @@ body {
 
   var compMap = {};
   var compLabelMap = {};
+  components.forEach(function(c) { compMap[c.id] = c; compLabelMap[c.id] = c.label; });
+
+  // Build connectivity sets (bidirectional for highlighting)
+  var connectedTo = {}; // id -> Set of ids this node connects to
+  var connectedFrom = {}; // id -> Set of ids that connect to this node
   components.forEach(function(c) {
-    compMap[c.id] = c;
-    compLabelMap[c.id] = c.label;
+    connectedTo[c.id] = new Set();
+    if (!connectedFrom[c.id]) connectedFrom[c.id] = new Set();
+    (c.connections || []).forEach(function(conn) {
+      connectedTo[c.id].add(conn.targetId);
+      if (!connectedFrom[conn.targetId]) connectedFrom[conn.targetId] = new Set();
+      connectedFrom[conn.targetId].add(c.id);
+    });
   });
 
   // ---- HEADER ----
@@ -731,271 +610,147 @@ body {
   document.getElementById('summaryText').innerHTML = s;
 
   // ============================================
-  // ARCHITECTURE DIAGRAM — layered layout
+  // LAYERED DIAGRAM
   // ============================================
 
-  var mapEl = document.getElementById('archMap');
-  var svgEl = document.getElementById('connLayer');
-
-  // Build adjacency: who does this component connect TO?
-  var outEdges = {};  // id -> [{targetId, label}]
-  var inDegree = {};  // id -> count of incoming
+  // Assign layers via longest-path from roots
+  var inDegree = {};
   components.forEach(function(c) {
-    outEdges[c.id] = c.connections || [];
     if (!(c.id in inDegree)) inDegree[c.id] = 0;
     (c.connections||[]).forEach(function(conn) {
       inDegree[conn.targetId] = (inDegree[conn.targetId]||0) + 1;
     });
   });
 
-  // Assign layers via longest-path from roots (nodes with no incoming edges)
-  var layer = {};
+  var layerOf = {};
   var visited = {};
 
   function assignLayer(id, depth) {
-    if (visited[id] && layer[id] >= depth) return;
+    if (visited[id] && layerOf[id] >= depth) return;
     visited[id] = true;
-    layer[id] = Math.max(layer[id] || 0, depth);
-    (outEdges[id]||[]).forEach(function(e) {
-      assignLayer(e.targetId, depth + 1);
+    layerOf[id] = Math.max(layerOf[id] || 0, depth);
+    (connectedTo[id] || new Set()).forEach(function(tid) {
+      assignLayer(tid, depth + 1);
     });
   }
 
-  // Start from nodes with no incoming edges
   components.forEach(function(c) {
     if ((inDegree[c.id]||0) === 0) assignLayer(c.id, 0);
   });
-  // Handle any unvisited (cycles or disconnected)
   components.forEach(function(c) {
-    if (!visited[c.id]) layer[c.id] = 0;
+    if (!visited[c.id]) layerOf[c.id] = 0;
   });
 
   // Group by layer
   var layers = {};
   var maxLayer = 0;
   components.forEach(function(c) {
-    var l = layer[c.id];
+    var l = layerOf[c.id];
     if (l > maxLayer) maxLayer = l;
     if (!layers[l]) layers[l] = [];
     layers[l].push(c);
   });
 
-  // Layout constants
-  var NODE_W = 200;
-  var NODE_H = 72;
-  var PAD_X = 48;
-  var PAD_Y = 36;
-  var LAYER_GAP = 100;
-  var NODE_GAP = 28;
-
-  // Calculate positions
-  var positions = {}; // id -> {x, y, w, h}
-  var totalHeight = 0;
-
-  // Find the widest layer to set the diagram width
-  var maxLayerWidth = 0;
-  for (var l = 0; l <= maxLayer; l++) {
-    var row = layers[l] || [];
-    var rowW = row.length * NODE_W + (row.length - 1) * NODE_GAP;
-    if (rowW > maxLayerWidth) maxLayerWidth = rowW;
-  }
-  var diagramWidth = Math.max(maxLayerWidth + PAD_X * 2, 700);
-
-  for (var l = 0; l <= maxLayer; l++) {
-    var row = layers[l] || [];
-    var rowW = row.length * NODE_W + (row.length - 1) * NODE_GAP;
-    var startX = (diagramWidth - rowW) / 2;
-    var y = PAD_Y + l * (NODE_H + LAYER_GAP);
-
-    row.forEach(function(c, i) {
-      positions[c.id] = {
-        x: startX + i * (NODE_W + NODE_GAP),
-        y: y,
-        w: NODE_W,
-        h: NODE_H
-      };
-    });
-
-    totalHeight = y + NODE_H;
-  }
-
-  totalHeight += PAD_Y;
-  mapEl.style.height = totalHeight + 'px';
-  mapEl.style.minWidth = diagramWidth + 'px';
-  svgEl.setAttribute('width', diagramWidth);
-  svgEl.setAttribute('height', totalHeight);
-  svgEl.setAttribute('viewBox', '0 0 ' + diagramWidth + ' ' + totalHeight);
-
-  // Render nodes
+  // Render diagram
+  var diagramEl = document.getElementById('diagram');
   var nodeEls = {};
-  components.forEach(function(comp, idx) {
-    var pos = positions[comp.id];
-    var node = document.createElement('div');
-    node.className = 'diagram-node';
-    node.setAttribute('data-id', comp.id);
-    node.style.left = pos.x + 'px';
-    node.style.top = pos.y + 'px';
-    node.style.width = pos.w + 'px';
-    node.style.animationDelay = (idx * 0.06) + 's';
+  var connTagEls = {}; // compId -> [tag elements]
+  var animIdx = 0;
 
-    var riskSev = componentRiskMap[comp.id];
-    if (riskSev) node.classList.add('risk-' + riskSev);
+  for (var l = 0; l <= maxLayer; l++) {
+    if (l > 0) {
+      var sep = document.createElement('div');
+      sep.className = 'layer-separator';
+      sep.textContent = '\u2193  \u2193  \u2193';
+      diagramEl.appendChild(sep);
+    }
 
-    var h = '';
-    if (riskSev) h += '<div class="risk-dot ' + riskSev + '"></div>';
-    h += '<span class="node-category" data-cat="' + esc(comp.category) + '">' + esc(comp.category.replace(/-/g,' ')) + '</span>';
-    h += '<div class="node-label">' + esc(comp.label.split('(')[0].trim()) + '</div>';
-    // Short sublabel from the part in parentheses, if present
-    var paren = comp.label.match(/\(([^)]+)\)/);
-    if (paren) h += '<div class="node-sublabel">' + esc(paren[1]) + '</div>';
+    var row = document.createElement('div');
+    row.className = 'diagram-layer';
 
-    node.innerHTML = h;
-    node.addEventListener('click', function() { selectComponent(comp); });
-    node.addEventListener('mouseenter', function() { highlightConnections(comp.id); });
-    node.addEventListener('mouseleave', function() { clearHighlight(); });
-    mapEl.appendChild(node);
-    nodeEls[comp.id] = node;
-  });
+    (layers[l] || []).forEach(function(comp) {
+      var node = document.createElement('div');
+      node.className = 'diagram-node';
+      node.setAttribute('data-id', comp.id);
+      node.style.animationDelay = (animIdx * 0.06) + 's';
+      animIdx++;
 
-  // Render connections as SVG paths
-  var connEls = []; // {path, arrow, label, sourceId, targetId}
+      var riskSev = componentRiskMap[comp.id];
+      if (riskSev) node.classList.add('risk-' + riskSev);
 
-  components.forEach(function(comp) {
-    (comp.connections||[]).forEach(function(conn) {
-      var from = positions[comp.id];
-      var to = positions[conn.targetId];
-      if (!from || !to) return;
+      var h = '';
+      if (riskSev) h += '<div class="risk-dot ' + riskSev + '"></div>';
+      h += '<span class="node-category" data-cat="' + esc(comp.category) + '">' + esc(comp.category.replace(/-/g,' ')) + '</span>';
 
-      // Calculate connection points: bottom-center of source -> top-center of target
-      var x1 = from.x + from.w / 2;
-      var y1 = from.y + from.h;
-      var x2 = to.x + to.w / 2;
-      var y2 = to.y;
+      var mainLabel = comp.label.split('(')[0].trim();
+      var paren = comp.label.match(/\(([^)]+)\)/);
+      h += '<div class="node-label">' + esc(mainLabel) + '</div>';
+      if (paren) h += '<div class="node-sublabel">' + esc(paren[1]) + '</div>';
 
-      // If on same layer, connect side-to-side
-      if (layer[comp.id] === layer[conn.targetId]) {
-        if (from.x < to.x) {
-          x1 = from.x + from.w;
-          y1 = from.y + from.h / 2;
-          x2 = to.x;
-          y2 = to.y + to.h / 2;
-        } else {
-          x1 = from.x;
-          y1 = from.y + from.h / 2;
-          x2 = to.x + to.w;
-          y2 = to.y + to.h / 2;
-        }
+      // Connection tags: show short target names
+      if (comp.connections && comp.connections.length) {
+        h += '<div class="node-conn-tags">';
+        comp.connections.forEach(function(conn) {
+          var tLabel = (compLabelMap[conn.targetId] || conn.targetId).split('(')[0].trim();
+          // Shorten to first 2 words
+          var short = tLabel.split(' ').slice(0, 2).join(' ');
+          h += '<span class="conn-tag" data-target="' + esc(conn.targetId) + '">' + esc(short) + ' &darr;</span>';
+        });
+        h += '</div>';
       }
 
-      // Cubic bezier for smooth curves
-      var dx = x2 - x1;
-      var dy = y2 - y1;
-      var cx1, cy1, cx2, cy2;
+      node.innerHTML = h;
 
-      if (layer[comp.id] === layer[conn.targetId]) {
-        // Horizontal: curve outward
-        cx1 = x1 + dx * 0.4;
-        cy1 = y1;
-        cx2 = x2 - dx * 0.4;
-        cy2 = y2;
-      } else {
-        // Vertical: smooth S-curve
-        cx1 = x1;
-        cy1 = y1 + Math.abs(dy) * 0.4;
-        cx2 = x2;
-        cy2 = y2 - Math.abs(dy) * 0.4;
-      }
+      node.addEventListener('click', function(e) {
+        e.stopPropagation();
+        selectComponent(comp);
+      });
+      node.addEventListener('mouseenter', function() { highlightConnections(comp.id); });
+      node.addEventListener('mouseleave', function() { clearHighlight(); });
 
-      var pathD = 'M' + x1 + ',' + y1 + ' C' + cx1 + ',' + cy1 + ' ' + cx2 + ',' + cy2 + ' ' + x2 + ',' + y2;
+      row.appendChild(node);
+      nodeEls[comp.id] = node;
 
-      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', pathD);
-      path.setAttribute('class', 'conn-path');
-      path.setAttribute('data-source', comp.id);
-      path.setAttribute('data-target', conn.targetId);
-      svgEl.appendChild(path);
-
-      // Arrowhead at target end
-      var angle = Math.atan2(y2 - cy2, x2 - cx2);
-      var arrowSize = 6;
-      var ax1 = x2 - arrowSize * Math.cos(angle - 0.4);
-      var ay1 = y2 - arrowSize * Math.sin(angle - 0.4);
-      var ax2 = x2 - arrowSize * Math.cos(angle + 0.4);
-      var ay2 = y2 - arrowSize * Math.sin(angle + 0.4);
-
-      var arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-      arrow.setAttribute('points', x2+','+y2 + ' ' + ax1+','+ay1 + ' ' + ax2+','+ay2);
-      arrow.setAttribute('class', 'conn-arrowhead');
-      svgEl.appendChild(arrow);
-
-      // Connection label at midpoint
-      var mx = (x1 + x2) / 2;
-      var my = (y1 + y2) / 2;
-      if (conn.label) {
-        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', mx);
-        text.setAttribute('y', my - 6);
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('class', 'conn-label-text');
-        // Truncate long labels
-        var lbl = conn.label.length > 30 ? conn.label.substring(0, 28) + '...' : conn.label;
-        text.textContent = lbl;
-        svgEl.appendChild(text);
-      }
-
-      connEls.push({ path: path, arrow: arrow, sourceId: comp.id, targetId: conn.targetId });
+      // Store references to connection tags
+      connTagEls[comp.id] = node.querySelectorAll('.conn-tag');
     });
-  });
 
-  // ---- Hover: highlight connections ----
+    diagramEl.appendChild(row);
+  }
+
+  // ---- Hover highlighting ----
   function highlightConnections(compId) {
-    // Find all connected IDs (both directions)
-    var connected = {};
-    connected[compId] = true;
-    connEls.forEach(function(c) {
-      if (c.sourceId === compId) connected[c.targetId] = true;
-      if (c.targetId === compId) connected[c.sourceId] = true;
-    });
+    var peers = new Set();
+    peers.add(compId);
+    (connectedTo[compId] || new Set()).forEach(function(id) { peers.add(id); });
+    (connectedFrom[compId] || new Set()).forEach(function(id) { peers.add(id); });
 
-    // Dim unconnected nodes
     components.forEach(function(c) {
-      if (!connected[c.id]) nodeEls[c.id].classList.add('dimmed');
-      else nodeEls[c.id].classList.remove('dimmed');
-    });
-
-    // Highlight/dim connections
-    connEls.forEach(function(c) {
-      var isConn = (c.sourceId === compId || c.targetId === compId);
-      c.path.classList.toggle('highlighted', isConn);
-      c.path.classList.toggle('dimmed', !isConn);
-      c.arrow.classList.toggle('highlighted', isConn);
-      c.arrow.classList.toggle('dimmed', !isConn);
-    });
-
-    // Dim labels
-    svgEl.querySelectorAll('.conn-label-text').forEach(function(t) {
-      var parent = t.previousElementSibling;
-      // Check if any highlighted path is near this label
-      t.classList.add('dimmed');
-    });
-    connEls.forEach(function(c) {
-      if (c.sourceId === compId || c.targetId === compId) {
-        // Find the label text after this path's arrow
-        var next = c.arrow.nextElementSibling;
-        if (next && next.classList.contains('conn-label-text')) {
-          next.classList.remove('dimmed');
-        }
+      if (peers.has(c.id)) {
+        nodeEls[c.id].classList.remove('dimmed');
+        nodeEls[c.id].classList.toggle('peer', c.id !== compId);
+      } else {
+        nodeEls[c.id].classList.add('dimmed');
+        nodeEls[c.id].classList.remove('peer');
       }
+    });
+
+    // Light up connection tags that point to highlighted peers
+    Object.keys(connTagEls).forEach(function(cid) {
+      connTagEls[cid].forEach(function(tag) {
+        var tid = tag.getAttribute('data-target');
+        tag.classList.toggle('lit', cid === compId || tid === compId);
+      });
     });
   }
 
   function clearHighlight() {
-    components.forEach(function(c) { nodeEls[c.id].classList.remove('dimmed'); });
-    connEls.forEach(function(c) {
-      c.path.classList.remove('highlighted', 'dimmed');
-      c.arrow.classList.remove('highlighted', 'dimmed');
+    components.forEach(function(c) {
+      nodeEls[c.id].classList.remove('dimmed', 'peer');
     });
-    svgEl.querySelectorAll('.conn-label-text').forEach(function(t) { t.classList.remove('dimmed'); });
+    Object.keys(connTagEls).forEach(function(cid) {
+      connTagEls[cid].forEach(function(tag) { tag.classList.remove('lit'); });
+    });
   }
 
   // ---- DETAIL PANEL ----
@@ -1004,7 +759,6 @@ body {
 
   function selectComponent(comp) {
     if (selectedId === comp.id) { closeDetail(); return; }
-
     if (selectedId && nodeEls[selectedId]) nodeEls[selectedId].classList.remove('selected');
     selectedId = comp.id;
     nodeEls[comp.id].classList.add('selected');
@@ -1016,13 +770,13 @@ body {
 
     var filesEl = document.getElementById('detailFiles');
     if (comp.files && comp.files.length) {
-      filesEl.innerHTML = '<div class="detail-files-title">Key Files</div>' +
+      filesEl.innerHTML = '<div class="detail-col-title">Key Files</div>' +
         comp.files.map(function(f) { return '<div class="detail-file">' + esc(f) + '</div>'; }).join('');
     } else { filesEl.innerHTML = ''; }
 
     var connsEl = document.getElementById('detailConnections');
     if (comp.connections && comp.connections.length) {
-      connsEl.innerHTML = '<div class="detail-connections-title">Connects To</div>' +
+      connsEl.innerHTML = '<div class="detail-col-title">Connects To</div>' +
         comp.connections.map(function(c) {
           return '<div class="detail-connection"><span class="detail-connection-target">' + esc(compLabelMap[c.targetId]||c.targetId) + '</span> &mdash; ' + esc(c.label) + '</div>';
         }).join('');
@@ -1037,37 +791,39 @@ body {
     detailPanel.classList.remove('visible');
   };
 
-  // ---- RISK REPORT ----
-  var riskListEl = document.getElementById('riskList');
-  var sortedRisks = risks.slice().sort(function(a,b) {
-    return (severityOrder[a.adjustedSeverity||a.severity]||99) - (severityOrder[b.adjustedSeverity||b.severity]||99);
+  document.addEventListener('click', function(e) {
+    if (selectedId && !e.target.closest('.diagram-node') && !e.target.closest('.detail-panel')) closeDetail();
   });
 
-  sortedRisks.forEach(function(risk) {
+  // ---- RISK REPORT ----
+  var riskListEl = document.getElementById('riskList');
+  risks.slice().sort(function(a,b) {
+    return (severityOrder[a.adjustedSeverity||a.severity]||99) - (severityOrder[b.adjustedSeverity||b.severity]||99);
+  }).forEach(function(risk) {
     var sev = risk.adjustedSeverity || risk.severity;
     var card = document.createElement('div');
     card.className = 'risk-card';
 
-    var hdr = '<div class="risk-card-header">';
-    hdr += '<span class="risk-severity ' + esc(sev) + '">' + esc(sev) + '</span>';
-    hdr += '<span class="risk-title">' + esc(risk.explanation.plain) + '</span>';
-    hdr += '<span class="risk-toggle">&#9654;</span></div>';
+    var h = '<div class="risk-card-header">';
+    h += '<span class="risk-severity ' + esc(sev) + '">' + esc(sev) + '</span>';
+    h += '<span class="risk-title">' + esc(risk.explanation.plain) + '</span>';
+    h += '<span class="risk-toggle">&#9654;</span></div>';
 
-    var det = '<div class="risk-detail">';
-    det += '<div class="risk-analogy">' + esc(risk.explanation.analogy) + '</div>';
-    det += '<p class="risk-consequence">' + esc(risk.explanation.consequence) + '</p>';
-    if (risk.evidence) det += '<div class="risk-evidence">' + esc(risk.evidence) + '</div>';
+    var d = '<div class="risk-detail">';
+    d += '<div class="risk-analogy">' + esc(risk.explanation.analogy) + '</div>';
+    d += '<p class="risk-consequence">' + esc(risk.explanation.consequence) + '</p>';
+    if (risk.evidence) d += '<div class="risk-evidence">' + esc(risk.evidence) + '</div>';
     if (risk.fix) {
-      det += '<div class="risk-fix"><div class="risk-fix-title">Recommended Fix</div>';
-      det += '<div class="risk-fix-summary">' + esc(risk.fix.summary) + '</div>';
-      det += '<div class="risk-fix-detail">' + esc(risk.fix.detail) + '</div></div>';
+      d += '<div class="risk-fix"><div class="risk-fix-title">Recommended Fix</div>';
+      d += '<div class="risk-fix-summary">' + esc(risk.fix.summary) + '</div>';
+      d += '<div class="risk-fix-detail">' + esc(risk.fix.detail) + '</div></div>';
     }
-    det += '<div class="risk-meta">';
+    d += '<div class="risk-meta">';
     if (risk.affectedComponents && risk.affectedComponents.length) {
-      det += '<div><span class="risk-meta-label">Affected</span>';
-      det += '<span class="risk-meta-value">' + risk.affectedComponents.map(function(id) { return esc(compLabelMap[id]||id); }).join(', ') + '</span></div>';
+      d += '<div><span class="risk-meta-label">Affected</span>';
+      d += '<span class="risk-meta-value">' + risk.affectedComponents.map(function(id) { return esc(compLabelMap[id]||id); }).join(', ') + '</span></div>';
     }
-    det += '</div>';
+    d += '</div>';
     if (risk.learnMore) {
       var links = [];
       (risk.learnMore.glossaryTerms||[]).forEach(function(t) {
@@ -1075,11 +831,11 @@ body {
       });
       if (risk.learnMore.buildStory && risk.learnMore.buildStory.slug)
         links.push('<a class="learn-more-link" href="https://systemdesignschool.com/stories/' + esc(risk.learnMore.buildStory.slug) + '" target="_blank" rel="noopener">Build Story: ' + esc(risk.learnMore.buildStory.slug.replace(/-/g,' ')) + '</a>');
-      if (links.length) det += '<div class="risk-learn-more">' + links.join('') + '</div>';
+      if (links.length) d += '<div class="risk-learn-more">' + links.join('') + '</div>';
     }
-    det += '</div>';
+    d += '</div>';
 
-    card.innerHTML = hdr + det;
+    card.innerHTML = h + d;
     card.querySelector('.risk-card-header').addEventListener('click', function() { card.classList.toggle('expanded'); });
     riskListEl.appendChild(card);
   });
@@ -1094,7 +850,6 @@ body {
     d.textContent = str;
     return d.innerHTML;
   }
-
 })();
 </script>
 </body>
