@@ -29,9 +29,9 @@ export function IcebergHero() {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          WHAT&apos;S BENEATH
+          YOUR APP WORKS.
           <br />
-          YOUR VIBE CODE.
+          UNTIL IT DOESN&apos;T.
         </h1>
 
         <div
