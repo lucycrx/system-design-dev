@@ -12,20 +12,17 @@ export function IcebergHero() {
 
   return (
     <header className="relative w-full overflow-hidden bg-bg">
-      <div className="max-w-5xl mx-auto px-6 pt-24 pb-20">
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-20">
-          <span className="font-mono text-[11px] tracking-[3px] uppercase text-text-muted">
+      <div className="max-w-5xl mx-auto px-6 pt-20 pb-16">
+        {/* Top label */}
+        <div className="mb-12">
+          <span className="label-mono text-text-muted">
             System Design for Builders
-          </span>
-          <span className="font-mono text-[11px] text-text-dim tracking-[2px] uppercase">
-            Est. 2025
           </span>
         </div>
 
         {/* Main title */}
         <h1
-          className={`text-5xl sm:text-7xl lg:text-[5.5rem] font-bold text-text leading-[1.02] tracking-tight mb-8 transition-all duration-700 ${
+          className={`text-5xl sm:text-7xl lg:text-[5.5rem] font-bold text-text leading-[1.02] tracking-tight mb-10 transition-all duration-700 ${
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -34,31 +31,31 @@ export function IcebergHero() {
           UNTIL IT DOESN&apos;T.
         </h1>
 
+        {/* Two-column bottom: subtitle left, annotation right */}
         <div
-          className={`flex flex-col sm:flex-row sm:items-end justify-between gap-8 transition-all duration-700 delay-200 ${
+          className={`grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-16 transition-all duration-700 delay-200 ${
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <p className="font-mono text-[13px] text-text-muted max-w-md leading-relaxed">
+          <p className="font-mono text-[13px] text-text-muted leading-relaxed">
             AI lets you build fast. But the systems underneath — scaling,
             reliability, data flow — that&apos;s what separates software that
             works from software that lasts.
           </p>
 
-          {/* Iceberg placeholder area */}
-          <div className="border border-border px-5 py-3 max-w-xs">
-            <div className="font-mono text-[10px] tracking-[3px] uppercase text-accent mb-1">
+          <div className="border-t border-text/15 pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-8">
+            <div className="label-mono text-accent mb-2">
               Interactive stories + structured lessons
             </div>
-            <div className="font-mono text-[11px] text-text-muted leading-relaxed">
+            <div className="font-mono text-[12px] text-text-dim leading-relaxed">
               For vibecoders, PMs, and founders — not just engineers prepping
               for interviews.
             </div>
           </div>
         </div>
 
-        {/* Thin rule */}
-        <div className="mt-16 border-t border-text/10" />
+        {/* Divider */}
+        <div className="mt-14 border-t border-border" />
       </div>
     </header>
   );
