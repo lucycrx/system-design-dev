@@ -1,0 +1,296 @@
+{
+  "ride-sharing-stage-1": {
+    "id": "ride-sharing-stage-1",
+    "nodes": [
+      {
+        "id": "rider",
+        "type": "client",
+        "label": "Rider App",
+        "position": { "x": 0, "y": 0 },
+        "explanation": "The rider's phone app where they request rides and see driver locations"
+      },
+      {
+        "id": "driver",
+        "type": "client",
+        "label": "Driver App",
+        "position": { "x": 0, "y": 300 },
+        "explanation": "The driver's phone app that sends GPS updates and receives ride assignments"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "Server",
+        "position": { "x": 300, "y": 150 },
+        "explanation": "A single server that matches riders with the nearest available driver"
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 600, "y": 150 },
+        "explanation": "Stores everything -- driver locations, trip history, user profiles, and payment records"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-rider-server",
+        "source": "rider",
+        "target": "server",
+        "label": "request ride",
+        "animated": true,
+        "style": "solid"
+      },
+      {
+        "id": "e-server-database",
+        "source": "server",
+        "target": "database",
+        "label": "find nearest driver",
+        "style": "solid"
+      },
+      {
+        "id": "e-server-driver",
+        "source": "server",
+        "target": "driver",
+        "label": "assign ride",
+        "animated": true,
+        "style": "solid"
+      },
+      {
+        "id": "e-driver-server",
+        "source": "driver",
+        "target": "server",
+        "label": "GPS updates",
+        "style": "dashed"
+      }
+    ]
+  },
+  "ride-sharing-stage-2": {
+    "id": "ride-sharing-stage-2",
+    "nodes": [
+      {
+        "id": "rider",
+        "type": "client",
+        "label": "Rider App",
+        "position": { "x": 0, "y": 0 },
+        "explanation": "The rider's phone app where they request rides and see driver locations"
+      },
+      {
+        "id": "driver",
+        "type": "client",
+        "label": "Driver App",
+        "position": { "x": 0, "y": 300 },
+        "explanation": "The driver's phone app that sends GPS updates and receives ride assignments"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "Server",
+        "position": { "x": 300, "y": 150 },
+        "explanation": "Handles ride matching with optimistic locking to prevent double-assignments"
+      },
+      {
+        "id": "cache",
+        "type": "cache",
+        "label": "Redis",
+        "position": { "x": 550, "y": 0 },
+        "explanation": "In-memory store for fast-changing driver locations and availability status",
+        "isNew": true
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 550, "y": 300 },
+        "explanation": "Stores persistent data like trip history, payment records, and user profiles"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-driver-server",
+        "source": "driver",
+        "target": "server",
+        "label": "GPS updates",
+        "style": "dashed"
+      },
+      {
+        "id": "e-server-cache-store",
+        "source": "server",
+        "target": "cache",
+        "label": "store location",
+        "animated": true,
+        "style": "solid"
+      },
+      {
+        "id": "e-rider-server",
+        "source": "rider",
+        "target": "server",
+        "label": "request ride",
+        "animated": true,
+        "style": "solid"
+      },
+      {
+        "id": "e-server-cache-find",
+        "source": "server",
+        "target": "cache",
+        "label": "find nearest",
+        "style": "solid"
+      },
+      {
+        "id": "e-server-database",
+        "source": "server",
+        "target": "database",
+        "label": "ride history, payments",
+        "style": "dashed"
+      },
+      {
+        "id": "e-server-driver",
+        "source": "server",
+        "target": "driver",
+        "label": "assign with lock",
+        "animated": true,
+        "style": "solid"
+      }
+    ]
+  },
+  "ride-sharing-stage-3": {
+    "id": "ride-sharing-stage-3",
+    "nodes": [
+      {
+        "id": "rider",
+        "type": "client",
+        "label": "Rider App",
+        "position": { "x": 0, "y": 0 },
+        "explanation": "The rider's phone app that sends ride requests through the API gateway"
+      },
+      {
+        "id": "driver",
+        "type": "client",
+        "label": "Driver App",
+        "position": { "x": 0, "y": 300 },
+        "explanation": "The driver's phone app that sends GPS updates and receives assignments"
+      },
+      {
+        "id": "api-gateway",
+        "type": "api-gateway",
+        "label": "API Gateway",
+        "position": { "x": 250, "y": 150 },
+        "explanation": "Single entry point that routes requests to the appropriate microservice",
+        "isNew": true
+      },
+      {
+        "id": "matching-service",
+        "type": "server",
+        "label": "Matching Service",
+        "position": { "x": 500, "y": 0 },
+        "explanation": "Dedicated service that finds and assigns the nearest available driver",
+        "isNew": true
+      },
+      {
+        "id": "cache",
+        "type": "cache",
+        "label": "Redis",
+        "position": { "x": 750, "y": 0 },
+        "explanation": "In-memory store for real-time driver locations and availability"
+      },
+      {
+        "id": "queue",
+        "type": "queue",
+        "label": "Message Queue",
+        "position": { "x": 500, "y": 300 },
+        "explanation": "Decouples services so a failure in one does not cascade to others",
+        "isNew": true
+      },
+      {
+        "id": "payment-service",
+        "type": "server",
+        "label": "Payment Service",
+        "position": { "x": 750, "y": 200 },
+        "explanation": "Handles charges, refunds, and driver payouts independently of other services",
+        "isNew": true
+      },
+      {
+        "id": "notification-service",
+        "type": "server",
+        "label": "Notification Service",
+        "position": { "x": 750, "y": 400 },
+        "explanation": "Sends push notifications and SMS to riders and drivers",
+        "isNew": true
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 1000, "y": 150 },
+        "explanation": "Persistent storage for trip records, payment history, and user accounts"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-rider-api-gateway",
+        "source": "rider",
+        "target": "api-gateway",
+        "label": "request ride",
+        "animated": true,
+        "style": "solid"
+      },
+      {
+        "id": "e-driver-api-gateway",
+        "source": "driver",
+        "target": "api-gateway",
+        "label": "GPS updates",
+        "style": "dashed"
+      },
+      {
+        "id": "e-api-gateway-matching-service",
+        "source": "api-gateway",
+        "target": "matching-service",
+        "label": "route request",
+        "animated": true,
+        "style": "solid"
+      },
+      {
+        "id": "e-matching-service-cache",
+        "source": "matching-service",
+        "target": "cache",
+        "label": "find nearest driver",
+        "style": "solid"
+      },
+      {
+        "id": "e-matching-service-queue",
+        "source": "matching-service",
+        "target": "queue",
+        "label": "ride completed event",
+        "animated": true,
+        "style": "solid"
+      },
+      {
+        "id": "e-queue-payment-service",
+        "source": "queue",
+        "target": "payment-service",
+        "label": "process payment",
+        "style": "solid"
+      },
+      {
+        "id": "e-queue-notification-service",
+        "source": "queue",
+        "target": "notification-service",
+        "label": "send notification",
+        "style": "solid"
+      },
+      {
+        "id": "e-payment-service-database",
+        "source": "payment-service",
+        "target": "database",
+        "label": "store payment",
+        "style": "dashed"
+      },
+      {
+        "id": "e-matching-service-database",
+        "source": "matching-service",
+        "target": "database",
+        "label": "store trip record",
+        "style": "dashed"
+      }
+    ]
+  }
+}

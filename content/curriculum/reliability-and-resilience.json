@@ -1,0 +1,285 @@
+{
+  "id": "reliability-and-resilience",
+  "slug": "reliability-and-resilience",
+  "title": "Reliability and Resilience",
+  "subtitle": "What happens when things go wrong (and they will)",
+  "description": "Systems break. Servers crash, networks fail, and databases go down. This module teaches you the patterns that keep apps running when the inevitable happens — so your users never have to see an error page.",
+  "moduleNumber": 5,
+  "icon": "🛡️",
+  "color": "pink",
+  "lessons": [
+    {
+      "id": "failover-and-redundancy",
+      "title": "Failover and Redundancy",
+      "description": "Why production systems run on multiple servers — and how backup machines take over the moment something breaks.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Redundancy** means having backup copies of critical components so that if one fails, another can take over. **Failover** is the process of automatically switching to that backup when the primary goes down.\n\nIn practice, this means running your app on multiple [[glossary:server|servers]] instead of just one. If Server A crashes at 3 AM, Server B is already running and picks up the traffic — often before anyone notices.\n\nThere are two main flavors:\n\n- **Active-passive**: One server handles all the traffic while another sits idle, ready to take over. The backup is like an understudy in a theater production — fully prepared but not on stage until needed.\n- **Active-active**: Multiple servers all handle traffic simultaneously. If one goes down, the others absorb its share. This is more common in modern systems because you get both redundancy and better performance."
+        },
+        {
+          "heading": "why",
+          "content": "If your app runs on a single server and that server dies, your entire product is offline. For a side project, that might be fine. For a business that processes orders, handles support tickets, or runs a marketplace, downtime means lost revenue and lost trust.\n\nUnderstanding redundancy helps you:\n\n- **Evaluate hosting decisions** — when your engineer says \"we need at least two instances in production,\" you'll know why that's not over-engineering.\n- **Understand uptime guarantees** — a 99.9% SLA means about 8 hours of downtime per year. Redundancy is how providers hit those numbers.\n- **Plan your budget** — redundancy costs more (you're paying for machines that might sit idle), but the cost of an outage is usually much higher.\n- **Ask the right questions** — \"What happens if this server goes down?\" is one of the most important questions you can ask about any architecture."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **backup generator** for a hospital:\n\n- The hospital runs on city power (the primary server). It works great 99% of the time.\n- But hospitals can't afford to lose power — lives depend on it. So they have a diesel generator sitting in the basement (the backup server).\n- The moment city power cuts out, an **automatic transfer switch** detects the failure and starts the generator within seconds (that's the failover mechanism).\n- Patients on life support never even notice the switch happened.\n\nNow imagine a hospital that said, \"Generators are expensive, we'll just hope the power stays on.\" That's what running a production app on a single server looks like.\n\nIn cloud platforms like AWS or Google Cloud, setting up redundancy is often as simple as changing a configuration number — \"run 2 instances instead of 1.\" A [[glossary:server|load balancer]] sits in front and routes traffic to whichever instances are healthy."
+        },
+        {
+          "heading": "when",
+          "content": "You need redundancy when:\n\n- Your app serves paying customers or handles financial transactions\n- Downtime directly costs money (e-commerce, SaaS, marketplaces)\n- Users depend on your service for time-sensitive tasks (communication tools, delivery apps)\n- You have an SLA or uptime commitment to customers\n\nYou might skip it when:\n\n- You're in early prototyping or pre-launch with no real users\n- The app is internal and occasional downtime is acceptable\n- You're running a hobby project where cost matters more than availability\n\nThe general rule: if someone would notice and care that your app is down, you need redundancy."
+        }
+      ],
+      "quiz": {
+        "question": "Is this architecture risky?",
+        "scenario": "Your startup runs a food delivery app. All orders flow through a single server hosted on one machine. An engineer proposes adding a second server with a load balancer. The CEO pushes back, saying, \"We've never had a crash. Why spend money on a backup we'll never use?\"",
+        "options": [
+          {
+            "id": "a",
+            "text": "The CEO is right — add redundancy later when there's actually a problem",
+            "correct": false,
+            "explanation": "By the time there's a problem, your entire ordering system is already down. Food delivery is time-sensitive — customers and restaurants are actively waiting. Adding redundancy after a crash is like buying a fire extinguisher after the kitchen is already on fire. You need it in place before you need it."
+          },
+          {
+            "id": "b",
+            "text": "The engineer is right — a single server is a single point of failure for a revenue-critical app",
+            "correct": true,
+            "explanation": "A food delivery app processes real-time orders that directly generate revenue. A single server means any hardware failure, software crash, or even a routine update takes the entire business offline. The cost of a second server is trivial compared to the cost of a dinner rush where no orders can be placed."
+          },
+          {
+            "id": "c",
+            "text": "They should compromise — keep one server but add really good monitoring",
+            "correct": false,
+            "explanation": "Monitoring tells you something is broken. It doesn't prevent downtime. If your one server crashes at 7 PM on a Friday, getting an alert means you know you're losing money — but you're still losing money until someone manually fixes it. Monitoring is essential, but it's not a substitute for redundancy."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "ride-sharing",
+          "stageId": "stage-3",
+          "label": "See this in action: Building a Ride-Sharing App → Scaling to a City"
+        }
+      ],
+      "relatedGlossary": ["server"]
+    },
+    {
+      "id": "health-checks-and-monitoring",
+      "title": "Health Checks and Monitoring",
+      "description": "How systems detect problems before your users do — and why waiting for complaints is a terrible strategy.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **health check** is a simple, automated test that asks a server, \"Are you alive and working?\" It runs continuously — every few seconds — and if the server stops responding, the system knows something is wrong.\n\nA typical health check pings an endpoint like `/health` on your [[glossary:server|server]]. The server responds with a status: everything is fine, or something is broken. If it doesn't respond at all, that's an answer too.\n\n**Monitoring** is the broader practice of tracking your system's vital signs over time:\n\n- **Uptime monitoring**: Is the app reachable?\n- **Performance monitoring**: How fast are responses? Are they getting slower?\n- **Error tracking**: Are requests failing? How many? Which ones?\n- **Resource monitoring**: How much CPU, memory, and disk space is being used?\n\nTogether, health checks and monitoring give you visibility into what's happening inside your system — before users start complaining."
+        },
+        {
+          "heading": "why",
+          "content": "Without monitoring, here's how you find out something is broken: a user emails you. Or tweets about it. Or just leaves and never comes back. By the time a human reports a problem, it's been going on for a while and multiple users have already been affected.\n\nMonitoring matters because:\n\n- **You catch problems early** — a health check detects a crashed server in seconds, not hours.\n- **You can fix things proactively** — if memory usage is climbing toward 100%, you can act before the server crashes.\n- **You build trust** — knowing your system's status at all times means you can respond to incidents quickly and communicate clearly with users.\n- **You understand patterns** — monitoring data shows you peak traffic times, slow endpoints, and recurring issues, which directly informs product and infrastructure decisions."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **smoke detector** in your house:\n\n- It runs 24/7 in the background, constantly checking for one thing: is there smoke?\n- If everything is fine, you never think about it. It just silently does its job.\n- The moment it detects smoke, it sounds an alarm — loudly and immediately — so you can act before a small problem becomes a disaster.\n- You don't wait until the house is on fire to check. The detector does it for you, automatically.\n\nNow imagine you had smoke detectors that also tracked temperature trends over time, warned you when the battery was low, and told you which room the problem was in. That's monitoring.\n\nIn practice, monitoring tools (like Datadog, Grafana, or even simple uptime checkers like Pingdom) collect data and trigger **alerts** when something crosses a threshold:\n\n- Error rate above 5%? Alert the on-call engineer.\n- Response time above 2 seconds? Send a warning.\n- Server stopped responding to health checks? Trigger failover automatically.\n\nThe best monitoring setups have **dashboards** (visual displays of system health) and **alerts** (notifications when things go wrong)."
+        },
+        {
+          "heading": "when",
+          "content": "You should add monitoring as soon as you have real users. Specifically:\n\n- **Uptime monitoring**: Day one of production. This is non-negotiable.\n- **Error tracking**: As soon as you deploy. Services like Sentry can be set up in minutes.\n- **Performance monitoring**: Once you have enough traffic to spot patterns (usually after launch).\n- **Resource monitoring**: When you're running your own [[glossary:server|servers]] or managing infrastructure.\n\nThe cost of basic monitoring is tiny (many tools have free tiers), and the cost of not having it is learning about outages from angry users."
+        }
+      ],
+      "quiz": {
+        "question": "What should you look at first?",
+        "scenario": "It's Monday morning and your team's Slack is blowing up — multiple users are reporting that your SaaS app is \"super slow.\" You open your monitoring dashboard and see: CPU usage is at 95%, response times have tripled since 6 AM, and the error rate jumped from 0.1% to 12%. The health check endpoint is still returning \"ok.\"",
+        "options": [
+          {
+            "id": "a",
+            "text": "The health check says OK, so the system is fine — users are probably exaggerating",
+            "correct": false,
+            "explanation": "A basic health check only tells you the server is reachable and responding — it doesn't mean the system is healthy. The monitoring data tells a much richer story: CPU is maxed out, responses are slow, and errors are spiking. This is a clear case where the health check is too simple to catch a degraded (but not dead) system. Health checks are a floor, not a ceiling."
+          },
+          {
+            "id": "b",
+            "text": "Focus on the CPU spike at 6 AM — something started consuming resources and is causing the slowness and errors",
+            "correct": true,
+            "explanation": "The timeline tells the story: CPU spiked at 6 AM, and response times and errors followed. Something that started at 6 AM is consuming too many resources — maybe a scheduled job, a traffic spike, or a runaway query. The CPU bottleneck is likely causing slow responses (tripled response times) which then cause timeouts and errors (12% error rate). Fix the root cause and the symptoms resolve."
+          },
+          {
+            "id": "c",
+            "text": "The 12% error rate is the biggest problem — fix the errors first and the rest will follow",
+            "correct": false,
+            "explanation": "The errors are likely a symptom, not the cause. When a server is overloaded (95% CPU), it starts timing out and failing requests — that's where the error spike comes from. Fixing individual errors without addressing the CPU bottleneck is like treating a fever without addressing the infection. You need to find what's eating the CPU."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "ride-sharing",
+          "stageId": "stage-3",
+          "label": "See this in action: Building a Ride-Sharing App → Scaling to a City"
+        }
+      ],
+      "relatedGlossary": ["server"]
+    },
+    {
+      "id": "graceful-degradation",
+      "title": "Graceful Degradation",
+      "description": "When part of your system breaks, showing a limited experience is always better than showing an error page.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Graceful degradation** means designing your system so that when a component fails, the app keeps working — just with reduced functionality instead of a complete crash.\n\nInstead of showing users a blank error page when something goes wrong, you show them a slightly diminished but still usable experience:\n\n- The recommendation engine is down? Show popular items instead of personalized picks.\n- The image service is slow? Show the page with placeholder images while they load.\n- The payment processor has an outage? Let users add to cart and notify them when checkout is back.\n- The [[glossary:database|database]] replica is lagging? Show slightly stale data with a notice: \"Showing results from a few minutes ago.\"\n\nThe opposite of graceful degradation is **brittle failure** — where one broken component brings down the entire app. That's what happens when systems are tightly coupled and have no fallback paths."
+        },
+        {
+          "heading": "why",
+          "content": "Modern apps depend on dozens of services: databases, caches, APIs, CDNs, payment processors, email providers, search engines, AI models. The probability that *all* of them are working perfectly at any given moment is lower than you'd think.\n\nGraceful degradation matters because:\n\n- **Users tolerate reduced features far better than total outages.** Showing cached search results is annoying; showing a 500 error page is unforgivable.\n- **Not all features are equally critical.** If your e-commerce site's review system is down, people can still browse and buy. Don't let a non-essential feature take down the whole store.\n- **It buys you time.** When something breaks at 2 AM, graceful degradation keeps users happy while the on-call engineer wakes up and fixes the root cause.\n- **It demonstrates maturity.** Products that handle failure gracefully feel reliable even when they're having problems."
+        },
+        {
+          "heading": "how",
+          "content": "Think of **backup systems on a commercial airplane**:\n\n- A modern aircraft has redundant systems for nearly everything: two engines, multiple hydraulic systems, backup electrical generators, and manual overrides for electronic controls.\n- If one engine fails, the plane doesn't fall out of the sky. It flies on the other engine — slower, with reduced capability, but safely.\n- If the electronic flight displays fail, pilots switch to backup instruments. Less convenient, but fully functional.\n- If the autopilot fails, pilots fly manually. The passengers don't even know.\n\nThe airplane is designed so that no single failure is catastrophic. Each failure mode has a planned response that keeps the core mission (getting passengers safely to the destination) intact.\n\nIn software, you build graceful degradation by:\n\n- **Identifying critical vs. non-critical features**: What absolutely must work? What can be temporarily disabled?\n- **Adding fallback paths**: If the primary data source fails, is there a cached version? A simpler alternative? A helpful error message?\n- **Using timeouts**: Don't let a slow dependency hang your entire page. If the recommendation service doesn't respond in 500ms, show a default list and move on.\n- **Isolating components**: Make sure a failure in one part of the app doesn't cascade to others."
+        },
+        {
+          "heading": "when",
+          "content": "Design for graceful degradation whenever:\n\n- Your app depends on third-party services (payment APIs, email providers, AI models)\n- You have features that aren't mission-critical (recommendations, analytics, social features)\n- Your users need the app to be reliable (e-commerce, healthcare, financial tools)\n- You're integrating with services that have known reliability issues\n\nThe simplest starting point: for every external dependency, ask \"What does the user see if this service is completely down?\" If the answer is \"a crash\" or \"a blank page,\" you need a fallback."
+        }
+      ],
+      "quiz": {
+        "question": "What should the app do?",
+        "scenario": "Your e-commerce app uses an AI-powered recommendation engine to show \"You might also like...\" on product pages. On Black Friday, the recommendation service goes down under heavy load. Product pages take 15 seconds to load because they're waiting for the recommendation service to respond.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Show the product page without recommendations — add a timeout so the page loads in under 2 seconds",
+            "correct": true,
+            "explanation": "This is graceful degradation in action. The recommendation engine is a nice-to-have, not a must-have. Customers came to buy a specific product — they can do that without personalized suggestions. By setting a short timeout on the recommendation service call, the rest of the page loads fast. You might show a \"Trending products\" section based on cached data as a fallback, or simply hide the section entirely. The core shopping experience stays intact."
+          },
+          {
+            "id": "b",
+            "text": "Show a \"Please try again later\" error page until the recommendation service recovers",
+            "correct": false,
+            "explanation": "This is the opposite of graceful degradation — it's brittle failure. You're letting a non-essential feature (recommendations) block the essential feature (buying products). On Black Friday, every minute of downtime costs real money. The recommendation service is down, not the product catalog or the checkout system."
+          },
+          {
+            "id": "c",
+            "text": "Keep the 15-second load time — the recommendations are important for upselling",
+            "correct": false,
+            "explanation": "A 15-second load time means most users will leave before the page even appears. Studies consistently show that users abandon pages after about 3 seconds. You'll lose far more in abandoned sales than you'd gain from recommendations. The best upselling in the world doesn't help if the customer has already left."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "ride-sharing",
+          "stageId": "stage-4",
+          "label": "See this in action: Building a Ride-Sharing App → Going Nationwide"
+        }
+      ],
+      "relatedGlossary": ["server", "database"]
+    },
+    {
+      "id": "backups-and-disaster-recovery",
+      "title": "Backups and Disaster Recovery",
+      "description": "Your database is the most valuable thing you own. Here's how to make sure you never lose it.",
+      "estimatedMinutes": 7,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Backups** are copies of your data stored separately from the original, so you can restore it if something goes wrong. **Disaster recovery** is the broader plan for how you get your system back up and running after a major failure.\n\nThere are several types of [[glossary:database|database]] backups:\n\n- **Full backups**: A complete copy of all your data. Simple but slow and storage-heavy for large databases.\n- **Incremental backups**: Only the data that changed since the last backup. Faster and smaller, but restoring requires replaying changes in order.\n- **Point-in-time recovery (PITR)**: The gold standard. Your database continuously logs every change, so you can restore to any exact moment — like rewinding a recording to 3:47 PM yesterday.\n\nTwo critical metrics define your disaster recovery strategy:\n\n- **RPO (Recovery Point Objective)**: How much data can you afford to lose? If your RPO is 1 hour, you need backups at least every hour.\n- **RTO (Recovery Time Objective)**: How long can you afford to be down? If your RTO is 30 minutes, your restore process needs to complete in under 30 minutes."
+        },
+        {
+          "heading": "why",
+          "content": "Data loss is the nightmare scenario. Servers can be replaced, code can be redeployed, but if your [[glossary:database|database]] is gone and there's no backup, your business might be too.\n\nData loss happens more often than you'd think:\n\n- A developer accidentally runs a destructive query on the production database\n- A software bug corrupts data over several days before anyone notices\n- A cloud provider has a regional outage affecting storage\n- A ransomware attack encrypts your database files\n\nBackups matter because:\n\n- **Accidents are inevitable.** The question isn't whether someone will accidentally delete data, but when.\n- **Bugs can corrupt data silently.** A bad deployment might write incorrect data for hours before it's detected. Point-in-time recovery lets you go back to just before the bug.\n- **Compliance often requires it.** Many industries (healthcare, finance) have legal requirements for data retention and recovery.\n- **It's cheap insurance.** Cloud database backups typically cost pennies per GB. The data they protect is irreplaceable."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **fire-safe** in your home:\n\n- You keep your most important documents (passport, deed, birth certificate) in a fire-safe. If the house burns down, those documents survive.\n- But a fire-safe in the house only protects against fire. A flood could destroy both the house and the safe. So you also keep copies in a bank safety deposit box across town — that's an **offsite backup**.\n- The fire-safe has documents from last month. But what if you need the version of a contract from three days ago, before an amendment? That's where **versioning** comes in — keeping multiple historical copies so you can go back to any point.\n\nIn practice, a solid backup strategy follows the **3-2-1 rule**:\n\n- **3** copies of your data (the original plus two backups)\n- **2** different storage types (e.g., your database server's disk and a cloud storage bucket)\n- **1** offsite copy (in a different physical location or cloud region)\n\nMost managed [[glossary:database|database]] services (like Supabase, AWS RDS, or Google Cloud SQL) handle automated backups for you — but you need to verify they're configured correctly and actually test restoring from them. An untested backup is not a backup."
+        },
+        {
+          "heading": "when",
+          "content": "You need a backup strategy the moment you have real user data:\n\n- **Day one of production**: Enable automated daily backups at minimum. Most cloud databases offer this out of the box.\n- **When you store irreplaceable data**: User-generated content, transaction records, medical data — if you can't regenerate it, back it up.\n- **Before risky operations**: Running a data migration or schema change? Take a manual backup first. Always.\n- **Regularly test restores**: At least quarterly, practice restoring from a backup. A backup you've never tested might not work when you need it most.\n\nThe most common backup mistake isn't failing to set them up — it's assuming they work without ever testing a restore."
+        }
+      ],
+      "quiz": {
+        "question": "How bad is this situation?",
+        "scenario": "A junior developer accidentally runs `DELETE FROM orders` on your production database (without a WHERE clause), wiping all order records. Your last full backup was taken 7 days ago. You have no point-in-time recovery enabled. The database has been processing about 500 orders per day.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Not a big deal — restore from the 7-day-old backup and you're fine",
+            "correct": false,
+            "explanation": "Restoring from a 7-day-old backup means you permanently lose about 3,500 orders (500 per day times 7 days). Those orders represent real customer purchases — you'd have no record of who bought what, shipping details, payment reconciliation, or refund history. The backup helps, but a week of lost data in a transactional system is a serious business incident."
+          },
+          {
+            "id": "b",
+            "text": "This is a major incident — you'll lose 7 days of order data with no way to recover it",
+            "correct": true,
+            "explanation": "Without point-in-time recovery, the most recent restore point is 7 days ago. That means approximately 3,500 orders are permanently lost. You'd need to manually reconcile with payment processors, contact affected customers, and rebuild what you can from logs and email receipts. This is exactly the scenario that daily backups and PITR are designed to prevent. With PITR enabled, you could have restored to one second before the accidental DELETE."
+          },
+          {
+            "id": "c",
+            "text": "Just re-run the app and the orders will come back from the client side",
+            "correct": false,
+            "explanation": "Order data lives in the server-side database, not on clients' devices. Once it's deleted from the database, it's gone. Users' browsers might have confirmation emails or order history pages cached, but the actual records — with all their associated data (items, quantities, addresses, payment info) — only existed in the database. This is why databases need proper backup strategies."
+          }
+        ]
+      },
+      "relatedGlossary": ["database", "persistence"]
+    },
+    {
+      "id": "timeouts-and-retries",
+      "title": "Timeouts and Retries",
+      "description": "What your app should do when another service is slow or unresponsive — and how to avoid making things worse.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **timeout** is a deadline your app sets when calling another service: \"If I don't get a response within 3 seconds, give up and move on.\" Without timeouts, a slow or unresponsive service can cause your app to hang indefinitely, tying up resources and eventually bringing everything down.\n\nA **retry** is exactly what it sounds like — trying the request again after it fails. Many failures are temporary (a brief network blip, a server restarting), so trying again a moment later often works.\n\nA **circuit breaker** is a pattern that stops your app from even trying to call a service that's clearly down. Like an electrical circuit breaker, it \"trips\" after a certain number of failures and prevents further requests for a cooldown period. This protects both your app (from wasting time on doomed requests) and the failing service (from being pummeled with requests while it's trying to recover).\n\nThese three patterns work together:\n\n1. Set a **timeout** so you don't wait forever\n2. **Retry** a few times in case the failure was temporary\n3. If retries keep failing, **open the circuit breaker** and stop trying for a while"
+        },
+        {
+          "heading": "why",
+          "content": "Slow services are more dangerous than down services. When a service is completely down, requests fail immediately and you can handle the error. When a service is *slow*, requests pile up waiting — and each waiting request holds onto memory, [[glossary:server|server]] threads, and database connections.\n\nThis creates a cascading failure:\n\n1. Service B gets slow (maybe it's overloaded)\n2. Service A calls Service B and waits... and waits... tying up a connection\n3. More requests come into Service A, all waiting for Service B\n4. Service A runs out of available connections\n5. Now Service A is also slow/down\n6. Service C, which depends on Service A, starts failing too\n\nOne slow dependency takes down your entire system like dominoes. Timeouts and circuit breakers prevent this by limiting the blast radius of any single failure."
+        },
+        {
+          "heading": "how",
+          "content": "Think of **making a phone call**:\n\n- You call a friend and it rings. You wait 30 seconds — no answer. Do you stay on the line for 20 minutes hoping they'll pick up? No. You **hang up** after a reasonable wait. That's a **timeout**.\n- You wait a minute and try again. Maybe they were in the other room. That's a **retry**.\n- You try a third time, still no answer. Rather than calling 50 more times in a row (which would be annoying and pointless), you decide to try again in an hour. That's a **circuit breaker** — you stop trying for a while.\n- If you absolutely need to reach someone, you try a different number (a fallback) or send a text instead (graceful degradation).\n\nThe important thing about retries is **backing off**. Don't retry immediately and rapidly — that floods the struggling service with even more requests. Use **exponential backoff**: wait 1 second, then 2 seconds, then 4 seconds. Add a bit of random jitter so that thousands of clients don't all retry at the exact same moment.\n\nWithout backoff, retries actually make outages worse. Imagine a service starts failing, and all 10,000 clients immediately retry — that's a retry storm that hits the service with double the normal traffic precisely when it's struggling to handle normal traffic."
+        },
+        {
+          "heading": "when",
+          "content": "Use timeouts and retries whenever your app calls an external service:\n\n- **API calls to third parties** (payment processors, email services, AI models): Always set timeouts. Always plan for failure.\n- **[[glossary:database|Database]] queries**: A query that normally takes 50ms but suddenly takes 30 seconds is a sign something is wrong. Set query timeouts.\n- **Service-to-service communication**: If your back end calls a microservice, that call needs a timeout.\n- **User-facing requests**: If a page takes more than a few seconds to load, it's better to show a partial result or error than to keep the user staring at a spinner.\n\nCircuit breakers are most valuable when:\n\n- You're calling a service that has known reliability issues\n- A dependency failure would cascade to your entire system\n- You want to fail fast instead of slow (fast failure lets you show a fallback immediately)\n\nThe key rule: **every outbound network call should have a timeout.** No exceptions. A missing timeout is a ticking time bomb."
+        }
+      ],
+      "quiz": {
+        "question": "What's causing the cascade?",
+        "scenario": "Your ride-sharing app calls a mapping service to calculate ETAs. The mapping service starts responding very slowly (10+ seconds instead of the usual 200ms). Your app has no timeouts configured. Within minutes, your entire app becomes unresponsive — not just the ETA feature, but also login, ride requests, and payment processing.",
+        "options": [
+          {
+            "id": "a",
+            "text": "The mapping service failure crashed your servers",
+            "correct": false,
+            "explanation": "The mapping service didn't crash your servers directly — it's not running on your infrastructure. The problem is subtler and more dangerous: your servers are alive but stuck. Every incoming request that needs an ETA is waiting 10+ seconds for a response that may never come, holding open a connection the whole time. Your servers run out of available connections, and even requests that don't need the mapping service (like login) can't get through."
+          },
+          {
+            "id": "b",
+            "text": "Without timeouts, every request waiting on the mapping service holds a connection open, exhausting your server's capacity",
+            "correct": true,
+            "explanation": "This is a classic cascading failure. Your server has a limited number of connections it can handle simultaneously (say 200). Each request waiting for the mapping service holds one of those connections for 10+ seconds instead of 200ms. Connections stack up 50x faster than they're released. Within minutes, all 200 connections are occupied by requests stuck waiting for the mapping service, and no new requests — for any feature — can be processed. A 3-second timeout would have freed those connections quickly, and a circuit breaker would have stopped calling the mapping service entirely after the first few failures."
+          },
+          {
+            "id": "c",
+            "text": "The mapping service is sending bad data that corrupts your system",
+            "correct": false,
+            "explanation": "The mapping service is slow, not sending bad data. It's not responding at all within a reasonable timeframe. The issue is resource exhaustion on your side: your app's connections are all tied up waiting, leaving no capacity for anything else. This is why slow failures are more dangerous than fast failures — a crashed service returns an error immediately, but a slow service ties up your resources for extended periods."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "ride-sharing",
+          "stageId": "stage-4",
+          "label": "See this in action: Building a Ride-Sharing App → Going Nationwide"
+        }
+      ],
+      "relatedGlossary": ["server", "database"]
+    }
+  ]
+}

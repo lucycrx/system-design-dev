@@ -1,0 +1,161 @@
+{
+  "online-store-stage-1": {
+    "id": "online-store-stage-1",
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Customer Browser",
+        "position": { "x": 0, "y": 100 },
+        "explanation": "The customer's web browser where they browse products and place orders"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "Server",
+        "position": { "x": 300, "y": 100 },
+        "explanation": "A single server that handles all requests, queries the database, and returns pages to the browser"
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 600, "y": 100 },
+        "explanation": "Stores all product listings, inventory counts, customer accounts, and order history"
+      }
+    ],
+    "edges": [
+      { "id": "e-client-server", "source": "client-1", "target": "server", "label": "browse products", "style": "solid", "animated": true },
+      { "id": "e-server-database", "source": "server", "target": "database", "label": "query products", "style": "solid" },
+      { "id": "e-database-server", "source": "database", "target": "server", "label": "return data", "style": "dashed" },
+      { "id": "e-server-client", "source": "server", "target": "client-1", "label": "render page", "style": "solid" }
+    ]
+  },
+  "online-store-stage-2": {
+    "id": "online-store-stage-2",
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Customer Browser",
+        "position": { "x": 0, "y": 150 },
+        "explanation": "The customer's web browser where they browse products and place orders"
+      },
+      {
+        "id": "cdn",
+        "type": "cdn",
+        "label": "CDN",
+        "position": { "x": 200, "y": 0 },
+        "explanation": "Serves static assets like product images, CSS, and JavaScript from edge servers close to the customer",
+        "isNew": true
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "Server",
+        "position": { "x": 350, "y": 150 },
+        "explanation": "Handles dynamic requests like product catalog lookups and checkout processing"
+      },
+      {
+        "id": "cache",
+        "type": "cache",
+        "label": "Redis Cache",
+        "position": { "x": 550, "y": 0 },
+        "explanation": "Stores frequently-accessed data in memory so the server can skip the database for repeated queries",
+        "isNew": true
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 700, "y": 150 },
+        "explanation": "Stores all product listings, inventory counts, customer accounts, and order history"
+      }
+    ],
+    "edges": [
+      { "id": "e-client-cdn", "source": "client-1", "target": "cdn", "label": "static assets", "style": "solid", "animated": true },
+      { "id": "e-client-server", "source": "client-1", "target": "server", "label": "dynamic requests", "style": "solid", "animated": true },
+      { "id": "e-server-cache", "source": "server", "target": "cache", "label": "check cache", "style": "solid", "animated": true },
+      { "id": "e-cache-server", "source": "cache", "target": "server", "label": "cache hit", "style": "dashed" },
+      { "id": "e-server-database", "source": "server", "target": "database", "label": "cache miss", "style": "dashed" },
+      { "id": "e-server-client", "source": "server", "target": "client-1", "label": "response", "style": "solid" }
+    ]
+  },
+  "online-store-stage-3": {
+    "id": "online-store-stage-3",
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Customer Browser",
+        "position": { "x": 0, "y": 200 },
+        "explanation": "The customer's web browser where they browse products and place orders"
+      },
+      {
+        "id": "cdn",
+        "type": "cdn",
+        "label": "CDN",
+        "position": { "x": 200, "y": 0 },
+        "explanation": "Serves static assets like product images, CSS, and JavaScript from edge servers close to the customer"
+      },
+      {
+        "id": "load-balancer",
+        "type": "load-balancer",
+        "label": "Load Balancer",
+        "position": { "x": 300, "y": 200 },
+        "explanation": "Distributes incoming traffic across multiple servers so no single server is overwhelmed",
+        "isNew": true
+      },
+      {
+        "id": "server-1",
+        "type": "server",
+        "label": "Server 1",
+        "position": { "x": 550, "y": 100 },
+        "explanation": "One of several identical servers handling customer requests in parallel"
+      },
+      {
+        "id": "server-2",
+        "type": "server",
+        "label": "Server 2",
+        "position": { "x": 550, "y": 300 },
+        "explanation": "A second server instance that shares the traffic load with Server 1",
+        "isNew": true
+      },
+      {
+        "id": "cache",
+        "type": "cache",
+        "label": "Redis Cache",
+        "position": { "x": 800, "y": 0 },
+        "explanation": "Shared cache that all servers check before querying the database"
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Primary DB",
+        "position": { "x": 800, "y": 200 },
+        "explanation": "The primary database that handles all write operations like placing orders and updating inventory"
+      },
+      {
+        "id": "read-replica",
+        "type": "database",
+        "label": "Read Replica",
+        "position": { "x": 800, "y": 400 },
+        "explanation": "A synchronized copy of the primary database that handles read-heavy queries like browsing products",
+        "isNew": true
+      }
+    ],
+    "edges": [
+      { "id": "e-client-cdn", "source": "client-1", "target": "cdn", "label": "static assets", "style": "solid" },
+      { "id": "e-client-lb", "source": "client-1", "target": "load-balancer", "label": "all requests", "style": "solid", "animated": true },
+      { "id": "e-lb-server1", "source": "load-balancer", "target": "server-1", "label": "distribute", "style": "solid", "animated": true },
+      { "id": "e-lb-server2", "source": "load-balancer", "target": "server-2", "label": "distribute", "style": "solid", "animated": true },
+      { "id": "e-server1-cache", "source": "server-1", "target": "cache", "label": "check cache", "style": "solid" },
+      { "id": "e-server2-cache", "source": "server-2", "target": "cache", "label": "check cache", "style": "solid" },
+      { "id": "e-server1-database", "source": "server-1", "target": "database", "label": "writes", "style": "solid" },
+      { "id": "e-server2-database", "source": "server-2", "target": "database", "label": "writes", "style": "solid" },
+      { "id": "e-server1-replica", "source": "server-1", "target": "read-replica", "label": "reads", "style": "dashed" },
+      { "id": "e-server2-replica", "source": "server-2", "target": "read-replica", "label": "reads", "style": "dashed" },
+      { "id": "e-database-replica", "source": "database", "target": "read-replica", "label": "replication", "style": "dashed" }
+    ]
+  }
+}

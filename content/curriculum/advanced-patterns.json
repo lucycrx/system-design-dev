@@ -1,0 +1,229 @@
+{
+  "id": "advanced-patterns",
+  "slug": "advanced-patterns",
+  "title": "Advanced Patterns",
+  "subtitle": "How big systems stay organized",
+  "description": "As systems grow, you can't keep everything in one place. This module covers the architectural patterns that let large-scale applications stay manageable, responsive, and resilient.",
+  "moduleNumber": 6,
+  "icon": "🧩",
+  "color": "purple",
+  "lessons": [
+    {
+      "id": "microservices-vs-monolith",
+      "title": "Microservices vs. Monolith: One big app or many small ones?",
+      "description": "The fundamental choice in how you structure your system — and why there's no universally right answer.",
+      "estimatedMinutes": 7,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "When you build an app, all your code has to live somewhere. You have two broad options:\n\n- A **[[glossary:monolith|monolith]]** is a single application that handles everything — user accounts, payments, notifications, search, all in one codebase and one deployment.\n- **[[glossary:microservices|Microservices]]** split that single application into many small, independent services, each responsible for one thing. The user service handles users. The payment service handles payments. The notification service handles notifications.\n\nBoth approaches power real products at massive scale. Shopify runs a famously large monolith. Netflix runs famously many microservices. The choice isn't about which is \"better\" — it's about which tradeoffs make sense for your situation."
+        },
+        {
+          "heading": "why",
+          "content": "This is one of the most consequential architectural decisions a team makes, and it's hard to reverse. Understanding the tradeoffs helps you:\n\n- **Evaluate engineering proposals** — when your team says \"we need to break out a microservice,\" you'll know what that actually means in terms of complexity and operational cost.\n- **Set realistic timelines** — microservices add coordination overhead. A feature that touches three services takes longer than one that lives in a single codebase.\n- **Avoid premature complexity** — many startups adopt microservices too early and drown in operational overhead before they have the traffic to justify it.\n- **Plan for growth** — at some point a monolith may become a bottleneck. Knowing when and why helps you plan the migration instead of panicking."
+        },
+        {
+          "heading": "how",
+          "content": "Think of it like food:\n\n- A **monolith** is a food truck. One kitchen, one menu, one team. Everyone works side by side. Communication is easy — you just turn around and talk. Adding a new dish is simple because you have access to all the ingredients and equipment in one place. But if the fryer breaks, the whole truck shuts down. And as the menu grows, the kitchen gets cramped and chaotic.\n\n- **Microservices** are a food court. Each stall is independent — the taco place, the pizza place, the sushi bar. Each has its own kitchen, its own staff, its own menu. If the pizza oven breaks, tacos and sushi keep flowing. But now you need a system to coordinate orders, each stall needs its own supplies, and adding a combo meal that spans three stalls requires careful coordination.\n\nThe food truck is simpler to run with a small team. The food court handles more variety and volume but needs more management overhead."
+        },
+        {
+          "heading": "when",
+          "content": "**Start with a monolith** when:\n- You're a small team (under 10-15 engineers)\n- You're still figuring out your product and iterating quickly\n- You don't yet have the operational maturity to manage distributed systems\n\n**Consider microservices** when:\n- Different parts of your system need to scale independently (your search feature needs 10x the resources of your settings page)\n- Multiple teams are stepping on each other's toes in the same codebase\n- A failure in one area (say, report generation) is crashing unrelated features (like user login)\n\nMany successful companies start monolith and gradually extract services as they grow. That's not a failure — it's a strategy."
+        }
+      ],
+      "quiz": {
+        "question": "Monolith or microservices?",
+        "scenario": "You're the PM at a 6-person startup that just raised a seed round. Your product is a project management tool with about 200 users. The CEO wants to \"build it right from the start\" and is pushing to adopt a microservices architecture with separate services for users, projects, notifications, and billing. Your sole backend engineer estimates this will add 3 months to the roadmap.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Go with the microservices plan — it's better to build the right architecture now than to rewrite later",
+            "correct": false,
+            "explanation": "With 6 people and 200 users, microservices would add significant operational overhead — managing multiple deployments, inter-service communication, distributed debugging — without any of the benefits. You don't have the team size or traffic to justify it, and those 3 months could be spent finding product-market fit."
+          },
+          {
+            "id": "b",
+            "text": "Start with a monolith but keep the code well-organized so services can be extracted later if needed",
+            "correct": true,
+            "explanation": "A well-structured monolith gives you speed and simplicity now while keeping the door open for microservices later. With 200 users and a small team, your bottleneck is product iteration speed, not system architecture. Many billion-dollar companies ran monoliths well past this stage."
+          },
+          {
+            "id": "c",
+            "text": "Compromise: build two services now (a main app and a billing service) and add more later",
+            "correct": false,
+            "explanation": "Even two services means your solo backend engineer now manages two deployments, inter-service networking, and distributed debugging. Billing at 200 users doesn't need its own service. This adds complexity without solving any actual problem you have today."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "ride-sharing",
+          "stageId": "stage-3",
+          "label": "See this in action: Building a Ride-Sharing App → Breaking apart the monolith"
+        }
+      ],
+      "relatedGlossary": ["monolith", "microservices"]
+    },
+    {
+      "id": "message-queues",
+      "title": "Message Queues: Not everything needs to happen right now",
+      "description": "How systems handle work that can wait — and why trying to do everything instantly is a recipe for failure.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **[[glossary:message-queue|message queue]]** is a system that holds tasks in a line and processes them one at a time (or in batches), rather than handling everything the instant it arrives.\n\nHere's the pattern:\n\n1. Something happens in your app (a user places an order)\n2. Instead of doing all the follow-up work immediately (charge the card, send confirmation email, update inventory, notify the warehouse), your app drops a message into a queue\n3. Worker processes pick up messages from the queue and handle them\n\nThe user sees \"Order confirmed!\" in milliseconds. The email, inventory update, and warehouse notification happen seconds later in the background. The user never notices the delay, and your system stays fast."
+        },
+        {
+          "heading": "why",
+          "content": "Message queues solve a set of problems that every growing system hits:\n\n- **Speed** — users shouldn't wait for things they don't need to wait for. Sending a confirmation email takes 2 seconds, but the user doesn't need to stare at a spinner for it.\n- **Reliability** — if the email service is down for 30 seconds, a queue holds the message and retries later. Without a queue, that email is lost.\n- **Handling spikes** — if 10,000 people sign up in an hour during a launch, the queue absorbs the burst and your email service processes them at a steady pace instead of falling over.\n- **Decoupling** — the part of your app that takes orders doesn't need to know anything about how emails are sent. It just puts a message in the queue and moves on."
+        },
+        {
+          "heading": "how",
+          "content": "Think of the order ticket system at a busy deli counter:\n\n- You walk up, place your order, and get a ticket number. You're free to go sit down. That's the **producer** putting a message in the queue.\n- Your order ticket goes on the rail behind the counter, joining a line of other orders. That's the **queue**.\n- The kitchen staff work through the rail in order, making sandwiches one by one. They're the **consumers** (or workers).\n- When your sandwich is ready, they call your number. That's the **callback** or result.\n\nYou didn't stand at the counter blocking everyone behind you while your sandwich was made. You got a fast acknowledgment (the ticket) and the actual work happened asynchronously.\n\nPopular message queue tools include RabbitMQ, Amazon SQS, and Redis (which can act as a simple queue). If you've used Zapier or background jobs in any app, you've used something similar."
+        },
+        {
+          "heading": "when",
+          "content": "Use a message queue when:\n\n- **The user doesn't need the result immediately** — sending emails, generating reports, processing images, syncing data to analytics\n- **Work can fail and needs retrying** — calling external APIs that might be temporarily down\n- **You have traffic spikes** — a queue smooths out bursts so your downstream services don't collapse\n- **You want to decouple services** — the order service shouldn't crash because the email service is having a bad day\n\nYou probably don't need a queue for:\n- Simple apps with low traffic\n- Operations where the user needs the result before they can continue (like checking if a username is available)"
+        }
+      ],
+      "quiz": {
+        "question": "Should this be async?",
+        "scenario": "Your e-commerce app has a checkout flow. When a user clicks \"Place Order,\" your system needs to: (1) charge their credit card, (2) send a confirmation email, (3) generate a PDF invoice, and (4) notify the warehouse to ship. Currently all four steps happen synchronously, and users sometimes see a 12-second loading spinner at checkout. You've been asked to speed it up.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Put all four steps into a message queue so the user sees instant confirmation",
+            "correct": false,
+            "explanation": "You can't queue the credit card charge. The user needs to know immediately if their payment succeeded or failed — that's critical information that determines what happens next. If you queue it and the charge fails five minutes later, you've already told them the order is confirmed."
+          },
+          {
+            "id": "b",
+            "text": "Charge the card synchronously, then queue the email, PDF, and warehouse notification",
+            "correct": true,
+            "explanation": "The credit card charge must happen in real time because the user needs to see success or failure immediately. But the email, invoice PDF, and warehouse notification can all happen in the background — the user doesn't need to wait for them. This cuts your checkout time from 12 seconds down to 2-3 seconds (just the payment processing)."
+          },
+          {
+            "id": "c",
+            "text": "Keep everything synchronous but add more server resources to handle it faster",
+            "correct": false,
+            "explanation": "Throwing more hardware at the problem might shave off a few seconds, but you're still making the user wait for work they don't need to wait for. The email and PDF will always take time regardless of server power, and external services like email providers have their own latency. The right fix is architectural: separate the must-wait work from the can-wait work."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "ride-sharing",
+          "stageId": "stage-3",
+          "label": "See this in action: Building a Ride-Sharing App → Handling peak demand"
+        }
+      ],
+      "relatedGlossary": ["message-queue", "async-processing", "decoupling"]
+    },
+    {
+      "id": "event-driven-architecture",
+      "title": "Event-Driven Architecture: Services that react to what happens",
+      "description": "Instead of services calling each other directly, they announce what happened and let others react.",
+      "estimatedMinutes": 7,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "In a traditional system, services talk to each other directly. The order service calls the email service: \"Send a confirmation email to this user.\" The order service calls the inventory service: \"Decrease stock by one.\" The order service has to know about every other service and call each one.\n\nIn an **[[glossary:event-driven-architecture|event-driven architecture]]**, services don't call each other. Instead, they publish **events** — announcements that something happened. The order service says: \"Hey everyone, an order was placed. Here are the details.\" Any service that cares about new orders can listen for that event and react on its own.\n\n- The email service hears \"order placed\" and sends a confirmation\n- The inventory service hears \"order placed\" and decreases stock\n- The analytics service hears \"order placed\" and logs it\n\nThe order service doesn't know or care how many services are listening. It just announces what happened."
+        },
+        {
+          "heading": "why",
+          "content": "Event-driven architecture matters because it changes how tightly your services are connected:\n\n- **Adding features is easy** — want to add a loyalty points system? Just create a new service that listens for \"order placed\" events. You don't modify the order service at all.\n- **Services are independent** — if the analytics service goes down, orders keep flowing. No one is waiting for analytics to respond.\n- **Teams can work independently** — the email team doesn't need to coordinate with the order team. They just agree on the event format.\n- **Audit trail for free** — since events are a record of everything that happened, you can replay them for debugging, auditing, or rebuilding data."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **newspaper subscription**:\n\n- The **newspaper publisher** is like a service that produces events. Every morning, they print the paper and make it available. They don't know who reads it or what they do with it.\n- **Subscribers** are like services that consume events. One subscriber reads the sports section. Another clips coupons. A third uses it for market research. Each subscriber independently decides what to do with the same newspaper.\n- **Subscribing and unsubscribing** is trivial. A new reader can start getting the paper without the publisher changing anything. If someone cancels, the publisher doesn't notice.\n\nNow compare this to the publisher personally calling every reader each morning and reading them the articles over the phone. That's the direct-call approach — it doesn't scale, and if one reader doesn't pick up, the publisher is stuck waiting.\n\nTools like Apache Kafka, Amazon SNS/EventBridge, and even simple webhook systems implement this pattern."
+        },
+        {
+          "heading": "when",
+          "content": "Event-driven architecture shines when:\n\n- **Multiple services need to react to the same thing** — a new user signs up and you need to send a welcome email, create a default workspace, log it in analytics, and notify the sales team\n- **You want loose coupling** — services should be able to evolve, deploy, and fail independently\n- **You need an audit trail** — regulated industries (finance, healthcare) often require a complete record of every action\n- **Your system is growing** — more teams, more services, more cross-cutting concerns\n\nIt may be overkill when:\n- You have a small app with straightforward flows\n- You need guaranteed ordering and immediate consistency (events are eventually consistent)\n- Your team is small and the coordination overhead of event schemas isn't worth it yet"
+        }
+      ],
+      "quiz": {
+        "question": "Direct calls or events?",
+        "scenario": "Your ride-sharing app needs to handle what happens when a ride is completed. Currently, the ride service directly calls five other services in sequence: billing (charge the rider), payouts (pay the driver), ratings (prompt for a rating), analytics (log the ride), and receipts (email a receipt). Last week, the ratings service had a bug that caused the entire completion flow to fail — riders were charged but never got receipts.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep direct calls but add better error handling and retries to each call",
+            "correct": false,
+            "explanation": "Better error handling helps, but it doesn't fix the fundamental problem: the ride service is tightly coupled to five other services. Every new service that cares about ride completion means another direct call. And the ride service still has to know about and manage connections to all of them. You're patching symptoms instead of addressing the architecture."
+          },
+          {
+            "id": "b",
+            "text": "Have the ride service publish a 'ride.completed' event and let each service react independently",
+            "correct": true,
+            "explanation": "With events, the ride service publishes one 'ride.completed' event and moves on. Billing, payouts, ratings, analytics, and receipts each listen independently. If ratings has a bug, it only affects ratings — billing and receipts keep working fine. Adding a new reaction (like a loyalty points service) means creating a new listener, with zero changes to the ride service."
+          },
+          {
+            "id": "c",
+            "text": "Combine all five actions into the ride service itself so there are no external calls",
+            "correct": false,
+            "explanation": "This is the monolith approach — cramming everything into one service. It eliminates inter-service calls but creates a massive, unwieldy service responsible for billing, payouts, ratings, analytics, and receipts. Each of those domains has its own complexity and team. You'd lose the ability to deploy and scale them independently."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "ride-sharing",
+          "stageId": "stage-3",
+          "label": "See this in action: Building a Ride-Sharing App → Scaling the platform"
+        }
+      ],
+      "relatedGlossary": ["event-driven-architecture", "decoupling", "message-queue"]
+    },
+    {
+      "id": "api-gateways",
+      "title": "API Gateways: A single front door for your services",
+      "description": "When you have many microservices, your clients need one place to talk to — not dozens.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "An **[[glossary:api-gateway|API gateway]]** is a single entry point that sits between your clients (web app, mobile app) and your backend services. Instead of your mobile app calling the user service, the order service, and the notification service directly, it calls one URL — the gateway — and the gateway routes the request to the right place.\n\nThe gateway handles the cross-cutting concerns that every request needs:\n\n- **Routing** — directing `/users/me` to the user service and `/orders` to the order service\n- **Authentication** — verifying the user's identity once, rather than in every service\n- **Rate limiting** — preventing any single client from overwhelming your system\n- **Response aggregation** — combining data from multiple services into one response so the client doesn't need to make five separate calls"
+        },
+        {
+          "heading": "why",
+          "content": "Without a gateway, every client needs to know about every service:\n\n- Your mobile app calls `users.api.yourapp.com`, `orders.api.yourapp.com`, `notifications.api.yourapp.com` — and if you add or rename a service, you have to update every client.\n- Every service has to implement its own authentication check, its own rate limiting, its own CORS headers.\n- A single mobile screen that shows user info, recent orders, and notifications requires three separate API calls.\n\nA gateway solves all of this by giving clients a single, stable interface. Behind that interface, you can restructure, split, merge, or replace services without clients ever knowing."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **hotel concierge**:\n\n- You're the **guest** (the client). You want dinner reservations, theater tickets, and a car service. You could call three different places yourself, wait on hold, explain your preferences each time, and coordinate the timing.\n- Or you tell the **concierge** (the API gateway) what you need. The concierge calls the restaurant, the theater, and the car service on your behalf, coordinates the timing, and comes back with one neat itinerary.\n- The concierge also handles things you shouldn't have to think about — checking that you're actually a guest (authentication), making sure you're not booking 50 cars (rate limiting), and knowing which restaurant to call if your first choice is full (routing and fallback).\n\nFrom your perspective, there's one person to talk to. Behind the scenes, the concierge manages all the complexity.\n\nPopular API gateway tools include Kong, Amazon API Gateway, and nginx. Many teams use cloud platforms that include gateway functionality out of the box."
+        },
+        {
+          "heading": "when",
+          "content": "You need an API gateway when:\n\n- **You have multiple backend services** and clients shouldn't need to know about each one\n- **You want centralized auth** — verify identity once at the gateway instead of in every service\n- **Mobile apps need optimized calls** — aggregate data from multiple services into a single response to save battery and bandwidth\n- **You need consistent rate limiting, logging, or monitoring** across all services\n\nYou probably don't need one when:\n- You have a monolith (it already has one entry point)\n- You have only two or three services and a small team — the overhead of managing a gateway might not be worth it yet\n- Your app only has a web frontend that can easily call a few services directly"
+        }
+      ],
+      "quiz": {
+        "question": "Where does the gateway help?",
+        "scenario": "Your company's mobile app calls 8 different microservices directly. Users complain the app is slow and drains battery. Your mobile team says each screen makes 4-6 API calls to different services, and each call includes authentication logic. Meanwhile, your backend team just split the order service into two separate services, which will require a mobile app update to point to the new URLs.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add an API gateway that aggregates calls and handles auth centrally",
+            "correct": true,
+            "explanation": "A gateway solves all three problems at once. It aggregates multiple backend calls into single responses (fewer round trips, less battery drain), centralizes authentication (removing duplicate logic from each service), and shields the mobile app from backend changes (the gateway URL stays the same even when services split or merge). The mobile app calls one endpoint per screen instead of 4-6."
+          },
+          {
+            "id": "b",
+            "text": "Merge the microservices back into fewer, larger services to reduce the number of calls",
+            "correct": false,
+            "explanation": "Re-merging services throws away the benefits of having them separated (independent scaling, independent deployments, team autonomy). The problem isn't that you have too many services — it's that clients are directly coupled to all of them. A gateway lets you keep the backend architecture while simplifying the client experience."
+          },
+          {
+            "id": "c",
+            "text": "Cache API responses on the mobile device so it makes fewer calls",
+            "correct": false,
+            "explanation": "Client-side caching helps with repeat requests but doesn't solve the core problems. The first load still requires 4-6 calls per screen. Auth logic is still duplicated everywhere. And the backend service split still breaks the app. Caching is a useful optimization but it doesn't address the architectural issue."
+          }
+        ]
+      },
+      "relatedGlossary": ["api-gateway", "microservices", "load-balancer"]
+    }
+  ]
+}

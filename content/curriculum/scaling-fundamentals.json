@@ -1,0 +1,292 @@
+{
+  "id": "scaling-fundamentals",
+  "slug": "scaling-fundamentals",
+  "title": "Scaling Fundamentals",
+  "subtitle": "Making your app fast for everyone",
+  "description": "When your app goes from 100 users to 100,000, the things that used to be instant start breaking. This module covers the five core techniques — caching, load balancing, CDNs, scaling strategies, and rate limiting — that keep your app fast and reliable as it grows.",
+  "moduleNumber": 3,
+  "icon": "🚀",
+  "color": "green",
+  "lessons": [
+    {
+      "id": "caching",
+      "title": "Caching: Why does my app keep fetching the same thing?",
+      "description": "The single most effective way to make anything faster — remembering answers instead of recalculating them.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A [[glossary:cache|cache]] is a temporary storage layer that saves a copy of data so you don't have to fetch or compute it again. Instead of asking the database the same question thousands of times, you ask once, save the answer, and reuse it.\n\nCaching happens at multiple levels:\n\n- **Browser cache** — your browser saves images, scripts, and pages locally so it doesn't re-download them every visit\n- **Server cache** — your back end stores frequently requested data in memory (much faster than hitting the database)\n- **Dedicated cache (like Redis)** — a specialized in-memory data store that sits between your server and your database, holding hot data that many users request\n\nThe core idea is simple: if the answer hasn't changed, don't do the work again."
+        },
+        {
+          "heading": "why",
+          "content": "Caching is often the single biggest performance win you can get. Understanding it helps you:\n\n- **Diagnose slow pages** — if a page loads slowly, asking \"is this cached?\" is the first question a senior engineer would ask\n- **Reduce costs** — every database query and API call costs time and money. Caching can cut those costs by 90% or more\n- **Understand stale data bugs** — ever updated your profile picture and still seen the old one? That's a caching issue. When you understand caching, you understand why data sometimes feels \"stuck\"\n- **Make better product decisions** — some features are easy to cache (a product catalog that changes once a day) and some are hard (a real-time stock ticker). Knowing the difference helps you scope features realistically."
+        },
+        {
+          "heading": "how",
+          "content": "Think of caching like a **sticky note on your fridge**:\n\nYour partner asks, \"What time does the pharmacy close?\" You don't know, so you look it up on your phone (that's querying the database). You find out it closes at 9 PM. Instead of throwing away that information, you stick a note on the fridge: \"Pharmacy closes at 9 PM.\"\n\nThe next time someone asks, you glance at the fridge instead of pulling out your phone. Instant answer. That sticky note is a cache.\n\nBut here's the catch: what if the pharmacy changes its hours? Your sticky note is now wrong. This is the **cache invalidation** problem — knowing when to throw away the old note and look up a fresh answer. It's one of the hardest problems in computer science, but in practice, most teams handle it with simple rules:\n\n- **Time-based expiry (TTL)** — the note is valid for 1 hour, then look it up again\n- **Event-based invalidation** — when the pharmacy updates its hours, throw away the note\n- **Manual clearing** — an admin clicks a button to refresh the cache\n\nIn a real app, [[glossary:redis|Redis]] is the most popular caching tool. It holds data in memory (RAM), which is roughly 100x faster than reading from a database on disk."
+        },
+        {
+          "heading": "when",
+          "content": "Caching is a great fit when:\n\n- **Data is read far more often than written** — a product page viewed 10,000 times a day but updated once a week\n- **The same data is requested by many users** — a homepage, trending posts, public profiles\n- **The computation is expensive** — generating a leaderboard, running a complex report, rendering a dashboard\n\nCaching is a poor fit when:\n\n- **Data changes constantly** — a live chat feed or real-time stock price\n- **Every request is unique** — personalized search results with no overlap between users\n- **Stale data causes real harm** — financial transactions, inventory counts during a flash sale"
+        }
+      ],
+      "quiz": {
+        "question": "Should you cache this?",
+        "scenario": "Your e-commerce app has a product catalog page that displays 50 items with their names, images, and prices. The catalog is updated by the merchandising team about twice a week, but the page is viewed by 20,000 users per day. Page load time is currently 3 seconds and your PM wants it under 1 second.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Yes, cache the product catalog with a TTL of a few hours",
+            "correct": true,
+            "explanation": "This is a textbook caching scenario: the data is read 20,000 times a day but only written twice a week. Caching the catalog in Redis or even at the server level with a TTL of a few hours means the database gets hit a handful of times per day instead of 20,000. You'll easily get under 1 second. When the merchandising team updates the catalog, the cache expires naturally within hours."
+          },
+          {
+            "id": "b",
+            "text": "No, users might see outdated prices and that could be a legal issue",
+            "correct": false,
+            "explanation": "This is a valid concern, but it's solvable. With a TTL of a few hours, the worst case is a user sees a price that's a few hours old — and you can also add event-based invalidation that clears the cache whenever the team publishes changes. The performance gain (3x faster page loads for 20,000 daily users) far outweighs the risk, especially with proper invalidation."
+          },
+          {
+            "id": "c",
+            "text": "No, just upgrade the database to handle more traffic",
+            "correct": false,
+            "explanation": "Upgrading your database is expensive and has diminishing returns. If you're running the same query 20,000 times a day and getting the same result, the problem isn't database capacity — it's unnecessary repetition. Caching solves the root cause and costs almost nothing to implement compared to a database upgrade."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-2",
+          "label": "See this in action: Building an Online Store"
+        }
+      ],
+      "relatedGlossary": ["cache", "redis", "database"]
+    },
+    {
+      "id": "load-balancing",
+      "title": "Load Balancing: How does one server become many?",
+      "description": "Distributing incoming traffic across multiple servers so no single machine gets overwhelmed.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A [[glossary:load-balancer|load balancer]] is a traffic director that sits in front of your servers and distributes incoming requests across them. Instead of one server handling all your traffic, you run multiple copies of your server and the load balancer decides which one handles each request.\n\nThe two most common strategies are:\n\n- **Round-robin** — requests go to each server in order: Server 1, Server 2, Server 3, Server 1, Server 2, Server 3... Simple, fair, and works well when all servers are equally capable.\n- **Least connections** — each request goes to whichever server is currently handling the fewest requests. This is smarter when some requests take longer than others, because it prevents one server from getting a pile-up of slow requests while another sits idle."
+        },
+        {
+          "heading": "why",
+          "content": "A single server has physical limits — it can only handle so many requests per second before it slows down or crashes. Load balancing matters because:\n\n- **Reliability** — if one server goes down, the load balancer routes traffic to the others. Your users never notice. Without it, one server crash means your entire app is down.\n- **Performance** — spreading requests across multiple machines means each one does less work, so every user gets a faster response.\n- **Growth** — when traffic increases, you add another server behind the load balancer instead of replacing your existing one with a more powerful (and more expensive) machine.\n- **Zero-downtime deploys** — you can update servers one at a time while the load balancer sends traffic to the ones still running the old version."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a load balancer like a **host at a busy restaurant**:\n\nThe restaurant has 10 tables, each served by a different waiter. When new guests arrive, the host doesn't let them wander in and pick a random table — the host seats them strategically:\n\n- If using \"round-robin,\" the host seats the next group with Waiter 1, then Waiter 2, then Waiter 3, cycling through evenly.\n- If using \"least connections,\" the host looks at which waiter currently has the fewest tables occupied and seats the group there.\n\nWithout the host, all guests would crowd around the first waiter they see, that waiter would be overwhelmed, and the rest would be standing around doing nothing.\n\nIn practice, cloud platforms like AWS, Google Cloud, and Vercel provide load balancers as a service. You don't build one yourself — you configure one and point it at your servers. The load balancer also performs **health checks**, pinging each server every few seconds to make sure it's still alive. If a server stops responding, the load balancer stops sending it traffic automatically."
+        },
+        {
+          "heading": "when",
+          "content": "You need load balancing when:\n\n- **Traffic exceeds what one server can handle** — this varies, but a single server typically tops out at a few hundred to a few thousand requests per second\n- **Uptime matters** — if your app being down for 5 minutes is unacceptable, you need at least two servers behind a load balancer\n- **You're deploying frequently** — load balancers enable rolling deployments without downtime\n\nYou probably don't need it when:\n\n- You're in early stages with a handful of users — one server is fine, and most hosting platforms handle basic traffic management for you\n- Your app is entirely static and served via a [[glossary:cdn|CDN]] (no server-side logic to balance)"
+        }
+      ],
+      "quiz": {
+        "question": "Which load balancing strategy fits?",
+        "scenario": "Your app has 3 servers behind a load balancer. Most requests are simple and fast (return in 50ms), but about 10% are report-generation requests that take 5 seconds each. You notice that sometimes the app feels slow for everyone, even though 2 of the 3 servers have low CPU usage.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Switch from round-robin to least-connections balancing",
+            "correct": true,
+            "explanation": "Round-robin distributes requests evenly by count, but it doesn't account for how long each request takes. One server might get a cluster of slow report requests and become overloaded while the other two are idle. Least-connections balancing sends new requests to whichever server currently has the fewest active connections, so the server stuck processing reports naturally gets fewer new requests."
+          },
+          {
+            "id": "b",
+            "text": "Add more servers to handle the load",
+            "correct": false,
+            "explanation": "Adding more servers doesn't solve the problem if the load balancer is still distributing unevenly. With round-robin, one server could still get stuck with multiple slow requests. The issue isn't total capacity — you said 2 out of 3 servers have low CPU usage. The issue is uneven distribution. Fix the strategy first, then scale if needed."
+          },
+          {
+            "id": "c",
+            "text": "Set up a separate server dedicated only to report requests",
+            "correct": false,
+            "explanation": "This could work as a long-term optimization, but it's over-engineering the problem right now. The simpler fix is changing the load balancing strategy so that slow requests naturally get spread out. Separating workloads into dedicated servers adds operational complexity and is usually reserved for much larger scale."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-3",
+          "label": "See this in action: Building an Online Store"
+        }
+      ],
+      "relatedGlossary": ["load-balancer", "server", "horizontal-scaling"]
+    },
+    {
+      "id": "cdns",
+      "title": "CDNs: Why is my site slow in other countries?",
+      "description": "Serving your images, scripts, and pages from locations close to your users instead of one faraway server.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A [[glossary:cdn|CDN]] (Content Delivery Network) is a global network of servers that stores copies of your static files — images, CSS, JavaScript, videos, fonts — at locations around the world. Instead of every user downloading your hero image from a server in Virginia, users in Tokyo get it from a server in Tokyo, users in London get it from London, and users in Sao Paulo get it from Sao Paulo.\n\nThese distributed locations are called **edge servers** or **points of presence (PoPs)**. Major CDN providers like Cloudflare, AWS CloudFront, and Fastly have hundreds of PoPs worldwide."
+        },
+        {
+          "heading": "why",
+          "content": "The speed of light is fast, but it still takes time for data to travel around the planet. A request from Sydney to a server in New York takes about 200 milliseconds just for the round trip — and that's before the server even starts doing any work. CDNs matter because:\n\n- **Latency** — serving files from a nearby edge server can cut load times from seconds to milliseconds for users far from your main server\n- **Bandwidth savings** — your origin server doesn't need to serve every image to every user. The CDN handles most of the heavy lifting.\n- **Reliability** — if your origin server goes down, the CDN can still serve cached static files. Your images and scripts keep working.\n- **Traffic spikes** — CDNs are built to absorb massive traffic. If your site goes viral, the CDN handles the surge instead of your server melting."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a CDN like a **franchise bookstore**:\n\nImagine you wrote a bestselling book. You could ship every single order from your garage in Kansas (your origin server). Customers in Kansas get it fast, but customers in Japan wait weeks.\n\nOr, you partner with a bookstore chain that has locations worldwide. You send a batch of books to each store (the CDN edge servers). Now when someone in Tokyo wants your book, they walk to their local store and pick it up immediately. The books were already there waiting.\n\nWhen the first person in a new city requests a file the CDN doesn't have yet, the CDN fetches it from your origin server, serves it to that user, and saves a copy for the next person. This is called a **cache miss** on the first request and a **cache hit** on every subsequent one.\n\nIn practice, setting up a CDN is usually just a configuration change. Services like Vercel, Netlify, and Cloudflare handle CDN distribution automatically for static assets. You upload your files once, and they appear globally."
+        },
+        {
+          "heading": "when",
+          "content": "Use a CDN for:\n\n- **Static assets** — images, CSS files, JavaScript bundles, fonts, videos. This is the bread and butter of CDNs.\n- **Public, cacheable pages** — marketing pages, blog posts, documentation. If the content is the same for every user, a CDN can serve it.\n- **Global audiences** — if your users are spread across multiple countries or continents, a CDN is almost mandatory for acceptable performance.\n\nCDNs are less useful for:\n\n- **Dynamic, personalized content** — a user's dashboard or account settings that are different for every person (though some CDNs now support edge computing for this)\n- **Apps with a purely local audience** — if all your users are in one city and your server is there too, a CDN adds minimal benefit"
+        }
+      ],
+      "quiz": {
+        "question": "What's causing the slowness?",
+        "scenario": "Your app is hosted on a server in US-East. Users in the US report fast load times (under 1 second), but users in Southeast Asia report that pages take 4-5 seconds to load. Your app has large product images (about 2MB each) and serves them directly from your server. The server CPU and memory usage look healthy.",
+        "options": [
+          {
+            "id": "a",
+            "text": "The physical distance is causing latency — put assets on a CDN",
+            "correct": true,
+            "explanation": "The server isn't overloaded (healthy CPU and memory), and US users are fine — so the server itself is performing well. The problem is that 2MB images are traveling 10,000+ miles from Virginia to Southeast Asia. Each round trip adds hundreds of milliseconds, and large files make it worse. A CDN would serve those images from edge servers in Singapore, Tokyo, or Mumbai, cutting load times dramatically."
+          },
+          {
+            "id": "b",
+            "text": "The server needs more resources to handle international traffic",
+            "correct": false,
+            "explanation": "The server's CPU and memory are healthy, so it's not a capacity problem. Adding more resources to a server in US-East doesn't make data travel faster across the Pacific Ocean. The issue is distance and physics, not server performance. You need to bring the content closer to the users."
+          },
+          {
+            "id": "c",
+            "text": "Southeast Asian users probably have slower internet, nothing you can do",
+            "correct": false,
+            "explanation": "While internet speeds vary globally, 4-5 seconds for a modern web app is not normal even on moderate connections. The real issue is that every request has to cross the Pacific Ocean and back. A CDN eliminates this by storing content at nearby edge servers. Many apps serve globally with sub-second load times — internet speed in Southeast Asia is not the bottleneck here."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-3",
+          "label": "See this in action: Building an Online Store"
+        }
+      ],
+      "relatedGlossary": ["cdn", "cache", "latency"]
+    },
+    {
+      "id": "horizontal-vs-vertical-scaling",
+      "title": "Horizontal vs Vertical Scaling: More machines or bigger machines?",
+      "description": "The two fundamental strategies for handling more traffic — and why the answer is usually both.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "When your app needs to handle more traffic, you have two options:\n\n- **Vertical scaling (scaling up)** — make your existing server bigger. More CPU, more RAM, faster disks. You take the machine you have and upgrade it.\n- [[glossary:horizontal-scaling|**Horizontal scaling (scaling out)**]] — add more servers. Instead of one powerful machine, you run many smaller ones working together.\n\nVertical scaling is like replacing your sedan with a truck. Horizontal scaling is like keeping your sedan and adding more sedans."
+        },
+        {
+          "heading": "why",
+          "content": "This is one of the most important architectural decisions you'll encounter, and understanding the trade-offs helps you:\n\n- **Understand cost conversations** — vertical scaling gets expensive fast (the biggest cloud servers cost $20,000+/month). Horizontal scaling uses cheaper machines but adds complexity.\n- **Plan for growth** — vertical scaling has a hard ceiling (there's a biggest machine money can buy). Horizontal scaling has no theoretical limit.\n- **Evaluate engineering proposals** — when your team says \"we need to re-architect for horizontal scaling,\" you'll understand why that's a significant effort and whether it's worth it.\n- **Appreciate managed services** — platforms like Vercel, Heroku, and AWS Lambda handle scaling decisions for you. Knowing what's happening behind the scenes helps you choose between them."
+        },
+        {
+          "heading": "how",
+          "content": "Think of it like running a **pizza shop**:\n\n**Vertical scaling** is like replacing your oven with a bigger, faster oven. It's simple — same kitchen, same process, just a better oven. But eventually, you hit a wall: the biggest oven in the world still has a maximum capacity, and your kitchen only has room for one.\n\n**Horizontal scaling** is like opening more locations. Each one has its own oven, its own staff, and can serve its own neighborhood. There's no limit to how many you can open. But now you need a system to route customers to the nearest location (load balancing), keep menus consistent across locations (deployment), and share inventory data (distributed state).\n\nIn practice, most apps start by scaling vertically because it's simple — just upgrade your server tier. When you hit the ceiling of what one machine can do, you move to horizontal scaling. Most cloud platforms make this transition relatively smooth:\n\n- **Vertical**: Change your AWS instance from `t3.medium` to `t3.xlarge` (takes minutes, no code changes)\n- **Horizontal**: Run 4 instances of your server behind a [[glossary:load-balancer|load balancer]] (requires your app to be \"stateless\" — meaning no server stores user-specific data locally)"
+        },
+        {
+          "heading": "when",
+          "content": "**Start with vertical scaling when:**\n- You're early-stage and traffic is moderate\n- Your app is simple and a single server handles the load with headroom\n- You want the fastest, simplest fix to a performance problem\n\n**Move to horizontal scaling when:**\n- You're approaching the limits of your current server and upgrading costs more than adding machines\n- You need high availability — a single server is a single point of failure\n- Traffic is spiky and you want to add/remove servers dynamically (auto-scaling)\n- Your system is already designed to be stateless (most modern frameworks are)\n\nThe real answer for most growing apps is **both**: scale vertically until it stops being cost-effective, then scale horizontally."
+        }
+      ],
+      "quiz": {
+        "question": "Which scaling approach do you recommend?",
+        "scenario": "Your SaaS app serves 200 customers. Traffic is steady and predictable. You're on a single server that's using 80% of its CPU during peak hours. Your CTO proposes re-architecting the entire app for horizontal scaling, which would take the engineering team 3 weeks. A vertical upgrade to the next server tier would take 10 minutes and costs $150/month more.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Scale vertically for now — upgrade the server",
+            "correct": true,
+            "explanation": "At 200 customers with steady, predictable traffic, the 10-minute vertical upgrade is the right call. It buys you headroom immediately for $150/month. Spending 3 engineering weeks on horizontal scaling is premature optimization — that time could be spent building features that grow your customer base. Revisit horizontal scaling when you're at 2,000 customers or when vertical upgrades stop being cost-effective."
+          },
+          {
+            "id": "b",
+            "text": "Scale horizontally now — you'll need it eventually anyway",
+            "correct": false,
+            "explanation": "\"You'll need it eventually\" is true for many things, but timing matters. Three weeks of engineering time at a 200-customer startup is enormously expensive in opportunity cost. The vertical upgrade solves the immediate problem in 10 minutes. You should invest in horizontal scaling when you have clear signals that vertical scaling is no longer sufficient — not as a precaution."
+          },
+          {
+            "id": "c",
+            "text": "Do nothing — 80% CPU usage is fine and you should focus on other things",
+            "correct": false,
+            "explanation": "80% CPU at peak hours is a warning sign, not a crisis — but ignoring it is risky. A traffic spike or a slightly heavier workload could push you to 100% and cause slowdowns or outages. The vertical upgrade takes 10 minutes and eliminates this risk. 'Do nothing' is rarely the right answer when you're that close to capacity."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-3",
+          "label": "See this in action: Building an Online Store"
+        }
+      ],
+      "relatedGlossary": ["horizontal-scaling", "load-balancer", "server"]
+    },
+    {
+      "id": "rate-limiting",
+      "title": "Rate Limiting: How do you stop one user from ruining it for everyone?",
+      "description": "Protecting your servers from being overwhelmed by limiting how many requests any single user can make.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Rate limiting** is a technique that controls how many requests a user (or IP address, or API key) can make in a given time window. If a user exceeds the limit, the server rejects additional requests with a \"429 Too Many Requests\" status code until the window resets.\n\n**Throttling** is a related concept — instead of rejecting excess requests outright, throttling slows them down. The requests still get processed, just not immediately.\n\nFor example, an API might allow:\n- 100 requests per minute per user\n- 1,000 requests per hour per API key\n- 10 login attempts per 15 minutes per IP address"
+        },
+        {
+          "heading": "why",
+          "content": "Without rate limiting, a single bad actor — or even a misbehaving script — can bring down your entire app for everyone. Rate limiting protects you from:\n\n- **Denial-of-service attacks** — someone intentionally flooding your server with millions of requests to crash it\n- **Runaway scripts** — a developer accidentally writes a loop that calls your API thousands of times per second\n- **Abuse** — a user scraping all your data, brute-forcing passwords, or exploiting a free tier\n- **Uneven resource consumption** — one power user consuming so many resources that the app slows down for everyone else\n\nRate limiting also helps you as a product decision-maker:\n\n- **API pricing tiers** — many SaaS products differentiate plans by rate limits (free: 100 requests/day, pro: 10,000 requests/day)\n- **Fair usage policies** — ensuring all customers get a consistent experience regardless of individual behavior"
+        },
+        {
+          "heading": "how",
+          "content": "Think of rate limiting like a **deli counter with a \"take a number\" system**:\n\nThe deli can serve 10 customers per hour. When customer 11 walks in, they're told: \"Sorry, we're at capacity. Come back in 30 minutes.\" This protects the deli staff from being overwhelmed and ensures the first 10 customers get good service.\n\nThe most common approach is the **sliding window**: track how many requests each user has made in the last N minutes. If they hit the limit, reject new requests until older ones fall outside the window.\n\nIn practice, rate limiting is usually implemented with:\n\n- **A counter per user** stored in a fast store like [[glossary:redis|Redis]] — \"user_123 has made 87 requests in the current window\"\n- **Response headers** that tell the client their current limit: `X-RateLimit-Limit: 100`, `X-RateLimit-Remaining: 13`, `X-RateLimit-Reset: 1680000000`\n- **Middleware** that checks the counter before processing the request — if over the limit, return a 429 status immediately without doing any expensive work\n\nMany API gateways and platforms (AWS API Gateway, Cloudflare, Nginx) provide rate limiting as a built-in feature you can configure without writing code."
+        },
+        {
+          "heading": "when",
+          "content": "Use rate limiting on:\n\n- **Public APIs** — any endpoint exposed to the internet, especially unauthenticated ones\n- **Authentication endpoints** — login, signup, password reset (to prevent brute-force attacks)\n- **Expensive operations** — report generation, file uploads, AI model calls (anything that consumes significant server resources)\n- **Free tiers** — when you want to offer limited access without letting users abuse it\n\nBe careful with rate limiting on:\n\n- **Critical user actions** — if a legitimate user gets rate-limited while trying to complete a purchase, that's a bad experience. Set limits high enough for normal usage.\n- **Internal services** — rate limiting between your own microservices can cause cascading failures if not tuned carefully"
+        }
+      ],
+      "quiz": {
+        "question": "How would you protect this endpoint?",
+        "scenario": "Your app has a /api/generate-report endpoint that queries the database heavily and takes about 10 seconds to complete. It's available to all logged-in users. One morning, you wake up to find the app was down for 2 hours overnight. The logs show a single user triggered 500 report generation requests in 3 minutes using an automated script.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add rate limiting: max 5 report requests per user per 15 minutes",
+            "correct": true,
+            "explanation": "Rate limiting directly prevents this scenario from recurring. No legitimate user needs to generate 500 reports in 3 minutes — or even 5 reports in 1 minute. A limit of 5 per 15 minutes is generous enough for real usage but stops automated abuse cold. The 429 response is returned instantly, so the abuse doesn't consume any database resources. You might also add a queue for report generation, but rate limiting is the immediate, essential fix."
+          },
+          {
+            "id": "b",
+            "text": "Scale up the server so it can handle 500 concurrent report requests",
+            "correct": false,
+            "explanation": "This is treating the symptom, not the cause. If 500 requests took it down, what about 5,000? You'd need an infinitely powerful server to protect against unchecked abuse. Scaling up also means paying for capacity you only need because of abusive behavior. Rate limiting costs nothing and solves the actual problem: one user making an unreasonable number of requests."
+          },
+          {
+            "id": "c",
+            "text": "Ban the user's account and move on",
+            "correct": false,
+            "explanation": "Banning one user doesn't prevent the next one from doing the same thing. It also might have been a developer testing their own integration who accidentally went overboard. The structural fix is rate limiting — it protects you from all future abuse, not just this one user. You might still reach out to the user, but rate limiting is the engineering solution."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-4",
+          "label": "See this in action: Building an Online Store"
+        }
+      ],
+      "relatedGlossary": ["rate-limiting", "redis", "server"]
+    }
+  ]
+}

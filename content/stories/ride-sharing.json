@@ -1,0 +1,324 @@
+{
+  "id": "ride-sharing",
+  "slug": "ride-sharing",
+  "title": "Building a Ride-Sharing App",
+  "subtitle": "From scrappy prototype to nationwide service",
+  "description": "Follow a ride-sharing app from a single-city experiment to a nationwide platform. You'll learn how real-time location tracking, race conditions, and microservice architectures shape the systems behind every ride you take.",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 28,
+  "concepts": ["consistency", "race-condition", "in-memory-store", "eventual-consistency", "microservices", "message-queue", "event-driven", "failover", "monitoring", "circuit-breaker"],
+  "prerequisites": ["chat-app", "online-store"],
+  "stages": [
+    {
+      "id": "stage-1",
+      "title": "One City, Fifty Drivers",
+      "userScale": "50 drivers, hundreds of riders",
+      "narrative": {
+        "setup": "You've launched a ride-sharing app in one city with fifty drivers. A rider opens the app, taps 'Request Ride,' and your server finds the nearest available driver. It's simple, it works, and the local press just wrote a nice article about you.",
+        "problem": null,
+        "resolution": null
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Your ride-sharing app is live, and it works like this: a rider requests a ride, your server looks at a list of available drivers, picks the nearest one, and sends them the request. The driver accepts, picks up the rider, completes the trip, and the cycle repeats.\n\nFifty drivers, a few hundred riders, one city. Everything runs on a single server with a single database. Life is simple."
+        },
+        {
+          "type": "callout",
+          "style": "analogy",
+          "content": "Think of your system like a small-town taxi dispatch office. One person sits at a desk with a map and a list of drivers. A call comes in, they look at the map, radio the nearest driver, done. When you only have a handful of cars, one dispatcher can handle everything."
+        },
+        {
+          "type": "text",
+          "content": "But there's something interesting about the data flowing through your system. Some of it is **persistent** -- things you need to keep forever, like trip history, payment records, and user profiles. This goes in your [[glossary:database|database]].\n\nOther data is **ephemeral** -- it changes constantly and you don't need to store it long-term. The most important example: **driver locations**. Every few seconds, each driver's phone sends a GPS update. These coordinates are only useful *right now*. Nobody cares where a driver was standing 30 minutes ago when matching a new ride."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "ride-sharing-stage-1",
+          "caption": "A simple ride-sharing system -- one server does it all"
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "This distinction between **ephemeral data** (driver locations, driver availability status) and **persistent data** (trip records, payments, user accounts) is one of the most important concepts in system design. Different types of data have different storage needs -- and using the wrong tool for the job will come back to bite you."
+        },
+        {
+          "type": "text",
+          "content": "Right now, your matching logic is straightforward:\n\n1. Rider requests a ride with a pickup location\n2. Server queries all available drivers\n3. Server calculates the distance from each driver to the pickup\n4. Server picks the closest driver and sends them the request\n5. Driver has 15 seconds to accept\n6. If they decline or time out, the server tries the next closest driver\n\nWith fifty drivers, this loop finishes in milliseconds. The server barely breaks a sweat."
+        },
+        {
+          "type": "callout",
+          "style": "tip",
+          "content": "At small scale, simple solutions are the *right* solutions. You don't need a fancy algorithm to match fifty drivers -- a straightforward loop that checks distances works perfectly. Resist the urge to over-engineer early. The complexity will come on its own soon enough."
+        },
+        {
+          "type": "checkpoint",
+          "question": "Your driver location data updates every 3 seconds per driver. With 50 drivers, that's roughly 17 GPS updates per second. Why might it be a bad idea to store every single one of these updates in your main database?",
+          "options": [
+            {
+              "id": "a",
+              "text": "GPS data is too large for a database to handle",
+              "correct": false,
+              "explanation": "GPS coordinates are tiny -- just two decimal numbers (latitude and longitude). Size isn't the issue. The problem is the *frequency* of writes, not the size of each write."
+            },
+            {
+              "id": "b",
+              "text": "Writing to the database 17 times per second for data you'll throw away wastes resources and slows down queries that actually matter",
+              "correct": true,
+              "explanation": "Exactly. Every database write takes effort -- disk I/O, transaction logging, index updates. Spending that effort on data that's outdated 3 seconds later is wasteful. Worse, those writes compete with the reads and writes your app actually cares about, like recording completed trips or processing payments. Ephemeral data deserves an ephemeral store."
+            },
+            {
+              "id": "c",
+              "text": "Databases can't store GPS coordinates",
+              "correct": false,
+              "explanation": "Databases handle GPS coordinates just fine -- many even have specialized geospatial features. The issue isn't capability, it's about using the right tool for the right job. Constantly overwriting throwaway data in a persistent store is like chiseling your grocery list into a stone tablet."
+            }
+          ]
+        }
+      ],
+      "suggestedQuestions": [
+        "What's the difference between ephemeral and persistent data?",
+        "How does GPS tracking actually work in a phone app?",
+        "Why not just keep everything in the database to keep things simple?"
+      ]
+    },
+    {
+      "id": "stage-2",
+      "title": "Ten Cities, Five Thousand Drivers",
+      "userScale": "5,000 drivers across 10 cities",
+      "narrative": {
+        "setup": "Your app is a hit. You've expanded to ten cities with five thousand drivers. Riders love the service. Investors are excited. You're hiring fast.",
+        "problem": "Two problems hit at the same time. First, all those GPS updates -- now 1,700 per second across 5,000 drivers -- are hammering your database. Queries for trip history and payments are slowing to a crawl. Second, and more dangerously, you're getting reports of the same driver being assigned to two different riders simultaneously. Your matching system has a race condition.",
+        "resolution": "You move ephemeral location data into Redis (a fast in-memory store), and add optimistic locking to your driver matching logic to prevent double-assignments."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Two fires just broke out at the same time, and you need to deal with both.\n\n**Fire number one: your database is drowning.** With 5,000 drivers sending GPS updates every 3 seconds, that's roughly 1,700 writes per second -- just for location data. Your database is spending so much effort processing these throwaway updates that the queries you actually care about (trip lookups, payment processing, user profiles) are getting slower and slower."
+        },
+        {
+          "type": "text",
+          "content": "**Fire number two: ghost rides.** Customer support is fielding complaints from riders who were told a driver is on the way, only to get a cancellation moments later. And drivers are reporting that they're receiving ride requests while already en route to pick someone up.\n\nYou dig into the logs and discover the root cause: when two riders near the same driver both request a ride at almost the same time, the server checks availability for both requests, sees the driver is free, and assigns them to *both riders*. By the time the second assignment goes through, the driver is already taken."
+        },
+        {
+          "type": "callout",
+          "style": "analogy",
+          "content": "Imagine two people in a store both spot the last item on the shelf at the same time. They both reach for it, both grab it, and both walk to the checkout thinking they got it. That's a [[glossary:race-condition|race condition]] -- two processes acting on the same resource without knowing about each other, leading to a conflict."
+        },
+        {
+          "type": "text",
+          "content": "Let's tackle these problems one at a time.\n\n## Fixing the database bottleneck\n\nThe solution for the GPS flood is an [[glossary:in-memory-store|in-memory store]] like Redis. Instead of writing driver locations to your disk-based database, you store them in Redis -- which keeps everything in RAM (your server's fast, temporary memory).\n\nRedis can handle hundreds of thousands of operations per second because it skips the slow step of writing to disk. Since driver locations are ephemeral anyway -- you only care about the *latest* position -- this is a perfect fit. Old locations are simply overwritten by new ones."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "ride-sharing-stage-2",
+          "caption": "Redis handles ephemeral GPS data; the database handles persistent records"
+        },
+        {
+          "type": "callout",
+          "style": "warning",
+          "content": "Redis stores data in memory, which means if Redis crashes, that data is gone. For driver locations, this is fine -- the next GPS ping repopulates the data in seconds. But you should never put data you can't afford to lose (like payment records) in an in-memory store alone. Always ask: *\"What happens if this data disappears?\"*"
+        },
+        {
+          "type": "text",
+          "content": "## Fixing the race condition\n\nNow for the double-assignment bug. The problem happens because your matching logic does this:\n\n1. **Read:** Check if the driver is available\n2. **Decide:** Yes, they're available -- assign them\n3. **Write:** Mark the driver as unavailable\n\nBetween steps 1 and 3, another request can sneak in and read the same \"available\" status. Both requests think the driver is free, and both assign them.\n\nThe fix is [[glossary:consistency|optimistic locking]]. Instead of just checking and writing separately, you make the check-and-write an **atomic operation** -- a single, indivisible step that can't be interrupted."
+        },
+        {
+          "type": "callout",
+          "style": "analogy",
+          "content": "Optimistic locking works like a version number on a shared document. Before you save your changes, you check: *\"Is the version still the same as when I started editing?\"* If yes, save and bump the version. If someone else changed it first, the version won't match, and you know you need to retry. It's called \"optimistic\" because you *assume* there won't be a conflict and only check at the end."
+        },
+        {
+          "type": "text",
+          "content": "In practice, this often looks like:\n\n1. Read the driver's record, including a version number (e.g., version 5)\n2. Decide to assign the driver\n3. Write the assignment, but **only if the version is still 5**\n4. If it is, the write succeeds and the version becomes 6\n5. If another request already changed it to version 6, the write fails -- and your code retries with the next available driver\n\nRedis makes this even easier with built-in atomic commands. You can do a \"set this value only if it's currently X\" in a single operation, with no gap for another request to sneak in."
+        },
+        {
+          "type": "checkpoint",
+          "question": "A new engineer on your team suggests solving the race condition by putting a lock on the entire drivers table -- no one can read or write until the current matching is done. What's wrong with this approach?",
+          "options": [
+            {
+              "id": "a",
+              "text": "It would work, but it would be painfully slow -- every ride request has to wait in line, even for drivers in completely different cities",
+              "correct": true,
+              "explanation": "This is called a pessimistic lock, and while it prevents race conditions, it creates a massive bottleneck. If a ride is being matched in New York, a request in Los Angeles has to wait for no reason. Optimistic locking is better here because conflicts are actually rare -- most of the time, two riders aren't competing for the exact same driver. You only pay the cost of retrying in the rare case of an actual conflict."
+            },
+            {
+              "id": "b",
+              "text": "Locking doesn't actually prevent race conditions",
+              "correct": false,
+              "explanation": "A full table lock would indeed prevent race conditions -- nothing else can touch the data while the lock is held. The problem isn't that it doesn't work, it's that it works too well. It serializes every single request, which destroys performance at scale."
+            },
+            {
+              "id": "c",
+              "text": "Redis doesn't support any kind of locking",
+              "correct": false,
+              "explanation": "Redis actually supports several locking mechanisms, including distributed locks (SETNX/RedLock). The issue isn't about Redis capabilities -- it's about choosing the right *granularity* of locking. A table-wide lock is like closing an entire highway because of one pothole."
+            }
+          ]
+        },
+        {
+          "type": "challenge",
+          "scenario": "You've deployed Redis for locations and optimistic locking for matching. Things are much better, but during a Friday night surge, you notice that 5% of ride matches are failing on the first try due to version conflicts and having to retry. A team member suggests increasing the lock hold time to reduce conflicts.",
+          "question": "Is increasing the lock hold time a good idea?",
+          "options": [
+            {
+              "id": "a",
+              "text": "No -- longer lock times would make the problem worse by increasing the window where conflicts can happen and slowing everything down",
+              "correct": true,
+              "explanation": "With optimistic locking, there's no lock being \"held\" -- that's the whole point. But even with pessimistic locks, holding them longer would increase contention, not reduce it. A 5% retry rate during peak surge is actually healthy. The retries are fast (milliseconds), and the system self-corrects. The right approach is to make sure retries are efficient, not to try to eliminate them.",
+              "conceptLink": "race-condition"
+            },
+            {
+              "id": "b",
+              "text": "Yes -- holding the lock longer gives each match more time to complete cleanly",
+              "correct": false,
+              "explanation": "This intuition is backwards. The longer any single match takes to resolve, the more other requests pile up waiting, and the more likely conflicts become when they do proceed. It's like solving a traffic jam by making every car drive slower -- it makes things worse, not better."
+            },
+            {
+              "id": "c",
+              "text": "Yes, but only during surge periods -- use a dynamic lock timer",
+              "correct": false,
+              "explanation": "A dynamic timer adds complexity without solving the core issue. Surge periods already have more concurrent requests, so longer lock times during surges would create the worst bottleneck exactly when you can least afford it. The 5% retry rate is a sign the system is handling contention gracefully, not a sign of a problem to fix."
+            }
+          ]
+        },
+        {
+          "type": "reveal",
+          "label": "Going deeper: How does Redis handle 100,000+ operations per second?",
+          "content": "Redis achieves its extreme speed through a few key design choices:\n\n**Everything is in memory.** While databases like PostgreSQL write data to disk (which takes milliseconds), Redis keeps all data in RAM (which takes microseconds). That's roughly a 1,000x speed difference for each operation.\n\n**Single-threaded event loop.** Counterintuitively, Redis uses a single thread to process all commands. This sounds slow, but it eliminates the overhead of thread coordination and locking. Since each operation is tiny (microseconds), one thread can churn through hundreds of thousands of them per second.\n\n**Simple data structures.** Redis doesn't support complex queries like SQL databases. It's essentially a giant key-value store with some extra data structures (lists, sets, sorted sets). This simplicity means each operation does very little work.\n\nFor your ride-sharing app, the pattern is: `SET driver:1234:location \"40.7128,-74.0060\"` with an expiration time of, say, 30 seconds. If a driver stops sending updates, their location automatically disappears -- which is exactly what you want."
+        }
+      ],
+      "suggestedQuestions": [
+        "What happens if Redis crashes and all driver locations are lost?",
+        "How does optimistic locking compare to pessimistic locking?",
+        "Could you use Redis for everything instead of a traditional database?"
+      ]
+    },
+    {
+      "id": "stage-3",
+      "title": "Nationwide at Scale",
+      "userScale": "50,000 drivers, millions of rides",
+      "narrative": {
+        "setup": "Your app has gone nationwide. Fifty thousand drivers, millions of rides per month, and your engineering team has grown from 5 people to 50. The codebase is massive -- matching, payments, notifications, pricing, driver onboarding, and analytics all live in one giant application.",
+        "problem": "At 2 AM on a Saturday, a bug in the payment processing code causes an unhandled exception. Because everything runs in a single application, the crash takes down the *entire system* -- including ride matching. For 12 agonizing minutes, no one in the country can request a ride. The next morning, your CEO's phone is ringing off the hook.",
+        "resolution": "You break the monolith into microservices connected by a message queue, add monitoring and alerting, and implement circuit breakers so one failing service can't take down the rest."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Let's talk about what just happened. A bug in your payment code -- something that has nothing to do with matching riders and drivers -- took down your entire platform. This happened because your app is a [[glossary:microservices|monolith]]: one giant application where every feature shares the same process, the same memory, and the same fate.\n\nWhen the payment code threw an unhandled error, it crashed the process. And since matching, notifications, pricing, and everything else lived in that same process, they all went down with it."
+        },
+        {
+          "type": "callout",
+          "style": "analogy",
+          "content": "A monolith is like a power strip with every appliance in your house plugged into it. Your refrigerator, your TV, your Wi-Fi router, your lights -- all on one strip. When someone trips over the cord, *everything* goes dark. What you need is separate circuits, so the kitchen can keep running even if the living room blows a fuse."
+        },
+        {
+          "type": "text",
+          "content": "The solution is to split your monolith into [[glossary:microservices|microservices]] -- independent services that each handle one part of the business. For your ride-sharing app, this might look like:\n\n- **Matching Service** -- finds and assigns drivers to riders\n- **Payment Service** -- handles charges, refunds, driver payouts\n- **Notification Service** -- sends push notifications and SMS\n- **Pricing Service** -- calculates fares and surge pricing\n- **Trip Service** -- manages trip lifecycle and history\n\nEach service runs independently, has its own database, and can be deployed, scaled, and restarted without affecting the others. If the Payment Service crashes, riders can still get matched with drivers."
+        },
+        {
+          "type": "text",
+          "content": "But splitting into services creates a new question: **how do these services talk to each other?**\n\nYour first instinct might be direct calls -- the Matching Service calls the Notification Service to say \"tell the rider their driver is on the way.\" This works, but it creates tight coupling. If the Notification Service is slow or down, the Matching Service has to wait -- or fail.\n\nA better approach for many interactions is a [[glossary:message-queue|message queue]]. Instead of calling the Notification Service directly, the Matching Service drops a message onto a queue: *\"Ride #4521 was matched, notify the rider.\"* The Notification Service picks up that message whenever it's ready."
+        },
+        {
+          "type": "callout",
+          "style": "analogy",
+          "content": "A message queue is like a to-do board in an office. Instead of tapping someone on the shoulder every time you need something (and standing there while they do it), you write a task on a sticky note and put it on the board. They'll get to it when they can. If they're busy or on break, the note waits. Nobody is blocked, and nothing is lost."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "ride-sharing-stage-3",
+          "caption": "Microservices communicate through a message queue -- no single failure takes down the system"
+        },
+        {
+          "type": "text",
+          "content": "This is an [[glossary:event-driven|event-driven architecture]]. Instead of services directly commanding each other, they publish *events* that describe what happened: \"ride requested,\" \"driver matched,\" \"trip completed,\" \"payment processed.\" Other services subscribe to the events they care about and react accordingly.\n\nThe beauty of this pattern is that the Matching Service doesn't need to know or care what happens after a match. It just says *\"a match happened\"* and moves on. The Notification Service, the Pricing Service, and the Analytics Service can all react to that event independently."
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "Event-driven architecture changes how you think about system design. Instead of asking *\"what should I call next?\"* you ask *\"what just happened, and who cares?\"* This makes it much easier to add new features -- just subscribe a new service to existing events. No changes to the services already running."
+        },
+        {
+          "type": "text",
+          "content": "## Making it resilient\n\nMicroservices solve the \"one crash takes down everything\" problem, but they introduce new failure modes. What happens when the Payment Service is running but responding slowly? If the Trip Service waits for payment confirmation before completing a trip, slow payments can back up everything.\n\nThis is where [[glossary:circuit-breaker|circuit breakers]] come in. Named after the electrical switches in your home, a circuit breaker monitors calls to a service. If it detects that the service is failing (too many errors or timeouts), it \"trips\" and stops sending requests for a short period. Instead, it returns a fallback response immediately.\n\nFor example, if the Payment Service is struggling, the circuit breaker might let the Trip Service complete the trip and queue the payment for processing later -- rather than making the rider sit in the car waiting for the payment system to recover."
+        },
+        {
+          "type": "callout",
+          "style": "warning",
+          "content": "Microservices are not a free lunch. They introduce network calls between services (which can fail), distributed data management (which is complex), and operational overhead (more services to deploy and monitor). Many teams adopt microservices too early, before the complexity is justified. A well-structured monolith is often the right choice until you genuinely have the scale and team size problems that microservices solve."
+        },
+        {
+          "type": "text",
+          "content": "## Monitoring and failover\n\nWith a monolith, you had one application to watch. Now you have five (or more) services, each of which can fail independently. You need [[glossary:monitoring|monitoring]] -- real-time visibility into the health of every service.\n\nGood monitoring answers three questions at a glance:\n- **Is it running?** (health checks)\n- **Is it fast enough?** (latency metrics)\n- **Is it correct?** (error rates)\n\nWhen monitoring detects a problem, [[glossary:failover|failover]] kicks in. Each critical service runs on multiple instances. If one instance of the Matching Service dies, traffic automatically shifts to the healthy instances. Your riders never notice."
+        },
+        {
+          "type": "checkpoint",
+          "question": "Your Notification Service goes down for 5 minutes. In a well-designed microservice architecture with a message queue, what happens to the ride notifications that were supposed to be sent during that time?",
+          "options": [
+            {
+              "id": "a",
+              "text": "They're lost forever -- messages sent during the outage are dropped",
+              "correct": false,
+              "explanation": "This would be true if services communicated directly (synchronous calls). But with a message queue, the queue itself acts as a buffer. Messages don't disappear just because the consumer is temporarily unavailable."
+            },
+            {
+              "id": "b",
+              "text": "They pile up in the message queue and get processed once the Notification Service recovers",
+              "correct": true,
+              "explanation": "This is one of the biggest advantages of a message queue. Messages are durable -- they persist in the queue until a consumer acknowledges them. When the Notification Service comes back online, it picks up right where it left off and processes the backlog. The riders get their notifications a few minutes late, but nothing is lost."
+            },
+            {
+              "id": "c",
+              "text": "The Matching Service detects the failure and starts sending notifications itself",
+              "correct": false,
+              "explanation": "In a well-designed microservice architecture, services have clear responsibilities. The Matching Service shouldn't need to know how to send notifications. That's the whole point of separation. The message queue handles the gap -- it holds messages until the responsible service is ready to process them."
+            }
+          ]
+        },
+        {
+          "type": "challenge",
+          "scenario": "It's New Year's Eve. Ride requests are at 10x normal volume. Your Matching Service is keeping up, but the Payment Service is buckling under the load -- response times have gone from 200ms to 8 seconds. Trips are completing successfully, but riders are staring at a 'Processing payment...' screen for an uncomfortably long time. Some are force-quitting the app and requesting new rides, making the problem worse.",
+          "question": "What's the best immediate response?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Trip the circuit breaker on payments -- complete trips immediately, queue payments for processing once the surge passes",
+              "correct": true,
+              "explanation": "This is exactly what circuit breakers are designed for. The ride itself is the core value -- the rider got from A to B. Payment can be processed asynchronously. By tripping the circuit breaker, you stop waiting on the slow Payment Service, clear the backlog of spinning screens, and stop the cascade of force-quit retries. Payments get processed a few minutes later when load subsides. The rider's experience is smooth, and you still collect every fare.",
+              "conceptLink": "circuit-breaker"
+            },
+            {
+              "id": "b",
+              "text": "Add more instances of the Payment Service to handle the load",
+              "correct": false,
+              "explanation": "Scaling up is the right long-term move, but it's not an *immediate* response. Spinning up new instances takes time -- provisioning, deploying, warming up. Meanwhile, riders are staring at frozen screens for the next 10-15 minutes. You need a fix that works *right now*, and then scale up to prevent it next time."
+            },
+            {
+              "id": "c",
+              "text": "Throttle incoming ride requests to reduce overall system load",
+              "correct": false,
+              "explanation": "Refusing riders on the busiest night of the year is terrible for business and for the riders who need a safe way home. The Matching Service is fine -- it's only the Payment Service that's struggling. A targeted fix (circuit breaker on payments) addresses the actual bottleneck without turning away any customers."
+            }
+          ]
+        },
+        {
+          "type": "reveal",
+          "label": "Going deeper: What does eventual consistency look like in a microservice world?",
+          "content": "When your ride-sharing app was a monolith with one database, everything was consistent by default. You could read a row right after writing it and see the update. With microservices, each service has its own database, and they communicate asynchronously through events.\n\nThis means there are brief moments when different services have slightly different views of the world. For example:\n\n1. The Matching Service assigns a driver and publishes a \"ride matched\" event\n2. For a few hundred milliseconds, the Trip Service hasn't processed that event yet\n3. If someone queries the Trip Service during that gap, it doesn't know about the match\n\nThis is [[glossary:eventual-consistency|eventual consistency]] -- the system will *eventually* agree on the current state, but there's a brief window where different parts disagree.\n\nFor a ride-sharing app, this is usually fine. The rider sees their match instantly (the Matching Service told them directly), and the Trip Service catches up moments later. But you have to design for those gaps. For example, if the Payment Service processes a charge before the Trip Service records the trip, you need reconciliation logic to sort things out.\n\nThe rule of thumb: if split-second accuracy matters (like deducting money from an account), use synchronous calls. If a few hundred milliseconds of delay is acceptable (like updating analytics dashboards), use events and embrace eventual consistency."
+        },
+        {
+          "type": "callout",
+          "style": "tip",
+          "content": "A helpful mental model for deciding between synchronous calls and async events: **synchronous when the caller needs the answer to continue, asynchronous when the caller just needs to announce what happened.** The Matching Service needs to confirm a payment hold before dispatching a driver (synchronous). But it doesn't need to wait for the analytics dashboard to update (asynchronous)."
+        }
+      ],
+      "suggestedQuestions": [
+        "How do you decide what should be a separate microservice?",
+        "What's the difference between a message queue and an event stream?",
+        "How do companies like Uber handle failures during peak demand?"
+      ]
+    }
+  ]
+}

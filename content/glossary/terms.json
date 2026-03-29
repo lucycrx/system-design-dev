@@ -4,71 +4,609 @@
     "term": "Client-Server Model",
     "shortDefinition": "A way of organizing software where one program (the client) requests services from another program (the server).",
     "analogy": "Like a restaurant: the customer (client) orders food, and the kitchen (server) prepares and delivers it. The customer never needs to know how the kitchen works — they just place orders and get results.",
-    "relatedConcepts": ["server", "api", "http"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-1" }
+    "relatedConcepts": [
+      "server",
+      "api",
+      "http"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-1"
+    }
   },
   {
     "id": "server",
     "term": "Server",
     "shortDefinition": "A computer (or program) that receives requests from clients and sends back responses. It runs 24/7 so your app is always available.",
     "analogy": "Think of a server as a restaurant kitchen that never closes. Orders come in from customers all over the world, and the kitchen processes them and sends back results. The kitchen doesn't care who's ordering — it just handles requests.",
-    "relatedConcepts": ["client-server", "load-balancer", "horizontal-scaling"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-1" }
+    "relatedConcepts": [
+      "client-server",
+      "load-balancer",
+      "horizontal-scaling"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-1"
+    }
   },
   {
     "id": "database",
     "term": "Database",
     "shortDefinition": "A system for storing and retrieving data permanently. Unlike memory (RAM), data in a database survives restarts and crashes.",
     "analogy": "A database is like a library's filing system. Every piece of data has a specific shelf and label so you can always find it again — even years later. Memory (RAM) is more like a sticky note: fast to read, but lost as soon as you clean up.",
-    "relatedConcepts": ["relational-database", "persistence", "sql"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-2" }
+    "relatedConcepts": [
+      "relational-database",
+      "persistence",
+      "sql"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-2"
+    }
   },
   {
     "id": "relational-database",
     "term": "Relational Database",
     "shortDefinition": "A database that stores data in tables (rows and columns) with defined relationships between them. Examples: PostgreSQL, MySQL.",
     "analogy": "Like a well-organized spreadsheet where each sheet represents a type of data (users, messages, chat rooms), and you can link rows across sheets. 'Show me all messages sent by user #42 in the general chat room' — a relational database handles that naturally.",
-    "relatedConcepts": ["database", "sql", "persistence"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-2" }
+    "relatedConcepts": [
+      "database",
+      "sql",
+      "persistence"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-2"
+    }
   },
   {
     "id": "persistence",
     "term": "Persistence",
     "shortDefinition": "Storing data so it survives beyond the current session. Persistent data doesn't disappear when the program stops.",
     "analogy": "The difference between writing on a whiteboard (non-persistent — erased at end of day) and writing in a notebook (persistent — stays there until you choose to erase it).",
-    "relatedConcepts": ["database", "memory"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-2" }
+    "relatedConcepts": [
+      "database",
+      "memory"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-2"
+    }
   },
   {
     "id": "polling",
     "term": "Polling",
     "shortDefinition": "A technique where a client repeatedly asks the server 'do you have anything new?' at regular intervals.",
     "analogy": "Like checking your mailbox every 5 minutes to see if anything arrived. Simple and reliable, but wastes a lot of trips when there's usually nothing there.",
-    "relatedConcepts": ["websockets", "real-time", "http"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-3" }
+    "relatedConcepts": [
+      "websockets",
+      "real-time",
+      "http"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-3"
+    }
   },
   {
     "id": "websockets",
     "term": "WebSockets",
     "shortDefinition": "A technology that creates a persistent, two-way connection between client and server. Either side can send data at any time without waiting for a request.",
     "analogy": "If HTTP (regular web requests) is like sending letters back and forth, WebSockets are like a phone call — once connected, both sides can talk whenever they want. No need to hang up and dial again for each message.",
-    "relatedConcepts": ["polling", "real-time", "client-server"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-3" }
+    "relatedConcepts": [
+      "polling",
+      "real-time",
+      "client-server"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-3"
+    }
   },
   {
     "id": "real-time",
     "term": "Real-Time",
     "shortDefinition": "Data that is delivered immediately as it's created, with no noticeable delay. Chat messages, live scores, and collaborative editing are all real-time features.",
     "analogy": "The difference between watching a live sports game (real-time) and reading the score in tomorrow's newspaper (batch). Real-time means you see it as it happens.",
-    "relatedConcepts": ["websockets", "polling"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-3" }
+    "relatedConcepts": [
+      "websockets",
+      "polling"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-3"
+    }
   },
   {
     "id": "pagination",
     "term": "Pagination",
     "shortDefinition": "Loading data in small chunks instead of all at once. Show 50 items, then load the next 50 when needed.",
     "analogy": "Like a book divided into pages. You don't print the entire book on one giant scroll — you break it into manageable pages. Google search results (page 1, 2, 3) and Twitter's infinite scroll are both forms of pagination.",
-    "relatedConcepts": ["database", "api"],
-    "firstAppearance": { "storyId": "chat-app", "stageId": "stage-2" }
+    "relatedConcepts": [
+      "database",
+      "api"
+    ],
+    "firstAppearance": {
+      "storyId": "chat-app",
+      "stageId": "stage-2"
+    }
+  },
+  {
+    "id": "cache",
+    "term": "Cache",
+    "shortDefinition": "A temporary storage layer that keeps frequently accessed data close at hand so you don't have to fetch it from the original source every time. It trades freshness for speed.",
+    "analogy": "Like keeping a cookbook on your kitchen counter instead of walking to the bookshelf every time you need a recipe. The counter has limited space, but anything on it is much faster to grab.",
+    "relatedConcepts": [
+      "in-memory-store",
+      "cdn",
+      "database",
+      "consistency"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-2"
+    }
+  },
+  {
+    "id": "cdn",
+    "term": "Content Delivery Network (CDN)",
+    "shortDefinition": "A network of servers spread across the globe that stores copies of your content (images, videos, pages) closer to users. Instead of everyone fetching from one far-away server, they get it from a nearby one.",
+    "analogy": "Like a franchise restaurant chain. Instead of one central kitchen shipping food worldwide, each city has its own location serving the same menu. Customers get their food faster because the kitchen is right around the corner.",
+    "relatedConcepts": [
+      "cache",
+      "server",
+      "horizontal-scaling"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "load-balancer",
+    "term": "Load Balancer",
+    "shortDefinition": "A system that distributes incoming requests across multiple servers so no single server gets overwhelmed. It acts as a traffic director for your application.",
+    "analogy": "Like a host at a busy restaurant who seats guests across all available tables instead of sending everyone to the same waiter. Each waiter handles a fair share, and the restaurant runs smoothly.",
+    "relatedConcepts": [
+      "server",
+      "horizontal-scaling",
+      "health-check",
+      "redundancy"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "horizontal-scaling",
+    "term": "Horizontal Scaling",
+    "shortDefinition": "Adding more servers to handle increased traffic, rather than making a single server more powerful. Also called 'scaling out.'",
+    "analogy": "When a coffee shop gets too busy, horizontal scaling means opening more locations across town rather than building a bigger shop. Each location shares the load of customers.",
+    "relatedConcepts": [
+      "vertical-scaling",
+      "load-balancer",
+      "server",
+      "sharding"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "vertical-scaling",
+    "term": "Vertical Scaling",
+    "shortDefinition": "Making a single server more powerful by adding more CPU, memory, or storage. Also called 'scaling up.' Simpler than horizontal scaling, but there's a ceiling on how big one machine can get.",
+    "analogy": "Like replacing your home kitchen with a bigger one that has more counter space, a faster oven, and a larger fridge. It works well up to a point, but eventually you run out of room to expand.",
+    "relatedConcepts": [
+      "horizontal-scaling",
+      "server"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "rate-limiting",
+    "term": "Rate Limiting",
+    "shortDefinition": "Restricting how many requests a user or client can make within a given time window. It protects your system from being flooded, whether by accident or by a bad actor.",
+    "analogy": "Like a theme park that limits how many people can enter per hour. Even if a thousand people show up at once, the park lets them in at a steady pace so rides don't get dangerously overcrowded.",
+    "relatedConcepts": [
+      "api-gateway",
+      "graceful-degradation",
+      "timeout"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "index",
+    "term": "Index (Database)",
+    "shortDefinition": "A data structure that helps a database find rows quickly without scanning every record. It speeds up reads at the cost of slightly slower writes.",
+    "analogy": "Like the index at the back of a textbook. Instead of flipping through 500 pages to find 'photosynthesis,' you look it up in the index, get the page number, and go straight there.",
+    "relatedConcepts": [
+      "database",
+      "relational-database",
+      "read-replica"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-2"
+    }
+  },
+  {
+    "id": "read-replica",
+    "term": "Read Replica",
+    "shortDefinition": "A copy of your database that handles only read queries (lookups), taking pressure off the primary database that handles writes. Changes written to the primary get copied to replicas automatically.",
+    "analogy": "Like printing extra copies of a popular library book. The original stays at the front desk for updates and annotations, but readers can grab any of the copies on the shelves without waiting in line.",
+    "relatedConcepts": [
+      "database",
+      "horizontal-scaling",
+      "eventual-consistency",
+      "consistency"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "consistency",
+    "term": "Consistency",
+    "shortDefinition": "The guarantee that everyone reading data sees the same, correct version at any given moment. In distributed systems, achieving consistency often involves trade-offs with speed or availability.",
+    "analogy": "Like making sure every clock in an office building shows the exact same time. If one clock is a minute behind, people will show up to meetings at different times and confusion follows.",
+    "relatedConcepts": [
+      "eventual-consistency",
+      "strong-consistency",
+      "cache",
+      "read-replica"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "eventual-consistency",
+    "term": "Eventual Consistency",
+    "shortDefinition": "A model where updates will propagate to all copies of the data eventually, but not instantly. For a brief window, different readers might see slightly different versions.",
+    "analogy": "Like updating your company's phone directory. When someone changes their number, the new directory takes a day to print and distribute. For a while, some offices have the old number and some have the new one, but everyone catches up eventually.",
+    "relatedConcepts": [
+      "consistency",
+      "strong-consistency",
+      "read-replica",
+      "cache"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "strong-consistency",
+    "term": "Strong Consistency",
+    "shortDefinition": "A guarantee that once data is written, every subsequent read will return that updated value. No stale data, ever. This is safer but usually slower than eventual consistency.",
+    "analogy": "Like a shared Google Doc: the instant one person types a change, everyone else sees it immediately. Nobody is ever reading an outdated version.",
+    "relatedConcepts": [
+      "consistency",
+      "eventual-consistency",
+      "database"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "sharding",
+    "term": "Sharding",
+    "shortDefinition": "Splitting a large database into smaller, independent pieces (shards), each holding a subset of the data. Each shard lives on its own server, so the system can handle more data and traffic overall.",
+    "analogy": "Like a library that gets too big for one building, so it splits: A-M goes to the east branch, N-Z goes to the west branch. Each branch is smaller and faster to navigate, and together they hold the full collection.",
+    "relatedConcepts": [
+      "database",
+      "horizontal-scaling",
+      "index",
+      "consistency"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-5"
+    }
+  },
+  {
+    "id": "state",
+    "term": "State",
+    "shortDefinition": "Any data your system remembers between requests. A user's shopping cart, their login session, or a half-finished form are all examples of state.",
+    "analogy": "Like a waiter who remembers that table 5 ordered drinks but hasn't ordered food yet. That knowledge about where each table is in their meal is the waiter's 'state.' If a new waiter takes over without that info, things get confusing.",
+    "relatedConcepts": [
+      "persistence",
+      "cache",
+      "database",
+      "in-memory-store"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-2"
+    }
+  },
+  {
+    "id": "failover",
+    "term": "Failover",
+    "shortDefinition": "Automatically switching to a backup system when the primary one fails. The goal is to keep things running with minimal interruption, ideally without users even noticing.",
+    "analogy": "Like a hospital with backup generators. The moment the main power goes out, the generators kick in automatically. Patients on life support never experience a gap in power.",
+    "relatedConcepts": [
+      "redundancy",
+      "health-check",
+      "disaster-recovery",
+      "load-balancer"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "redundancy",
+    "term": "Redundancy",
+    "shortDefinition": "Having duplicate components (servers, databases, network paths) so that if one fails, another can take over. It's the foundation of reliable systems.",
+    "analogy": "Like carrying a spare tire in your car. You hope you never need it, but when you get a flat on a highway, you're glad it's there. The spare doesn't make you faster, but it keeps you from being stranded.",
+    "relatedConcepts": [
+      "failover",
+      "read-replica",
+      "horizontal-scaling",
+      "disaster-recovery"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "health-check",
+    "term": "Health Check",
+    "shortDefinition": "An automated test that periodically pings a server or service to confirm it's running correctly. If a health check fails, the system can reroute traffic or trigger an alert.",
+    "analogy": "Like a nurse doing regular rounds in a hospital, checking each patient's vital signs. If something looks wrong, they call the doctor immediately rather than waiting for the patient to ring the bell.",
+    "relatedConcepts": [
+      "monitoring",
+      "load-balancer",
+      "failover"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "monitoring",
+    "term": "Monitoring",
+    "shortDefinition": "Continuously collecting and displaying data about how your system is performing: response times, error rates, CPU usage, and more. It helps you spot problems before users do.",
+    "analogy": "Like the dashboard in your car. You glance at it while driving to check speed, fuel level, and engine temperature. If a warning light comes on, you know something needs attention before it becomes a breakdown.",
+    "relatedConcepts": [
+      "health-check",
+      "graceful-degradation",
+      "circuit-breaker"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "graceful-degradation",
+    "term": "Graceful Degradation",
+    "shortDefinition": "Designing a system so that when parts of it fail, it continues working in a reduced capacity rather than crashing entirely. Users get a worse experience, but not a broken one.",
+    "analogy": "Like a department store during a power outage. The elevators stop, but the stairs still work. The electronic registers are down, but staff can take cash. The store stays open, just with fewer conveniences.",
+    "relatedConcepts": [
+      "circuit-breaker",
+      "failover",
+      "redundancy",
+      "monitoring"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "circuit-breaker",
+    "term": "Circuit Breaker",
+    "shortDefinition": "A pattern that stops your system from repeatedly calling a service that's failing. After a threshold of failures, the circuit 'opens' and requests are rejected immediately, giving the failing service time to recover.",
+    "analogy": "Like the circuit breaker in your home's electrical panel. When too much current flows (a short circuit), it trips automatically to prevent a fire. You reset it once the problem is fixed, rather than letting wires keep overheating.",
+    "relatedConcepts": [
+      "graceful-degradation",
+      "timeout",
+      "retry",
+      "monitoring"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "disaster-recovery",
+    "term": "Disaster Recovery",
+    "shortDefinition": "A plan and set of tools for restoring your system after a major failure: a data center outage, data corruption, or a catastrophic bug. It covers backups, failover sites, and recovery procedures.",
+    "analogy": "Like a fire escape plan for a building. You hope you never need it, but everyone knows the exits, the meeting point is designated, and the sprinklers are tested regularly. When disaster strikes, you follow the plan instead of panicking.",
+    "relatedConcepts": [
+      "failover",
+      "redundancy",
+      "monitoring"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-5"
+    }
+  },
+  {
+    "id": "timeout",
+    "term": "Timeout",
+    "shortDefinition": "A limit on how long your system will wait for a response before giving up. Without timeouts, a stuck request can hold up resources indefinitely.",
+    "analogy": "Like giving a friend 15 minutes to show up before you leave the restaurant. You're not going to sit there all night. If they don't arrive in time, you move on and try again later.",
+    "relatedConcepts": [
+      "retry",
+      "circuit-breaker",
+      "graceful-degradation"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "retry",
+    "term": "Retry",
+    "shortDefinition": "Automatically attempting a failed request again, often with a short delay between attempts. Useful for transient errors like network blips, but dangerous if the failure is permanent.",
+    "analogy": "Like re-dialing a phone number when you get a busy signal. Trying once more often works. But if you call 50 times in a row, you're just jamming up the line for everyone.",
+    "relatedConcepts": [
+      "timeout",
+      "circuit-breaker",
+      "rate-limiting"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "microservices",
+    "term": "Microservices",
+    "shortDefinition": "An architecture where your application is split into small, independent services that each handle one responsibility (payments, search, notifications, etc.). Each service can be developed, deployed, and scaled on its own.",
+    "analogy": "Like a food court versus a single restaurant. Each stall in the food court specializes in one cuisine, has its own staff, and can expand or close independently. If the pizza stall breaks down, the sushi stall keeps serving.",
+    "relatedConcepts": [
+      "monolith",
+      "api-gateway",
+      "message-queue",
+      "event-driven"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-5"
+    }
+  },
+  {
+    "id": "monolith",
+    "term": "Monolith",
+    "shortDefinition": "An application built as a single, unified codebase where all features run together in one process. Simpler to start with, but harder to scale and maintain as the system grows.",
+    "analogy": "Like a single-owner restaurant where one chef handles appetizers, mains, desserts, and drinks. It works beautifully when the restaurant is small, but as it gets busier, that one chef becomes a bottleneck and everything slows down.",
+    "relatedConcepts": [
+      "microservices",
+      "horizontal-scaling",
+      "vertical-scaling"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-5"
+    }
+  },
+  {
+    "id": "message-queue",
+    "term": "Message Queue",
+    "shortDefinition": "A buffer that holds messages between services so the sender doesn't have to wait for the receiver to process them. Work gets done asynchronously, at each service's own pace.",
+    "analogy": "Like a restaurant's order ticket rail. The waiter clips an order to the rail and moves on to the next table. The kitchen picks up tickets when it's ready. Neither side has to wait for the other, and no orders get lost.",
+    "relatedConcepts": [
+      "async",
+      "event-driven",
+      "microservices"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "event-driven",
+    "term": "Event-Driven Architecture",
+    "shortDefinition": "A design where services communicate by emitting and listening for events ('order placed,' 'payment received') rather than calling each other directly. This keeps services loosely connected.",
+    "analogy": "Like a newsroom bulletin board. A reporter posts a breaking story, and editors, producers, and social media managers each notice it and respond in their own way. Nobody has to tap each person on the shoulder individually.",
+    "relatedConcepts": [
+      "message-queue",
+      "async",
+      "microservices"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "api-gateway",
+    "term": "API Gateway",
+    "shortDefinition": "A single entry point that sits in front of your services and routes incoming requests to the right backend. It can also handle authentication, rate limiting, and logging in one place.",
+    "analogy": "Like a hotel concierge desk. Guests don't need to know which department handles their request. They just go to the concierge, who figures out whether to call housekeeping, the restaurant, or the valet, and brings back the answer.",
+    "relatedConcepts": [
+      "load-balancer",
+      "microservices",
+      "rate-limiting"
+    ],
+    "firstAppearance": {
+      "storyId": "ride-sharing",
+      "stageId": "stage-5"
+    }
+  },
+  {
+    "id": "async",
+    "term": "Asynchronous Processing",
+    "shortDefinition": "Handling tasks in the background rather than making the user wait for them to finish. The system accepts the request immediately and processes it later.",
+    "analogy": "Like dropping off your clothes at a dry cleaner. You don't stand there watching them clean each garment. You drop them off, go about your day, and pick them up when they're ready.",
+    "relatedConcepts": [
+      "message-queue",
+      "event-driven",
+      "polling"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "race-condition",
+    "term": "Race Condition",
+    "shortDefinition": "A bug that happens when two operations try to change the same data at the same time, and the final result depends on which one finishes first. The outcome is unpredictable.",
+    "analogy": "Like two people editing the same shared document at the exact same moment without knowing about each other. One saves their version and the other saves theirs a second later, overwriting the first person's changes entirely.",
+    "relatedConcepts": [
+      "optimistic-locking",
+      "consistency",
+      "state"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-4"
+    }
+  },
+  {
+    "id": "in-memory-store",
+    "term": "In-Memory Store",
+    "shortDefinition": "A database that keeps all data in RAM instead of on disk, making reads and writes extremely fast. Redis and Memcached are common examples. The trade-off is that data can be lost if the system restarts.",
+    "analogy": "Like a sticky note on your monitor versus a file in your cabinet. The sticky note is right in front of you (instant access), but if someone cleans your desk, it's gone. The filing cabinet is slower to search, but nothing disappears.",
+    "relatedConcepts": [
+      "cache",
+      "database",
+      "persistence",
+      "state"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-3"
+    }
+  },
+  {
+    "id": "optimistic-locking",
+    "term": "Optimistic Locking",
+    "shortDefinition": "A strategy that lets multiple users read and work with the same data simultaneously, but checks for conflicts only at the moment of saving. If someone else changed the data first, your save is rejected and you retry.",
+    "analogy": "Like a potluck signup sheet. You check the sheet, see that nobody is bringing salad, and go buy ingredients. When you come back to write your name, you check again. If someone already signed up for salad, you pick something else instead of bringing a duplicate.",
+    "relatedConcepts": [
+      "race-condition",
+      "consistency",
+      "retry"
+    ],
+    "firstAppearance": {
+      "storyId": "online-store",
+      "stageId": "stage-4"
+    }
   }
 ]
