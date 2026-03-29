@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllModules } from "@/lib/content";
+import { StickyTabs } from "@/components/ui/StickyTabs";
 
 const MODULE_COLORS: Record<string, string> = {
   accent: "border-accent/20 hover:border-accent/40",
@@ -33,46 +34,40 @@ export default function CurriculumPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="border-b border-border">
-        <div className="max-w-3xl mx-auto px-6 py-4">
-          <Link
-            href="/"
-            className="text-sm text-text-muted hover:text-text transition-colors flex items-center gap-2"
-          >
-            <span>←</span> Home
-          </Link>
+      {/* Shared hero */}
+      <header className="max-w-4xl mx-auto px-6 pt-20 pb-16">
+        <div className="mb-3">
+          <span className="text-[11px] font-mono text-accent font-medium uppercase tracking-[3px]">
+            System Design for Builders
+          </span>
         </div>
+        <h1 className="text-4xl sm:text-5xl font-bold text-text leading-tight mb-5">
+          Learn why systems work
+          <br />
+          <span className="text-text-muted font-light">(and why they break)</span>
+        </h1>
+        <p className="text-lg text-text-muted max-w-xl leading-relaxed">
+          A structured path through the fundamentals. Each lesson follows a
+          clear framework: What &rarr; Why &rarr; How &rarr; When.
+        </p>
       </header>
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-xs font-mono text-blue font-semibold uppercase tracking-[2px]">
-              Curriculum
-            </span>
-          </div>
-          <h1 className="text-4xl font-bold text-text mb-2">
-            Learn Systematically
-          </h1>
-          <p className="text-lg text-text-muted max-w-xl leading-relaxed">
-            A structured path through the fundamentals. Each lesson follows a
-            clear framework: What is it? Why does it matter? How does it work?
-            When should I use it?
-          </p>
-        </div>
+      <StickyTabs />
+
+      <main className="max-w-4xl mx-auto px-6 pb-24 pt-10">
 
         <div className="space-y-4">
           {modules.map((mod) => (
             <Link
               key={mod.id}
               href={`/curriculum/${mod.slug}`}
-              className={`group block bg-surface border ${MODULE_COLORS[mod.color]} rounded-2xl p-6 transition-all`}
+              className={`group block bg-surface border ${MODULE_COLORS[mod.color]} rounded-2xl p-7 hover:shadow-sm transition-all`}
             >
               <div className="flex items-start gap-4">
                 <div
-                  className={`flex-shrink-0 w-12 h-12 rounded-xl ${MODULE_BG_COLORS[mod.color]} flex items-center justify-center text-2xl`}
+                  className={`flex-shrink-0 w-12 h-12 rounded-xl ${MODULE_BG_COLORS[mod.color]} flex items-center justify-center text-sm font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]}`}
                 >
-                  {mod.icon}
+                  {mod.moduleNumber}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -110,7 +105,7 @@ export default function CurriculumPage() {
                   </div>
                 </div>
                 <span className="text-text-dim group-hover:text-accent transition-colors text-lg mt-1">
-                  →
+                  &rarr;
                 </span>
               </div>
             </Link>
@@ -120,17 +115,17 @@ export default function CurriculumPage() {
         {/* Future modules placeholder */}
         <div className="mt-4 space-y-3">
           {[
-            { num: 3, title: "Architecture Patterns", icon: "🏗️" },
-            { num: 4, title: "Making It Real (Deployment)", icon: "🚀" },
-            { num: 5, title: "Level Up", icon: "⚡" },
-            { num: 6, title: "AI-Specific Concepts", icon: "🤖" },
+            { num: 3, title: "Architecture Patterns" },
+            { num: 4, title: "Making It Real (Deployment)" },
+            { num: 5, title: "Level Up" },
+            { num: 6, title: "AI-Specific Concepts" },
           ].map((mod) => (
             <div
               key={mod.num}
-              className="bg-surface/50 border border-dashed border-border rounded-2xl p-6 flex items-center gap-4 opacity-50"
+              className="bg-surface/50 border border-dashed border-border rounded-2xl p-7 flex items-center gap-4 opacity-40"
             >
-              <div className="w-12 h-12 rounded-xl bg-bg flex items-center justify-center text-2xl">
-                {mod.icon}
+              <div className="w-12 h-12 rounded-xl bg-bg flex items-center justify-center text-sm font-mono text-text-dim">
+                {mod.num}
               </div>
               <div>
                 <span className="text-[11px] font-mono text-text-dim">

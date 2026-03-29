@@ -26,7 +26,7 @@ export default async function LessonPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-bg">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-bg/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-40 bg-bg/90 backdrop-blur-md border-b border-border">
         <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
           <Link
             href={`/curriculum/${mod.slug}`}
@@ -97,7 +97,7 @@ export default async function LessonPage({ params }: Props) {
                   className="block bg-accent-dim border border-accent/20 rounded-xl p-4 hover:border-accent/40 transition-colors"
                 >
                   <span className="text-sm text-accent font-medium">
-                    📖 {rel.label}
+                    {rel.label}
                   </span>
                 </Link>
               ))}
@@ -144,9 +144,9 @@ export default async function LessonPage({ params }: Props) {
           ) : (
             <Link
               href={`/curriculum/${mod.slug}`}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue text-bg rounded-full font-semibold text-sm hover:bg-blue/90 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue text-white rounded-full font-semibold text-sm hover:opacity-90 transition-opacity"
             >
-              Complete Module ✓
+              Complete Module
             </Link>
           )}
         </div>

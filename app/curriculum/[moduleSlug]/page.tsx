@@ -60,9 +60,9 @@ export default async function ModulePage({ params }: Props) {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4">
             <span
-              className={`text-3xl ${MODULE_BG_COLORS[mod.color]} w-12 h-12 rounded-xl flex items-center justify-center`}
+              className={`text-sm font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]} ${MODULE_BG_COLORS[mod.color]} w-12 h-12 rounded-xl flex items-center justify-center`}
             >
-              {mod.icon}
+              {mod.moduleNumber}
             </span>
             <div>
               <span
@@ -116,9 +116,9 @@ export default async function ModulePage({ params }: Props) {
         <div className="mt-8">
           <Link
             href={`/curriculum/${mod.slug}/${mod.lessons[0].id}`}
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-accent text-bg rounded-full font-bold text-base hover:bg-accent/90 transition-colors"
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-accent text-white rounded-full font-bold text-base hover:opacity-90 transition-opacity"
           >
-            Start Module →
+            Start Module &rarr;
           </Link>
         </div>
       </main>
