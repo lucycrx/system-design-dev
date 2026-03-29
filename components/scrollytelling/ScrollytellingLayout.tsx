@@ -136,7 +136,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap }: Props) {
 
       {/* Right panel — sticky diagram (desktop only) */}
       <div className="hidden lg:block lg:w-[45%]">
-        <div className="sticky top-20 h-[calc(100vh-7rem)] flex flex-col justify-center">
+        <div className="sticky top-20">
           <div className="bg-surface rounded-2xl border border-border p-6 shadow-sm">
             <SystemDiagram
               diagram={activeDiagram}
