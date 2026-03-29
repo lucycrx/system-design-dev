@@ -121,14 +121,14 @@ function SystemNodeComponent({ data }: { data: SystemNodeData }) {
 
       {/* Highlight ring */}
       {isHighlighted && (
-        <div className="absolute -inset-1.5 rounded-xl border-2 border-accent animate-[diagram-pulse_2s_ease-in-out_infinite]" />
+        <div className="absolute -inset-1.5 border-2 border-accent animate-[diagram-pulse_2s_ease-in-out_infinite]" />
       )}
 
       {/* Node body */}
       <div
         className={`
           flex items-center gap-2.5 px-3 py-2.5
-          bg-surface border rounded-lg shadow-sm
+          bg-surface border shadow-sm
           transition-all duration-300 cursor-pointer
           hover:shadow-md hover:border-accent/40
           ${isHighlighted ? "border-accent/50" : "border-border"}
@@ -157,7 +157,7 @@ function SystemNodeComponent({ data }: { data: SystemNodeData }) {
       {/* Explanation tooltip */}
       {showTooltip && data.explanation && (
         <div
-          className="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 bg-text text-bg text-xs rounded-lg shadow-lg pointer-events-none"
+          className="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 bg-text text-bg text-xs shadow-lg pointer-events-none"
         >
           {data.explanation}
           <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-text rotate-45 -mt-1" />

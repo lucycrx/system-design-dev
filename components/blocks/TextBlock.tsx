@@ -115,7 +115,7 @@ export function TextBlock({ block, glossaryMap }: Props) {
             </li>
           ),
           table: ({ children }) => (
-            <div className="overflow-x-auto mb-4 rounded-lg border border-border">
+            <div className="overflow-x-auto mb-4 border border-border">
               <table className="w-full text-sm text-left">{children}</table>
             </div>
           ),
@@ -136,13 +136,13 @@ export function TextBlock({ block, glossaryMap }: Props) {
             const isBlock = className?.includes("language-");
             if (isBlock) {
               return (
-                <code className="block bg-bg rounded-lg p-4 text-sm font-mono text-text/70 overflow-x-auto">
+                <code className="block bg-bg p-4 text-sm font-mono text-text/70 overflow-x-auto border border-border">
                   {children}
                 </code>
               );
             }
             return (
-              <code className="bg-surface px-1.5 py-0.5 rounded text-sm font-mono text-accent">
+              <code className="bg-surface px-1.5 py-0.5 text-sm font-mono text-accent border border-border">
                 {children}
               </code>
             );

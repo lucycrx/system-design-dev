@@ -69,7 +69,7 @@ export function CheckpointBlock({ block }: Props) {
         <div className="px-5 pb-5">
           <button
             onClick={() => setRevealed(true)}
-            className="w-full py-3 bg-accent text-white font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
+            className="w-full py-3 bg-text text-bg font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
           >
             Check Answer
           </button>

@@ -42,7 +42,7 @@ export function GlossaryTooltip({ term, children }: Props) {
       {open && (
         <div
           ref={tooltipRef}
-          className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-surface border border-border rounded-xl p-4 shadow-lg shadow-black/8"
+          className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-surface border border-border p-4 shadow-lg shadow-black/8"
         >
           <div className="text-xs font-semibold text-accent uppercase tracking-wider mb-1">
             {term.term}
