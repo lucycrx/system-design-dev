@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Architecture Review — <!-- PROJECT_NAME --></title>
+<title>Architecture Review — Hyperagents</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -565,7 +565,223 @@ body {
 </div>
 
 <script id="architectureData" type="application/json">
-<!-- ARCHITECTURE_DATA -->
+{
+  "metadata": {
+    "projectName": "Hyperagents",
+    "framework": "Python CLI + Docker",
+    "language": "Python 3.12",
+    "scannedAt": "2026-03-29T18:00:00Z",
+    "scaleAssessment": "prototype",
+    "componentCount": 8,
+    "riskCount": { "critical": 1, "high": 2, "medium": 2, "low": 1 }
+  },
+  "components": [
+    {
+      "id": "generation-loop",
+      "category": "api-layer",
+      "label": "Generation Loop (Orchestrator)",
+      "description": "The brain of the system. A 2,800-line Python script that coordinates everything: it picks which AI model to improve, runs it, evaluates the results, and decides what to try next. Think of it as the project manager who assigns work and checks quality.",
+      "files": ["generate_loop.py", "select_next_parent.py", "ensemble.py"],
+      "connections": [
+        { "targetId": "meta-agent", "label": "spawns to generate improvements" },
+        { "targetId": "task-agent", "label": "spawns to solve tasks" },
+        { "targetId": "docker-runtime", "label": "runs code inside containers" },
+        { "targetId": "domain-evaluators", "label": "triggers evaluation" },
+        { "targetId": "archive-store", "label": "reads/writes generation history" }
+      ]
+    },
+    {
+      "id": "meta-agent",
+      "category": "background-jobs",
+      "label": "Meta-Agent (Self-Improver)",
+      "description": "An AI agent whose job is to improve other AI agents. It reads the current code, thinks about what could work better, and writes patches (code changes). It is the 'researcher' that proposes experiments.",
+      "files": ["meta_agent.py", "run_meta_agent.py"],
+      "connections": [
+        { "targetId": "llm-interface", "label": "calls LLM APIs to think and generate code" },
+        { "targetId": "archive-store", "label": "reads past attempts and scores" }
+      ]
+    },
+    {
+      "id": "task-agent",
+      "category": "background-jobs",
+      "label": "Task Agent (Problem Solver)",
+      "description": "An AI agent that actually solves problems: writing code, playing games, reviewing papers, proving math theorems. Each 'generation' of the task agent is a different version that the meta-agent created.",
+      "files": ["task_agent.py", "run_task_agent.py", "agent/base_agent.py"],
+      "connections": [
+        { "targetId": "llm-interface", "label": "calls LLM APIs to reason and act" },
+        { "targetId": "docker-runtime", "label": "executes generated code safely" }
+      ]
+    },
+    {
+      "id": "llm-interface",
+      "category": "external-services",
+      "label": "LLM API Interface (litellm)",
+      "description": "A unified wrapper that lets the system talk to multiple AI providers (OpenAI, Anthropic, Google) through one interface. Handles retries, timeouts, and switching between models like GPT-4o, Claude, and Gemini.",
+      "files": ["agent/llm.py", "agent/llm_withtools.py", "agent/tools/bash.py", "agent/tools/edit.py"],
+      "connections": [
+        { "targetId": "external-llm-providers", "label": "sends prompts, receives completions" }
+      ]
+    },
+    {
+      "id": "external-llm-providers",
+      "category": "external-services",
+      "label": "External LLM Providers",
+      "description": "The actual AI services the system depends on: OpenAI (GPT-4o, GPT-5), Anthropic (Claude), and Google (Gemini). API keys stored in a .env file. These are the 'contractors' the system hires to do the thinking.",
+      "files": [".env"],
+      "connections": []
+    },
+    {
+      "id": "docker-runtime",
+      "category": "storage",
+      "label": "Docker Execution Environment",
+      "description": "Isolated containers where AI-generated code runs safely. Built on NVIDIA CUDA for GPU access. Each evaluation spins up a container, runs the code inside, and captures the results. This is the 'lab' where experiments happen.",
+      "files": ["utils/docker_utils.py", "Dockerfile", "setup_initial.sh"],
+      "connections": [
+        { "targetId": "domain-evaluators", "label": "hosts evaluation runs" }
+      ]
+    },
+    {
+      "id": "domain-evaluators",
+      "category": "background-jobs",
+      "label": "Domain Evaluators",
+      "description": "Specialized test suites for different problem types: game-playing (BALROG), robotics (Genesis), math (IMO), code generation (Polyglot/SWE-bench), paper review, and search. Each domain scores how well a task agent performed.",
+      "files": ["domains/harness.py", "domains/balrog/evaluator.py", "domains/genesis/", "domains/imo/", "domains/polyglot/", "domains/run_eval.py"],
+      "connections": [
+        { "targetId": "archive-store", "label": "writes evaluation scores" }
+      ]
+    },
+    {
+      "id": "archive-store",
+      "category": "database",
+      "label": "Archive (File-Based State Store)",
+      "description": "The system's memory. An append-only JSONL file that records every generation attempt: what was tried, what code was written, and how well it scored. Also stores metadata, diffs, and evaluation reports as files on disk.",
+      "files": ["utils/gl_utils.py", "archive.jsonl", "gen_*/metadata.json"],
+      "connections": []
+    }
+  ],
+  "risks": [
+    {
+      "patternId": "untrusted-code-execution",
+      "severity": "critical",
+      "adjustedSeverity": "critical",
+      "affectedComponents": ["docker-runtime", "task-agent", "meta-agent"],
+      "evidence": "agent/tools/bash.py executes arbitrary commands via asyncio.subprocess. agent/tools/edit.py writes to arbitrary file paths. generate_loop.py applies git patches from LLM output. Docker containers run with NVIDIA GPU access and no visible resource limits (memory, CPU, disk).",
+      "explanation": {
+        "plain": "This system is designed to execute code written by AI models. The AI writes code, and the system runs it. While Docker containers provide some isolation, there are no visible resource limits (memory, CPU, disk) on those containers, and the bash tool can run arbitrary commands.",
+        "analogy": "Imagine hiring a stranger to cook in your kitchen, but giving them the keys to your whole house and not checking what they put in the food. Docker is like saying 'at least they are cooking in a separate kitchen,' but without locks on the pantry or limits on the gas stove, a mistake (or malicious recipe) could still cause a fire.",
+        "consequence": "A misbehaving AI-generated script could consume all available GPU memory, fill the disk, make network calls to external services, or interfere with other processes on the host. In a research setting this risk is accepted, but it means the system cannot be safely exposed to untrusted users."
+      },
+      "fix": {
+        "summary": "Add Docker resource limits and network restrictions",
+        "detail": "Set --memory, --cpus, and --storage-opt limits on container creation in docker_utils.py. Use --network=none for containers that do not need external access. Add a timeout kill switch that forcefully removes containers after a maximum wall-clock time."
+      },
+      "learnMore": {
+        "glossaryTerms": [],
+        "buildStory": null
+      }
+    },
+    {
+      "patternId": "single-file-state-store",
+      "severity": "high",
+      "adjustedSeverity": "high",
+      "affectedComponents": ["archive-store", "generation-loop"],
+      "evidence": "utils/gl_utils.py appends to archive.jsonl with no file locking, no transactions, and no backup mechanism. The entire evolutionary history lives in one file. Metadata per generation stored as individual JSON files with no atomic write guarantees.",
+      "explanation": {
+        "plain": "The entire history of every experiment the system has ever run lives in a single file called archive.jsonl. There is no backup, no redundancy, and no protection against the file being corrupted by a crash or concurrent write.",
+        "analogy": "It is like keeping your company's entire accounting history in one notebook. If someone spills coffee on it, or two people try to write in it at the same time, you could lose months of records. A real accounting system keeps copies, has transaction logs, and never lets two people edit the same entry simultaneously.",
+        "consequence": "If the process crashes mid-write, archive.jsonl could be corrupted, losing the record of all past generations. If two processes try to write simultaneously (e.g., during parallel evaluation), data could be interleaved and unreadable. A single disk failure means total loss of experiment history."
+      },
+      "fix": {
+        "summary": "Add atomic writes, file locking, and periodic backups",
+        "detail": "Write to a temporary file first, then atomically rename it (write-then-rename pattern). Add file locking (fcntl.flock) before writes. Create periodic snapshots or use SQLite instead of raw JSONL for structured state that needs transaction safety."
+      },
+      "learnMore": {
+        "glossaryTerms": ["database", "persistence"],
+        "buildStory": null
+      }
+    },
+    {
+      "patternId": "secrets-in-source",
+      "severity": "high",
+      "adjustedSeverity": "high",
+      "affectedComponents": ["external-llm-providers", "llm-interface"],
+      "evidence": "API keys loaded via dotenv.load_dotenv() in agent/llm.py and baselines/sft_openai/run.py. The .env file pattern is used but there is no .env.example documenting required variables, and .gitignore may not cover all secret files. The fine-tuning baseline sends actual training data to OpenAI's API.",
+      "explanation": {
+        "plain": "Your API keys for OpenAI, Anthropic, and Google are stored in a .env file. While .env is better than hardcoding, there is no documentation of what keys are needed, and the fine-tuning code sends training data directly to OpenAI's servers.",
+        "analogy": "It is like keeping your building's master key in an unlabeled envelope on your desk instead of written on a Post-it on the door. Better, but still easy to accidentally share, and anyone who gets the envelope has full access to everything.",
+        "consequence": "If the .env file is accidentally committed or shared, all API keys are exposed. There is no audit trail of API usage, no key rotation, and the fine-tuning workflow uploads potentially sensitive research data to external providers."
+      },
+      "fix": {
+        "summary": "Add .env.example, verify .gitignore, and document API key requirements",
+        "detail": "Create a .env.example listing all required variables without values. Verify .env is in .gitignore. Consider using a secrets manager for team use. For the fine-tuning baseline, document what data is sent to OpenAI and ensure it is appropriate."
+      },
+      "learnMore": {
+        "glossaryTerms": [],
+        "buildStory": null
+      }
+    },
+    {
+      "patternId": "monolith-no-boundaries",
+      "severity": "medium",
+      "adjustedSeverity": "medium",
+      "affectedComponents": ["generation-loop"],
+      "evidence": "generate_loop.py is 2,800+ lines containing orchestration logic, container management, evaluation triggers, selection strategies, file I/O, and reporting all in one file. Functions reach across domains, utils, and agent modules freely.",
+      "explanation": {
+        "plain": "The main orchestration file is nearly 3,000 lines long and handles everything: managing experiments, running containers, evaluating results, picking what to try next, and writing reports. Changing one part risks breaking another.",
+        "analogy": "It is like a restaurant where the head chef also takes orders, buses tables, manages inventory, does the books, and fixes the plumbing. They know how everything works, but if they get sick, nobody else can step in because all the knowledge is in one person's head. And if they change the recipe, they might accidentally break the inventory system.",
+        "consequence": "New researchers will struggle to understand and modify the system. Debugging is harder because side effects can cascade across unrelated logic. Testing individual components is difficult when everything is intertwined."
+      },
+      "fix": {
+        "summary": "Extract orchestration concerns into focused modules",
+        "detail": "Split generate_loop.py into focused modules: a selection module (picking parents), an evaluation coordinator, a container lifecycle manager, and a reporting module. Each module should have a clear interface. The main loop becomes a thin coordinator that calls these modules."
+      },
+      "learnMore": {
+        "glossaryTerms": ["monolith"],
+        "buildStory": { "slug": "ride-sharing", "stageId": "stage-5" }
+      }
+    },
+    {
+      "patternId": "no-error-boundary",
+      "severity": "medium",
+      "adjustedSeverity": "medium",
+      "affectedComponents": ["generation-loop", "domain-evaluators"],
+      "evidence": "727 try/except blocks across the codebase. Many catch broad exceptions and continue silently. No centralized error monitoring or alerting. Errors logged to per-thread rotating files with no aggregation. Container failures may lose in-memory state.",
+      "explanation": {
+        "plain": "The system has hundreds of try/except blocks that catch errors and keep going. While this prevents crashes, it means errors can happen silently. There is no central place to see what went wrong, and no alerting when experiments fail in unexpected ways.",
+        "analogy": "It is like a factory where every machine has a 'mute' button on its alarm. When something goes wrong, the machine keeps running in a degraded state instead of stopping. The factory floor looks fine from the control room, but individual machines might be producing defective output that nobody notices until the end of the day.",
+        "consequence": "Failed experiments might be silently skipped or produce corrupt results that propagate to future generations. Debugging requires reading through individual log files per thread. Systematic issues (like an API provider being down) are hard to detect quickly."
+      },
+      "fix": {
+        "summary": "Add a centralized error summary and distinguish recoverable from critical errors",
+        "detail": "Create an error aggregation module that collects all exceptions into a summary report after each generation loop. Classify errors as recoverable (retry) vs. critical (stop the loop). Log error counts and types to a single summary file that researchers can check at a glance."
+      },
+      "learnMore": {
+        "glossaryTerms": ["graceful-degradation", "monitoring"],
+        "buildStory": null
+      }
+    },
+    {
+      "patternId": "no-health-check",
+      "severity": "low",
+      "adjustedSeverity": "low",
+      "affectedComponents": ["docker-runtime", "generation-loop"],
+      "evidence": "No health check endpoint or monitoring dashboard. Long-running experiments (hours to days) have no external visibility into progress. Container status checked only via Docker API calls during execution. No heartbeat or progress reporting mechanism.",
+      "explanation": {
+        "plain": "When this system runs a long experiment (which can take hours or days), there is no easy way to check on it from the outside. You have to SSH into the machine and read log files to know if things are working.",
+        "analogy": "It is like sending a submarine on a mission with no radio. The submarine might be doing great, or it might be stuck on the ocean floor. You will not know until it either surfaces with results or fails to come back on time.",
+        "consequence": "Researchers cannot monitor experiment progress without manually checking logs. Failed runs may consume resources for hours before anyone notices. There is no way to get a quick status update without reading raw output files."
+      },
+      "fix": {
+        "summary": "Add a simple progress reporting mechanism",
+        "detail": "Write a periodic status file (e.g., status.json) that records: current generation, last evaluation score, elapsed time, and any errors. A simple watcher script or even a tail -f on this file gives researchers visibility into long-running experiments."
+      },
+      "learnMore": {
+        "glossaryTerms": ["health-check", "monitoring"],
+        "buildStory": { "slug": "ride-sharing", "stageId": "stage-3" }
+      }
+    }
+  ]
+}
 </script>
 
 <script>

@@ -163,13 +163,13 @@ The architecture diagram uses spatial relationships to communicate structure. Th
 - **Adjacency = "relates"**: Category boxes placed side by side in the same row are peer systems at the same architectural tier. Two components side by side within a category box are related alternatives or collaborators.
 - **Flow connectors between tiers**: Simple CSS dashed lines with small text labels between rows of category boxes. These are CSS borders and positioned divs, not SVG paths. Labels are extracted from the connection data and describe the relationship between tiers (e.g., "calls LLM APIs", "writes evaluation scores").
 - **Layered layout**: Categories are auto-sorted top-to-bottom by dependency depth (entry points at top, data stores at bottom). The vertical position communicates the flow direction.
-- **Dark blueprint aesthetic**: The diagram uses a dark palette to visually distinguish it from the rest of the page and feel like a technical schematic.
+- **Light schematic aesthetic**: The diagram uses a warm light palette consistent with the rest of the page, with category colors providing visual distinction.
 - **Fixed 760px width**: Constrained to avoid reflow problems. No horizontal scrolling.
 
 **What the template renders:**
 - Sticky header with project identity and risk severity count chips
 - One-sentence health summary
-- Architecture diagram (containment-based, dark blueprint style) with clickable component cards
+- Architecture diagram (containment-based, light schematic style) with clickable component cards
 - Expandable risk report sorted by severity (each card has: plain-English explanation, analogy, consequence, evidence, fix recommendation, and "learn more" links to the companion website)
 - Detail panel that shows description, files, and connections when a component is clicked
 
