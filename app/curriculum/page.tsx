@@ -35,18 +35,20 @@ export default function CurriculumPage() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Shared hero */}
-      <header className="max-w-4xl mx-auto px-6 pt-20 pb-16">
-        <div className="mb-3">
+      <header className="max-w-4xl mx-auto px-6 pt-28 pb-24">
+        <div className="mb-5">
           <span className="text-[11px] font-mono text-accent font-medium uppercase tracking-[3px]">
             System Design for Builders
           </span>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-bold text-text leading-tight mb-5">
-          Learn why systems work
+        <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-text leading-[1.04] mb-8">
+          Learn why
           <br />
-          <span className="text-text-muted font-light">(and why they break)</span>
+          systems work
+          <br />
+          <span className="text-accent font-bold italic">(and why they break)</span>
         </h1>
-        <p className="text-lg text-text-muted max-w-xl leading-relaxed">
+        <p className="text-lg sm:text-xl text-text-muted max-w-lg leading-relaxed font-light">
           A structured path through the fundamentals. Each lesson follows a
           clear framework: What &rarr; Why &rarr; How &rarr; When.
         </p>
@@ -54,25 +56,26 @@ export default function CurriculumPage() {
 
       <StickyTabs />
 
-      <main className="max-w-4xl mx-auto px-6 pb-24 pt-10">
+      <main className="max-w-4xl mx-auto px-6 pb-24 pt-12">
 
-        <div className="space-y-4">
-          {modules.map((mod) => (
+        <div className="space-y-5">
+          {modules.map((mod, i) => (
             <Link
               key={mod.id}
               href={`/curriculum/${mod.slug}`}
-              className={`group block bg-surface border ${MODULE_COLORS[mod.color]} rounded-2xl p-7 hover:shadow-sm transition-all`}
+              className={`group block bg-surface border ${MODULE_COLORS[mod.color]} rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out animate-[fade-up_0.4s_ease-out_both]`}
+              style={{ animationDelay: `${i * 100}ms` }}
             >
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-5">
                 <div
-                  className={`flex-shrink-0 w-12 h-12 rounded-xl ${MODULE_BG_COLORS[mod.color]} flex items-center justify-center text-sm font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]}`}
+                  className={`flex-shrink-0 w-16 h-16 rounded-2xl ${MODULE_BG_COLORS[mod.color]} flex items-center justify-center text-2xl font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]}`}
                 >
                   {mod.moduleNumber}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1.5">
                     <span
-                      className={`text-[11px] font-mono ${MODULE_TEXT_COLORS[mod.color]}`}
+                      className={`text-[11px] font-mono font-medium ${MODULE_TEXT_COLORS[mod.color]}`}
                     >
                       Module {mod.moduleNumber}
                     </span>
@@ -80,13 +83,13 @@ export default function CurriculumPage() {
                       {mod.lessons.length} lessons
                     </span>
                   </div>
-                  <h2 className="text-lg font-bold text-text group-hover:text-accent transition-colors">
+                  <h2 className="text-2xl font-bold text-text group-hover:text-accent transition-colors leading-snug">
                     {mod.title}
                   </h2>
-                  <p className="text-sm text-text-muted mt-1">
+                  <p className="text-sm text-text-muted mt-1.5">
                     {mod.subtitle}
                   </p>
-                  <div className="flex flex-wrap gap-1.5 mt-3">
+                  <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-border/50">
                     {mod.lessons.slice(0, 3).map((lesson) => (
                       <span
                         key={lesson.id}
@@ -104,7 +107,7 @@ export default function CurriculumPage() {
                     )}
                   </div>
                 </div>
-                <span className="text-text-dim group-hover:text-accent transition-colors text-lg mt-1">
+                <span className="text-text-dim group-hover:text-accent group-hover:translate-x-1 transition-all text-lg mt-3">
                   &rarr;
                 </span>
               </div>
@@ -113,7 +116,7 @@ export default function CurriculumPage() {
         </div>
 
         {/* Future modules placeholder */}
-        <div className="mt-4 space-y-3">
+        <div className="mt-5 space-y-4">
           {[
             { num: 3, title: "Architecture Patterns" },
             { num: 4, title: "Making It Real (Deployment)" },
@@ -122,16 +125,16 @@ export default function CurriculumPage() {
           ].map((mod) => (
             <div
               key={mod.num}
-              className="bg-surface/50 border border-dashed border-border rounded-2xl p-7 flex items-center gap-4 opacity-40"
+              className="bg-surface/50 border border-dashed border-border rounded-2xl p-8 flex items-center gap-5 opacity-35"
             >
-              <div className="w-12 h-12 rounded-xl bg-bg flex items-center justify-center text-sm font-mono text-text-dim">
+              <div className="w-16 h-16 rounded-2xl bg-bg flex items-center justify-center text-2xl font-mono text-text-dim">
                 {mod.num}
               </div>
               <div>
                 <span className="text-[11px] font-mono text-text-dim">
                   Module {mod.num}
                 </span>
-                <h3 className="text-base font-semibold text-text-muted">
+                <h3 className="text-lg font-semibold text-text-muted">
                   {mod.title}
                 </h3>
                 <p className="text-xs text-text-dim">Coming soon</p>

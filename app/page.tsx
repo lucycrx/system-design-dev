@@ -8,18 +8,20 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Hero */}
-      <header className="max-w-4xl mx-auto px-6 pt-20 pb-16">
-        <div className="mb-3">
+      <header className="max-w-4xl mx-auto px-6 pt-28 pb-24">
+        <div className="mb-5">
           <span className="text-[11px] font-mono text-accent font-medium uppercase tracking-[3px]">
             System Design for Builders
           </span>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-bold text-text leading-tight mb-5">
-          Learn why systems work
+        <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-text leading-[1.04] mb-8">
+          Learn why
           <br />
-          <span className="text-text-muted font-light">(and why they break)</span>
+          systems work
+          <br />
+          <span className="text-accent font-bold italic">(and why they break)</span>
         </h1>
-        <p className="text-lg text-text-muted max-w-xl leading-relaxed">
+        <p className="text-lg sm:text-xl text-text-muted max-w-lg leading-relaxed font-light">
           Interactive stories and structured lessons that teach system design to
           vibecoders, PMs, and founders — not just engineers prepping for
           interviews.
@@ -28,8 +30,8 @@ export default function HomePage() {
 
       <StickyTabs />
 
-      <main className="max-w-4xl mx-auto px-6 pb-24 pt-10">
-        <div className="flex items-center justify-between mb-8">
+      <main className="max-w-4xl mx-auto px-6 pb-24 pt-12">
+        <div className="flex items-center justify-between mb-10">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-text-dim">
             Build Stories
           </h2>
@@ -37,14 +39,15 @@ export default function HomePage() {
             {stories.length} {stories.length === 1 ? "story" : "stories"}
           </span>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2">
-          {stories.map((story) => (
+        <div className="grid gap-6 sm:grid-cols-2">
+          {stories.map((story, i) => (
             <Link
               key={story.id}
               href={`/stories/${story.slug}`}
-              className="group bg-surface border border-border rounded-2xl p-7 hover:border-accent/30 hover:shadow-sm transition-all"
+              className="group bg-surface border border-border rounded-2xl p-8 hover:border-accent/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out animate-[fade-up_0.4s_ease-out_both]"
+              style={{ animationDelay: `${i * 80}ms` }}
             >
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-5">
                 <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-green-dim text-green border border-green/20">
                   {story.difficulty}
                 </span>
@@ -52,7 +55,7 @@ export default function HomePage() {
                   ~{story.estimatedMinutes} min
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-text group-hover:text-accent transition-colors mb-1.5">
+              <h3 className="text-2xl font-bold text-text group-hover:text-accent transition-colors mb-2 leading-snug">
                 {story.title}
               </h3>
               <p className="text-sm text-text-muted mb-1">
@@ -61,7 +64,7 @@ export default function HomePage() {
               <p className="text-xs text-text-dim leading-relaxed mt-4 line-clamp-2">
                 {story.description}
               </p>
-              <div className="flex flex-wrap gap-1.5 mt-5">
+              <div className="flex flex-wrap gap-1.5 mt-6 pt-5 border-t border-border/60">
                 {story.concepts.slice(0, 4).map((c) => (
                   <span
                     key={c}
@@ -79,8 +82,8 @@ export default function HomePage() {
             </Link>
           ))}
           {/* Coming soon placeholder */}
-          <div className="border border-dashed border-border rounded-2xl p-7 flex items-center justify-center">
-            <p className="text-text-dim text-sm text-center">
+          <div className="border border-dashed border-text-dim/20 rounded-2xl p-8 flex items-center justify-center">
+            <p className="text-text-dim text-sm text-center italic">
               More stories coming soon
             </p>
           </div>

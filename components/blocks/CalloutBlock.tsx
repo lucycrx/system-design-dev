@@ -9,24 +9,28 @@ const CALLOUT_STYLES = {
     borderColor: "border-l-accent",
     bgColor: "bg-accent-dim",
     labelColor: "text-accent",
+    topBorderColor: "border-t-accent/30",
   },
   analogy: {
     label: "Real-World Analogy",
     borderColor: "border-l-blue",
     bgColor: "bg-blue-dim",
     labelColor: "text-blue",
+    topBorderColor: "border-t-blue/30",
   },
   warning: {
     label: "Watch Out",
     borderColor: "border-l-orange",
     bgColor: "bg-orange-dim",
     labelColor: "text-orange",
+    topBorderColor: "border-t-orange/30",
   },
   tip: {
     label: "Pro Tip",
     borderColor: "border-l-green",
     bgColor: "bg-green-dim",
     labelColor: "text-green",
+    topBorderColor: "border-t-green/30",
   },
 };
 
@@ -39,14 +43,14 @@ export function CalloutBlock({ block }: Props) {
 
   return (
     <div
-      className={`${style.bgColor} ${style.borderColor} border-l-[3px] rounded-r-xl p-5 my-6`}
+      className={`${style.bgColor} ${style.borderColor} ${style.topBorderColor} border-l-4 border-t rounded-r-xl p-7 my-10`}
     >
       <div
-        className={`text-[11px] font-semibold uppercase tracking-wider ${style.labelColor} mb-2`}
+        className={`text-[11px] font-bold uppercase tracking-[2px] ${style.labelColor} mb-3`}
       >
         {style.label}
       </div>
-      <div className="text-[14px] text-text/80 leading-relaxed">
+      <div className="text-[15px] text-text/85 leading-[1.7]">
         <ReactMarkdown
           components={{
             p: ({ children }) => <p className="mb-0 last:mb-0">{children}</p>,

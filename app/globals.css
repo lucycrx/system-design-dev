@@ -6,22 +6,22 @@
   --color-surface: #FFFFFF;
   --color-surface-hover: #F5F4F1;
   --color-accent: #AB4F35;
-  --color-accent-dim: #AB4F3514;
-  --color-accent-mid: #AB4F3526;
+  --color-accent-dim: #AB4F351A;
+  --color-accent-mid: #AB4F3530;
   --color-text: #1A1A1A;
   --color-text-muted: #666666;
   --color-text-dim: #737373;
   --color-border: #E5E2DE;
   --color-blue: #4A7191;
-  --color-blue-dim: #4A719114;
+  --color-blue-dim: #4A71911A;
   --color-pink: #A04040;
-  --color-pink-dim: #A0404014;
+  --color-pink-dim: #A040401A;
   --color-green: #3D8B6E;
-  --color-green-dim: #3D8B6E14;
+  --color-green-dim: #3D8B6E1A;
   --color-orange: #96722E;
-  --color-orange-dim: #96722E14;
+  --color-orange-dim: #96722E1A;
   --color-purple: #6B5C91;
-  --color-purple-dim: #6B5C9114;
+  --color-purple-dim: #6B5C911A;
 
   /* Fonts */
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
@@ -49,6 +49,18 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-dim);
+}
+
+/* Content entrance animation */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Diagram animations */
