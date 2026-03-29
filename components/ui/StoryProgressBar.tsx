@@ -12,7 +12,7 @@ export function StoryProgressBar({
   const progress = ((currentStage) / totalStages) * 100;
 
   return (
-    <div className="mb-8">
+    <div>
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs text-text-muted font-mono">
           Stage {currentStage} of {totalStages}

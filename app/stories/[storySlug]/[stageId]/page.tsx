@@ -2,9 +2,7 @@ import { notFound } from "next/navigation";
 import { getStory, getGlossaryMap, getDiagramsForStage } from "@/lib/content";
 import { BlockRenderer } from "@/components/blocks/BlockRenderer";
 import { ScrollytellingLayout } from "@/components/scrollytelling/ScrollytellingLayout";
-import { StoryProgressBar } from "@/components/ui/StoryProgressBar";
 import { StageNavigation } from "@/components/ui/StageNavigation";
-import Link from "next/link";
 
 interface Props {
   params: Promise<{ storySlug: string; stageId: string }>;
@@ -32,32 +30,8 @@ export default async function StagePage({ params }: Props) {
       : undefined;
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-bg/90 backdrop-blur-md border-b border-border">
-        <div className={`mx-auto px-6 py-3 flex items-center justify-between ${hasDiagrams ? "max-w-6xl" : "max-w-3xl"}`}>
-          <Link
-            href={`/stories/${story.slug}`}
-            className="text-sm text-text-muted hover:text-text transition-colors flex items-center gap-2"
-          >
-            <span>&larr;</span>
-            <span className="hidden sm:inline">{story.title}</span>
-            <span className="sm:hidden">Back</span>
-          </Link>
-          <span className="text-xs font-mono text-text-dim">
-            {stage.userScale}
-          </span>
-        </div>
-      </header>
-
       <main className={`mx-auto px-6 py-8 ${hasDiagrams ? "max-w-6xl" : "max-w-3xl"}`}>
         <div>
-          <StoryProgressBar
-            currentStage={stageIndex + 1}
-            totalStages={story.stages.length}
-            stageTitle={stage.title}
-          />
-
           {/* Stage header */}
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-3">
@@ -114,7 +88,6 @@ export default async function StagePage({ params }: Props) {
           nextStage={nextStage}
         />
       </main>
-    </div>
   );
 }
 
