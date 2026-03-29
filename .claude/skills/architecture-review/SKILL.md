@@ -147,12 +147,30 @@ Read the HTML template at `./html-template.html` (relative to this skill file).
 4. Write the complete HTML to `architecture-review.html` in the project root
 5. Open it in the browser: `open architecture-review.html` (macOS), `xdg-open` (Linux)
 
-**The template handles all rendering.** You only need to produce valid JSON matching the schema in Step 5. The template's embedded JavaScript reads the JSON and builds:
-- A sticky header with project identity and risk severity counts
-- A one-sentence health summary
-- An interactive architecture map with clickable component cards (category-colored, risk-indicated)
-- An expandable risk report sorted by severity (each card has: plain-English explanation, analogy, consequence, evidence, fix recommendation, and "learn more" links to the companion website)
-- A detail panel that shows files and connections when a component is clicked
+**The template handles all rendering.** You only need to produce valid JSON matching the schema in Step 5. The template's embedded JavaScript reads the JSON and builds the full interactive report.
+
+**How the diagram works — containment model, not drawn lines:**
+
+The architecture diagram uses spatial relationships to communicate structure. This is a deliberate design choice — SVG connectors fail in self-contained HTML because of absolute coordinate problems, path routing, and no reflow awareness. Instead:
+
+- **Containment = "belongs to"**: Components are grouped inside category boxes. A component card inside an "External Services" box means it belongs to that layer. Category boxes have floating edge labels (like fieldset legends) identifying the type.
+- **Adjacency = "relates"**: Category boxes placed side by side in the same row are peer systems at the same architectural tier. Two components side by side within a category box are related alternatives or collaborators.
+- **Flow connectors between tiers**: Simple CSS dashed lines with small text labels between rows of category boxes. These are CSS borders and positioned divs, not SVG paths. Labels are extracted from the connection data and describe the relationship between tiers (e.g., "calls LLM APIs", "writes evaluation scores").
+- **Layered layout**: Categories are auto-sorted top-to-bottom by dependency depth (entry points at top, data stores at bottom). The vertical position communicates the flow direction.
+- **Dark blueprint aesthetic**: The diagram uses a dark palette to visually distinguish it from the rest of the page and feel like a technical schematic.
+- **Fixed 760px width**: Constrained to avoid reflow problems. No horizontal scrolling.
+
+**What the template renders:**
+- Sticky header with project identity and risk severity count chips
+- One-sentence health summary
+- Architecture diagram (containment-based, dark blueprint style) with clickable component cards
+- Expandable risk report sorted by severity (each card has: plain-English explanation, analogy, consequence, evidence, fix recommendation, and "learn more" links to the companion website)
+- Detail panel that shows description, files, and connections when a component is clicked
+
+**Do NOT attempt to:**
+- Draw SVG lines or paths between components
+- Use absolute positioning for diagram nodes
+- Generate Mermaid or other diagram markup (the HTML template handles all visualization)
 
 **After generating the HTML**, also present a brief summary in the conversation:
 1. One sentence: what the project is and overall health
@@ -167,7 +185,30 @@ After presenting the summary, offer to fix any of the flagged risks. For each ri
 3. Explain what changed, using the analogy from the risk pattern
 4. Note any follow-up steps the user should take
 
-### Important guidelines
+### Data quality guidelines
+
+The architecture data JSON is the single input that determines diagram quality. Write it carefully:
+
+**Component labels:**
+- Use the format `"Main Name (Short Role)"` — the template splits on parentheses to show the role as a sublabel. Example: `"Generation Loop (Orchestrator)"`, `"LLM API Interface (litellm)"`, `"PostgreSQL (Primary Database)"`.
+- Keep the main name to 2-3 words. The sublabel in parentheses can be longer.
+- Use the actual technology name when it's recognizable: "Redis", "PostgreSQL", "Supabase Auth" — not generic labels like "Cache" or "Database".
+
+**Component descriptions:**
+- Write for someone who has never seen the codebase. One to two sentences.
+- Start with what it does, not what it is. "Handles all incoming API requests and routes them to the right handler" not "The API layer of the application."
+- Relate it to the overall system: "The brain of the system that coordinates..." or "The storage layer where all user data lives permanently."
+
+**Connection labels:**
+- Keep to 5-6 words max. These appear as small text between diagram tiers.
+- Use active verbs: "sends prompts", "writes evaluation scores", "reads user sessions" — not "is connected to" or "depends on".
+- Be specific: "calls OpenAI API" not "makes external requests".
+
+**Category assignment:**
+- Each component gets exactly one category from the taxonomy. When a component spans categories (e.g., an API route that also does auth), pick the primary responsibility.
+- Prefer specific categories over generic ones. If something is clearly a cache, call it "cache" not "storage".
+
+### General guidelines
 
 - **Never use jargon without explaining it.** If you must use a technical term, immediately follow it with a plain-English explanation or analogy.
 - **Be honest about uncertainty.** If you can't determine something from the codebase alone, say so. "I couldn't find evidence of caching, but it's possible it's handled at the infrastructure level (e.g., Vercel's edge cache)."

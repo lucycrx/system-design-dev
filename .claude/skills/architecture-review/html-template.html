@@ -13,12 +13,19 @@
   --bg: hsl(48, 14%, 97%);
   --surface: hsl(0, 0%, 100%);
   --surface-raised: hsl(48, 10%, 95%);
+  --diagram-bg: hsl(220, 12%, 14%);
+  --diagram-surface: hsl(220, 12%, 19%);
+  --diagram-border: hsl(220, 10%, 28%);
+  --diagram-text: hsl(48, 10%, 88%);
+  --diagram-text-dim: hsl(220, 8%, 52%);
+  --diagram-label: hsl(48, 10%, 62%);
+
   --text: hsl(0, 0%, 10%);
   --text-muted: hsl(0, 0%, 40%);
   --text-dim: hsl(0, 0%, 45%);
   --border: hsl(40, 8%, 88%);
   --border-hover: hsl(40, 8%, 78%);
-  --highlight: hsl(215, 20%, 38%);
+  --highlight: hsl(48, 10%, 88%);
 
   --risk-critical: hsl(4, 65%, 42%);
   --risk-critical-bg: hsl(4, 65%, 95%);
@@ -29,14 +36,14 @@
   --risk-low: hsl(210, 15%, 55%);
   --risk-low-bg: hsl(210, 15%, 95%);
 
-  --cat-frontend: hsl(205, 35%, 47%);
-  --cat-api: hsl(215, 20%, 38%);
-  --cat-database: hsl(145, 35%, 32%);
-  --cat-cache: hsl(42, 65%, 44%);
-  --cat-auth: hsl(0, 35%, 40%);
-  --cat-external: hsl(8, 60%, 48%);
-  --cat-jobs: hsl(270, 25%, 45%);
-  --cat-storage: hsl(140, 20%, 40%);
+  --cat-frontend: hsl(205, 45%, 55%);
+  --cat-api: hsl(215, 25%, 50%);
+  --cat-database: hsl(145, 35%, 45%);
+  --cat-cache: hsl(42, 65%, 55%);
+  --cat-auth: hsl(0, 35%, 50%);
+  --cat-external: hsl(8, 55%, 55%);
+  --cat-jobs: hsl(270, 30%, 55%);
+  --cat-storage: hsl(140, 25%, 50%);
 
   --max-width: 1280px;
 }
@@ -51,11 +58,7 @@ body {
   line-height: 1.55;
 }
 
-.shell {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 2rem 4rem;
-}
+.shell { max-width: var(--max-width); margin: 0 auto; padding: 0 2rem 4rem; }
 
 /* ---- HEADER ---- */
 
@@ -89,7 +92,6 @@ body {
 }
 
 .project-meta { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
-
 .risk-counts { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
 .risk-chip {
@@ -111,8 +113,6 @@ body {
 .risk-chip[data-severity="low"] { color: var(--risk-low); border-color: var(--risk-low); background: var(--risk-low-bg); }
 .risk-chip .count { font-weight: 700; font-size: 0.85rem; }
 
-/* ---- SUMMARY ---- */
-
 .summary-strip { padding: 1.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
 .summary-text { font-size: 1.05rem; line-height: 1.6; max-width: 48rem; }
 .summary-text strong { font-weight: 600; }
@@ -127,118 +127,142 @@ body {
   margin-bottom: 1rem;
 }
 
-/* ---- ARCHITECTURE DIAGRAM ---- */
+/* ============================================
+   ARCHITECTURE DIAGRAM
+   Dark blueprint style, containment-based
+   ============================================ */
 
 .map-section { margin-bottom: 3rem; }
 
 .diagram {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 2rem 2.5rem;
+  background: var(--diagram-bg);
+  border: 1px solid var(--diagram-border);
+  padding: 2rem;
+  width: 760px;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
-/* Each layer is a row of nodes */
-.diagram-layer {
-  display: flex;
-  justify-content: center;
-  gap: 1.25rem;
+/* Category group — outer container with floating edge label */
+.cat-group {
+  border: 1px solid var(--diagram-border);
+  padding: 0.75rem;
   position: relative;
+  background: var(--diagram-surface);
 }
 
-/* Vertical flow indicator between layers */
-.layer-separator {
-  display: flex;
-  justify-content: center;
-  padding: 0.75rem 0;
-  color: var(--border-hover);
-  font-size: 1.1rem;
-  letter-spacing: 0.25rem;
-  user-select: none;
-}
-
-/* Nodes */
-.diagram-node {
-  flex: 0 0 auto;
-  width: 220px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  padding: 0.85rem 1rem;
-  cursor: pointer;
-  transition: border-color 0.2s ease, opacity 0.2s ease;
-  position: relative;
-}
-
-.diagram-node:hover { border-color: var(--border-hover); }
-.diagram-node.selected { border-color: var(--highlight); box-shadow: 0 0 0 1px var(--highlight); }
-.diagram-node.peer { border-color: var(--highlight); }
-.diagram-node.dimmed { opacity: 0.2; }
-
-/* Risk left-border */
-.diagram-node.risk-critical { border-left: 3px solid var(--risk-critical); }
-.diagram-node.risk-high { border-left: 3px solid var(--risk-high); }
-.diagram-node.risk-medium { border-left: 3px solid var(--risk-medium); }
-.diagram-node.risk-low { border-left: 3px solid var(--risk-low); }
-
-.node-category {
+.cat-group-label {
+  position: absolute;
+  top: -0.55rem;
+  left: 0.75rem;
   font-family: var(--font-mono);
   font-size: 0.6rem;
   font-weight: 500;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  display: inline-block;
-  padding: 0.05rem 0.35rem;
-  color: white;
-  margin-bottom: 0.3rem;
+  padding: 0 0.4rem;
+  background: var(--diagram-surface);
+  z-index: 1;
 }
 
-.node-category[data-cat="frontend"] { background: var(--cat-frontend); }
-.node-category[data-cat="api-layer"] { background: var(--cat-api); }
-.node-category[data-cat="database"] { background: var(--cat-database); }
-.node-category[data-cat="cache"] { background: var(--cat-cache); color: var(--text); }
-.node-category[data-cat="auth"] { background: var(--cat-auth); }
-.node-category[data-cat="external-services"] { background: var(--cat-external); }
-.node-category[data-cat="background-jobs"] { background: var(--cat-jobs); }
-.node-category[data-cat="storage"] { background: var(--cat-storage); }
+/* Component card inside a category group */
+.comp-card {
+  border: 1px solid var(--diagram-border);
+  padding: 0.6rem 0.75rem;
+  background: var(--diagram-bg);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  position: relative;
+}
 
-.node-label { font-size: 0.88rem; font-weight: 600; line-height: 1.3; }
-.node-sublabel { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
+.comp-card:hover { border-color: var(--diagram-label); }
+.comp-card.selected { border-color: var(--highlight); }
 
-/* Connection tags inside node */
-.node-conn-tags {
-  margin-top: 0.5rem;
+.comp-card + .comp-card { margin-top: 0.4rem; }
+
+.comp-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--diagram-text);
+  line-height: 1.3;
+}
+
+.comp-sublabel {
+  font-size: 0.68rem;
+  color: var(--diagram-text-dim);
+  margin-top: 0.1rem;
+}
+
+/* Risk indicator — thin top border */
+.comp-card.risk-critical { border-top: 2px solid var(--risk-critical); }
+.comp-card.risk-high { border-top: 2px solid var(--risk-high); }
+.comp-card.risk-medium { border-top: 2px solid var(--risk-medium); }
+.comp-card.risk-low { border-top: 2px solid var(--risk-low); }
+
+/* Side-by-side components inside a group */
+.comp-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.2rem;
+  gap: 0.4rem;
 }
 
-.conn-tag {
+.comp-row .comp-card { flex: 1; }
+.comp-row .comp-card + .comp-card { margin-top: 0; }
+
+/* ---- Layout rows for category groups ---- */
+
+.diagram-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.diagram-row .cat-group { flex: 1; }
+
+/* ---- Flow connectors between rows ----
+   CSS-only vertical lines with relationship labels */
+
+.flow-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0;
+  position: relative;
+}
+
+/* Vertical dashed stem */
+.flow-stem {
+  width: 1px;
+  height: 18px;
+  border-left: 1px dashed var(--diagram-border);
+}
+
+/* Label between two stems */
+.flow-label {
   font-family: var(--font-mono);
   font-size: 0.55rem;
-  letter-spacing: 0.04em;
-  padding: 0.1rem 0.3rem;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  color: var(--diagram-text-dim);
+  padding: 0 0.6rem;
   white-space: nowrap;
-  transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.conn-tag.lit {
-  border-color: var(--highlight);
-  color: var(--highlight);
+/* Multi-connector row: several labeled flows side by side */
+.flow-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 0.25rem 0;
 }
 
-.risk-dot {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  width: 7px;
-  height: 7px;
+.flow-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.risk-dot.critical { background: var(--risk-critical); }
-.risk-dot.high { background: var(--risk-high); }
-.risk-dot.medium { background: var(--risk-medium); }
-.risk-dot.low { background: var(--risk-low); }
+.flow-item .flow-stem { height: 14px; }
+
+.flow-item .flow-label {
+  padding: 0.15rem 0;
+}
 
 /* ---- DETAIL PANEL ---- */
 
@@ -246,8 +270,8 @@ body {
   display: none;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-top: none;
   padding: 1.5rem;
+  margin-top: 1rem;
 }
 
 .detail-panel.visible { display: block; }
@@ -292,7 +316,6 @@ body {
 }
 
 .detail-file { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); padding: 0.15rem 0; }
-
 .detail-connection { font-size: 0.82rem; color: var(--text-muted); padding: 0.2rem 0; }
 .detail-connection-target { font-weight: 500; color: var(--text); }
 
@@ -409,7 +432,6 @@ body {
 }
 
 .risk-meta-value { color: var(--text-muted); font-size: 0.78rem; }
-
 .risk-learn-more { margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
 .learn-more-link {
@@ -439,14 +461,8 @@ body {
 .footer-right a { color: var(--cat-frontend); text-decoration: none; }
 .footer-right a:hover { text-decoration: underline; }
 
-/* ---- ANIMATIONS ---- */
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.diagram-node { animation: fadeIn 0.3s ease-out both; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.cat-group { animation: fadeIn 0.4s ease-out both; }
 .risk-card { animation: fadeIn 0.3s ease-out both; }
 .risk-list .risk-card:nth-child(1) { animation-delay: 0.1s; }
 .risk-list .risk-card:nth-child(2) { animation-delay: 0.15s; }
@@ -457,25 +473,33 @@ body {
 
 @media (max-width: 768px) {
   .header-inner { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
-  .diagram-layer { flex-wrap: wrap; }
-  .diagram-node { width: 100%; }
+  .diagram { width: 100%; padding: 1rem; }
+  .diagram-row { flex-direction: column; }
+  .comp-row { flex-direction: column; }
   .risk-card-header { grid-template-columns: auto 1fr auto; gap: 0.75rem; }
   .risk-detail { padding-left: 1.25rem; }
-  .risk-meta { flex-direction: column; gap: 0.75rem; }
   .detail-columns { grid-template-columns: 1fr; }
   .footer { flex-direction: column; gap: 0.5rem; }
 }
 
 @media print {
   .header { position: static; border-bottom: 2px solid var(--text); }
-  .diagram-node, .risk-card { animation: none; break-inside: avoid; }
+  .cat-group, .risk-card { animation: none; break-inside: avoid; }
   .risk-card .risk-detail { display: block; }
   .risk-toggle, .detail-close { display: none; }
   body { background: white; }
+  .diagram { background: hsl(220, 10%, 96%); border: 1px solid #ccc; }
+  .cat-group { background: white; border-color: #ddd; }
+  .cat-group-label { background: white; color: #555; }
+  .comp-card { background: hsl(220, 10%, 96%); border-color: #ddd; }
+  .comp-label { color: #222; }
+  .comp-sublabel { color: #666; }
+  .flow-stem { border-color: #ccc; }
+  .flow-label { color: #888; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .diagram-node, .risk-card { animation: none; }
+  .cat-group, .risk-card { animation: none; }
   * { transition-duration: 0.01ms !important; }
 }
 </style>
@@ -503,7 +527,7 @@ body {
     <div class="detail-panel" id="detailPanel">
       <div class="detail-panel-header">
         <div>
-          <span class="node-category" id="detailCategory"></span>
+          <span class="node-category" id="detailCategory" style="font-family:var(--font-mono);font-size:0.6rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;display:inline-block;padding:0.05rem 0.35rem;color:white;margin-bottom:0.3rem"></span>
           <h2 class="detail-title" id="detailTitle"></h2>
         </div>
         <button class="detail-close" onclick="closeDetail()">close</button>
@@ -541,7 +565,7 @@ body {
   var data;
   try { data = JSON.parse(dataEl.textContent); }
   catch(e) {
-    document.body.innerHTML = '<div style="padding:3rem;font-family:system-ui"><h1>No architecture data found</h1><p>This template needs architecture data injected by the skill.</p></div>';
+    document.body.innerHTML = '<div style="padding:3rem;font-family:system-ui"><h1>No architecture data found</h1></div>';
     return;
   }
 
@@ -549,7 +573,6 @@ body {
   var components = data.components || [];
   var risks = data.risks || [];
 
-  // Lookups
   var componentRiskMap = {};
   var severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
   risks.forEach(function(r) {
@@ -564,18 +587,17 @@ body {
   var compLabelMap = {};
   components.forEach(function(c) { compMap[c.id] = c; compLabelMap[c.id] = c.label; });
 
-  // Build connectivity sets (bidirectional for highlighting)
-  var connectedTo = {}; // id -> Set of ids this node connects to
-  var connectedFrom = {}; // id -> Set of ids that connect to this node
-  components.forEach(function(c) {
-    connectedTo[c.id] = new Set();
-    if (!connectedFrom[c.id]) connectedFrom[c.id] = new Set();
-    (c.connections || []).forEach(function(conn) {
-      connectedTo[c.id].add(conn.targetId);
-      if (!connectedFrom[conn.targetId]) connectedFrom[conn.targetId] = new Set();
-      connectedFrom[conn.targetId].add(c.id);
-    });
-  });
+  // Category color map
+  var catColors = {
+    'frontend': 'var(--cat-frontend)',
+    'api-layer': 'var(--cat-api)',
+    'database': 'var(--cat-database)',
+    'cache': 'var(--cat-cache)',
+    'auth': 'var(--cat-auth)',
+    'external-services': 'var(--cat-external)',
+    'background-jobs': 'var(--cat-jobs)',
+    'storage': 'var(--cat-storage)'
+  };
 
   // ---- HEADER ----
   document.getElementById('projectName').textContent = meta.projectName || 'Project';
@@ -610,10 +632,18 @@ body {
   document.getElementById('summaryText').innerHTML = s;
 
   // ============================================
-  // LAYERED DIAGRAM
+  // CONTAINMENT-BASED ARCHITECTURE DIAGRAM
   // ============================================
 
-  // Assign layers via longest-path from roots
+  // Group components by category
+  var catGroups = {};
+  var catOrder = ['frontend', 'api-layer', 'auth', 'background-jobs', 'external-services', 'cache', 'storage', 'database'];
+  components.forEach(function(c) {
+    if (!catGroups[c.category]) catGroups[c.category] = [];
+    catGroups[c.category].push(c);
+  });
+
+  // Determine layout tiers based on connection depth
   var inDegree = {};
   components.forEach(function(c) {
     if (!(c.id in inDegree)) inDegree[c.id] = 0;
@@ -622,6 +652,7 @@ body {
     });
   });
 
+  // Assign categories to tiers based on their components' average depth
   var layerOf = {};
   var visited = {};
 
@@ -629,142 +660,184 @@ body {
     if (visited[id] && layerOf[id] >= depth) return;
     visited[id] = true;
     layerOf[id] = Math.max(layerOf[id] || 0, depth);
-    (connectedTo[id] || new Set()).forEach(function(tid) {
-      assignLayer(tid, depth + 1);
+    (compMap[id] && compMap[id].connections || []).forEach(function(conn) {
+      assignLayer(conn.targetId, depth + 1);
     });
   }
 
   components.forEach(function(c) {
     if ((inDegree[c.id]||0) === 0) assignLayer(c.id, 0);
   });
-  components.forEach(function(c) {
-    if (!visited[c.id]) layerOf[c.id] = 0;
+  components.forEach(function(c) { if (!visited[c.id]) layerOf[c.id] = 0; });
+
+  // Compute average layer per category
+  var catAvgLayer = {};
+  Object.keys(catGroups).forEach(function(cat) {
+    var sum = 0;
+    catGroups[cat].forEach(function(c) { sum += (layerOf[c.id]||0); });
+    catAvgLayer[cat] = sum / catGroups[cat].length;
   });
 
-  // Group by layer
-  var layers = {};
-  var maxLayer = 0;
-  components.forEach(function(c) {
-    var l = layerOf[c.id];
-    if (l > maxLayer) maxLayer = l;
-    if (!layers[l]) layers[l] = [];
-    layers[l].push(c);
+  // Sort categories by average layer depth
+  var sortedCats = Object.keys(catGroups).sort(function(a, b) {
+    return catAvgLayer[a] - catAvgLayer[b];
   });
 
-  // Render diagram
+  // Build rows of category groups (pair categories into rows of 2)
   var diagramEl = document.getElementById('diagram');
-  var nodeEls = {};
-  var connTagEls = {}; // compId -> [tag elements]
-  var animIdx = 0;
+  var animDelay = 0;
 
-  for (var l = 0; l <= maxLayer; l++) {
-    if (l > 0) {
-      var sep = document.createElement('div');
-      sep.className = 'layer-separator';
-      sep.textContent = '\u2193  \u2193  \u2193';
-      diagramEl.appendChild(sep);
+  // Collect connection summaries between tiers for flow labels
+  // Map: sourceCat -> targetCat -> [labels]
+  var catConnections = {};
+  components.forEach(function(c) {
+    (c.connections || []).forEach(function(conn) {
+      var target = compMap[conn.targetId];
+      if (!target) return;
+      if (c.category === target.category) return; // skip intra-category
+      var key = c.category + '|' + target.category;
+      if (!catConnections[key]) catConnections[key] = [];
+      if (catConnections[key].length < 2) { // max 2 labels per relationship
+        catConnections[key].push(conn.label);
+      }
+    });
+  });
+
+  // Render groups and flow connectors
+  var prevRowCats = [];
+
+  for (var i = 0; i < sortedCats.length; i += 2) {
+    var rowCats = [sortedCats[i]];
+    if (i + 1 < sortedCats.length) rowCats.push(sortedCats[i + 1]);
+
+    // Flow connector between previous row and this row
+    if (prevRowCats.length > 0) {
+      var flowLabels = [];
+      prevRowCats.forEach(function(pCat) {
+        rowCats.forEach(function(rCat) {
+          var key = pCat + '|' + rCat;
+          if (catConnections[key]) {
+            catConnections[key].forEach(function(lbl) {
+              if (flowLabels.length < 3) flowLabels.push(lbl);
+            });
+          }
+        });
+      });
+      // Also check reverse: this row's cats connecting to prev row's cats
+      rowCats.forEach(function(rCat) {
+        prevRowCats.forEach(function(pCat) {
+          var key = rCat + '|' + pCat;
+          if (catConnections[key]) {
+            catConnections[key].forEach(function(lbl) {
+              if (flowLabels.length < 3) flowLabels.push(lbl);
+            });
+          }
+        });
+      });
+
+      if (flowLabels.length > 0) {
+        var flowRow = document.createElement('div');
+        flowRow.className = 'flow-row';
+        flowLabels.forEach(function(lbl) {
+          var item = document.createElement('div');
+          item.className = 'flow-item';
+          item.innerHTML = '<div class="flow-stem"></div><div class="flow-label">' + esc(lbl.length > 35 ? lbl.substring(0, 33) + '...' : lbl) + '</div><div class="flow-stem"></div>';
+          flowRow.appendChild(item);
+        });
+        diagramEl.appendChild(flowRow);
+      } else {
+        var simpleStem = document.createElement('div');
+        simpleStem.className = 'flow-connector';
+        simpleStem.innerHTML = '<div class="flow-stem" style="height:24px"></div>';
+        diagramEl.appendChild(simpleStem);
+      }
     }
 
+    // Render row of category groups
     var row = document.createElement('div');
-    row.className = 'diagram-layer';
+    row.className = 'diagram-row';
 
-    (layers[l] || []).forEach(function(comp) {
-      var node = document.createElement('div');
-      node.className = 'diagram-node';
-      node.setAttribute('data-id', comp.id);
-      node.style.animationDelay = (animIdx * 0.06) + 's';
-      animIdx++;
+    rowCats.forEach(function(cat) {
+      var group = document.createElement('div');
+      group.className = 'cat-group';
+      group.style.animationDelay = (animDelay * 0.08) + 's';
+      animDelay++;
 
-      var riskSev = componentRiskMap[comp.id];
-      if (riskSev) node.classList.add('risk-' + riskSev);
+      var color = catColors[cat] || 'var(--diagram-label)';
+      var label = document.createElement('span');
+      label.className = 'cat-group-label';
+      label.textContent = cat.replace(/-/g, ' ');
+      label.style.color = color;
+      group.appendChild(label);
 
-      var h = '';
-      if (riskSev) h += '<div class="risk-dot ' + riskSev + '"></div>';
-      h += '<span class="node-category" data-cat="' + esc(comp.category) + '">' + esc(comp.category.replace(/-/g,' ')) + '</span>';
+      var comps = catGroups[cat];
 
-      var mainLabel = comp.label.split('(')[0].trim();
-      var paren = comp.label.match(/\(([^)]+)\)/);
-      h += '<div class="node-label">' + esc(mainLabel) + '</div>';
-      if (paren) h += '<div class="node-sublabel">' + esc(paren[1]) + '</div>';
-
-      // Connection tags: show short target names
-      if (comp.connections && comp.connections.length) {
-        h += '<div class="node-conn-tags">';
-        comp.connections.forEach(function(conn) {
-          var tLabel = (compLabelMap[conn.targetId] || conn.targetId).split('(')[0].trim();
-          // Shorten to first 2 words
-          var short = tLabel.split(' ').slice(0, 2).join(' ');
-          h += '<span class="conn-tag" data-target="' + esc(conn.targetId) + '">' + esc(short) + ' &darr;</span>';
+      // If 2 or fewer components, put them side by side
+      if (comps.length === 2) {
+        var compRow = document.createElement('div');
+        compRow.className = 'comp-row';
+        comps.forEach(function(c) {
+          compRow.appendChild(makeCompCard(c));
         });
-        h += '</div>';
+        group.appendChild(compRow);
+      } else {
+        comps.forEach(function(c) {
+          group.appendChild(makeCompCard(c));
+        });
       }
 
-      node.innerHTML = h;
-
-      node.addEventListener('click', function(e) {
-        e.stopPropagation();
-        selectComponent(comp);
-      });
-      node.addEventListener('mouseenter', function() { highlightConnections(comp.id); });
-      node.addEventListener('mouseleave', function() { clearHighlight(); });
-
-      row.appendChild(node);
-      nodeEls[comp.id] = node;
-
-      // Store references to connection tags
-      connTagEls[comp.id] = node.querySelectorAll('.conn-tag');
+      row.appendChild(group);
     });
+
+    // If only one cat in this row, add an empty flex item for balance
+    if (rowCats.length === 1) {
+      var spacer = document.createElement('div');
+      spacer.style.flex = '1';
+      row.appendChild(spacer);
+    }
 
     diagramEl.appendChild(row);
+    prevRowCats = rowCats;
   }
 
-  // ---- Hover highlighting ----
-  function highlightConnections(compId) {
-    var peers = new Set();
-    peers.add(compId);
-    (connectedTo[compId] || new Set()).forEach(function(id) { peers.add(id); });
-    (connectedFrom[compId] || new Set()).forEach(function(id) { peers.add(id); });
+  function makeCompCard(comp) {
+    var card = document.createElement('div');
+    card.className = 'comp-card';
+    card.setAttribute('data-id', comp.id);
 
-    components.forEach(function(c) {
-      if (peers.has(c.id)) {
-        nodeEls[c.id].classList.remove('dimmed');
-        nodeEls[c.id].classList.toggle('peer', c.id !== compId);
-      } else {
-        nodeEls[c.id].classList.add('dimmed');
-        nodeEls[c.id].classList.remove('peer');
-      }
-    });
+    var riskSev = componentRiskMap[comp.id];
+    if (riskSev) card.classList.add('risk-' + riskSev);
 
-    // Light up connection tags that point to highlighted peers
-    Object.keys(connTagEls).forEach(function(cid) {
-      connTagEls[cid].forEach(function(tag) {
-        var tid = tag.getAttribute('data-target');
-        tag.classList.toggle('lit', cid === compId || tid === compId);
-      });
-    });
-  }
+    var mainLabel = comp.label.split('(')[0].trim();
+    var paren = comp.label.match(/\(([^)]+)\)/);
 
-  function clearHighlight() {
-    components.forEach(function(c) {
-      nodeEls[c.id].classList.remove('dimmed', 'peer');
+    var h = '<div class="comp-label">' + esc(mainLabel) + '</div>';
+    if (paren) h += '<div class="comp-sublabel">' + esc(paren[1]) + '</div>';
+
+    card.innerHTML = h;
+    card.addEventListener('click', function(e) {
+      e.stopPropagation();
+      selectComponent(comp);
     });
-    Object.keys(connTagEls).forEach(function(cid) {
-      connTagEls[cid].forEach(function(tag) { tag.classList.remove('lit'); });
-    });
+    return card;
   }
 
   // ---- DETAIL PANEL ----
   var detailPanel = document.getElementById('detailPanel');
-  var selectedId = null;
+  var selectedCard = null;
 
   function selectComponent(comp) {
-    if (selectedId === comp.id) { closeDetail(); return; }
-    if (selectedId && nodeEls[selectedId]) nodeEls[selectedId].classList.remove('selected');
-    selectedId = comp.id;
-    nodeEls[comp.id].classList.add('selected');
+    if (selectedCard) selectedCard.classList.remove('selected');
+    var card = diagramEl.querySelector('[data-id="' + comp.id + '"]');
 
-    document.getElementById('detailCategory').setAttribute('data-cat', comp.category);
-    document.getElementById('detailCategory').textContent = comp.category.replace(/-/g,' ');
+    if (selectedCard === card) { closeDetail(); return; }
+    selectedCard = card;
+    card.classList.add('selected');
+
+    var catEl = document.getElementById('detailCategory');
+    catEl.textContent = comp.category.replace(/-/g, ' ');
+    catEl.style.background = catColors[comp.category] || '#666';
+
     document.getElementById('detailTitle').textContent = comp.label;
     document.getElementById('detailDescription').textContent = comp.description;
 
@@ -786,13 +859,13 @@ body {
   }
 
   window.closeDetail = function() {
-    if (selectedId && nodeEls[selectedId]) nodeEls[selectedId].classList.remove('selected');
-    selectedId = null;
+    if (selectedCard) selectedCard.classList.remove('selected');
+    selectedCard = null;
     detailPanel.classList.remove('visible');
   };
 
   document.addEventListener('click', function(e) {
-    if (selectedId && !e.target.closest('.diagram-node') && !e.target.closest('.detail-panel')) closeDetail();
+    if (selectedCard && !e.target.closest('.comp-card') && !e.target.closest('.detail-panel')) closeDetail();
   });
 
   // ---- RISK REPORT ----
