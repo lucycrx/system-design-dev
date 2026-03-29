@@ -155,7 +155,12 @@ export type DiagramNodeType =
   | "queue"
   | "load-balancer"
   | "cdn"
-  | "api-gateway";
+  | "api-gateway"
+  | "auth"
+  | "external-service"
+  | "background-job"
+  | "storage"
+  | "agent";
 
 export interface DiagramNode {
   id: string;

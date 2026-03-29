@@ -5,6 +5,7 @@
       "label": "Frontend",
       "description": "What users see and interact with — the screens, buttons, and forms that make up the user interface",
       "analogy": "The storefront and customer-facing counters of a business. Everything the customer touches and sees.",
+      "icon": "lucide:monitor",
       "diagramNodeType": "client",
       "color": "#4A708E",
       "signals": [
@@ -21,6 +22,7 @@
       "label": "API Layer",
       "description": "The gateway that receives all incoming requests and routes them to the right place — the front desk of your application",
       "analogy": "The front desk at a hotel. Every guest request goes through the front desk, which figures out whether to call housekeeping, the restaurant, or the valet.",
+      "icon": "lucide:route",
       "diagramNodeType": "api-gateway",
       "color": "#4E5E6E",
       "signals": [
@@ -39,6 +41,7 @@
       "label": "Database",
       "description": "Where your data lives permanently — the system of record that remembers everything even after restarts",
       "analogy": "The filing cabinet that stores all your important records. Slower to access than your desk, but nothing gets lost.",
+      "icon": "lucide:database",
       "diagramNodeType": "database",
       "color": "#256B3B",
       "signals": [
@@ -60,6 +63,7 @@
       "label": "Cache",
       "description": "A fast, temporary storage layer that keeps frequently accessed data close at hand to avoid slow database lookups",
       "analogy": "A cookbook on the kitchen counter instead of in the bookshelf. Limited space, but anything there is instant to grab.",
+      "icon": "lucide:zap",
       "diagramNodeType": "cache",
       "color": "#C49A1D",
       "signals": [
@@ -77,6 +81,7 @@
       "label": "Authentication and Authorization",
       "description": "How the system verifies who you are and what you're allowed to do",
       "analogy": "The security guard at the building entrance who checks your ID badge and makes sure you only go to floors you have access to.",
+      "icon": "lucide:shield-check",
       "diagramNodeType": "server",
       "color": "#8C3B3B",
       "signals": [
@@ -97,6 +102,7 @@
       "label": "External Services",
       "description": "Third-party services your system depends on — payment processors, email providers, AI APIs, analytics, etc.",
       "analogy": "Suppliers and contractors your business relies on. You don't make everything in-house — you outsource to specialists.",
+      "icon": "lucide:plug",
       "diagramNodeType": "server",
       "color": "#C44536",
       "signals": [
@@ -113,6 +119,7 @@
       "label": "Background Jobs",
       "description": "Tasks that run behind the scenes without making the user wait — sending emails, processing images, syncing data",
       "analogy": "The back office that handles paperwork after the customer leaves. The customer doesn't wait while their receipt is filed and their loyalty points are updated.",
+      "icon": "lucide:workflow",
       "diagramNodeType": "queue",
       "color": "#6B5B8A",
       "signals": [
@@ -130,6 +137,7 @@
       "label": "File Storage",
       "description": "Where files, images, documents, and uploads are kept — separate from the database",
       "analogy": "The warehouse where you store physical inventory. Different from the office filing cabinet (database) — this is for bulky items.",
+      "icon": "lucide:hard-drive",
       "diagramNodeType": "server",
       "color": "#5A7A5A",
       "signals": [
