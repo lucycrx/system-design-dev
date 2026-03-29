@@ -114,7 +114,7 @@ body {
 .risk-chip .count { font-weight: 700; font-size: 0.85rem; }
 
 .summary-strip { padding: 1.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-.summary-text { font-size: 1.05rem; line-height: 1.6; max-width: 48rem; }
+.summary-text { font-size: 1.05rem; line-height: 1.6; }
 .summary-text strong { font-weight: 600; }
 
 .section-label {
@@ -293,31 +293,34 @@ body {
   white-space: nowrap;
 }
 
-/* Multi-connector row: several labeled flows side by side */
+/* Multi-connector row: single column of labeled flows */
 .flow-row {
   display: flex;
-  justify-content: space-around;
-  padding: 0.25rem 0;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.15rem 0;
+  gap: 0;
 }
 
 .flow-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 0.5rem;
+  padding: 0.1rem 0;
 }
 
-.flow-item .flow-stem { height: 14px; }
+.flow-item .flow-stem { height: 10px; }
 
-/* Stagger animation for multiple connectors in a row */
+/* Stagger animation for multiple connectors */
 .flow-item:nth-child(1) .flow-stem::after { animation-delay: 0s; }
 .flow-item:nth-child(2) .flow-stem::after { animation-delay: 0.4s; }
 .flow-item:nth-child(3) .flow-stem::after { animation-delay: 0.8s; }
 
-/* Only animate the top stem in each flow-item (direction indicator) */
+/* Only animate the first stem in each flow-item */
 .flow-item .flow-stem:last-child::after { display: none; }
 
 .flow-item .flow-label {
-  padding: 0.15rem 0;
+  padding: 0;
 }
 
 /* ---- DETAIL PANEL ---- */
@@ -363,7 +366,6 @@ body {
   line-height: 1.6;
   color: var(--text-muted);
   margin-bottom: 1rem;
-  max-width: 48rem;
 }
 
 .detail-columns { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
@@ -863,10 +865,13 @@ body {
       row.appendChild(group);
     });
 
-    // If only one cat in this row, add an empty flex item for balance
+    // If only one cat in this row, center it instead of stretching
     if (rowCats.length === 1) {
+      row.style.justifyContent = 'center';
+      row.querySelector('.cat-group').style.flex = 'none';
+      row.querySelector('.cat-group').style.width = '60%';
       var spacer = document.createElement('div');
-      spacer.style.flex = '1';
+      spacer.style.display = 'none';
       row.appendChild(spacer);
     }
 
