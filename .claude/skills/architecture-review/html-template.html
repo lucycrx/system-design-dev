@@ -285,12 +285,21 @@ body {
 /* Label between two stems */
 .flow-label {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--diagram-text);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  color: var(--diagram-text-dim);
   padding: 0 0.6rem;
   white-space: nowrap;
+}
+
+.flow-label .flow-endpoint {
+  font-weight: 600;
+  color: var(--diagram-text);
+}
+
+.flow-label .flow-arrow {
+  color: var(--diagram-text-dim);
+  padding: 0 0.15rem;
 }
 
 /* Multi-connector row: single column of labeled flows */
@@ -764,17 +773,19 @@ body {
   var animDelay = 0;
 
   // Collect connection summaries between tiers for flow labels
-  // Map: sourceCat -> targetCat -> [labels]
+  // Map: sourceCat|targetCat -> [{source, target, label}]
   var catConnections = {};
   components.forEach(function(c) {
+    var sourceName = c.label.split('(')[0].trim();
     (c.connections || []).forEach(function(conn) {
       var target = compMap[conn.targetId];
       if (!target) return;
       if (c.category === target.category) return; // skip intra-category
+      var targetName = target.label.split('(')[0].trim();
       var key = c.category + '|' + target.category;
       if (!catConnections[key]) catConnections[key] = [];
       if (catConnections[key].length < 2) { // max 2 labels per relationship
-        catConnections[key].push(conn.label);
+        catConnections[key].push({ source: sourceName, target: targetName, label: conn.label });
       }
     });
   });
@@ -788,13 +799,13 @@ body {
 
     // Flow connector between previous row and this row
     if (prevRowCats.length > 0) {
-      var flowLabels = [];
+      var flowEntries = [];
       prevRowCats.forEach(function(pCat) {
         rowCats.forEach(function(rCat) {
           var key = pCat + '|' + rCat;
           if (catConnections[key]) {
-            catConnections[key].forEach(function(lbl) {
-              if (flowLabels.length < 3) flowLabels.push(lbl);
+            catConnections[key].forEach(function(entry) {
+              if (flowEntries.length < 3) flowEntries.push(entry);
             });
           }
         });
@@ -804,20 +815,24 @@ body {
         prevRowCats.forEach(function(pCat) {
           var key = rCat + '|' + pCat;
           if (catConnections[key]) {
-            catConnections[key].forEach(function(lbl) {
-              if (flowLabels.length < 3) flowLabels.push(lbl);
+            catConnections[key].forEach(function(entry) {
+              if (flowEntries.length < 3) flowEntries.push(entry);
             });
           }
         });
       });
 
-      if (flowLabels.length > 0) {
+      if (flowEntries.length > 0) {
         var flowRow = document.createElement('div');
         flowRow.className = 'flow-row';
-        flowLabels.forEach(function(lbl) {
+        flowEntries.forEach(function(entry) {
           var item = document.createElement('div');
           item.className = 'flow-item';
-          item.innerHTML = '<div class="flow-stem"></div><div class="flow-label">' + esc(lbl.length > 35 ? lbl.substring(0, 33) + '...' : lbl) + '</div><div class="flow-stem"></div>';
+          var labelHtml = '<span class="flow-endpoint">' + esc(entry.source) + '</span>'
+            + '<span class="flow-arrow">\u2192</span>'
+            + '<span class="flow-endpoint">' + esc(entry.target) + '</span> '
+            + esc(entry.label);
+          item.innerHTML = '<div class="flow-stem"></div><div class="flow-label">' + labelHtml + '</div><div class="flow-stem"></div>';
           flowRow.appendChild(item);
         });
         diagramEl.appendChild(flowRow);
