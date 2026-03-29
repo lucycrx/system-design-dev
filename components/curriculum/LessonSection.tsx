@@ -47,7 +47,7 @@ export function LessonSection({ section }: Props) {
           components={{
             p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
             strong: ({ children }) => (
-              <strong className="text-text font-semibold">{children}</strong>
+              <strong className="text-text font-bold">{children}</strong>
             ),
             em: ({ children }) => (
               <em className="text-text-muted">{children}</em>

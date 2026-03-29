@@ -55,7 +55,7 @@ export function CalloutBlock({ block }: Props) {
           components={{
             p: ({ children }) => <p className="mb-0 last:mb-0">{children}</p>,
             strong: ({ children }) => (
-              <strong className="text-text font-semibold">{children}</strong>
+              <strong className="text-text font-bold">{children}</strong>
             ),
           }}
         >

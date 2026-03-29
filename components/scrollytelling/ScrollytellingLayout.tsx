@@ -138,7 +138,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
       {/* Right panel — sticky diagram (desktop only) */}
       <div className="hidden lg:block lg:w-[45%]">
         <div className="sticky" style={{ top: stickyTop }}>
-          <div className="bg-surface  border border-border p-6 shadow-sm">
+          <div className="bg-surface border border-border p-6">
             <InteractiveDiagramLoader
               diagram={activeDiagram}
               highlightNodes={activeHighlightNodes}

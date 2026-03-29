@@ -155,7 +155,7 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
         ))}
         {/* Coming soon placeholder */}
         <div className="border border-dashed border-text-dim/20 p-8 flex items-center justify-center">
-          <p className="text-text-dim text-sm font-mono">
+          <p className="label-mono text-text-dim">
             More stories coming soon
           </p>
         </div>

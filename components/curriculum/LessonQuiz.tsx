@@ -74,7 +74,7 @@ export function LessonQuiz({ quiz }: Props) {
         <div className="px-4 pb-4">
           <button
             onClick={() => setRevealed(true)}
-            className="w-full py-3 bg-purple text-white font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
+            className="w-full py-3 bg-text text-bg font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
           >
             Check Answer
           </button>

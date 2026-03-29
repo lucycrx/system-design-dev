@@ -128,9 +128,9 @@ function SystemNodeComponent({ data }: { data: SystemNodeData }) {
       <div
         className={`
           flex items-center gap-2.5 px-3 py-2.5
-          bg-surface border shadow-sm
-          transition-all duration-300 cursor-pointer
-          hover:shadow-md hover:border-accent/40
+          bg-surface border
+          transition-all duration-200 cursor-pointer
+          hover:border-text/30
           ${isHighlighted ? "border-accent/50" : "border-border"}
           ${data.nodeType === "cache" ? "border-dashed" : ""}
           ${isNew ? "animate-[diagram-node-enter_500ms_ease-out_both]" : ""}
@@ -157,7 +157,7 @@ function SystemNodeComponent({ data }: { data: SystemNodeData }) {
       {/* Explanation tooltip */}
       {showTooltip && data.explanation && (
         <div
-          className="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 bg-text text-bg text-xs shadow-lg pointer-events-none"
+          className="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 bg-text text-bg text-xs pointer-events-none"
         >
           {data.explanation}
           <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-text rotate-45 -mt-1" />

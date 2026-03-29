@@ -35,7 +35,7 @@ export function RevealBlock({ block }: Props) {
               components={{
                 p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
                 strong: ({ children }) => (
-                  <strong className="text-text font-semibold">{children}</strong>
+                  <strong className="text-text font-bold">{children}</strong>
                 ),
                 ol: ({ children }) => (
                   <ol className="list-decimal list-inside space-y-1 mb-3">{children}</ol>

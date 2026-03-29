@@ -94,7 +94,7 @@ export function TextBlock({ block, glossaryMap }: Props) {
             </p>
           ),
           strong: ({ children }) => (
-            <strong className="text-text font-semibold">{children}</strong>
+            <strong className="text-text font-bold">{children}</strong>
           ),
           em: ({ children }) => (
             <em className="text-text-muted italic">{children}</em>
@@ -125,7 +125,7 @@ export function TextBlock({ block, glossaryMap }: Props) {
             </thead>
           ),
           th: ({ children }) => (
-            <th className="px-4 py-3 font-semibold">{children}</th>
+            <th className="px-4 py-3 font-bold">{children}</th>
           ),
           td: ({ children }) => (
             <td className="px-4 py-2.5 border-t border-border text-text/80">
