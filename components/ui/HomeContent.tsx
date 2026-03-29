@@ -191,7 +191,7 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
           >
             <div className="flex items-start gap-5">
               <div
-                className={`flex-shrink-0 w-14 h-14 ${MODULE_BG_FULL_COLORS[mod.color]} flex items-center justify-center text-2xl font-bold font-mono text-bg`}
+                className={`flex-shrink-0 w-10 h-10 ${MODULE_BG_FULL_COLORS[mod.color]} flex items-center justify-center text-lg font-bold font-mono text-bg`}
               >
                 {mod.moduleNumber}
               </div>
@@ -250,7 +250,7 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
             key={mod.num}
             className="bg-surface/50 border border-dashed border-border p-7 flex items-center gap-5 opacity-35"
           >
-            <div className="w-14 h-14 bg-bg flex items-center justify-center text-2xl font-mono text-text-dim">
+            <div className="w-10 h-10 bg-bg flex items-center justify-center text-lg font-mono text-text-dim">
               {mod.num}
             </div>
             <div>

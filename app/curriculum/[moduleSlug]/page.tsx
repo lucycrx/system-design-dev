@@ -69,7 +69,7 @@ export default async function ModulePage({ params }: Props) {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4">
             <span
-              className={`text-sm font-bold font-mono text-bg ${MODULE_BG_FULL_COLORS[mod.color]} w-12 h-12 flex items-center justify-center`}
+              className={`text-sm font-bold font-mono text-bg ${MODULE_BG_FULL_COLORS[mod.color]} w-10 h-10 flex items-center justify-center`}
             >
               {mod.moduleNumber}
             </span>
