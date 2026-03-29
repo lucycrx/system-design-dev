@@ -1,0 +1,292 @@
+{
+  "id": "data-and-state",
+  "slug": "data-and-state",
+  "title": "Data and State",
+  "subtitle": "Keeping your data correct, fast, and safe",
+  "description": "As your app grows, a single database isn't enough. This module covers the techniques that keep your data fast to read, safe to write, and consistent across every user — even when things get big.",
+  "moduleNumber": 4,
+  "icon": "🗄️",
+  "color": "orange",
+  "lessons": [
+    {
+      "id": "database-indexing",
+      "title": "Database Indexing: Why did my query get slow?",
+      "description": "What happens when your database table grows from 1,000 rows to 10 million — and the one trick that fixes it.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "An **index** is a data structure that your [[glossary:database|database]] maintains alongside your actual data. Its sole purpose is to make lookups fast.\n\nWithout an index, every query has to scan every single row in a table to find what it's looking for. This is called a **full table scan**, and it's exactly as slow as it sounds. With 1,000 rows, you won't notice. With 10 million rows, your page takes 8 seconds to load and your users leave.\n\nAn index works by keeping a sorted, efficient copy of specific columns so the database can jump directly to matching rows instead of reading them all."
+        },
+        {
+          "heading": "why",
+          "content": "Database performance is one of the most common reasons apps feel slow. Understanding indexes helps you:\n\n- **Diagnose slow pages** — if a page loads slowly and the database query is the bottleneck, a missing index is the first thing to check\n- **Review AI-generated code** — AI tools often create database tables and queries but forget to add indexes on columns you filter or sort by\n- **Have productive conversations with engineers** — saying \"do we have an index on the user_id column?\" shows you understand the most common performance fix in all of web development\n- **Prevent outages** — a missing index on a growing table is a ticking time bomb. It works fine at launch and degrades gradually until everything falls over"
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **library card catalog**.\n\nImagine a library with 100,000 books on the shelves. If someone asks for \"all books by Margaret Atwood,\" you have two options:\n\n1. **No index**: Walk down every single aisle, pull out every book, check the author, put it back. This takes hours.\n2. **With an index**: Go to the card catalog, flip to \"Atwood, Margaret,\" and get a list of shelf locations. Walk directly to those shelves. This takes minutes.\n\nThe card catalog is the index. It doesn't contain the books themselves — it contains a sorted reference that tells you exactly where to look.\n\nIn database terms:\n- You create an index on a column (like `email` or `created_at`)\n- The database maintains a sorted structure behind the scenes\n- Queries that filter or sort by that column go from scanning millions of rows to jumping straight to the answer\n\nThe tradeoff: indexes take up extra storage space, and every time you write new data, the index needs to be updated too. So you don't index everything — just the columns you query frequently."
+        },
+        {
+          "heading": "when",
+          "content": "You should think about indexes when:\n\n- **A page is loading slowly** and the cause is a database query\n- **You filter by a column often** — if every user profile page runs `WHERE user_id = ?`, that column needs an index\n- **You sort by a column** — showing orders by `created_at` descending? Index it.\n- **You have more than a few thousand rows** in a table and growing\n\nYou probably don't need to worry about indexes when:\n- Your tables are small (under a few thousand rows)\n- You only read data occasionally (like an admin dashboard)\n- You're in early prototyping and performance doesn't matter yet"
+        }
+      ],
+      "quiz": {
+        "question": "What's slowing down the dashboard?",
+        "scenario": "Your e-commerce app has an admin dashboard that shows all orders from the last 30 days. When you had 500 orders, it loaded instantly. Now you have 2 million orders and the page takes 12 seconds. The query is: SELECT * FROM orders WHERE created_at > '2026-02-26' ORDER BY created_at DESC. There is no index on the created_at column.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add an index on the created_at column",
+            "correct": true,
+            "explanation": "Without an index, the database has to scan all 2 million rows to find orders from the last 30 days, then sort them. An index on created_at lets it jump directly to recent orders and return them already sorted. This is the textbook case for an index — a filter and sort on the same column with a large and growing table."
+          },
+          {
+            "id": "b",
+            "text": "Switch to a faster database engine",
+            "correct": false,
+            "explanation": "Switching databases is a massive undertaking and almost never the right first step. A missing index is the most common cause of slow queries, and adding one takes seconds. You'd be rebuilding the engine when you just need to add a card catalog."
+          },
+          {
+            "id": "c",
+            "text": "Load fewer columns by replacing SELECT * with specific column names",
+            "correct": false,
+            "explanation": "Selecting fewer columns can help marginally, but the core problem is that the database is scanning 2 million rows to find matching ones. Even if you only select one column, a full table scan of 2 million rows is still slow. The index is what eliminates the scan."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-2",
+          "label": "See this in action: Building an Online Store → Growing Pains"
+        }
+      ],
+      "relatedGlossary": ["database", "relational-database"]
+    },
+    {
+      "id": "read-replicas",
+      "title": "Read Replicas: Copying your database to go faster",
+      "description": "Why one database becomes a bottleneck and how making copies of it solves the problem without changing your code.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **read replica** is a copy of your [[glossary:database|database]] that handles read queries (SELECT statements) so your primary database can focus on writes (INSERT, UPDATE, DELETE).\n\nHere's the core idea: most apps read data far more often than they write it. A social media feed, a product catalog, a dashboard — users are constantly loading pages, but only occasionally posting, purchasing, or updating. If your single database is handling both reads and writes, the reads can overwhelm it.\n\nA read replica solves this by creating one or more copies of your database. Writes still go to the primary. Reads get distributed across the replicas. The primary automatically streams changes to the replicas so they stay up to date."
+        },
+        {
+          "heading": "why",
+          "content": "Read replicas matter because:\n\n- **Most apps are read-heavy** — a typical app does 80-95% reads and 5-20% writes. Offloading reads to replicas can dramatically reduce load on your primary database.\n- **It's one of the easiest scaling wins** — compared to sharding or re-architecting, adding a read replica is straightforward and often supported out of the box by managed database services like AWS RDS or Supabase.\n- **It improves availability** — if your primary database goes down, a replica can be promoted to take over, reducing downtime.\n- **It doesn't require app changes** — your app just needs to know to send reads to the replica and writes to the primary. Many database drivers handle this automatically."
+        },
+        {
+          "heading": "how",
+          "content": "Imagine a popular restaurant with **one chef** (the primary database). The chef both prepares dishes (writes) and answers questions about the menu (reads).\n\nAt first this is fine. But as the restaurant gets busier, the chef spends half their time answering \"what's in the risotto?\" instead of cooking. Food takes longer. Customers get frustrated.\n\nThe solution: hire a few **front-of-house staff** (read replicas) who know the full menu and can answer any question. The chef gives them an updated menu whenever it changes. Now the chef focuses on cooking, and customers get instant answers about the menu.\n\nThat's a read replica. The primary database handles all writes and streams the changes to replicas. The replicas handle read traffic. Everyone's faster.\n\nThere's one important nuance: **replication lag**. It takes a small amount of time (usually milliseconds, sometimes seconds) for changes to reach the replicas. This means a user might write something and not immediately see it when reading from a replica. Most apps handle this by reading from the primary for the user who just wrote, and from replicas for everyone else."
+        },
+        {
+          "heading": "when",
+          "content": "Consider read replicas when:\n\n- **Your database CPU is high** and most of the load is read queries\n- **Page loads are getting slow** because the database can't keep up with all the SELECT queries\n- **You have a read-heavy workload** like a content site, product catalog, or reporting dashboard\n- **You need high availability** and want a hot standby in case your primary fails\n\nYou probably don't need replicas when:\n- Your database isn't the bottleneck (check your metrics first)\n- Your app is write-heavy (replicas won't help because the primary still handles all writes)\n- You have a small number of users and the database is barely loaded"
+        }
+      ],
+      "quiz": {
+        "question": "Will a read replica help here?",
+        "scenario": "Your ride-sharing app shows drivers a real-time map of ride requests nearby. During rush hour, the database is overloaded. Monitoring shows 90% of queries are reads (drivers checking for requests) and 10% are writes (riders creating requests). Page loads are slow for drivers during peak times.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Yes — send the driver map reads to a replica so the primary can focus on ride requests",
+            "correct": true,
+            "explanation": "This is a textbook read-replica scenario. The workload is 90% reads, and those reads are what's overwhelming the database. Moving driver map queries to a read replica frees up the primary to handle ride request creation. The small replication lag (milliseconds) is acceptable for showing nearby rides — a driver won't notice a 200ms delay."
+          },
+          {
+            "id": "b",
+            "text": "No — ride-sharing needs real-time data, so replicas with any lag won't work",
+            "correct": false,
+            "explanation": "Replication lag is typically milliseconds — far below what any human would notice on a map. The driver doesn't need to see a ride request the instant it's created; a 100-200ms delay is invisible. Perfect real-time accuracy matters for things like financial trading, not for showing dots on a map."
+          },
+          {
+            "id": "c",
+            "text": "No — you should add more database indexes instead",
+            "correct": false,
+            "explanation": "Indexes help individual queries run faster, but if the database is overwhelmed by sheer volume of queries (thousands of drivers polling every few seconds), indexes alone won't solve it. You need to distribute the load across multiple database instances. Indexes and replicas solve different problems."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "ride-sharing",
+          "stageId": "stage-3",
+          "label": "See this in action: Building a Ride-Sharing App → Scaling for Rush Hour"
+        }
+      ],
+      "relatedGlossary": ["database", "persistence"]
+    },
+    {
+      "id": "data-consistency",
+      "title": "Data Consistency: What happens when two people edit at the same time?",
+      "description": "Eventual vs. strong consistency — the tradeoff every distributed system has to make.",
+      "estimatedMinutes": 7,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Data consistency** is about whether every part of your system sees the same data at the same time. In a world where data is copied across multiple servers (replicas, caches, regions), changes don't arrive everywhere simultaneously. This creates a fundamental question: how stale can your data be?\n\nThere are two main models:\n\n- **Strong consistency**: Every read returns the most recent write. If you update your profile name, every user who loads your profile immediately sees the new name. No exceptions.\n- **Eventual consistency**: After a write, replicas will *eventually* catch up, but for a brief window, some users might see the old data. Your profile name change might take a few seconds to appear everywhere.\n\nNeither model is \"better.\" They're tradeoffs between speed, availability, and correctness."
+        },
+        {
+          "heading": "why",
+          "content": "Consistency matters because getting it wrong leads to real problems:\n\n- **Double-spending**: Two users buy the last concert ticket at the same time. Without proper consistency, both transactions succeed and you've oversold.\n- **Lost updates**: Two people edit the same document. One saves, then the other saves, and the first person's changes silently vanish.\n- **Stale data**: A user changes their privacy settings to \"private,\" but for 30 seconds their profile is still visible to everyone because replicas haven't caught up.\n\nAs a product person, you need to know which parts of your app require strong consistency (financial transactions, inventory, permissions) and which can tolerate eventual consistency (social feeds, analytics, recommendations). Getting this wrong can cost money, lose data, or violate user trust."
+        },
+        {
+          "heading": "how",
+          "content": "Think of **updating a company's phone directory**.\n\n**Strong consistency** is like having one master directory book that everyone in the office shares. When someone's number changes, you update the one book. Everyone always sees the right number, but if someone else is using the book, you have to wait your turn. It's slow but always correct.\n\n**Eventual consistency** is like printing copies of the directory for every desk. When a number changes, you update the master and start distributing new copies. For a few minutes, some desks have the old number. But nobody has to wait in line to check a number, so it's much faster for everyday lookups.\n\nIn practice, here's how the two-editors problem gets solved:\n\n- **Optimistic locking**: Each record has a version number. When you save, the system checks if the version still matches. If someone edited it while you were working, your save is rejected and you're asked to merge the changes.\n- **Pessimistic locking**: The record is locked when someone starts editing. Nobody else can edit until the first person is done. Safer but creates bottlenecks.\n- **Last-write-wins**: Simplest approach — whatever save happens last overwrites everything before it. Fast but you lose data silently. Fine for low-stakes updates like a user's display name; terrible for financial records."
+        },
+        {
+          "heading": "when",
+          "content": "**Use strong consistency for:**\n- Financial transactions (account balances, payments, transfers)\n- Inventory management (\"only 3 left in stock\")\n- Security-critical data (permissions, authentication tokens)\n- Anything where being wrong has real consequences\n\n**Eventual consistency is fine for:**\n- Social media feeds (seeing a post 2 seconds late is harmless)\n- View counts, like counts, follower counts (approximate is okay)\n- Search indexes (a new product appearing in search a few seconds late is acceptable)\n- Analytics and reporting dashboards\n\nThe key question to ask: \"If a user sees data that's 5 seconds old, does anything bad happen?\" If the answer is yes, you need strong consistency. If no, eventual consistency lets your system be faster and more available."
+        }
+      ],
+      "quiz": {
+        "question": "Which consistency model do you need?",
+        "scenario": "Your online store is having a flash sale. A limited-edition sneaker has 50 pairs in stock. Thousands of users are trying to buy them simultaneously. You need to make sure you don't sell more than 50 pairs.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Strong consistency — every purchase must check and decrement the real-time inventory count",
+            "correct": true,
+            "explanation": "This is a textbook case for strong consistency. If two users both read '1 pair left' from different replicas at the same time and both purchase, you've oversold. Inventory during a flash sale must be strongly consistent — every read must reflect every completed purchase. Yes, it's slower, but selling 51 of 50 items is far worse than a slightly slower checkout."
+          },
+          {
+            "id": "b",
+            "text": "Eventual consistency — it's faster and the count will catch up within seconds",
+            "correct": false,
+            "explanation": "Seconds matter enormously here. During a flash sale, hundreds of purchases happen per second. A 2-second consistency lag could mean dozens of oversold items. Each oversale means either canceling a customer's order (terrible experience) or eating the cost. Speed isn't worth it when correctness has a dollar value."
+          },
+          {
+            "id": "c",
+            "text": "Last-write-wins — just let the most recent purchase go through and sort it out later",
+            "correct": false,
+            "explanation": "Last-write-wins is the opposite of what you want for inventory. It would let purchases succeed without checking real availability, leading to massive overselling. 'Sort it out later' means canceling orders and sending apologetic emails — a terrible customer experience that damages trust."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-3",
+          "label": "See this in action: Building an Online Store → The Flash Sale"
+        }
+      ],
+      "relatedGlossary": ["database", "persistence"]
+    },
+    {
+      "id": "database-sharding",
+      "title": "Database Sharding: Splitting data across multiple databases",
+      "description": "When one database can't hold it all, you divide your data by a key — and unlock massive scale at the cost of new complexity.",
+      "estimatedMinutes": 7,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Sharding** means splitting your [[glossary:database|database]] into multiple smaller databases (called **shards**), each holding a portion of the total data. Instead of one massive database with 500 million users, you might have 10 databases each holding 50 million users.\n\nYou split the data based on a **shard key** — a value that determines which shard a record belongs to. For example:\n- Shard by user ID: users 1-50M go to shard 1, users 50M-100M go to shard 2, and so on\n- Shard by geography: European users on one shard, American users on another\n- Shard by tenant: in a B2B app, each large customer gets their own shard\n\nEach shard is a fully independent database. Your application has a routing layer that looks at the shard key and sends the query to the right shard."
+        },
+        {
+          "heading": "why",
+          "content": "Sharding solves the \"one database can't handle this anymore\" problem:\n\n- **Storage limits**: A single database server has finite disk space. When you have billions of records, you physically need more machines.\n- **Write throughput**: Unlike reads (which you can scale with replicas), writes all go to one primary. Sharding distributes writes across multiple primaries.\n- **Query performance**: Even with indexes, queries on a table with a billion rows are slower than queries on a table with 100 million rows.\n\nBut sharding comes with serious tradeoffs:\n- **Cross-shard queries are painful**: \"Show me all orders from last month\" now means querying every shard and combining results.\n- **Resharding is a nightmare**: If you pick the wrong shard key or your data grows unevenly, rebalancing data across shards is one of the hardest operations in engineering.\n- **Increased complexity**: Your app now has to know which shard to talk to for every query."
+        },
+        {
+          "heading": "how",
+          "content": "Imagine you run a **massive filing cabinet company** that stores paper records for businesses.\n\nAt first, you have one giant filing cabinet (one database). A clerk can find any file, but as you add millions of records, the cabinet is overflowing and the clerk can barely move. Finding a file takes forever because there's just too much stuff.\n\nSo you split into **multiple filing cabinets by last name**: A-E in cabinet 1, F-J in cabinet 2, and so on. Each cabinet has its own clerk. When someone asks for \"Smith,\" you know to go to cabinet 4. Much faster.\n\nBut now if someone asks \"give me all records from last month regardless of name,\" you have to ask every clerk to check their cabinet and combine the results. That query used to be easy; now it's complex.\n\nThis is exactly the sharding tradeoff. Lookups by the shard key are fast. Everything else gets harder.\n\nChoosing the right shard key is critical:\n- **Good shard key**: Evenly distributes data and matches how your app queries. User ID works well if most queries are per-user.\n- **Bad shard key**: Creates \"hot shards\" where one shard gets far more traffic than others. Sharding by country puts 50% of your data on the US shard while others sit idle."
+        },
+        {
+          "heading": "when",
+          "content": "Sharding is a **last resort**, not a first move. The progression typically goes:\n\n1. **Add indexes** — the cheapest performance fix\n2. **Add read replicas** — handles read-heavy workloads\n3. **Vertical scaling** — get a bigger database server (more RAM, faster disk)\n4. **Sharding** — when nothing else works and you need to split data\n\nYou should consider sharding when:\n- Your database is approaching storage limits on the largest available hardware\n- Write throughput is the bottleneck and replicas don't help (replicas only help reads)\n- You're at the scale of millions to billions of records with sustained high write volume\n\nMost apps never need sharding. If you're not at the scale of a major SaaS platform or a social network with millions of active users, simpler solutions will get you much further."
+        }
+      ],
+      "quiz": {
+        "question": "Is sharding the right call?",
+        "scenario": "Your B2B SaaS app has 200 enterprise customers. Your largest customer has 5 million records in the database; most others have under 100,000. The database is slow during peak hours, and monitoring shows high read load with moderate writes. The team suggests sharding by customer ID.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Try read replicas first — the workload is read-heavy, so replicas will reduce load without the complexity of sharding",
+            "correct": true,
+            "explanation": "The monitoring shows high read load with only moderate writes — this is exactly the pattern read replicas solve. Sharding is a major architectural change with long-term complexity costs. With only 200 customers and read-heavy traffic, read replicas will likely solve the performance problem and should always be tried before sharding."
+          },
+          {
+            "id": "b",
+            "text": "Shard by customer ID — each enterprise customer gets their own shard for isolation and performance",
+            "correct": false,
+            "explanation": "This is premature. Sharding 200 customers means managing potentially 200 separate databases — an operational nightmare. And since most customers have under 100,000 records, those shards would be nearly empty while one customer's shard has 5 million records. The data is unevenly distributed, which defeats the purpose. Try simpler solutions first."
+          },
+          {
+            "id": "c",
+            "text": "Add indexes on the most queried columns — the queries themselves might be unoptimized",
+            "correct": false,
+            "explanation": "Indexes are worth checking and are the cheapest fix, but the scenario says the database is slow 'during peak hours,' suggesting the issue is load volume, not individual query speed. If queries were just missing indexes, they'd be slow all the time, not only during peaks. Read replicas address the volume problem directly."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-4",
+          "label": "See this in action: Building an Online Store → Going Global"
+        }
+      ],
+      "relatedGlossary": ["database", "relational-database"]
+    },
+    {
+      "id": "state-management",
+      "title": "State Management: Where does your data actually live?",
+      "description": "Client state, server state, database state, cache state — understanding where data lives (and when it gets out of sync).",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**State** is any data your application is keeping track of at a given moment. It sounds abstract, but it's everywhere:\n\n- Is the user logged in? That's **authentication state**.\n- What's in their shopping cart? That's **session state**.\n- What text have they typed into a form but not submitted? That's **client state**.\n- What are the latest 20 messages in a chat room? That's **server state** (or **application state**).\n\nThe tricky part is that state lives in multiple places simultaneously:\n\n- **Client state**: In the browser's memory. Fast to access, but lost when the user refreshes or closes the tab. Form inputs, UI toggles, scroll position.\n- **Server state**: In your [[glossary:server|server's]] memory or a cache. Shared across users, faster than the database, but lost when the server restarts.\n- **Database state**: In your [[glossary:database|database]]. Permanent and reliable, but slower to read and write.\n- **Cache state**: A temporary, fast copy of data that originally lives in the database. Speeds things up but can become stale."
+        },
+        {
+          "heading": "why",
+          "content": "State management bugs are some of the most confusing issues you'll encounter:\n\n- A user adds an item to their cart, navigates away, comes back, and the cart is empty (client state was lost on navigation)\n- Two tabs show different data for the same user (client state is per-tab, not shared)\n- A user updates their profile, but the old name still shows in the header (the cache has stale state)\n- A user logs out, but their session is still active in another browser (session state wasn't invalidated everywhere)\n\nUnderstanding where state lives helps you:\n- **Debug confusing behaviors** — \"refresh fixes it\" almost always means client state was out of sync with server state\n- **Make better product decisions** — should the shopping cart persist across devices? That means moving it from client state to database state.\n- **Evaluate architectural choices** — when an AI tool puts state in the wrong place, you can catch it early"
+        },
+        {
+          "heading": "how",
+          "content": "Think of state like **notes in different places** during a team project:\n\n- **Client state** is like notes on a whiteboard in your office. Fast to jot down, easy to reference, but if the cleaning crew erases the board (browser refresh), they're gone. And nobody in other offices can see them.\n- **Server state** is like a shared document in Slack. Multiple team members can see it, it updates quickly, but it's not the official record. If Slack goes down, you lose it.\n- **Database state** is like the formal project document in your company's filing system. It's the source of truth, backed up, permanent — but takes longer to retrieve.\n- **Cache state** is like a printed copy of that document sitting on your desk. It's faster to read, but it might be a day old.\n\n**Session state vs. application state** is another important distinction:\n- **Session state** is tied to one user's visit: their auth token, shopping cart, form progress. It lives in cookies, browser storage, or a server-side session store.\n- **Application state** is shared across users: product listings, message history, leaderboard. It lives in the database and is read by everyone."
+        },
+        {
+          "heading": "when",
+          "content": "Here's a practical guide for where to put different kinds of state:\n\n- **Ephemeral UI state** (form inputs, dropdown open/closed, modal visibility) — keep it in client state. No reason to send this to the server.\n- **User session data** (auth token, user preferences for the current session) — keep in cookies or browser storage, validated by the server.\n- **Data the user expects to persist** (shopping cart, draft messages, saved filters) — store in the database. Users expect these to survive a refresh and work across devices.\n- **Frequently read, rarely changed data** (product catalog, user profiles) — cache it. Keep the source of truth in the database, but serve a cached copy for speed.\n\nThe golden rule: **the database is always the source of truth.** Everything else is a convenient copy. When something goes wrong, the database is what you trust."
+        }
+      ],
+      "quiz": {
+        "question": "Where should this state live?",
+        "scenario": "Users of your e-commerce app are complaining that their shopping cart disappears when they switch from their phone to their laptop. Currently, the cart is stored in the browser's local storage. The product team wants carts to persist across devices.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Move the cart to database state — store it as a record tied to the user's account",
+            "correct": true,
+            "explanation": "Browser local storage is client state — it only exists on that specific device and browser. To persist a cart across devices, you need to store it somewhere all devices can access: the database. When the user logs in on any device, the app fetches their cart from the database. This is the standard approach for cross-device persistence."
+          },
+          {
+            "id": "b",
+            "text": "Use cookies instead of local storage — cookies sync across devices",
+            "correct": false,
+            "explanation": "Cookies do not sync across devices. Like local storage, cookies are per-browser. The difference is that cookies are sent with every HTTP request, while local storage is only accessible via JavaScript. Neither solves the cross-device problem. You need server-side storage."
+          },
+          {
+            "id": "c",
+            "text": "Cache the cart on the server — it will be accessible from any device and faster than the database",
+            "correct": false,
+            "explanation": "A server cache (like Redis) could technically work, but caches are temporary by design — they can be evicted at any time to free memory. If a user adds items to their cart on Monday and comes back Thursday, the cache may have cleared their cart. Shopping carts are data users expect to persist, so the database is the right home. You can cache it for speed, but the database must be the source of truth."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "online-store",
+          "stageId": "stage-2",
+          "label": "See this in action: Building an Online Store → Growing Pains"
+        }
+      ],
+      "relatedGlossary": ["database", "persistence", "server"]
+    }
+  ]
+}
