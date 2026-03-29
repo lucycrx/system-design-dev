@@ -134,19 +134,11 @@ body {
 
 .map-section { margin-bottom: 3rem; }
 
-.map-layout {
-  display: flex;
-  align-items: flex-start;
-  gap: 1.5rem;
-}
-
 .diagram {
   background: var(--diagram-bg);
   border: 1px solid var(--diagram-border);
   padding: 2rem;
-  width: 560px;
-  flex-shrink: 0;
-  max-width: 100%;
+  width: 100%;
 }
 
 /* Category group — outer container with floating edge label */
@@ -307,8 +299,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.15rem 0;
-  gap: 0;
+  padding: 0.5rem 0;
+  gap: 0.15rem;
 }
 
 .flow-item {
@@ -339,13 +331,7 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 1.5rem;
-  flex: 1;
-  min-width: 0;
-  position: sticky;
-  top: 5rem;
-  align-self: flex-start;
-  max-height: calc(100vh - 6rem);
-  overflow-y: auto;
+  margin-top: 1rem;
 }
 
 .detail-panel.visible { display: block; }
@@ -377,7 +363,7 @@ body {
   margin-bottom: 1rem;
 }
 
-.detail-columns { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+.detail-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
 
 .detail-col-title {
   font-family: var(--font-mono);
@@ -546,11 +532,10 @@ body {
 
 @media (max-width: 768px) {
   .header-inner { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
-  .map-layout { flex-direction: column; }
-  .diagram { width: 100%; padding: 1rem; }
-  .detail-panel { position: static; max-height: none; }
+  .diagram { padding: 1rem; }
   .diagram-row { flex-direction: column; }
   .comp-row { flex-direction: column; }
+  .detail-columns { grid-template-columns: 1fr; }
   .risk-card-header { grid-template-columns: auto 1fr auto; gap: 0.75rem; }
   .risk-detail { padding-left: 1.25rem; }
   .footer { flex-direction: column; gap: 0.5rem; }
@@ -594,21 +579,19 @@ body {
 
   <section class="map-section">
     <div class="section-label">Architecture Diagram</div>
-    <div class="map-layout">
-      <div class="diagram" id="diagram"></div>
-      <div class="detail-panel" id="detailPanel">
-        <div class="detail-panel-header">
-          <div>
-            <span class="node-category" id="detailCategory" style="font-family:var(--font-mono);font-size:0.6rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;display:inline-block;padding:0.05rem 0.35rem;color:white;margin-bottom:0.3rem"></span>
-            <h2 class="detail-title" id="detailTitle"></h2>
-          </div>
-          <button class="detail-close" onclick="closeDetail()">close</button>
+    <div class="diagram" id="diagram"></div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-panel-header">
+        <div>
+          <span class="node-category" id="detailCategory" style="font-family:var(--font-mono);font-size:0.6rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;display:inline-block;padding:0.05rem 0.35rem;color:white;margin-bottom:0.3rem"></span>
+          <h2 class="detail-title" id="detailTitle"></h2>
         </div>
-        <p class="detail-description" id="detailDescription"></p>
-        <div class="detail-columns">
-          <div id="detailFiles"></div>
-          <div id="detailConnections"></div>
-        </div>
+        <button class="detail-close" onclick="closeDetail()">close</button>
+      </div>
+      <p class="detail-description" id="detailDescription"></p>
+      <div class="detail-columns">
+        <div id="detailFiles"></div>
+        <div id="detailConnections"></div>
       </div>
     </div>
   </section>
