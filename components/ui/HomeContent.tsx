@@ -89,7 +89,12 @@ export function HomeContent({ stories, modules, initialTab }: Props) {
       </div>
 
       {/* Tab content */}
-      <main className="max-w-5xl mx-auto px-6 pb-24 pt-12">
+      <main className="max-w-5xl mx-auto px-6 pb-24 pt-10">
+        <p className="font-mono text-[12px] text-text-dim mb-10">
+          {activeTab === "stories"
+            ? "Follow a product as it grows from MVP to production scale. Each story introduces system design concepts as they become necessary."
+            : "Structured lessons organized by topic. Start from the basics or jump to what you need."}
+        </p>
         {activeTab === "stories" ? (
           <StoriesPanel stories={stories} />
         ) : (
@@ -246,7 +251,7 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
               <h3 className="text-lg font-bold text-text-muted tracking-[-0.01em] uppercase">
                 {mod.title}
               </h3>
-              <p className="text-sm text-text-dim font-mono">Coming soon</p>
+              <p className="label-mono text-text-dim mt-1">Coming soon</p>
             </div>
           </div>
         ))}
