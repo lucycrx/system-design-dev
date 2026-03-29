@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Colors — light, minimal, warm neutral palette */
+  /* Colors — bold institutional palette (LaB K-inspired) */
   --color-bg: #FAFAF8;
   --color-surface: #FFFFFF;
   --color-surface-hover: #F5F4F1;
-  --color-accent: #AB4F35;
-  --color-accent-dim: #AB4F351A;
-  --color-accent-mid: #AB4F3530;
+  --color-accent: #C44536;
+  --color-accent-dim: #C445361A;
+  --color-accent-mid: #C4453630;
   --color-text: #1A1A1A;
-  --color-text-muted: #666666;
-  --color-text-dim: #737373;
-  --color-border: #E5E2DE;
-  --color-blue: #4A7191;
-  --color-blue-dim: #4A71911A;
-  --color-pink: #A04040;
-  --color-pink-dim: #A040401A;
-  --color-green: #3D8B6E;
-  --color-green-dim: #3D8B6E1A;
-  --color-orange: #96722E;
-  --color-orange-dim: #96722E1A;
-  --color-purple: #6B5C91;
-  --color-purple-dim: #6B5C911A;
+  --color-text-muted: #555555;
+  --color-text-dim: #6B6B6B;
+  --color-border: #E0DDD8;
+  --color-blue: #4A708E;
+  --color-blue-dim: #4A708E1A;
+  --color-pink: #8C3B3B;
+  --color-pink-dim: #8C3B3B1A;
+  --color-green: #256B3B;
+  --color-green-dim: #256B3B1A;
+  --color-orange: #C49A1D;
+  --color-orange-dim: #C49A1D1A;
+  --color-purple: #4E5E6E;
+  --color-purple-dim: #4E5E6E1A;
 
   /* Fonts */
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
