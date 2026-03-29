@@ -12,23 +12,25 @@ export function RevealBlock({ block }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="my-6 border border-border rounded-xl overflow-hidden">
+    <div className="border border-border rounded-xl overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full text-left p-4 flex items-center gap-3 hover:bg-surface-hover transition-colors"
       >
-        <span
-          className={`text-text-dim text-lg transition-transform duration-200 ${
+        <svg
+          className={`w-3.5 h-3.5 text-text-dim transition-transform duration-200 ${
             open ? "rotate-90" : ""
           }`}
+          viewBox="0 0 12 12"
+          fill="currentColor"
         >
-          &#9656;
-        </span>
+          <path d="M4.5 2L9 6L4.5 10V2Z" />
+        </svg>
         <span className="text-[14px] text-blue font-medium">{block.label}</span>
       </button>
       {open && (
         <div className="px-5 pb-5 border-t border-border bg-surface">
-          <div className="pt-4 text-[14px] text-text/70 leading-relaxed">
+          <div className="pt-4 text-[15px] text-text/70 leading-relaxed">
             <ReactMarkdown
               components={{
                 p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,

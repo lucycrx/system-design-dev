@@ -14,8 +14,8 @@ interface Props {
   glossaryMap: Record<string, GlossaryTerm>;
 }
 
-/** Height of site nav + journey header + stage tabs (approx) */
-const STICKY_HEADER_HEIGHT = 140;
+/** Height of site nav + stage tabs (approx) */
+const STICKY_HEADER_HEIGHT = 100;
 
 export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
   const searchParams = useSearchParams();
@@ -109,14 +109,9 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
     <div className="min-h-screen bg-bg">
       <StoryHero story={story} />
 
-      {/* Sticky container: journey header + stage tabs */}
+      {/* Sticky stage tabs */}
       <div className="sticky top-[44px] z-30 bg-bg/95 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="py-3 border-b border-border/50">
-            <h2 className="text-sm font-semibold text-text">
-              The journey of {story.title.toLowerCase()}:
-            </h2>
-          </div>
           <StageTabs
             stages={story.stages}
             activeIndex={activeStageIndex}
@@ -141,42 +136,44 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
                 <div className="border-t border-border mb-12" />
               )}
 
-              {/* Stage header */}
-              <div className="mb-10">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-accent-dim text-accent border border-accent/20">
-                    {stage.userScale}
-                  </span>
+              {/* Stage header + narrative callouts */}
+              <div className="max-w-3xl">
+                <div className="mb-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-accent-dim text-accent border border-accent/20">
+                      {stage.userScale}
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-bold text-text mb-3">{stage.title}</h2>
+                  <p className="text-text-muted leading-relaxed">
+                    {stage.narrative.setup}
+                  </p>
                 </div>
-                <h2 className="text-3xl font-bold text-text mb-3">{stage.title}</h2>
-                <p className="text-text-muted leading-relaxed">
-                  {stage.narrative.setup}
-                </p>
+
+                {/* Problem callout */}
+                {stage.narrative.problem && (
+                  <div className="bg-pink-dim border-l-[3px] border-l-pink rounded-r-xl p-5 mb-8">
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-pink mb-2">
+                      The Problem
+                    </div>
+                    <p className="text-[14px] text-text/80 leading-relaxed">
+                      {stage.narrative.problem}
+                    </p>
+                  </div>
+                )}
+
+                {/* Resolution teaser */}
+                {stage.narrative.resolution && (
+                  <div className="bg-green-dim border-l-[3px] border-l-green rounded-r-xl p-5 mb-8">
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-green mb-2">
+                      The Solution
+                    </div>
+                    <p className="text-[14px] text-text/80 leading-relaxed">
+                      {stage.narrative.resolution}
+                    </p>
+                  </div>
+                )}
               </div>
-
-              {/* Problem callout */}
-              {stage.narrative.problem && (
-                <div className="bg-pink-dim border-l-[3px] border-l-pink rounded-r-xl p-5 mb-8">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-pink mb-2">
-                    The Problem
-                  </div>
-                  <p className="text-[14px] text-text/80 leading-relaxed">
-                    {stage.narrative.problem}
-                  </p>
-                </div>
-              )}
-
-              {/* Resolution teaser */}
-              {stage.narrative.resolution && (
-                <div className="bg-green-dim border-l-[3px] border-l-green rounded-r-xl p-5 mb-8">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-green mb-2">
-                    The Solution
-                  </div>
-                  <p className="text-[14px] text-text/80 leading-relaxed">
-                    {stage.narrative.resolution}
-                  </p>
-                </div>
-              )}
 
               {/* Content blocks */}
               {hasDiagrams ? (
@@ -187,7 +184,9 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
                   stickyTop={STICKY_HEADER_HEIGHT}
                 />
               ) : (
-                <BlockRenderer blocks={stage.blocks} glossaryMap={glossaryMap} />
+                <div className="max-w-3xl">
+                  <BlockRenderer blocks={stage.blocks} glossaryMap={glossaryMap} />
+                </div>
               )}
             </section>
           );

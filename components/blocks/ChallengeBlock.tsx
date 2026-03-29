@@ -14,17 +14,17 @@ export function ChallengeBlock({ block }: Props) {
   const selectedOption = block.options.find((o) => o.id === selected);
 
   return (
-    <div className="my-8 bg-surface rounded-2xl border border-accent/20 overflow-hidden">
+    <div className="bg-surface rounded-2xl border border-accent/20 overflow-hidden">
       <div className="p-5 bg-accent-dim border-b border-accent/20">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-accent mb-3">
           Design Challenge
         </div>
-        <p className="text-[14px] text-text/80 leading-relaxed mb-3">
+        <p className="text-[15px] text-text/80 leading-relaxed mb-3">
           {block.scenario}
         </p>
         <p className="text-[15px] text-text font-semibold">{block.question}</p>
       </div>
-      <div className="p-4 space-y-2">
+      <div className="p-5 space-y-2">
         {block.options.map((option) => {
           const isSelected = selected === option.id;
           const showResult = revealed && isSelected;
@@ -77,7 +77,7 @@ export function ChallengeBlock({ block }: Props) {
       </div>
 
       {selected && !revealed && (
-        <div className="px-4 pb-4">
+        <div className="px-5 pb-5">
           <button
             onClick={() => setRevealed(true)}
             className="w-full py-3 rounded-xl bg-accent text-white font-semibold text-sm hover:opacity-90 transition-opacity"

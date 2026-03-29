@@ -100,12 +100,12 @@ export function TextBlock({ block, glossaryMap }: Props) {
             <em className="text-text-muted italic">{children}</em>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal list-inside space-y-2 mb-4 text-[15px] text-text/90">
+            <ol className="list-decimal list-outside pl-5 space-y-2 mb-4 text-[15px] text-text/90">
               {children}
             </ol>
           ),
           ul: ({ children }) => (
-            <ul className="list-disc list-inside space-y-2 mb-4 text-[15px] text-text/90">
+            <ul className="list-disc list-outside pl-5 space-y-2 mb-4 text-[15px] text-text/90">
               {children}
             </ul>
           ),

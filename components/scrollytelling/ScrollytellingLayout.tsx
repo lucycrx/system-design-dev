@@ -80,7 +80,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
   return (
     <div className="flex flex-col lg:flex-row lg:gap-8">
       {/* Left panel — scrollable narrative */}
-      <div className="lg:w-[55%]">
+      <div className="lg:w-[55%] space-y-8">
         {blocks.map((block, i) => {
           if (block.type === "diagram") {
             const diagramBlock = block as DiagramBlockType;
@@ -91,7 +91,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
                 <div
                   ref={(el) => registerRef(diagramBlock.diagramId, el)}
                   data-diagram-id={diagramBlock.diagramId}
-                  className="hidden lg:block my-6 py-4 border-l-2 border-accent/30 pl-4"
+                  className="hidden lg:block py-4 border-l-2 border-accent/30 pl-4"
                 >
                   {diagramBlock.caption && (
                     <p className="text-xs text-accent font-medium">
@@ -103,7 +103,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
                   </p>
                 </div>
                 {/* Inline diagram for mobile */}
-                <div className="lg:hidden my-8 bg-surface rounded-2xl border border-border p-6">
+                <div className="lg:hidden bg-surface rounded-2xl border border-border p-6">
                   {diagram ? (
                     <>
                       <InteractiveDiagramLoader

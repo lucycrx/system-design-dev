@@ -13,7 +13,7 @@ interface Props {
 
 export function BlockRenderer({ blocks, glossaryMap }: Props) {
   return (
-    <div>
+    <div className="space-y-8">
       {blocks.map((block, i) => {
         switch (block.type) {
           case "text":

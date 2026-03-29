@@ -35,7 +35,7 @@ export function GlossaryTooltip({ term, children }: Props) {
       <span
         ref={triggerRef}
         onClick={() => setOpen(!open)}
-        className="text-accent border-b border-dashed border-accent/40 cursor-pointer hover:border-accent/80 transition-colors"
+        className="text-accent underline decoration-dotted decoration-accent/40 underline-offset-2 cursor-pointer hover:decoration-accent/80 transition-colors"
       >
         {children}
       </span>
