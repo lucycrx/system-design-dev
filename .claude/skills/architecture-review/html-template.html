@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Review — <!-- PROJECT_NAME --></title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ========================================
+   DESIGN TOKENS
+   Institutional aesthetic: sharp edges, flat,
+   borders over shadows. DM Sans + DM Mono.
+   ======================================== */
+
+:root {
+  /* Typography */
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  /* Base palette */
+  --bg: hsl(48, 14%, 97%);
+  --surface: hsl(0, 0%, 100%);
+  --surface-raised: hsl(48, 10%, 95%);
+  --text: hsl(0, 0%, 10%);
+  --text-muted: hsl(0, 0%, 40%);
+  --text-dim: hsl(0, 0%, 45%);
+  --border: hsl(40, 8%, 88%);
+  --border-hover: hsl(40, 8%, 78%);
+
+  /* Risk severity */
+  --risk-critical: hsl(4, 65%, 42%);
+  --risk-critical-bg: hsl(4, 65%, 95%);
+  --risk-high: hsl(24, 75%, 45%);
+  --risk-high-bg: hsl(24, 75%, 95%);
+  --risk-medium: hsl(42, 75%, 42%);
+  --risk-medium-bg: hsl(42, 75%, 94%);
+  --risk-low: hsl(210, 15%, 55%);
+  --risk-low-bg: hsl(210, 15%, 95%);
+
+  /* Component category colors */
+  --cat-frontend: hsl(205, 35%, 47%);
+  --cat-api: hsl(215, 20%, 38%);
+  --cat-database: hsl(145, 35%, 32%);
+  --cat-cache: hsl(42, 65%, 44%);
+  --cat-auth: hsl(0, 35%, 40%);
+  --cat-external: hsl(8, 60%, 48%);
+  --cat-jobs: hsl(270, 25%, 45%);
+  --cat-storage: hsl(140, 20%, 40%);
+
+  /* Layout */
+  --max-width: 1280px;
+  --gap: 1.5rem;
+}
+
+/* ========================================
+   RESET & BASE
+   ======================================== */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.55;
+}
+
+/* ========================================
+   LAYOUT SHELL
+   ======================================== */
+
+.shell {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+}
+
+/* ========================================
+   HEADER
+   Top bar with project identity + risk counts
+   ======================================== */
+
+.header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 1.25rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.project-name {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.project-meta {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.risk-counts {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.risk-chip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.risk-chip[data-severity="critical"] {
+  color: var(--risk-critical);
+  border-color: var(--risk-critical);
+  background: var(--risk-critical-bg);
+}
+
+.risk-chip[data-severity="high"] {
+  color: var(--risk-high);
+  border-color: var(--risk-high);
+  background: var(--risk-high-bg);
+}
+
+.risk-chip[data-severity="medium"] {
+  color: var(--risk-medium);
+  border-color: var(--risk-medium);
+  background: var(--risk-medium-bg);
+}
+
+.risk-chip[data-severity="low"] {
+  color: var(--risk-low);
+  border-color: var(--risk-low);
+  background: var(--risk-low-bg);
+}
+
+.risk-chip .count {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* ========================================
+   SUMMARY STRIP
+   One-sentence health assessment
+   ======================================== */
+
+.summary-strip {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+.summary-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text);
+  max-width: 48rem;
+}
+
+.summary-text strong {
+  font-weight: 600;
+}
+
+/* ========================================
+   SECTION TITLES
+   ======================================== */
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 1rem;
+}
+
+/* ========================================
+   ARCHITECTURE MAP
+   Circuit-board inspired component layout
+   ======================================== */
+
+.map-section {
+  margin-bottom: 3rem;
+}
+
+.architecture-map {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  min-height: 420px;
+  overflow: hidden;
+}
+
+/* SVG connection layer sits behind components */
+.connection-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.connection-line {
+  stroke: var(--border-hover);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.connection-line.highlighted {
+  stroke: var(--text-muted);
+  stroke-width: 2;
+}
+
+.connection-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+/* Component nodes on the map */
+.map-nodes {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  background: var(--border);
+}
+
+.component-node {
+  background: var(--surface);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.component-node:hover {
+  background: var(--surface-raised);
+}
+
+.component-node.has-risk {
+  border-left: 3px solid transparent;
+}
+
+.component-node.risk-critical { border-left-color: var(--risk-critical); }
+.component-node.risk-high { border-left-color: var(--risk-high); }
+.component-node.risk-medium { border-left-color: var(--risk-medium); }
+.component-node.risk-low { border-left-color: var(--risk-low); }
+
+.component-node.selected {
+  background: var(--surface-raised);
+}
+
+.node-category {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  color: white;
+}
+
+.node-category[data-cat="frontend"] { background: var(--cat-frontend); }
+.node-category[data-cat="api-layer"] { background: var(--cat-api); }
+.node-category[data-cat="database"] { background: var(--cat-database); }
+.node-category[data-cat="cache"] { background: var(--cat-cache); color: var(--text); }
+.node-category[data-cat="auth"] { background: var(--cat-auth); }
+.node-category[data-cat="external-services"] { background: var(--cat-external); }
+.node-category[data-cat="background-jobs"] { background: var(--cat-jobs); }
+.node-category[data-cat="storage"] { background: var(--cat-storage); }
+
+.node-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.node-description {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.node-files {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.component-node.selected .node-files {
+  display: block;
+}
+
+.node-connections {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 0.4rem;
+  display: none;
+}
+
+.component-node.selected .node-connections {
+  display: block;
+}
+
+.connection-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--border);
+  margin: 0.15rem 0.15rem 0 0;
+  color: var(--text-muted);
+}
+
+/* Risk indicator dot on component */
+.risk-dot {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 8px;
+  height: 8px;
+}
+
+.risk-dot.critical { background: var(--risk-critical); }
+.risk-dot.high { background: var(--risk-high); }
+.risk-dot.medium { background: var(--risk-medium); }
+.risk-dot.low { background: var(--risk-low); }
+
+/* ========================================
+   RISK REPORT
+   Expandable risk cards
+   ======================================== */
+
+.risk-section {
+  margin-bottom: 3rem;
+}
+
+.risk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.risk-card {
+  background: var(--surface);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.risk-card:hover {
+  background: var(--surface-raised);
+}
+
+.risk-card-header {
+  display: grid;
+  grid-template-columns: 5rem 1fr auto;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  gap: 1rem;
+}
+
+.risk-severity {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0;
+  text-align: center;
+  border: 1px solid;
+}
+
+.risk-severity.critical {
+  color: var(--risk-critical);
+  border-color: var(--risk-critical);
+  background: var(--risk-critical-bg);
+}
+
+.risk-severity.high {
+  color: var(--risk-high);
+  border-color: var(--risk-high);
+  background: var(--risk-high-bg);
+}
+
+.risk-severity.medium {
+  color: var(--risk-medium);
+  border-color: var(--risk-medium);
+  background: var(--risk-medium-bg);
+}
+
+.risk-severity.low {
+  color: var(--risk-low);
+  border-color: var(--risk-low);
+  background: var(--risk-low-bg);
+}
+
+.risk-title {
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.risk-toggle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  transition: transform 0.2s ease;
+}
+
+.risk-card.expanded .risk-toggle {
+  transform: rotate(90deg);
+}
+
+.risk-detail {
+  display: none;
+  padding: 0 1.25rem 1.5rem;
+  padding-left: calc(5rem + 1.25rem + 1rem);
+}
+
+.risk-card.expanded .risk-detail {
+  display: block;
+}
+
+.risk-explanation {
+  margin-bottom: 1rem;
+}
+
+.risk-explanation p {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+
+.risk-analogy {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  border-left: 2px solid var(--border);
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  font-style: italic;
+}
+
+.risk-consequence {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.risk-meta {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.risk-meta-item {
+  font-size: 0.78rem;
+}
+
+.risk-meta-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.risk-meta-value {
+  color: var(--text-muted);
+}
+
+.risk-fix {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.risk-fix-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.risk-fix-summary {
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.risk-fix-detail {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.risk-evidence {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.75rem;
+  line-height: 1.5;
+}
+
+.risk-learn-more {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.learn-more-link {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  color: var(--cat-frontend);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.5rem;
+  transition: border-color 0.15s ease;
+}
+
+.learn-more-link:hover {
+  border-color: var(--cat-frontend);
+}
+
+/* ========================================
+   COMPONENT DETAIL PANEL
+   Slides in from right when a node is clicked
+   ======================================== */
+
+.detail-panel {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  margin-top: -1px;
+}
+
+.detail-panel.visible {
+  display: block;
+}
+
+.detail-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.detail-close {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: none;
+  padding: 0.2rem 0.5rem;
+  transition: border-color 0.15s ease;
+}
+
+.detail-close:hover {
+  border-color: var(--text-muted);
+}
+
+.detail-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.detail-description {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.detail-files-title,
+.detail-connections-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.4rem;
+}
+
+.detail-file {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding: 0.15rem 0;
+}
+
+.detail-connections-list {
+  margin-top: 1rem;
+}
+
+.detail-connection {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 0.25rem 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.detail-connection-arrow {
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.detail-connection-target {
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.footer {
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.footer-left {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.footer-right {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.footer-right a {
+  color: var(--cat-frontend);
+  text-decoration: none;
+}
+
+.footer-right a:hover {
+  text-decoration: underline;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.component-node {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+.risk-card {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+/* Stagger children */
+.map-nodes .component-node:nth-child(1) { animation-delay: 0.05s; }
+.map-nodes .component-node:nth-child(2) { animation-delay: 0.1s; }
+.map-nodes .component-node:nth-child(3) { animation-delay: 0.15s; }
+.map-nodes .component-node:nth-child(4) { animation-delay: 0.2s; }
+.map-nodes .component-node:nth-child(5) { animation-delay: 0.25s; }
+.map-nodes .component-node:nth-child(6) { animation-delay: 0.3s; }
+.map-nodes .component-node:nth-child(7) { animation-delay: 0.35s; }
+.map-nodes .component-node:nth-child(8) { animation-delay: 0.4s; }
+
+.risk-list .risk-card:nth-child(1) { animation-delay: 0.1s; }
+.risk-list .risk-card:nth-child(2) { animation-delay: 0.15s; }
+.risk-list .risk-card:nth-child(3) { animation-delay: 0.2s; }
+.risk-list .risk-card:nth-child(4) { animation-delay: 0.25s; }
+.risk-list .risk-card:nth-child(5) { animation-delay: 0.3s; }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .risk-card-header {
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
+  }
+
+  .risk-detail {
+    padding-left: 1.25rem;
+  }
+
+  .risk-meta {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .map-nodes {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* ========================================
+   PRINT
+   ======================================== */
+
+@media print {
+  .header {
+    position: static;
+    border-bottom: 2px solid var(--text);
+  }
+
+  .component-node,
+  .risk-card {
+    animation: none;
+    break-inside: avoid;
+  }
+
+  .risk-card .risk-detail {
+    display: block;
+  }
+
+  .risk-toggle,
+  .detail-close {
+    display: none;
+  }
+
+  body {
+    background: white;
+  }
+
+  .architecture-map {
+    border: 2px solid var(--text);
+  }
+}
+
+/* ========================================
+   REDUCED MOTION
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .component-node,
+  .risk-card {
+    animation: none;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <span class="project-name" id="projectName"></span>
+      <span class="project-meta" id="projectMeta"></span>
+    </div>
+    <div class="risk-counts" id="riskCounts"></div>
+  </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<div class="shell">
+
+  <!-- SUMMARY -->
+  <div class="summary-strip">
+    <p class="summary-text" id="summaryText"></p>
+  </div>
+
+  <!-- ARCHITECTURE MAP -->
+  <section class="map-section">
+    <div class="section-label">Architecture Map</div>
+    <div class="architecture-map">
+      <div class="map-nodes" id="mapNodes"></div>
+    </div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-panel-header">
+        <div>
+          <span class="node-category" id="detailCategory"></span>
+          <h2 class="detail-title" id="detailTitle"></h2>
+        </div>
+        <button class="detail-close" onclick="closeDetail()">close</button>
+      </div>
+      <p class="detail-description" id="detailDescription"></p>
+      <div id="detailFiles"></div>
+      <div class="detail-connections-list" id="detailConnections"></div>
+    </div>
+  </section>
+
+  <!-- RISK REPORT -->
+  <section class="risk-section">
+    <div class="section-label">Risk Report</div>
+    <div class="risk-list" id="riskList"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-left" id="footerTimestamp"></div>
+    <div class="footer-right">
+      Generated by <a href="https://systemdesignschool.com" target="_blank" rel="noopener">System Design for Builders</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ARCHITECTURE DATA — replaced by the skill -->
+<script id="architectureData" type="application/json">
+<!-- ARCHITECTURE_DATA -->
+</script>
+
+<script>
+/* ========================================
+   RENDERER
+   Reads the architecture data JSON and
+   populates all sections of the page.
+   ======================================== */
+
+(function() {
+  'use strict';
+
+  // Parse the injected data
+  var dataEl = document.getElementById('architectureData');
+  var data;
+  try {
+    data = JSON.parse(dataEl.textContent);
+  } catch(e) {
+    document.body.innerHTML = '<div style="padding:3rem;font-family:system-ui"><h1>No architecture data found</h1><p>This template needs architecture data injected by the skill.</p></div>';
+    return;
+  }
+
+  var meta = data.metadata;
+  var components = data.components || [];
+  var risks = data.risks || [];
+
+  // Build a lookup: component ID → highest risk severity
+  var componentRiskMap = {};
+  var severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+  risks.forEach(function(r) {
+    var sev = r.adjustedSeverity || r.severity;
+    (r.affectedComponents || []).forEach(function(cid) {
+      if (!componentRiskMap[cid] || severityOrder[sev] < severityOrder[componentRiskMap[cid]]) {
+        componentRiskMap[cid] = sev;
+      }
+    });
+  });
+
+  // Component label lookup
+  var componentLabelMap = {};
+  components.forEach(function(c) { componentLabelMap[c.id] = c.label; });
+
+  // ---- HEADER ----
+  document.getElementById('projectName').textContent = meta.projectName || 'Project';
+  document.getElementById('projectMeta').textContent =
+    (meta.framework || '') + (meta.language ? ' / ' + meta.language : '') +
+    ' / ' + (meta.scaleAssessment || 'unknown') + ' scale';
+
+  // Risk count chips
+  var countsEl = document.getElementById('riskCounts');
+  var rc = meta.riskCount || {};
+  ['critical', 'high', 'medium', 'low'].forEach(function(sev) {
+    var count = rc[sev] || 0;
+    if (count === 0) return;
+    var chip = document.createElement('span');
+    chip.className = 'risk-chip';
+    chip.setAttribute('data-severity', sev);
+    chip.innerHTML = '<span class="count">' + count + '</span> ' + sev;
+    countsEl.appendChild(chip);
+  });
+
+  // ---- SUMMARY ----
+  var totalRisks = (rc.critical||0) + (rc.high||0) + (rc.medium||0) + (rc.low||0);
+  var summaryParts = [];
+  summaryParts.push('<strong>' + (meta.projectName || 'This project') + '</strong>');
+  summaryParts.push(' is a ' + (meta.framework || 'web') + ' application');
+  summaryParts.push(' with <strong>' + components.length + ' components</strong>');
+  if (totalRisks > 0) {
+    summaryParts.push(' and <strong>' + totalRisks + ' identified risk' + (totalRisks !== 1 ? 's' : '') + '</strong>');
+    if (rc.critical > 0) {
+      summaryParts.push(', including ' + rc.critical + ' critical');
+    }
+  } else {
+    summaryParts.push(' and no significant risks identified at its current scale');
+  }
+  summaryParts.push('.');
+  document.getElementById('summaryText').innerHTML = summaryParts.join('');
+
+  // ---- ARCHITECTURE MAP ----
+  var mapEl = document.getElementById('mapNodes');
+  components.forEach(function(comp) {
+    var node = document.createElement('div');
+    node.className = 'component-node';
+    node.setAttribute('data-id', comp.id);
+
+    var riskSev = componentRiskMap[comp.id];
+    if (riskSev) {
+      node.classList.add('has-risk', 'risk-' + riskSev);
+    }
+
+    var html = '';
+
+    // Risk dot
+    if (riskSev) {
+      html += '<div class="risk-dot ' + riskSev + '"></div>';
+    }
+
+    // Category badge
+    html += '<span class="node-category" data-cat="' + esc(comp.category) + '">' + esc(comp.category.replace(/-/g, ' ')) + '</span>';
+
+    // Label and description
+    html += '<div class="node-label">' + esc(comp.label) + '</div>';
+    html += '<div class="node-description">' + esc(comp.description) + '</div>';
+
+    // Files (shown on select)
+    if (comp.files && comp.files.length > 0) {
+      html += '<div class="node-files">' + comp.files.map(function(f) { return esc(f); }).join('<br>') + '</div>';
+    }
+
+    // Connections (shown on select)
+    if (comp.connections && comp.connections.length > 0) {
+      html += '<div class="node-connections">';
+      comp.connections.forEach(function(conn) {
+        var targetLabel = componentLabelMap[conn.targetId] || conn.targetId;
+        html += '<span class="connection-tag">' + esc(conn.label) + ' &rarr; ' + esc(targetLabel) + '</span>';
+      });
+      html += '</div>';
+    }
+
+    node.innerHTML = html;
+    node.addEventListener('click', function() { selectComponent(comp); });
+    mapEl.appendChild(node);
+  });
+
+  // ---- RISK REPORT ----
+  var riskListEl = document.getElementById('riskList');
+
+  // Sort: critical first, then high, medium, low
+  var sortedRisks = risks.slice().sort(function(a, b) {
+    var sa = severityOrder[a.adjustedSeverity || a.severity] || 99;
+    var sb = severityOrder[b.adjustedSeverity || b.severity] || 99;
+    return sa - sb;
+  });
+
+  sortedRisks.forEach(function(risk) {
+    var sev = risk.adjustedSeverity || risk.severity;
+    var card = document.createElement('div');
+    card.className = 'risk-card';
+    card.setAttribute('data-pattern', risk.patternId);
+
+    var headerHtml = '<div class="risk-card-header">';
+    headerHtml += '<span class="risk-severity ' + esc(sev) + '">' + esc(sev) + '</span>';
+    headerHtml += '<span class="risk-title">' + esc(risk.explanation.plain) + '</span>';
+    headerHtml += '<span class="risk-toggle">&#9654;</span>';
+    headerHtml += '</div>';
+
+    var detailHtml = '<div class="risk-detail">';
+
+    // Analogy
+    detailHtml += '<div class="risk-explanation">';
+    detailHtml += '<div class="risk-analogy">' + esc(risk.explanation.analogy) + '</div>';
+    detailHtml += '<p class="risk-consequence">' + esc(risk.explanation.consequence) + '</p>';
+    detailHtml += '</div>';
+
+    // Evidence
+    if (risk.evidence) {
+      detailHtml += '<div class="risk-evidence">' + esc(risk.evidence) + '</div>';
+    }
+
+    // Fix
+    if (risk.fix) {
+      detailHtml += '<div class="risk-fix">';
+      detailHtml += '<div class="risk-fix-title">Recommended Fix</div>';
+      detailHtml += '<div class="risk-fix-summary">' + esc(risk.fix.summary) + '</div>';
+      detailHtml += '<div class="risk-fix-detail">' + esc(risk.fix.detail) + '</div>';
+      detailHtml += '</div>';
+    }
+
+    // Meta: scale threshold, affected components
+    detailHtml += '<div class="risk-meta">';
+    if (risk.affectedComponents && risk.affectedComponents.length > 0) {
+      detailHtml += '<div class="risk-meta-item">';
+      detailHtml += '<span class="risk-meta-label">Affected</span>';
+      detailHtml += '<span class="risk-meta-value">' + risk.affectedComponents.map(function(id) {
+        return esc(componentLabelMap[id] || id);
+      }).join(', ') + '</span>';
+      detailHtml += '</div>';
+    }
+    detailHtml += '</div>';
+
+    // Learn more links
+    if (risk.learnMore) {
+      var links = [];
+      if (risk.learnMore.glossaryTerms && risk.learnMore.glossaryTerms.length > 0) {
+        risk.learnMore.glossaryTerms.forEach(function(term) {
+          links.push('<a class="learn-more-link" href="https://systemdesignschool.com/glossary#' + esc(term) + '" target="_blank" rel="noopener">' + esc(term.replace(/-/g, ' ')) + '</a>');
+        });
+      }
+      if (risk.learnMore.buildStory && risk.learnMore.buildStory.slug) {
+        links.push('<a class="learn-more-link" href="https://systemdesignschool.com/stories/' + esc(risk.learnMore.buildStory.slug) + '" target="_blank" rel="noopener">Build Story: ' + esc(risk.learnMore.buildStory.slug.replace(/-/g, ' ')) + '</a>');
+      }
+      if (links.length > 0) {
+        detailHtml += '<div class="risk-learn-more">' + links.join('') + '</div>';
+      }
+    }
+
+    detailHtml += '</div>';
+
+    card.innerHTML = headerHtml + detailHtml;
+    card.querySelector('.risk-card-header').addEventListener('click', function() {
+      card.classList.toggle('expanded');
+    });
+    riskListEl.appendChild(card);
+  });
+
+  // ---- FOOTER ----
+  var ts = meta.scannedAt ? new Date(meta.scannedAt).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+  }) : '';
+  document.getElementById('footerTimestamp').textContent = 'Scanned ' + ts;
+
+  // ---- COMPONENT DETAIL PANEL ----
+  var detailPanel = document.getElementById('detailPanel');
+  var selectedNodeEl = null;
+
+  function selectComponent(comp) {
+    // Deselect previous
+    if (selectedNodeEl) selectedNodeEl.classList.remove('selected');
+
+    var nodeEl = mapEl.querySelector('[data-id="' + comp.id + '"]');
+    if (selectedNodeEl === nodeEl) {
+      closeDetail();
+      return;
+    }
+
+    selectedNodeEl = nodeEl;
+    nodeEl.classList.add('selected');
+
+    document.getElementById('detailCategory').setAttribute('data-cat', comp.category);
+    document.getElementById('detailCategory').textContent = comp.category.replace(/-/g, ' ');
+    document.getElementById('detailTitle').textContent = comp.label;
+    document.getElementById('detailDescription').textContent = comp.description;
+
+    var filesEl = document.getElementById('detailFiles');
+    if (comp.files && comp.files.length > 0) {
+      filesEl.innerHTML = '<div class="detail-files-title">Key Files</div>' +
+        comp.files.map(function(f) { return '<div class="detail-file">' + esc(f) + '</div>'; }).join('');
+    } else {
+      filesEl.innerHTML = '';
+    }
+
+    var connsEl = document.getElementById('detailConnections');
+    if (comp.connections && comp.connections.length > 0) {
+      connsEl.innerHTML = '<div class="detail-connections-title">Connections</div>' +
+        comp.connections.map(function(conn) {
+          var tLabel = componentLabelMap[conn.targetId] || conn.targetId;
+          return '<div class="detail-connection"><span class="detail-connection-arrow">&rarr;</span> <span class="detail-connection-target">' + esc(tLabel) + '</span> <span style="color:var(--text-dim);font-size:0.8rem">' + esc(conn.label) + '</span></div>';
+        }).join('');
+    } else {
+      connsEl.innerHTML = '';
+    }
+
+    detailPanel.classList.add('visible');
+  }
+
+  window.closeDetail = function() {
+    if (selectedNodeEl) selectedNodeEl.classList.remove('selected');
+    selectedNodeEl = null;
+    detailPanel.classList.remove('visible');
+  };
+
+  // Escape HTML
+  function esc(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+})();
+</script>
+
+</body>
+</html>

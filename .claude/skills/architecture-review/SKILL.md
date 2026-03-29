@@ -136,21 +136,28 @@ Construct a structured JSON object with this shape (this is the contract for the
 }
 ```
 
-#### Step 6: Generate output
+#### Step 6: Generate the interactive HTML output
 
-**For now (until the HTML template is ready):** Write the architecture data JSON to `architecture-review.json` in the project root. Then present a formatted markdown summary in the conversation:
+Read the HTML template at `./html-template.html` (relative to this skill file).
 
-1. **Project overview** — One sentence: what this project is, what framework, what scale assessment
-2. **Architecture map** — List components by category with descriptions and connections (formatted as a clear hierarchy)
-3. **Risk report** — Each risk as a section with:
-   - Severity badge (text: CRITICAL / HIGH / MEDIUM / LOW)
-   - What's wrong (plain English)
-   - The analogy
-   - When it'll bite (scale threshold)
-   - The fix (summary)
-4. **Health summary** — Overall assessment in 2-3 sentences
+**Injection process:**
+1. Read the full contents of `html-template.html`
+2. Replace the `<!-- ARCHITECTURE_DATA -->` placeholder (inside the `<script id="architectureData">` tag) with the architecture data JSON from Step 5
+3. Also replace `<!-- PROJECT_NAME -->` in the `<title>` tag with the actual project name
+4. Write the complete HTML to `architecture-review.html` in the project root
+5. Open it in the browser: `open architecture-review.html` (macOS), `xdg-open` (Linux)
 
-**When the HTML template is available:** Read the template at `./html-template.html`, inject the architecture data JSON into the `<!-- ARCHITECTURE_DATA -->` placeholder, write to `architecture-review.html` in the project root, and open in the browser.
+**The template handles all rendering.** You only need to produce valid JSON matching the schema in Step 5. The template's embedded JavaScript reads the JSON and builds:
+- A sticky header with project identity and risk severity counts
+- A one-sentence health summary
+- An interactive architecture map with clickable component cards (category-colored, risk-indicated)
+- An expandable risk report sorted by severity (each card has: plain-English explanation, analogy, consequence, evidence, fix recommendation, and "learn more" links to the companion website)
+- A detail panel that shows files and connections when a component is clicked
+
+**After generating the HTML**, also present a brief summary in the conversation:
+1. One sentence: what the project is and overall health
+2. Top 2-3 risks with their plain-English summary
+3. Note that the full interactive report is open in the browser
 
 #### Step 7: Offer to fix
 
