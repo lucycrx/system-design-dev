@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { Story, CurriculumModule } from "@/types/story";
 
@@ -22,15 +19,6 @@ const MODULE_TEXT_COLORS: Record<string, string> = {
   purple: "text-purple",
 };
 
-const MODULE_BG_COLORS: Record<string, string> = {
-  accent: "bg-accent-dim",
-  blue: "bg-blue-dim",
-  green: "bg-green-dim",
-  orange: "bg-orange-dim",
-  pink: "bg-pink-dim",
-  purple: "bg-purple-dim",
-};
-
 const MODULE_BG_FULL_COLORS: Record<string, string> = {
   accent: "bg-accent",
   blue: "bg-blue",
@@ -40,81 +28,7 @@ const MODULE_BG_FULL_COLORS: Record<string, string> = {
   purple: "bg-purple",
 };
 
-type Tab = "stories" | "curriculum";
-
-const TABS = [
-  { id: "stories" as Tab, label: "Build Stories", path: "/" },
-  { id: "curriculum" as Tab, label: "Curriculum", path: "/curriculum" },
-] as const;
-
-interface Props {
-  stories: Story[];
-  modules: CurriculumModule[];
-  initialTab: Tab;
-}
-
-export function HomeContent({ stories, modules, initialTab }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
-
-  function switchTab(tab: Tab) {
-    setActiveTab(tab);
-    const path = tab === "stories" ? "/" : "/curriculum";
-    window.history.replaceState(null, "", path);
-  }
-
-  // Sync with browser back/forward
-  useEffect(() => {
-    function onPopState() {
-      setActiveTab(window.location.pathname === "/curriculum" ? "curriculum" : "stories");
-    }
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, []);
-
-  return (
-    <>
-      {/* Sticky Tabs */}
-      <div className="sticky top-0 z-40 bg-bg/90 backdrop-blur-md border-b border-border">
-        <div className="max-w-5xl mx-auto px-6">
-          <nav className="flex gap-8">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => switchTab(tab.id)}
-                className={`relative py-3 text-[11px] font-mono tracking-[2px] uppercase transition-colors ${
-                  activeTab === tab.id
-                    ? "text-text"
-                    : "text-text-dim hover:text-text-muted"
-                }`}
-              >
-                {tab.label}
-                {activeTab === tab.id && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-text" />
-                )}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
-
-      {/* Tab content */}
-      <main className="max-w-5xl mx-auto px-6 pb-24 pt-10">
-        <p className="font-mono text-[12px] text-text-dim mb-10">
-          {activeTab === "stories"
-            ? "Follow a product as it grows from MVP to production scale. Each story introduces system design concepts as they become necessary."
-            : "Structured lessons organized by topic. Start from the basics or jump to what you need."}
-        </p>
-        {activeTab === "stories" ? (
-          <StoriesPanel stories={stories} />
-        ) : (
-          <CurriculumPanel modules={modules} />
-        )}
-      </main>
-    </>
-  );
-}
-
-function StoriesPanel({ stories }: { stories: Story[] }) {
+export function StoriesPanel({ stories }: { stories: Story[] }) {
   return (
     <>
       <div className="flex items-center justify-between mb-10">
@@ -184,7 +98,7 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
   );
 }
 
-function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
+export function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
   return (
     <>
       <div className="space-y-4">
