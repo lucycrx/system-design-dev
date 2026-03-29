@@ -35,33 +35,33 @@ export default async function StoryOverviewPage({ params }: Props) {
         <div className="mb-14">
           <div className="flex items-center gap-3 mb-5">
             <span
-              className={`text-[11px] font-semibold px-3 py-1 rounded-full border ${difficultyColors[story.difficulty]}`}
+              className={`text-[0.6875rem] font-semibold px-3 py-1 rounded-full border ${difficultyColors[story.difficulty]}`}
             >
               {story.difficulty}
             </span>
-            <span className="text-xs text-text-dim font-mono">
+            <span className="text-[0.6875rem] text-text-dim font-mono">
               ~{story.estimatedMinutes} min
             </span>
           </div>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-text mb-4 leading-[1.06]">{story.title}</h1>
-          <p className="text-xl sm:text-2xl text-text-muted font-light leading-relaxed">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text mb-4 leading-[1.08] tracking-[-0.02em]">{story.title}</h1>
+          <p className="text-lg sm:text-xl text-text-muted font-light leading-relaxed">
             {story.subtitle}
           </p>
-          <p className="text-[15px] text-text-dim leading-relaxed mt-5 max-w-2xl">
+          <p className="text-base text-text-dim leading-relaxed mt-5 max-w-2xl">
             {story.description}
           </p>
         </div>
 
         {/* Concepts you'll learn */}
         <div className="mb-14">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-text-dim mb-4">
+          <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-text-dim mb-4">
             Concepts You&apos;ll Learn
           </h2>
           <div className="flex flex-wrap gap-2">
             {story.concepts.map((concept) => (
               <span
                 key={concept}
-                className="text-xs px-3 py-1.5 rounded-full bg-surface border border-border text-text-muted font-mono"
+                className="text-[0.6875rem] px-3 py-1.5 rounded-full bg-surface border border-border text-text-muted font-mono"
               >
                 {concept}
               </span>
@@ -71,7 +71,7 @@ export default async function StoryOverviewPage({ params }: Props) {
 
         {/* Stage list */}
         <div className="mb-14">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-text-dim mb-6">
+          <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-text-dim mb-6">
             The Journey ({story.stages.length} stages)
           </h2>
           <div className="space-y-0 relative">
@@ -90,18 +90,18 @@ export default async function StoryOverviewPage({ params }: Props) {
                   </div>
                   <div className="flex-1 min-w-0 pt-1">
                     <div className="flex items-center gap-3 mb-1.5">
-                      <h3 className="text-base font-bold text-text group-hover:text-accent transition-colors">
+                      <h3 className="text-lg font-semibold text-text group-hover:text-accent transition-colors tracking-[-0.01em]">
                         {stage.title}
                       </h3>
-                      <span className="text-[11px] font-mono text-text-dim bg-bg px-2 py-0.5 rounded border border-border/60">
+                      <span className="text-[0.6875rem] font-mono text-text-dim bg-bg px-2 py-0.5 rounded border border-border/60">
                         {stage.userScale}
                       </span>
                     </div>
-                    <p className="text-sm text-text-muted line-clamp-2">
+                    <p className="text-sm text-text-muted line-clamp-2 leading-relaxed">
                       {stage.narrative.setup}
                     </p>
                     {stage.narrative.problem && (
-                      <p className="text-xs text-pink mt-2 font-medium">
+                      <p className="text-sm text-pink mt-2 font-medium leading-relaxed">
                         {stage.narrative.problem.slice(0, 100)}...
                       </p>
                     )}

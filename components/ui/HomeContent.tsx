@@ -104,10 +104,10 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
   return (
     <>
       <div className="flex items-center justify-between mb-10">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-text-dim">
+        <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-text-dim">
           Build Stories
         </h2>
-        <span className="text-xs text-text-dim">
+        <span className="text-[0.6875rem] text-text-dim font-mono">
           {stories.length} {stories.length === 1 ? "story" : "stories"}
         </span>
       </div>
@@ -119,34 +119,34 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
             className="group bg-surface border border-border rounded-2xl p-8 hover:border-accent/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out animate-[fade-up_0.4s_ease-out_both]"
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <div className="flex items-center gap-2 mb-5">
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-green-dim text-green border border-green/20">
+            <div className="flex items-center gap-2.5 mb-5">
+              <span className="text-[0.6875rem] font-semibold px-2.5 py-0.5 rounded-full bg-green-dim text-green border border-green/20">
                 {story.difficulty}
               </span>
-              <span className="text-[11px] text-text-dim font-mono">
+              <span className="text-[0.6875rem] text-text-dim font-mono">
                 ~{story.estimatedMinutes} min
               </span>
             </div>
-            <h3 className="text-2xl font-bold text-text group-hover:text-accent transition-colors mb-2 leading-snug">
+            <h3 className="text-xl font-bold text-text group-hover:text-accent transition-colors mb-1 leading-snug tracking-[-0.01em]">
               {story.title}
             </h3>
-            <p className="text-sm text-text-muted mb-1">
+            <p className="text-[0.9375rem] text-text-muted leading-snug">
               {story.subtitle}
             </p>
-            <p className="text-xs text-text-dim leading-relaxed mt-4 line-clamp-2">
+            <p className="text-sm text-text-dim leading-relaxed mt-3 line-clamp-2">
               {story.description}
             </p>
             <div className="flex flex-wrap gap-1.5 mt-6 pt-5 border-t border-border/60">
               {story.concepts.slice(0, 4).map((c) => (
                 <span
                   key={c}
-                  className="text-[10px] px-2 py-0.5 rounded bg-bg border border-border text-text-dim font-mono"
+                  className="text-[0.6875rem] px-2 py-0.5 rounded bg-bg border border-border text-text-dim font-mono"
                 >
                   {c}
                 </span>
               ))}
               {story.concepts.length > 4 && (
-                <span className="text-[10px] text-text-dim">
+                <span className="text-[0.6875rem] text-text-dim font-mono">
                   +{story.concepts.length - 4} more
                 </span>
               )}
@@ -182,27 +182,27 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
                 {mod.moduleNumber}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5">
+                <div className="flex items-center gap-2.5 mb-1.5">
                   <span
-                    className={`text-[11px] font-mono font-medium ${MODULE_TEXT_COLORS[mod.color]}`}
+                    className={`text-[0.6875rem] font-mono font-medium ${MODULE_TEXT_COLORS[mod.color]}`}
                   >
                     Module {mod.moduleNumber}
                   </span>
-                  <span className="text-[11px] text-text-dim">
+                  <span className="text-[0.6875rem] text-text-dim font-mono">
                     {mod.lessons.length} lessons
                   </span>
                 </div>
-                <h2 className="text-2xl font-bold text-text group-hover:text-accent transition-colors leading-snug">
+                <h2 className="text-xl font-bold text-text group-hover:text-accent transition-colors leading-snug tracking-[-0.01em]">
                   {mod.title}
                 </h2>
-                <p className="text-sm text-text-muted mt-1.5">
+                <p className="text-[0.9375rem] text-text-muted mt-1.5 leading-snug">
                   {mod.subtitle}
                 </p>
                 <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-border/50">
                   {mod.lessons.slice(0, 3).map((lesson) => (
                     <span
                       key={lesson.id}
-                      className="text-[10px] px-2 py-0.5 rounded bg-bg border border-border text-text-dim"
+                      className="text-[0.6875rem] px-2 py-0.5 rounded bg-bg border border-border text-text-dim font-mono"
                     >
                       {lesson.title.length > 30
                         ? lesson.title.slice(0, 30) + "..."
@@ -210,7 +210,7 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
                     </span>
                   ))}
                   {mod.lessons.length > 3 && (
-                    <span className="text-[10px] text-text-dim">
+                    <span className="text-[0.6875rem] text-text-dim font-mono">
                       +{mod.lessons.length - 3} more
                     </span>
                   )}
@@ -240,13 +240,13 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
               {mod.num}
             </div>
             <div>
-              <span className="text-[11px] font-mono text-text-dim">
+              <span className="text-[0.6875rem] font-mono text-text-dim">
                 Module {mod.num}
               </span>
-              <h3 className="text-lg font-semibold text-text-muted">
+              <h3 className="text-lg font-semibold text-text-muted tracking-[-0.01em]">
                 {mod.title}
               </h3>
-              <p className="text-xs text-text-dim">Coming soon</p>
+              <p className="text-sm text-text-dim">Coming soon</p>
             </div>
           </div>
         ))}
