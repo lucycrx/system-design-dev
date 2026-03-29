@@ -20,6 +20,15 @@ const MODULE_BG_COLORS: Record<string, string> = {
   purple: "bg-purple-dim",
 };
 
+const MODULE_BG_FULL_COLORS: Record<string, string> = {
+  accent: "bg-accent",
+  blue: "bg-blue",
+  green: "bg-green",
+  orange: "bg-orange",
+  pink: "bg-pink",
+  purple: "bg-purple",
+};
+
 const MODULE_BORDER_COLORS: Record<string, string> = {
   accent: "border-accent/20",
   blue: "border-blue/20",
@@ -60,7 +69,7 @@ export default async function ModulePage({ params }: Props) {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4">
             <span
-              className={`text-sm font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]} ${MODULE_BG_COLORS[mod.color]} w-12 h-12 flex items-center justify-center`}
+              className={`text-sm font-bold font-mono text-bg ${MODULE_BG_FULL_COLORS[mod.color]} w-12 h-12 flex items-center justify-center`}
             >
               {mod.moduleNumber}
             </span>

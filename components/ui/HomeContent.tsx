@@ -31,6 +31,15 @@ const MODULE_BG_COLORS: Record<string, string> = {
   purple: "bg-purple-dim",
 };
 
+const MODULE_BG_FULL_COLORS: Record<string, string> = {
+  accent: "bg-accent",
+  blue: "bg-blue",
+  green: "bg-green",
+  orange: "bg-orange",
+  pink: "bg-pink",
+  purple: "bg-purple",
+};
+
 type Tab = "stories" | "curriculum";
 
 const TABS = [
@@ -182,7 +191,7 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
           >
             <div className="flex items-start gap-5">
               <div
-                className={`flex-shrink-0 w-14 h-14 ${MODULE_BG_COLORS[mod.color]} flex items-center justify-center text-2xl font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]}`}
+                className={`flex-shrink-0 w-14 h-14 ${MODULE_BG_FULL_COLORS[mod.color]} flex items-center justify-center text-2xl font-bold font-mono text-bg`}
               >
                 {mod.moduleNumber}
               </div>
