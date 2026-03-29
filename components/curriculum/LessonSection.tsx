@@ -37,11 +37,11 @@ export function LessonSection({ section }: Props) {
   return (
     <div className={`${meta.borderColor} border-l-[3px] pl-5 py-1 mb-8`}>
       <div
-        className={`text-[11px] font-semibold uppercase tracking-wider ${meta.color} mb-3`}
+        className={`text-[0.6875rem] font-semibold uppercase tracking-[0.1em] ${meta.color} mb-3`}
       >
         {meta.label}
       </div>
-      <div className="text-[15px] text-text/80 leading-relaxed">
+      <div className="text-base text-text/80 leading-relaxed">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{

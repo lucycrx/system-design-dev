@@ -16,13 +16,13 @@ export function LessonQuiz({ quiz }: Props) {
   return (
     <div className="bg-surface rounded-2xl border border-purple/20 overflow-hidden">
       <div className="p-5 bg-purple-dim border-b border-purple/20">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-purple mb-3">
+        <div className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-purple mb-3">
           Check Your Understanding
         </div>
-        <p className="text-[14px] text-text/80 leading-relaxed mb-2">
+        <p className="text-sm text-text/80 leading-relaxed mb-2">
           {quiz.scenario}
         </p>
-        <p className="text-[15px] text-text font-semibold">{quiz.question}</p>
+        <p className="text-base text-text font-semibold">{quiz.question}</p>
       </div>
       <div className="p-4 space-y-2">
         {quiz.options.map((option) => {
@@ -50,7 +50,7 @@ export function LessonQuiz({ quiz }: Props) {
               }`}
             >
               <span
-                className={`text-[14px] ${
+                className={`text-sm ${
                   showResult
                     ? isCorrect
                       ? "text-green"
@@ -63,7 +63,7 @@ export function LessonQuiz({ quiz }: Props) {
                 {option.text}
               </span>
               {revealed && (isSelected || option.correct) && (
-                <p className="text-[13px] text-text-muted leading-relaxed mt-2">
+                <p className="text-sm text-text-muted leading-relaxed mt-2">
                   {option.explanation}
                 </p>
               )}

@@ -38,7 +38,7 @@ export default async function LessonPage({ params }: Props) {
             </span>
             <span className="sm:hidden">Back</span>
           </Link>
-          <span className="text-xs font-mono text-text-dim">
+          <span className="text-[0.6875rem] font-mono text-text-dim">
             Lesson {lessonIndex + 1} of {mod.lessons.length}
           </span>
         </div>
@@ -48,10 +48,10 @@ export default async function LessonPage({ params }: Props) {
         {/* Progress bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-text-muted font-mono">
+            <span className="text-[0.6875rem] text-text-muted font-mono">
               Lesson {lessonIndex + 1} of {mod.lessons.length}
             </span>
-            <span className="text-xs text-text-dim">
+            <span className="text-[0.6875rem] text-text-dim font-mono">
               ~{lesson.estimatedMinutes} min
             </span>
           </div>
@@ -67,7 +67,7 @@ export default async function LessonPage({ params }: Props) {
 
         {/* Lesson header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-text mb-2">{lesson.title}</h1>
+          <h1 className="text-3xl font-bold text-text mb-2 tracking-[-0.02em]">{lesson.title}</h1>
           <p className="text-text-muted leading-relaxed">
             {lesson.description}
           </p>
@@ -86,7 +86,7 @@ export default async function LessonPage({ params }: Props) {
         {/* Related Build Stories */}
         {lesson.relatedStories && lesson.relatedStories.length > 0 && (
           <div className="mt-8 mb-8">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-dim mb-3">
+            <h3 className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-text-dim mb-3">
               See This In Action
             </h3>
             <div className="space-y-2">
@@ -116,10 +116,10 @@ export default async function LessonPage({ params }: Props) {
                 ←
               </span>
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-text-dim">
+                <div className="text-[0.6875rem] uppercase tracking-[0.1em] text-text-dim">
                   Previous
                 </div>
-                <div className="text-sm font-medium">{prevLesson.title}</div>
+                <div className="text-sm font-semibold">{prevLesson.title}</div>
               </div>
             </Link>
           ) : (
@@ -132,10 +132,10 @@ export default async function LessonPage({ params }: Props) {
               className="group flex items-center gap-3 text-right text-text-muted hover:text-blue transition-colors"
             >
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-text-dim">
+                <div className="text-[0.6875rem] uppercase tracking-[0.1em] text-text-dim">
                   Next Lesson
                 </div>
-                <div className="text-sm font-medium">{nextLesson.title}</div>
+                <div className="text-sm font-semibold">{nextLesson.title}</div>
               </div>
               <span className="text-lg group-hover:translate-x-1 transition-transform">
                 →

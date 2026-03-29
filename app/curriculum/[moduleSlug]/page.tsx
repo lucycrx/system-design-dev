@@ -66,16 +66,16 @@ export default async function ModulePage({ params }: Props) {
             </span>
             <div>
               <span
-                className={`text-[11px] font-mono ${MODULE_TEXT_COLORS[mod.color]} font-semibold`}
+                className={`text-[0.6875rem] font-mono ${MODULE_TEXT_COLORS[mod.color]} font-semibold`}
               >
                 Module {mod.moduleNumber}
               </span>
-              <div className="text-xs text-text-dim">
+              <div className="text-[0.6875rem] text-text-dim font-mono">
                 {mod.lessons.length} lessons &middot; ~{totalMinutes} min total
               </div>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-text mb-2">{mod.title}</h1>
+          <h1 className="text-3xl font-bold text-text mb-2 tracking-[-0.02em]">{mod.title}</h1>
           <p className="text-text-muted leading-relaxed">{mod.description}</p>
         </div>
 
@@ -94,13 +94,13 @@ export default async function ModulePage({ params }: Props) {
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-[15px] font-semibold text-text group-hover:text-accent transition-colors">
+                  <h3 className="text-base font-semibold text-text group-hover:text-accent transition-colors tracking-[-0.01em]">
                     {lesson.title}
                   </h3>
-                  <p className="text-sm text-text-muted mt-0.5">
+                  <p className="text-sm text-text-muted mt-0.5 leading-relaxed">
                     {lesson.description}
                   </p>
-                  <span className="text-[11px] text-text-dim font-mono mt-2 inline-block">
+                  <span className="text-[0.6875rem] text-text-dim font-mono mt-2 inline-block">
                     ~{lesson.estimatedMinutes} min
                   </span>
                 </div>
