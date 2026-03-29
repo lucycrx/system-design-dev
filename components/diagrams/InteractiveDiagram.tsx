@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -25,60 +25,21 @@ interface Props {
 
 const nodeTypes = { system: SystemNode };
 const edgeTypes = { animated: AnimatedEdge };
+const EMPTY_ARRAY: string[] = [];
 
-function convertDiagram(
-  diagram: Diagram,
-  highlightNodes: string[],
-  animateFlow: string[]
-): { nodes: Node[]; edges: Edge[] } {
-  const highlightSet = new Set(highlightNodes);
+function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: Props) {
+  const stableHighlight = highlightNodes ?? EMPTY_ARRAY;
+  const stableAnimate = animateFlow ?? EMPTY_ARRAY;
 
-  // Build animated edges set from animateFlow path
-  const animatedFromFlow = new Set<string>();
-  if (animateFlow.length > 1) {
-    for (let i = 0; i < animateFlow.length - 1; i++) {
-      animatedFromFlow.add(`${animateFlow[i]}-${animateFlow[i + 1]}`);
-    }
-  }
-
-  const nodes: Node[] = diagram.nodes.map((node) => ({
-    id: node.id,
-    type: "system",
-    position: node.position,
-    data: {
-      label: node.label,
-      nodeType: node.type,
-      explanation: node.explanation,
-      glossaryLink: node.glossaryLink,
-      isNew: node.isNew,
-      isHighlighted: highlightSet.has(node.id),
-    },
-  }));
-
-  const edges: Edge[] = diagram.edges.map((edge) => {
-    const flowKey = `${edge.source}-${edge.target}`;
-    const isAnimated = edge.animated || animatedFromFlow.has(flowKey);
-    return {
-      id: edge.id,
-      source: edge.source,
-      target: edge.target,
-      type: "animated",
-      label: edge.label,
-      data: {
-        animated: isAnimated,
-        edgeStyle: edge.style || "solid",
-      },
-    };
-  });
-
-  return { nodes, edges };
-}
-
-function DiagramInner({ diagram, highlightNodes = [], animateFlow = [], className = "" }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const { fitView } = useReactFlow();
   const [isVisible, setIsVisible] = useState(false);
+
+  // Stable string keys to avoid re-running effect on new array references
+  const highlightKey = stableHighlight.join(",");
+  const animateKey = stableAnimate.join(",");
+  const diagramId = diagram?.id ?? null;
 
   // Update nodes/edges when diagram changes
   useEffect(() => {
@@ -88,12 +49,45 @@ function DiagramInner({ diagram, highlightNodes = [], animateFlow = [], classNam
       return;
     }
 
+    const highlightSet = new Set(stableHighlight);
+    const animatedFromFlow = new Set<string>();
+    if (stableAnimate.length > 1) {
+      for (let i = 0; i < stableAnimate.length - 1; i++) {
+        animatedFromFlow.add(`${stableAnimate[i]}-${stableAnimate[i + 1]}`);
+      }
+    }
+
+    const newNodes: Node[] = diagram.nodes.map((node) => ({
+      id: node.id,
+      type: "system",
+      position: node.position,
+      data: {
+        label: node.label,
+        nodeType: node.type,
+        explanation: node.explanation,
+        glossaryLink: node.glossaryLink,
+        isNew: node.isNew,
+        isHighlighted: highlightSet.has(node.id),
+      },
+    }));
+
+    const newEdges: Edge[] = diagram.edges.map((edge) => {
+      const flowKey = `${edge.source}-${edge.target}`;
+      const isAnimated = edge.animated || animatedFromFlow.has(flowKey);
+      return {
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        type: "animated",
+        label: edge.label,
+        data: {
+          animated: isAnimated,
+          edgeStyle: edge.style || "solid",
+        },
+      };
+    });
+
     setIsVisible(false);
-    const { nodes: newNodes, edges: newEdges } = convertDiagram(
-      diagram,
-      highlightNodes,
-      animateFlow
-    );
     setNodes(newNodes);
     setEdges(newEdges);
 
@@ -103,7 +97,8 @@ function DiagramInner({ diagram, highlightNodes = [], animateFlow = [], classNam
       setIsVisible(true);
     }, 50);
     return () => clearTimeout(timer);
-  }, [diagram, highlightNodes, animateFlow, setNodes, setEdges, fitView]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [diagramId, highlightKey, animateKey]);
 
   const onInit = useCallback(() => {
     fitView({ padding: 0.3 });
