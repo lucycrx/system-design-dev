@@ -93,7 +93,7 @@ export default async function LessonPage({ params }: Props) {
               {lesson.relatedStories.map((rel) => (
                 <Link
                   key={`${rel.storySlug}-${rel.stageId}`}
-                  href={`/stories/${rel.storySlug}/${rel.stageId}`}
+                  href={`/stories/${rel.storySlug}?stage=${rel.stageId}`}
                   className="block bg-accent-dim border border-accent/20 rounded-xl p-4 hover:border-accent/40 transition-colors"
                 >
                   <span className="text-sm text-accent font-medium">

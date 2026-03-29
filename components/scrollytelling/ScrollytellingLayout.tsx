@@ -13,9 +13,10 @@ interface Props {
   blocks: Block[];
   diagrams: Record<string, Diagram>;
   glossaryMap: Record<string, GlossaryTerm>;
+  stickyTop?: number;
 }
 
-export function ScrollytellingLayout({ blocks, diagrams, glossaryMap }: Props) {
+export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop = 96 }: Props) {
   const [activeDiagramId, setActiveDiagramId] = useState<string | null>(null);
   const [activeHighlightNodes, setActiveHighlightNodes] = useState<string[]>([]);
   const [activeAnimateFlow, setActiveAnimateFlow] = useState<string[]>([]);
@@ -136,7 +137,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap }: Props) {
 
       {/* Right panel — sticky diagram (desktop only) */}
       <div className="hidden lg:block lg:w-[45%]">
-        <div className="sticky top-24">
+        <div className="sticky" style={{ top: stickyTop }}>
           <div className="bg-surface rounded-2xl border border-border p-6 shadow-sm">
             <InteractiveDiagramLoader
               diagram={activeDiagram}

@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async redirects() {
+    return [
+      {
+        source: "/stories/:storySlug/:stageId",
+        destination: "/stories/:storySlug?stage=:stageId",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
