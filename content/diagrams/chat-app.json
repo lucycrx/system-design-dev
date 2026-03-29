@@ -1,0 +1,137 @@
+{
+  "chat-app-stage-1": {
+    "id": "chat-app-stage-1",
+    "width": 520,
+    "height": 280,
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Your Browser",
+        "x": 60,
+        "y": 120,
+        "explanation": "The client — your web browser running the chat app UI"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "Server",
+        "x": 250,
+        "y": 120,
+        "explanation": "A single server that receives and forwards messages between clients"
+      },
+      {
+        "id": "client-2",
+        "type": "client",
+        "label": "Friend's Browser",
+        "x": 440,
+        "y": 120,
+        "explanation": "Your friend's browser — also a client connected to the same server"
+      }
+    ],
+    "edges": [
+      { "from": "client-1", "to": "server", "label": "send message", "style": "solid" },
+      { "from": "server", "to": "client-2", "label": "deliver message", "style": "solid" }
+    ]
+  },
+  "chat-app-stage-2": {
+    "id": "chat-app-stage-2",
+    "width": 520,
+    "height": 360,
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Your Browser",
+        "x": 60,
+        "y": 100,
+        "explanation": "The client — your web browser running the chat app UI"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "Server",
+        "x": 250,
+        "y": 100,
+        "explanation": "The server that processes messages and stores them in the database"
+      },
+      {
+        "id": "client-2",
+        "type": "client",
+        "label": "Friend's Browser",
+        "x": 440,
+        "y": 100,
+        "explanation": "Your friend's browser — also a client connected to the same server"
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "x": 250,
+        "y": 260,
+        "explanation": "A database that permanently stores all messages on disk — survives server restarts",
+        "isNew": true
+      }
+    ],
+    "edges": [
+      { "from": "client-1", "to": "server", "label": "send message", "style": "solid" },
+      { "from": "server", "to": "client-2", "label": "deliver message", "style": "solid" },
+      { "from": "server", "to": "database", "label": "write to disk", "style": "solid", "animated": true },
+      { "from": "database", "to": "server", "label": "read history", "style": "dashed" }
+    ]
+  },
+  "chat-app-stage-3": {
+    "id": "chat-app-stage-3",
+    "width": 580,
+    "height": 360,
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "User A",
+        "x": 60,
+        "y": 100,
+        "explanation": "A connected client with a persistent WebSocket connection to the server"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "Server",
+        "x": 280,
+        "y": 100,
+        "explanation": "The server maintains open WebSocket connections with all active clients"
+      },
+      {
+        "id": "client-2",
+        "type": "client",
+        "label": "User B",
+        "x": 500,
+        "y": 40,
+        "explanation": "Another connected client receiving messages instantly via WebSocket"
+      },
+      {
+        "id": "client-3",
+        "type": "client",
+        "label": "User C",
+        "x": 500,
+        "y": 160,
+        "explanation": "A third client — the server pushes messages to all connected clients simultaneously",
+        "isNew": true
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "x": 280,
+        "y": 280,
+        "explanation": "Still stores all messages permanently — acts as the safety net when clients reconnect"
+      }
+    ],
+    "edges": [
+      { "from": "client-1", "to": "server", "label": "WebSocket", "style": "solid", "animated": true },
+      { "from": "server", "to": "client-2", "label": "push", "style": "solid", "animated": true },
+      { "from": "server", "to": "client-3", "label": "push", "style": "solid", "animated": true },
+      { "from": "server", "to": "database", "label": "persist", "style": "dashed" }
+    ]
+  }
+}

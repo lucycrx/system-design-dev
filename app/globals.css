@@ -6,22 +6,22 @@
   --color-surface: #FFFFFF;
   --color-surface-hover: #F5F4F1;
   --color-accent: #C4654A;
-  --color-accent-dim: rgba(196, 101, 74, 0.08);
-  --color-accent-mid: rgba(196, 101, 74, 0.15);
+  --color-accent-dim: #C4654A14;
+  --color-accent-mid: #C4654A26;
   --color-text: #1A1A1A;
   --color-text-muted: #666666;
   --color-text-dim: #999999;
   --color-border: #E5E2DE;
   --color-blue: #6B8EAE;
-  --color-blue-dim: rgba(107, 142, 174, 0.08);
+  --color-blue-dim: #6B8EAE14;
   --color-pink: #B85C5C;
-  --color-pink-dim: rgba(184, 92, 92, 0.08);
+  --color-pink-dim: #B85C5C14;
   --color-green: #6BA88E;
-  --color-green-dim: rgba(107, 168, 142, 0.08);
+  --color-green-dim: #6BA88E14;
   --color-orange: #C49A5A;
-  --color-orange-dim: rgba(196, 154, 90, 0.08);
+  --color-orange-dim: #C49A5A14;
   --color-purple: #8B7BAE;
-  --color-purple-dim: rgba(139, 123, 174, 0.08);
+  --color-purple-dim: #8B7BAE14;
 
   /* Fonts */
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
@@ -49,4 +49,25 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-dim);
+}
+
+/* Diagram animations */
+@keyframes diagram-node-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes diagram-pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
