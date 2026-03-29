@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { Block, Diagram, DiagramBlock as DiagramBlockType, GlossaryTerm } from "@/types/story";
-import { SystemDiagram } from "@/components/diagrams/SystemDiagram";
+import { InteractiveDiagramLoader } from "@/components/diagrams/InteractiveDiagramLoader";
 import { TextBlock } from "@/components/blocks/TextBlock";
 import { CalloutBlock } from "@/components/blocks/CalloutBlock";
 import { CheckpointBlock } from "@/components/blocks/CheckpointBlock";
@@ -105,7 +105,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap }: Props) {
                 <div className="lg:hidden my-8 bg-surface rounded-2xl border border-border p-6">
                   {diagram ? (
                     <>
-                      <SystemDiagram
+                      <InteractiveDiagramLoader
                         diagram={diagram}
                         highlightNodes={diagramBlock.highlightNodes}
                         animateFlow={diagramBlock.animateFlow}
@@ -138,7 +138,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap }: Props) {
       <div className="hidden lg:block lg:w-[45%]">
         <div className="sticky top-24">
           <div className="bg-surface rounded-2xl border border-border p-6 shadow-sm">
-            <SystemDiagram
+            <InteractiveDiagramLoader
               diagram={activeDiagram}
               highlightNodes={activeHighlightNodes}
               animateFlow={activeAnimateFlow}

@@ -1,0 +1,171 @@
+"use client";
+
+import { memo, useState } from "react";
+import { Handle, Position } from "@xyflow/react";
+import type { DiagramNodeType } from "@/types/story";
+
+interface SystemNodeData {
+  label: string;
+  nodeType: DiagramNodeType;
+  explanation: string;
+  glossaryLink?: string;
+  isNew?: boolean;
+  isHighlighted?: boolean;
+}
+
+const NODE_WIDTH = 140;
+const NODE_HEIGHT = 64;
+
+function NodeIcon({ type }: { type: DiagramNodeType }) {
+  const iconClass = "w-5 h-5 flex-shrink-0";
+
+  switch (type) {
+    case "client":
+      return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <rect x="3" y="4" width="18" height="12" rx="2" />
+          <line x1="12" y1="16" x2="12" y2="19" />
+          <line x1="8" y1="19" x2="16" y2="19" />
+        </svg>
+      );
+    case "server":
+      return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <rect x="4" y="3" width="16" height="6" rx="1.5" />
+          <rect x="4" y="11" width="16" height="6" rx="1.5" />
+          <circle cx="7" cy="6" r="1" fill="currentColor" />
+          <circle cx="7" cy="14" r="1" fill="currentColor" />
+          <line x1="11" y1="6" x2="17" y2="6" />
+          <line x1="11" y1="14" x2="17" y2="14" />
+        </svg>
+      );
+    case "database":
+      return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <ellipse cx="12" cy="6" rx="8" ry="3" />
+          <path d="M4 6v6c0 1.657 3.582 3 8 3s8-1.343 8-3V6" />
+          <path d="M4 12v6c0 1.657 3.582 3 8 3s8-1.343 8-3v-6" />
+        </svg>
+      );
+    case "cache":
+      return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+      );
+    case "queue":
+      return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <rect x="3" y="8" width="4" height="8" rx="1" />
+          <rect x="10" y="8" width="4" height="8" rx="1" />
+          <rect x="17" y="8" width="4" height="8" rx="1" />
+          <path d="M7 12h3M14 12h3" strokeDasharray="2 1" />
+        </svg>
+      );
+    case "load-balancer":
+      return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <circle cx="12" cy="5" r="2.5" />
+          <circle cx="6" cy="18" r="2.5" />
+          <circle cx="18" cy="18" r="2.5" />
+          <line x1="12" y1="7.5" x2="6" y2="15.5" />
+          <line x1="12" y1="7.5" x2="18" y2="15.5" />
+        </svg>
+      );
+    case "cdn":
+      return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <circle cx="12" cy="12" r="9" />
+          <ellipse cx="12" cy="12" rx="4" ry="9" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+        </svg>
+      );
+    case "api-gateway":
+      return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <rect x="8" y="3" width="8" height="18" rx="2" />
+          <path d="M3 8h5M3 12h5M3 16h5M16 8h5M16 12h5M16 16h5" />
+        </svg>
+      );
+  }
+}
+
+const typeLabels: Record<DiagramNodeType, string> = {
+  client: "client",
+  server: "server",
+  database: "database",
+  cache: "cache",
+  queue: "queue",
+  "load-balancer": "load balancer",
+  cdn: "CDN",
+  "api-gateway": "API gateway",
+};
+
+function SystemNodeComponent({ data }: { data: SystemNodeData }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const isHighlighted = data.isHighlighted;
+  const isNew = data.isNew;
+
+  return (
+    <div
+      className="relative group"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      onClick={() => setShowTooltip((prev) => !prev)}
+    >
+      <Handle type="target" position={Position.Left} className="!bg-border !border-border !w-1.5 !h-1.5 !-left-1" />
+      <Handle type="source" position={Position.Right} className="!bg-border !border-border !w-1.5 !h-1.5 !-right-1" />
+      <Handle type="target" position={Position.Top} id="top" className="!bg-border !border-border !w-1.5 !h-1.5 !-top-1" />
+      <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-border !border-border !w-1.5 !h-1.5 !-bottom-1" />
+
+      {/* Highlight ring */}
+      {isHighlighted && (
+        <div className="absolute -inset-1.5 rounded-xl border-2 border-accent animate-[diagram-pulse_2s_ease-in-out_infinite]" />
+      )}
+
+      {/* Node body */}
+      <div
+        className={`
+          flex items-center gap-2.5 px-3 py-2.5
+          bg-surface border rounded-lg shadow-sm
+          transition-all duration-300 cursor-pointer
+          hover:shadow-md hover:border-accent/40
+          ${isHighlighted ? "border-accent/50" : "border-border"}
+          ${data.nodeType === "cache" ? "border-dashed" : ""}
+          ${isNew ? "animate-[diagram-node-enter_500ms_ease-out_both]" : ""}
+        `}
+        style={{
+          width: NODE_WIDTH,
+          minHeight: NODE_HEIGHT,
+          animationDelay: isNew ? "200ms" : undefined,
+        }}
+      >
+        <div className="text-text-muted">
+          <NodeIcon type={data.nodeType} />
+        </div>
+        <div className="flex flex-col min-w-0">
+          <span className="text-xs font-medium text-text leading-tight truncate">
+            {data.label}
+          </span>
+          <span className="text-[10px] font-mono text-text-dim leading-tight">
+            {typeLabels[data.nodeType]}
+          </span>
+        </div>
+      </div>
+
+      {/* Explanation tooltip */}
+      {showTooltip && data.explanation && (
+        <div
+          className="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 bg-text text-bg text-xs rounded-lg shadow-lg pointer-events-none"
+        >
+          {data.explanation}
+          <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-text rotate-45 -mt-1" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export const SystemNode = memo(SystemNodeComponent);
+export { NODE_WIDTH, NODE_HEIGHT };

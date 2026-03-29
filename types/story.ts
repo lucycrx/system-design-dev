@@ -147,28 +147,30 @@ export interface CurriculumModule {
 
 // ---- Diagram ----
 
+export type DiagramNodeType =
+  | "client"
+  | "server"
+  | "database"
+  | "cache"
+  | "queue"
+  | "load-balancer"
+  | "cdn"
+  | "api-gateway";
+
 export interface DiagramNode {
   id: string;
-  type:
-    | "client"
-    | "server"
-    | "database"
-    | "cache"
-    | "queue"
-    | "load-balancer"
-    | "cdn"
-    | "api-gateway";
+  type: DiagramNodeType;
   label: string;
-  x: number;
-  y: number;
+  position: { x: number; y: number };
   explanation: string;
   glossaryLink?: string;
   isNew?: boolean;
 }
 
 export interface DiagramEdge {
-  from: string;
-  to: string;
+  id: string;
+  source: string;
+  target: string;
   label?: string;
   animated?: boolean;
   style?: "solid" | "dashed";
@@ -176,8 +178,6 @@ export interface DiagramEdge {
 
 export interface Diagram {
   id: string;
-  width: number;
-  height: number;
   nodes: DiagramNode[];
   edges: DiagramEdge[];
 }
