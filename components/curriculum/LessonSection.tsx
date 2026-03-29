@@ -37,7 +37,7 @@ export function LessonSection({ section }: Props) {
   return (
     <div className={`${meta.borderColor} border-l-[3px] pl-5 py-1 mb-8`}>
       <div
-        className={`text-[0.6875rem] font-semibold uppercase tracking-[0.1em] ${meta.color} mb-3`}
+        className={`label-mono ${meta.color} mb-3`}
       >
         {meta.label}
       </div>
@@ -69,13 +69,13 @@ export function LessonSection({ section }: Props) {
               const isBlock = className?.includes("language-");
               if (isBlock) {
                 return (
-                  <code className="block bg-bg rounded-lg p-4 text-sm font-mono text-text/70 overflow-x-auto mb-4">
+                  <code className="block bg-bg p-4 text-sm font-mono text-text/70 overflow-x-auto mb-4 border border-border">
                     {children}
                   </code>
                 );
               }
               return (
-                <code className="bg-bg px-1.5 py-0.5 rounded text-sm font-mono text-accent">
+                <code className="bg-bg px-1.5 py-0.5 text-sm font-mono text-accent border border-border">
                   {children}
                 </code>
               );

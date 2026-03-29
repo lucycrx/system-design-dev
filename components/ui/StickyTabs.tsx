@@ -20,13 +20,13 @@ export function StickyTabs() {
 
   return (
     <div className="sticky top-0 z-40 bg-bg/90 backdrop-blur-md border-b border-border">
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-6">
         <nav className="flex gap-8">
           {TABS.map((tab) => (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`relative py-3 text-sm font-medium transition-colors ${
+              className={`relative py-3 text-[11px] font-mono tracking-[2px] uppercase transition-colors ${
                 isActive(tab)
                   ? "text-text"
                   : "text-text-dim hover:text-text-muted"
@@ -34,7 +34,7 @@ export function StickyTabs() {
             >
               {tab.label}
               {isActive(tab) && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent" />
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-text" />
               )}
             </Link>
           ))}

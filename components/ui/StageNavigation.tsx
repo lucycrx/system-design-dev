@@ -18,10 +18,10 @@ export function StageNavigation({ storySlug, prevStage, nextStage }: Props) {
             &larr;
           </span>
           <div>
-            <div className="text-[11px] uppercase tracking-wider text-text-dim">
+            <div className="label-mono text-text-dim">
               Previous
             </div>
-            <div className="text-sm font-medium">{prevStage.title}</div>
+            <div className="text-sm font-bold uppercase">{prevStage.title}</div>
           </div>
         </Link>
       ) : (
@@ -34,10 +34,10 @@ export function StageNavigation({ storySlug, prevStage, nextStage }: Props) {
           className="group flex items-center gap-3 text-right text-text-muted hover:text-accent transition-colors"
         >
           <div>
-            <div className="text-[11px] uppercase tracking-wider text-text-dim">
+            <div className="label-mono text-text-dim">
               Next
             </div>
-            <div className="text-sm font-medium">{nextStage.title}</div>
+            <div className="text-sm font-bold uppercase">{nextStage.title}</div>
           </div>
           <span className="text-lg group-hover:translate-x-1 transition-transform">
             &rarr;
@@ -46,7 +46,7 @@ export function StageNavigation({ storySlug, prevStage, nextStage }: Props) {
       ) : (
         <Link
           href={`/stories/${storySlug}`}
-          className="flex items-center gap-2 px-5 py-2.5 bg-accent text-white rounded-full font-semibold text-sm hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 px-5 py-2.5 bg-text text-bg font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
         >
           Complete Story
         </Link>

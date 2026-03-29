@@ -14,9 +14,9 @@ export function CheckpointBlock({ block }: Props) {
   const selectedOption = block.options.find((o) => o.id === selected);
 
   return (
-    <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+    <div className="bg-surface border border-border overflow-hidden">
       <div className="p-5 border-b border-border">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-purple mb-2">
+        <div className="label-mono text-purple mb-2">
           Quick Check
         </div>
         <p className="text-[15px] text-text font-medium leading-relaxed">
@@ -37,7 +37,7 @@ export function CheckpointBlock({ block }: Props) {
                   setSelected(option.id);
                 }
               }}
-              className={`w-full text-left p-4 rounded-xl border transition-all ${
+              className={`w-full text-left p-4 border transition-all ${
                 showResult
                   ? isCorrect
                     ? "border-green bg-green-dim"
@@ -69,7 +69,7 @@ export function CheckpointBlock({ block }: Props) {
         <div className="px-5 pb-5">
           <button
             onClick={() => setRevealed(true)}
-            className="w-full py-3 rounded-xl bg-accent text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="w-full py-3 bg-accent text-white font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
           >
             Check Answer
           </button>
@@ -78,13 +78,13 @@ export function CheckpointBlock({ block }: Props) {
 
       {revealed && selectedOption && (
         <div
-          className={`mx-5 mb-5 p-4 rounded-xl ${
+          className={`mx-5 mb-5 p-4 ${
             selectedOption.correct ? "bg-green-dim" : "bg-pink-dim"
           }`}
         >
           <div className="flex items-center gap-2 mb-1">
             <span
-              className={`text-sm font-semibold ${
+              className={`text-sm font-bold font-mono uppercase ${
                 selectedOption.correct ? "text-green" : "text-pink"
               }`}
             >

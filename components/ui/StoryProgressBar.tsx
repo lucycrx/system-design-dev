@@ -19,9 +19,9 @@ export function StoryProgressBar({
         </span>
         <span className="text-xs text-text-dim">{stageTitle}</span>
       </div>
-      <div className="h-1 bg-border rounded-full overflow-hidden">
+      <div className="h-[2px] bg-border overflow-hidden">
         <div
-          className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+          className="h-full bg-text transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>

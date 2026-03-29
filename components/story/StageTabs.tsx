@@ -15,7 +15,7 @@ export function StageTabs({ stages, activeIndex, onSelect }: Props) {
         <button
           key={stage.id}
           onClick={() => onSelect(i)}
-          className={`relative flex-shrink-0 px-6 py-3 text-sm font-medium transition-colors ${
+          className={`relative flex-shrink-0 px-6 py-3 text-[11px] font-mono tracking-[2px] uppercase transition-colors ${
             i === activeIndex
               ? "text-text"
               : "text-text-dim hover:text-text-muted"
@@ -23,7 +23,7 @@ export function StageTabs({ stages, activeIndex, onSelect }: Props) {
         >
           Stage {i + 1}: {stage.userScale}
           {i === activeIndex && (
-            <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent" />
+            <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-text" />
           )}
         </button>
       ))}

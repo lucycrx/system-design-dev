@@ -140,11 +140,11 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
               <div className="max-w-3xl">
                 <div className="mb-10">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-accent-dim text-accent border border-accent/20">
+                    <span className="label-mono px-2.5 py-1 bg-accent-dim text-accent border border-accent/20">
                       {stage.userScale}
                     </span>
                   </div>
-                  <h2 className="text-3xl font-bold text-text mb-3">{stage.title}</h2>
+                  <h2 className="heading-editorial text-3xl text-text mb-3">{stage.title}</h2>
                   <p className="text-text-muted leading-relaxed">
                     {stage.narrative.setup}
                   </p>
@@ -152,8 +152,8 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
 
                 {/* Problem callout */}
                 {stage.narrative.problem && (
-                  <div className="bg-pink-dim border-l-[3px] border-l-pink rounded-r-xl p-5 mb-8">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-pink mb-2">
+                  <div className="bg-pink-dim border-l-[3px] border-l-pink p-5 mb-8">
+                    <div className="label-mono text-pink mb-2">
                       The Problem
                     </div>
                     <p className="text-[14px] text-text/80 leading-relaxed">
@@ -164,8 +164,8 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
 
                 {/* Resolution teaser */}
                 {stage.narrative.resolution && (
-                  <div className="bg-green-dim border-l-[3px] border-l-green rounded-r-xl p-5 mb-8">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-green mb-2">
+                  <div className="bg-green-dim border-l-[3px] border-l-green p-5 mb-8">
+                    <div className="label-mono text-green mb-2">
                       The Solution
                     </div>
                     <p className="text-[14px] text-text/80 leading-relaxed">

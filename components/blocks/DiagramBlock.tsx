@@ -6,8 +6,8 @@ interface Props {
 
 export function DiagramBlock({ block }: Props) {
   return (
-    <div className="bg-surface rounded-2xl border border-border p-8 flex flex-col items-center gap-4">
-      <div className="w-full h-48 flex items-center justify-center border border-dashed border-border rounded-xl bg-bg">
+    <div className="bg-surface border border-border p-8 flex flex-col items-center gap-4">
+      <div className="w-full h-48 flex items-center justify-center border border-dashed border-border bg-bg">
         <div className="text-center">
           <p className="text-sm text-text-muted">
             Interactive diagram coming soon

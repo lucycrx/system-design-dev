@@ -12,7 +12,7 @@ export function RevealBlock({ block }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
+    <div className="border border-border overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full text-left p-4 flex items-center gap-3 hover:bg-surface-hover transition-colors"
@@ -26,7 +26,7 @@ export function RevealBlock({ block }: Props) {
         >
           <path d="M4.5 2L9 6L4.5 10V2Z" />
         </svg>
-        <span className="text-[14px] text-blue font-medium">{block.label}</span>
+        <span className="text-[14px] text-blue font-medium font-mono">{block.label}</span>
       </button>
       {open && (
         <div className="px-5 pb-5 border-t border-border bg-surface">
@@ -41,7 +41,7 @@ export function RevealBlock({ block }: Props) {
                   <ol className="list-decimal list-inside space-y-1 mb-3">{children}</ol>
                 ),
                 code: ({ children }) => (
-                  <code className="bg-bg px-1.5 py-0.5 rounded text-sm font-mono text-accent">
+                  <code className="bg-bg px-1.5 py-0.5 text-sm font-mono text-accent border border-border">
                     {children}
                   </code>
                 ),

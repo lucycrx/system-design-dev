@@ -66,13 +66,13 @@ export function HomeContent({ stories, modules, initialTab }: Props) {
     <>
       {/* Sticky Tabs */}
       <div className="sticky top-0 z-40 bg-bg/90 backdrop-blur-md border-b border-border">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <nav className="flex gap-8">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => switchTab(tab.id)}
-                className={`relative py-3 text-sm font-medium transition-colors ${
+                className={`relative py-3 text-[11px] font-mono tracking-[2px] uppercase transition-colors ${
                   activeTab === tab.id
                     ? "text-text"
                     : "text-text-dim hover:text-text-muted"
@@ -80,7 +80,7 @@ export function HomeContent({ stories, modules, initialTab }: Props) {
               >
                 {tab.label}
                 {activeTab === tab.id && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent" />
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-text" />
                 )}
               </button>
             ))}
@@ -89,7 +89,7 @@ export function HomeContent({ stories, modules, initialTab }: Props) {
       </div>
 
       {/* Tab content */}
-      <main className="max-w-4xl mx-auto px-6 pb-24 pt-12">
+      <main className="max-w-5xl mx-auto px-6 pb-24 pt-12">
         {activeTab === "stories" ? (
           <StoriesPanel stories={stories} />
         ) : (
@@ -104,30 +104,30 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
   return (
     <>
       <div className="flex items-center justify-between mb-10">
-        <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-text-dim">
+        <h2 className="label-mono text-text-dim">
           Build Stories
         </h2>
-        <span className="text-[0.6875rem] text-text-dim font-mono">
+        <span className="label-mono text-text-dim">
           {stories.length} {stories.length === 1 ? "story" : "stories"}
         </span>
       </div>
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         {stories.map((story, i) => (
           <Link
             key={story.id}
             href={`/stories/${story.slug}`}
-            className="group bg-surface border border-border rounded-2xl p-8 hover:border-accent/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out animate-[fade-up_0.4s_ease-out_both]"
+            className="group bg-surface border border-border p-7 hover:border-text/30 transition-all duration-200 animate-[fade-up_0.4s_ease-out_both]"
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="flex items-center gap-2.5 mb-5">
-              <span className="text-[0.6875rem] font-semibold px-2.5 py-0.5 rounded-full bg-green-dim text-green border border-green/20">
+              <span className="label-mono px-2 py-0.5 bg-green-dim text-green border border-green/20">
                 {story.difficulty}
               </span>
-              <span className="text-[0.6875rem] text-text-dim font-mono">
+              <span className="label-mono text-text-dim">
                 ~{story.estimatedMinutes} min
               </span>
             </div>
-            <h3 className="text-xl font-bold text-text group-hover:text-accent transition-colors mb-1 leading-snug tracking-[-0.01em]">
+            <h3 className="text-lg font-bold text-text group-hover:text-accent transition-colors mb-1 leading-snug tracking-[-0.01em] uppercase">
               {story.title}
             </h3>
             <p className="text-[0.9375rem] text-text-muted leading-snug">
@@ -140,13 +140,13 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
               {story.concepts.slice(0, 4).map((c) => (
                 <span
                   key={c}
-                  className="text-[0.6875rem] px-2 py-0.5 rounded bg-bg border border-border text-text-dim font-mono"
+                  className="label-mono px-2 py-0.5 bg-bg border border-border text-text-dim"
                 >
                   {c}
                 </span>
               ))}
               {story.concepts.length > 4 && (
-                <span className="text-[0.6875rem] text-text-dim font-mono">
+                <span className="label-mono text-text-dim">
                   +{story.concepts.length - 4} more
                 </span>
               )}
@@ -154,8 +154,8 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
           </Link>
         ))}
         {/* Coming soon placeholder */}
-        <div className="border border-dashed border-text-dim/20 rounded-2xl p-8 flex items-center justify-center">
-          <p className="text-text-dim text-sm text-center italic">
+        <div className="border border-dashed border-text-dim/20 p-8 flex items-center justify-center">
+          <p className="text-text-dim text-sm font-mono">
             More stories coming soon
           </p>
         </div>
@@ -167,32 +167,32 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
 function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
   return (
     <>
-      <div className="space-y-5">
+      <div className="space-y-4">
         {modules.map((mod, i) => (
           <Link
             key={mod.id}
             href={`/curriculum/${mod.slug}`}
-            className={`group block bg-surface border ${MODULE_COLORS[mod.color]} rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out animate-[fade-up_0.4s_ease-out_both]`}
+            className={`group block bg-surface border ${MODULE_COLORS[mod.color]} p-7 hover:border-text/30 transition-all duration-200 animate-[fade-up_0.4s_ease-out_both]`}
             style={{ animationDelay: `${i * 100}ms` }}
           >
             <div className="flex items-start gap-5">
               <div
-                className={`flex-shrink-0 w-16 h-16 rounded-2xl ${MODULE_BG_COLORS[mod.color]} flex items-center justify-center text-2xl font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]}`}
+                className={`flex-shrink-0 w-14 h-14 ${MODULE_BG_COLORS[mod.color]} flex items-center justify-center text-2xl font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]}`}
               >
                 {mod.moduleNumber}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2.5 mb-1.5">
                   <span
-                    className={`text-[0.6875rem] font-mono font-medium ${MODULE_TEXT_COLORS[mod.color]}`}
+                    className={`label-mono font-medium ${MODULE_TEXT_COLORS[mod.color]}`}
                   >
                     Module {mod.moduleNumber}
                   </span>
-                  <span className="text-[0.6875rem] text-text-dim font-mono">
+                  <span className="label-mono text-text-dim">
                     {mod.lessons.length} lessons
                   </span>
                 </div>
-                <h2 className="text-xl font-bold text-text group-hover:text-accent transition-colors leading-snug tracking-[-0.01em]">
+                <h2 className="text-xl font-bold text-text group-hover:text-accent transition-colors leading-snug tracking-[-0.01em] uppercase">
                   {mod.title}
                 </h2>
                 <p className="text-[0.9375rem] text-text-muted mt-1.5 leading-snug">
@@ -202,7 +202,7 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
                   {mod.lessons.slice(0, 3).map((lesson) => (
                     <span
                       key={lesson.id}
-                      className="text-[0.6875rem] px-2 py-0.5 rounded bg-bg border border-border text-text-dim font-mono"
+                      className="label-mono px-2 py-0.5 bg-bg border border-border text-text-dim"
                     >
                       {lesson.title.length > 30
                         ? lesson.title.slice(0, 30) + "..."
@@ -210,13 +210,13 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
                     </span>
                   ))}
                   {mod.lessons.length > 3 && (
-                    <span className="text-[0.6875rem] text-text-dim font-mono">
+                    <span className="label-mono text-text-dim">
                       +{mod.lessons.length - 3} more
                     </span>
                   )}
                 </div>
               </div>
-              <span className="text-text-dim group-hover:text-accent group-hover:translate-x-1 transition-all text-lg mt-3">
+              <span className="text-text-dim group-hover:text-accent group-hover:translate-x-1 transition-all text-lg mt-3 font-mono">
                 &rarr;
               </span>
             </div>
@@ -225,7 +225,7 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
       </div>
 
       {/* Future modules placeholder */}
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 space-y-3">
         {[
           { num: 3, title: "Architecture Patterns" },
           { num: 4, title: "Making It Real (Deployment)" },
@@ -234,19 +234,19 @@ function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
         ].map((mod) => (
           <div
             key={mod.num}
-            className="bg-surface/50 border border-dashed border-border rounded-2xl p-8 flex items-center gap-5 opacity-35"
+            className="bg-surface/50 border border-dashed border-border p-7 flex items-center gap-5 opacity-35"
           >
-            <div className="w-16 h-16 rounded-2xl bg-bg flex items-center justify-center text-2xl font-mono text-text-dim">
+            <div className="w-14 h-14 bg-bg flex items-center justify-center text-2xl font-mono text-text-dim">
               {mod.num}
             </div>
             <div>
-              <span className="text-[0.6875rem] font-mono text-text-dim">
+              <span className="label-mono text-text-dim">
                 Module {mod.num}
               </span>
-              <h3 className="text-lg font-semibold text-text-muted tracking-[-0.01em]">
+              <h3 className="text-lg font-bold text-text-muted tracking-[-0.01em] uppercase">
                 {mod.title}
               </h3>
-              <p className="text-sm text-text-dim">Coming soon</p>
+              <p className="text-sm text-text-dim font-mono">Coming soon</p>
             </div>
           </div>
         ))}

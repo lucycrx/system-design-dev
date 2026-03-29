@@ -13,15 +13,15 @@ export function StoryHero({ story }: { story: Story }) {
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-5">
           <span
-            className={`text-[0.6875rem] font-semibold px-3 py-1 rounded-full border ${difficultyColors[story.difficulty]}`}
+            className={`label-mono px-2.5 py-1 border ${difficultyColors[story.difficulty]}`}
           >
             {story.difficulty}
           </span>
-          <span className="text-[0.6875rem] text-text-dim font-mono">
+          <span className="label-mono text-text-dim">
             ~{story.estimatedMinutes} min
           </span>
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text mb-4 leading-[1.08] tracking-[-0.02em]">
+        <h1 className="heading-editorial text-4xl sm:text-5xl lg:text-6xl text-text mb-4">
           {story.title}
         </h1>
         <p className="text-lg sm:text-xl text-text-muted font-light leading-relaxed">
@@ -34,14 +34,14 @@ export function StoryHero({ story }: { story: Story }) {
 
       {/* Concepts you'll learn */}
       <div>
-        <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-text-dim mb-4">
+        <h2 className="label-mono text-text-dim mb-4">
           Concepts You&apos;ll Learn
         </h2>
         <div className="flex flex-wrap gap-2">
           {story.concepts.map((concept) => (
             <span
               key={concept}
-              className="text-[0.6875rem] px-3 py-1.5 rounded-full bg-surface border border-border text-text-muted font-mono"
+              className="label-mono px-3 py-1.5 bg-surface border border-border text-text-muted"
             >
               {concept}
             </span>

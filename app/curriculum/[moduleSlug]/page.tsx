@@ -49,9 +49,9 @@ export default async function ModulePage({ params }: Props) {
         <div className="max-w-3xl mx-auto px-6 py-4">
           <Link
             href="/curriculum"
-            className="text-sm text-text-muted hover:text-text transition-colors flex items-center gap-2"
+            className="label-mono text-text-muted hover:text-text transition-colors flex items-center gap-2"
           >
-            <span>←</span> All Modules
+            <span>&larr;</span> All Modules
           </Link>
         </div>
       </header>
@@ -60,22 +60,22 @@ export default async function ModulePage({ params }: Props) {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4">
             <span
-              className={`text-sm font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]} ${MODULE_BG_COLORS[mod.color]} w-12 h-12 rounded-xl flex items-center justify-center`}
+              className={`text-sm font-bold font-mono ${MODULE_TEXT_COLORS[mod.color]} ${MODULE_BG_COLORS[mod.color]} w-12 h-12 flex items-center justify-center`}
             >
               {mod.moduleNumber}
             </span>
             <div>
               <span
-                className={`text-[0.6875rem] font-mono ${MODULE_TEXT_COLORS[mod.color]} font-semibold`}
+                className={`label-mono ${MODULE_TEXT_COLORS[mod.color]} font-medium`}
               >
                 Module {mod.moduleNumber}
               </span>
-              <div className="text-[0.6875rem] text-text-dim font-mono">
+              <div className="label-mono text-text-dim">
                 {mod.lessons.length} lessons &middot; ~{totalMinutes} min total
               </div>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-text mb-2 tracking-[-0.02em]">{mod.title}</h1>
+          <h1 className="heading-editorial text-3xl text-text mb-2">{mod.title}</h1>
           <p className="text-text-muted leading-relaxed">{mod.description}</p>
         </div>
 
@@ -85,27 +85,27 @@ export default async function ModulePage({ params }: Props) {
             <Link
               key={lesson.id}
               href={`/curriculum/${mod.slug}/${lesson.id}`}
-              className={`group block bg-surface border ${MODULE_BORDER_COLORS[mod.color]} rounded-xl p-5 hover:border-accent/30 transition-all`}
+              className={`group block bg-surface border ${MODULE_BORDER_COLORS[mod.color]} p-5 hover:border-text/30 transition-all`}
             >
               <div className="flex items-start gap-4">
                 <div
-                  className={`flex-shrink-0 w-8 h-8 rounded-full ${MODULE_BG_COLORS[mod.color]} border ${MODULE_BORDER_COLORS[mod.color]} flex items-center justify-center ${MODULE_TEXT_COLORS[mod.color]} text-sm font-bold`}
+                  className={`flex-shrink-0 w-8 h-8 ${MODULE_BG_COLORS[mod.color]} border ${MODULE_BORDER_COLORS[mod.color]} flex items-center justify-center ${MODULE_TEXT_COLORS[mod.color]} text-sm font-bold font-mono`}
                 >
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-text group-hover:text-accent transition-colors tracking-[-0.01em]">
+                  <h3 className="text-base font-bold text-text group-hover:text-accent transition-colors tracking-[-0.01em] uppercase">
                     {lesson.title}
                   </h3>
                   <p className="text-sm text-text-muted mt-0.5 leading-relaxed">
                     {lesson.description}
                   </p>
-                  <span className="text-[0.6875rem] text-text-dim font-mono mt-2 inline-block">
+                  <span className="label-mono text-text-dim mt-2 inline-block">
                     ~{lesson.estimatedMinutes} min
                   </span>
                 </div>
-                <span className="text-text-dim group-hover:text-accent transition-colors text-lg">
-                  →
+                <span className="text-text-dim group-hover:text-accent transition-colors text-lg font-mono">
+                  &rarr;
                 </span>
               </div>
             </Link>
@@ -116,7 +116,7 @@ export default async function ModulePage({ params }: Props) {
         <div className="mt-8">
           <Link
             href={`/curriculum/${mod.slug}/${mod.lessons[0].id}`}
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-accent text-white rounded-full font-bold text-base hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-text text-bg font-bold font-mono text-[13px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
           >
             Start Module &rarr;
           </Link>

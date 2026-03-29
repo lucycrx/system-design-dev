@@ -43,10 +43,10 @@ export function CalloutBlock({ block }: Props) {
 
   return (
     <div
-      className={`${style.bgColor} ${style.borderColor} ${style.topBorderColor} border-l-4 border-t rounded-r-xl p-7`}
+      className={`${style.bgColor} ${style.borderColor} ${style.topBorderColor} border-l-4 border-t p-7`}
     >
       <div
-        className={`text-[0.6875rem] font-bold uppercase tracking-[0.1em] ${style.labelColor} mb-3`}
+        className={`label-mono ${style.labelColor} mb-3`}
       >
         {style.label}
       </div>

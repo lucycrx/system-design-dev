@@ -11,18 +11,16 @@ export function LessonQuiz({ quiz }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
 
-  const selectedOption = quiz.options.find((o) => o.id === selected);
-
   return (
-    <div className="bg-surface rounded-2xl border border-purple/20 overflow-hidden">
+    <div className="bg-surface border border-purple/20 overflow-hidden">
       <div className="p-5 bg-purple-dim border-b border-purple/20">
-        <div className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-purple mb-3">
+        <div className="label-mono text-purple mb-3">
           Check Your Understanding
         </div>
         <p className="text-sm text-text/80 leading-relaxed mb-2">
           {quiz.scenario}
         </p>
-        <p className="text-base text-text font-semibold">{quiz.question}</p>
+        <p className="text-base text-text font-bold">{quiz.question}</p>
       </div>
       <div className="p-4 space-y-2">
         {quiz.options.map((option) => {
@@ -37,7 +35,7 @@ export function LessonQuiz({ quiz }: Props) {
               onClick={() => {
                 if (!revealed) setSelected(option.id);
               }}
-              className={`w-full text-left p-4 rounded-xl border transition-all ${
+              className={`w-full text-left p-4 border transition-all ${
                 showResult
                   ? isCorrect
                     ? "border-green bg-green-dim"
@@ -76,7 +74,7 @@ export function LessonQuiz({ quiz }: Props) {
         <div className="px-4 pb-4">
           <button
             onClick={() => setRevealed(true)}
-            className="w-full py-3 rounded-xl bg-purple text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="w-full py-3 bg-purple text-white font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
           >
             Check Answer
           </button>

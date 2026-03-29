@@ -11,18 +11,16 @@ export function ChallengeBlock({ block }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
 
-  const selectedOption = block.options.find((o) => o.id === selected);
-
   return (
-    <div className="bg-surface rounded-2xl border border-accent/20 overflow-hidden">
+    <div className="bg-surface border border-accent/20 overflow-hidden">
       <div className="p-5 bg-accent-dim border-b border-accent/20">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-accent mb-3">
+        <div className="label-mono text-accent mb-3">
           Design Challenge
         </div>
         <p className="text-[15px] text-text/80 leading-relaxed mb-3">
           {block.scenario}
         </p>
-        <p className="text-[15px] text-text font-semibold">{block.question}</p>
+        <p className="text-[15px] text-text font-bold">{block.question}</p>
       </div>
       <div className="p-5 space-y-2">
         {block.options.map((option) => {
@@ -41,7 +39,7 @@ export function ChallengeBlock({ block }: Props) {
                   setSelected(option.id);
                 }
               }}
-              className={`w-full text-left p-4 rounded-xl border transition-all ${
+              className={`w-full text-left p-4 border transition-all ${
                 showResult
                   ? isCorrect
                     ? "border-green bg-green-dim"
@@ -80,7 +78,7 @@ export function ChallengeBlock({ block }: Props) {
         <div className="px-5 pb-5">
           <button
             onClick={() => setRevealed(true)}
-            className="w-full py-3 rounded-xl bg-accent text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="w-full py-3 bg-accent text-white font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
           >
             Submit Answer
           </button>

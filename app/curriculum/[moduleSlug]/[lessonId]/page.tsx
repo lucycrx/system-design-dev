@@ -30,15 +30,15 @@ export default async function LessonPage({ params }: Props) {
         <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
           <Link
             href={`/curriculum/${mod.slug}`}
-            className="text-sm text-text-muted hover:text-text transition-colors flex items-center gap-2"
+            className="label-mono text-text-muted hover:text-text transition-colors flex items-center gap-2"
           >
-            <span>←</span>
+            <span>&larr;</span>
             <span className="hidden sm:inline">
               Module {mod.moduleNumber}: {mod.title}
             </span>
             <span className="sm:hidden">Back</span>
           </Link>
-          <span className="text-[0.6875rem] font-mono text-text-dim">
+          <span className="label-mono text-text-dim">
             Lesson {lessonIndex + 1} of {mod.lessons.length}
           </span>
         </div>
@@ -48,16 +48,16 @@ export default async function LessonPage({ params }: Props) {
         {/* Progress bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[0.6875rem] text-text-muted font-mono">
+            <span className="label-mono text-text-muted">
               Lesson {lessonIndex + 1} of {mod.lessons.length}
             </span>
-            <span className="text-[0.6875rem] text-text-dim font-mono">
+            <span className="label-mono text-text-dim">
               ~{lesson.estimatedMinutes} min
             </span>
           </div>
-          <div className="h-1 bg-border rounded-full overflow-hidden">
+          <div className="h-[2px] bg-border overflow-hidden">
             <div
-              className="h-full bg-blue rounded-full transition-all duration-500 ease-out"
+              className="h-full bg-text transition-all duration-500 ease-out"
               style={{
                 width: `${((lessonIndex + 1) / mod.lessons.length) * 100}%`,
               }}
@@ -67,7 +67,7 @@ export default async function LessonPage({ params }: Props) {
 
         {/* Lesson header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-text mb-2 tracking-[-0.02em]">{lesson.title}</h1>
+          <h1 className="heading-editorial text-3xl text-text mb-2">{lesson.title}</h1>
           <p className="text-text-muted leading-relaxed">
             {lesson.description}
           </p>
@@ -86,7 +86,7 @@ export default async function LessonPage({ params }: Props) {
         {/* Related Build Stories */}
         {lesson.relatedStories && lesson.relatedStories.length > 0 && (
           <div className="mt-8 mb-8">
-            <h3 className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-text-dim mb-3">
+            <h3 className="label-mono text-text-dim mb-3">
               See This In Action
             </h3>
             <div className="space-y-2">
@@ -94,9 +94,9 @@ export default async function LessonPage({ params }: Props) {
                 <Link
                   key={`${rel.storySlug}-${rel.stageId}`}
                   href={`/stories/${rel.storySlug}?stage=${rel.stageId}`}
-                  className="block bg-accent-dim border border-accent/20 rounded-xl p-4 hover:border-accent/40 transition-colors"
+                  className="block bg-accent-dim border border-accent/20 p-4 hover:border-accent/40 transition-colors"
                 >
-                  <span className="text-sm text-accent font-medium">
+                  <span className="text-sm text-accent font-medium font-mono">
                     {rel.label}
                   </span>
                 </Link>
@@ -112,14 +112,14 @@ export default async function LessonPage({ params }: Props) {
               href={`/curriculum/${mod.slug}/${prevLesson.id}`}
               className="group flex items-center gap-3 text-text-muted hover:text-text transition-colors"
             >
-              <span className="text-lg group-hover:-translate-x-1 transition-transform">
-                ←
+              <span className="text-lg font-mono group-hover:-translate-x-1 transition-transform">
+                &larr;
               </span>
               <div>
-                <div className="text-[0.6875rem] uppercase tracking-[0.1em] text-text-dim">
+                <div className="label-mono text-text-dim">
                   Previous
                 </div>
-                <div className="text-sm font-semibold">{prevLesson.title}</div>
+                <div className="text-sm font-bold uppercase">{prevLesson.title}</div>
               </div>
             </Link>
           ) : (
@@ -129,22 +129,22 @@ export default async function LessonPage({ params }: Props) {
           {nextLesson ? (
             <Link
               href={`/curriculum/${mod.slug}/${nextLesson.id}`}
-              className="group flex items-center gap-3 text-right text-text-muted hover:text-blue transition-colors"
+              className="group flex items-center gap-3 text-right text-text-muted hover:text-text transition-colors"
             >
               <div>
-                <div className="text-[0.6875rem] uppercase tracking-[0.1em] text-text-dim">
+                <div className="label-mono text-text-dim">
                   Next Lesson
                 </div>
-                <div className="text-sm font-semibold">{nextLesson.title}</div>
+                <div className="text-sm font-bold uppercase">{nextLesson.title}</div>
               </div>
-              <span className="text-lg group-hover:translate-x-1 transition-transform">
-                →
+              <span className="text-lg font-mono group-hover:translate-x-1 transition-transform">
+                &rarr;
               </span>
             </Link>
           ) : (
             <Link
               href={`/curriculum/${mod.slug}`}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue text-white rounded-full font-semibold text-sm hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-5 py-2.5 bg-text text-bg font-bold font-mono text-[11px] tracking-[2px] uppercase hover:opacity-90 transition-opacity"
             >
               Complete Module
             </Link>
