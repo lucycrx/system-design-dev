@@ -134,7 +134,13 @@ function StoriesPanel({ stories }: { stories: Story[] }) {
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="flex items-center gap-2.5 mb-5">
-              <span className="label-mono px-2 py-0.5 bg-green-dim text-green border border-green/20">
+              <span className={`label-mono px-2 py-0.5 text-bg ${
+                story.difficulty === "beginner"
+                  ? "bg-green"
+                  : story.difficulty === "intermediate"
+                  ? "bg-orange"
+                  : "bg-accent"
+              }`}>
                 {story.difficulty}
               </span>
               <span className="label-mono text-text-dim">

@@ -1,9 +1,9 @@
 import type { Story } from "@/types/story";
 
 const difficultyColors = {
-  beginner: "text-green bg-green-dim border-green/20",
-  intermediate: "text-orange bg-orange-dim border-orange/20",
-  advanced: "text-pink bg-pink-dim border-pink/20",
+  beginner: "bg-green text-bg",
+  intermediate: "bg-orange text-bg",
+  advanced: "bg-accent text-bg",
 };
 
 export function StoryHero({ story }: { story: Story }) {
@@ -13,7 +13,7 @@ export function StoryHero({ story }: { story: Story }) {
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-5">
           <span
-            className={`label-mono px-2.5 py-1 border ${difficultyColors[story.difficulty]}`}
+            className={`label-mono px-2.5 py-1 ${difficultyColors[story.difficulty]}`}
           >
             {story.difficulty}
           </span>
