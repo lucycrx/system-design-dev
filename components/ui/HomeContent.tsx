@@ -99,8 +99,18 @@ export function StoriesPanel({ stories }: { stories: Story[] }) {
 }
 
 export function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
+  const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+
   return (
     <>
+      <div className="flex items-center justify-between mb-10">
+        <h2 className="label-mono text-text-dim">
+          Curriculum
+        </h2>
+        <span className="label-mono text-text-dim">
+          {modules.length} {modules.length === 1 ? "module" : "modules"} &middot; {totalLessons} lessons
+        </span>
+      </div>
       <div className="space-y-4">
         {modules.map((mod, i) => (
           <Link
