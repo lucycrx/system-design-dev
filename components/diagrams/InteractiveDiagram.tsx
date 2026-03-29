@@ -158,7 +158,7 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
 
       {/* Caption */}
       <div className="mt-2 text-center">
-        <p className="text-[10px] font-mono text-text-dim uppercase tracking-wider">
+        <p className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em]">
           {diagram.nodes.length} components -- zoom and pan to explore
         </p>
       </div>

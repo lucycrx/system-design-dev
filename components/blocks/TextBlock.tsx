@@ -120,7 +120,7 @@ export function TextBlock({ block, glossaryMap }: Props) {
             </div>
           ),
           thead: ({ children }) => (
-            <thead className="bg-surface text-text-muted text-xs uppercase tracking-wider">
+            <thead className="bg-surface text-text-muted text-xs uppercase tracking-[0.15em] font-mono">
               {children}
             </thead>
           ),
