@@ -35,7 +35,7 @@ export default async function StagePage({ params }: Props) {
     <div className="min-h-screen bg-bg">
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-bg/90 backdrop-blur-md border-b border-border">
-        <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className={`mx-auto px-6 py-3 flex items-center justify-between ${hasDiagrams ? "max-w-6xl" : "max-w-3xl"}`}>
           <Link
             href={`/stories/${story.slug}`}
             className="text-sm text-text-muted hover:text-text transition-colors flex items-center gap-2"
@@ -51,7 +51,7 @@ export default async function StagePage({ params }: Props) {
       </header>
 
       <main className={`mx-auto px-6 py-8 ${hasDiagrams ? "max-w-6xl" : "max-w-3xl"}`}>
-        <div className={hasDiagrams ? "max-w-3xl" : ""}>
+        <div>
           <StoryProgressBar
             currentStage={stageIndex + 1}
             totalStages={story.stages.length}
