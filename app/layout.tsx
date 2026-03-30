@@ -16,9 +16,9 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "System Design for Builders",
+  title: "Architecture Review \u2014 Any Codebase, Understood",
   description:
-    "Learn system design through interactive stories. Built for vibecoders, PMs, and founders — not just engineers.",
+    "A Claude Code skill that scans any codebase and generates an interactive architecture map with plain-English explanations and risk analysis. For PMs, founders, and vibecoders.",
 };
 
 export default function RootLayout({
