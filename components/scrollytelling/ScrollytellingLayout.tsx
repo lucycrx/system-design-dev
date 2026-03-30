@@ -14,9 +14,10 @@ interface Props {
   diagrams: Record<string, Diagram>;
   glossaryMap: Record<string, GlossaryTerm>;
   stickyTop?: number;
+  layout?: "inline" | "scrollytelling";
 }
 
-export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop = 96 }: Props) {
+export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop = 96, layout = "scrollytelling" }: Props) {
   const [activeDiagramId, setActiveDiagramId] = useState<string | null>(null);
   const [activeHighlightNodes, setActiveHighlightNodes] = useState<string[]>([]);
   const [activeAnimateFlow, setActiveAnimateFlow] = useState<string[]>([]);
@@ -78,6 +79,43 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
 
   const activeDiagram = activeDiagramId ? diagrams[activeDiagramId] || null : null;
 
+  // Inline layout: single column, diagrams at full width between text blocks
+  if (layout === "inline") {
+    return (
+      <div className="space-y-8">
+        {blocks.map((block, i) => {
+          if (block.type === "diagram") {
+            const diagramBlock = block as DiagramBlockType;
+            const diagram = diagrams[diagramBlock.diagramId];
+            return (
+              <div key={i} className="bg-surface border border-border p-6">
+                {diagram ? (
+                  <InteractiveDiagramLoader
+                    diagram={diagram}
+                    highlightNodes={diagramBlock.highlightNodes}
+                    animateFlow={diagramBlock.animateFlow}
+                    onNodeClick={setSelectedNodeId}
+                  />
+                ) : (
+                  <div className="h-48 flex items-center justify-center">
+                    <p className="text-sm text-text-dim">Diagram: {diagramBlock.diagramId}</p>
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <div key={i} className="max-w-3xl">
+              {renderBlock(block, glossaryMap, selectedNodeId)}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Scrollytelling layout: two-panel with sticky diagram
   return (
     <div className="flex flex-col lg:flex-row lg:gap-8">
       {/* Left panel — scrollable narrative */}
@@ -104,7 +142,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
                   </p>
                 </div>
                 {/* Inline diagram for mobile */}
-                <div className="lg:hidden bg-surface  border border-border p-6">
+                <div className="lg:hidden bg-surface border border-border p-6">
                   {diagram ? (
                     <>
                       <InteractiveDiagramLoader

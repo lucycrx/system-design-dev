@@ -8,6 +8,7 @@
   "estimatedMinutes": 25,
   "concepts": ["client-server", "database", "persistence", "websockets", "real-time", "polling"],
   "prerequisites": [],
+  "layout": "inline",
   "stages": [
     {
       "id": "stage-1",

@@ -86,6 +86,7 @@ export interface Story {
   concepts: string[];
   prerequisites: string[];
   stages: Stage[];
+  layout?: "inline" | "scrollytelling";
 }
 
 // ---- Glossary ----
