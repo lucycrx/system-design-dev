@@ -209,7 +209,7 @@ body {
   padding: 0.6rem 0.75rem;
   background: var(--diagram-bg);
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease, color 0.2s ease;
   position: relative;
   outline: none;
 }
@@ -217,7 +217,18 @@ body {
 .comp-card:hover { border-color: var(--diagram-label); transform: translateY(-1px); }
 .comp-card:active { transform: translateY(0); background: var(--diagram-surface); }
 .comp-card:focus-visible { border-color: var(--highlight); outline: 2px solid var(--highlight); outline-offset: 1px; }
-.comp-card.selected { border-color: var(--highlight); }
+
+.comp-card.selected {
+  background: var(--text);
+  border-color: var(--text);
+}
+.comp-card.selected .comp-label { color: var(--bg); }
+.comp-card.selected .comp-sublabel { color: hsl(0, 0%, 65%); }
+.comp-card.selected .comp-icon { color: var(--bg); opacity: 1; }
+.comp-card.selected .conn-tag { border-color: hsl(0, 0%, 35%); color: hsl(0, 0%, 65%); background: hsl(0, 0%, 18%); }
+.comp-card.selected .conn-tag .conn-target { color: var(--bg); }
+.comp-card.selected .conn-tag:hover { border-color: hsl(0, 0%, 55%); color: hsl(0, 0%, 80%); }
+.comp-card.selected .conn-tag::before { background: var(--bg); }
 
 .comp-card + .comp-card { margin-top: 0.4rem; }
 
@@ -253,11 +264,11 @@ body {
   margin-top: 0.1rem;
 }
 
-/* Risk indicator — thin top border */
-.comp-card.risk-critical { border-top: 2px solid var(--risk-critical); }
-.comp-card.risk-high { border-top: 2px solid var(--risk-high); }
-.comp-card.risk-medium { border-top: 2px solid var(--risk-medium); }
-.comp-card.risk-low { border-top: 2px solid var(--risk-low); }
+/* Risk indicator — thin top border (persists on selected state) */
+.comp-card.risk-critical, .comp-card.selected.risk-critical { border-top: 2px solid var(--risk-critical); }
+.comp-card.risk-high, .comp-card.selected.risk-high { border-top: 2px solid var(--risk-high); }
+.comp-card.risk-medium, .comp-card.selected.risk-medium { border-top: 2px solid var(--risk-medium); }
+.comp-card.risk-low, .comp-card.selected.risk-low { border-top: 2px solid var(--risk-low); }
 
 /* Side-by-side components inside a group */
 .comp-row {
