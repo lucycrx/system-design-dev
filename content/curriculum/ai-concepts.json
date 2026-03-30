@@ -1,0 +1,412 @@
+{
+  "id": "ai-concepts",
+  "slug": "ai-concepts",
+  "title": "AI Concepts",
+  "subtitle": "How AI models work under the hood",
+  "description": "AI is changing how we build software. This module covers the technical concepts behind large language models, how your app talks to them, and the tradeoffs you need to understand to build AI-powered features that actually work well.",
+  "moduleNumber": 8,
+  "icon": "🤖",
+  "color": "accent",
+  "lessons": [
+    {
+      "id": "llms-tokens-context",
+      "title": "LLMs, Tokens, and Context Windows",
+      "description": "How AI models actually process your prompts.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Three concepts form the foundation of how AI language models work:\n\n**LLM (Large Language Model)** is a neural network trained on massive amounts of text data. It works by predicting the next token in a sequence. When you ask Claude or ChatGPT a question, the model isn't \"thinking\" the way a person does -- it's generating one token at a time, each one based on everything that came before it. The \"large\" part refers to the billions of parameters (learned patterns) inside the model.\n\n**Tokens** are the chunks of text that models actually read and write. A token isn't exactly a word -- it's more like a syllable-sized piece. The word \"understanding\" might be split into \"under\" + \"standing\", while common short words like \"the\" are a single token. A rough rule of thumb: **1 token is about 4 characters**, or about 0.75 words. So 1,000 tokens is roughly 750 words.\n\n**Context window** is the maximum number of tokens the model can see at once. This includes both your input (the prompt, conversation history, any documents you paste in) and the model's output. Claude's context window is 200,000 tokens (roughly 150,000 words -- about 2-3 novels). GPT-4o's is 128,000 tokens. Anything beyond this limit is simply invisible to the model."
+        },
+        {
+          "heading": "why",
+          "content": "Understanding tokens and context windows directly affects how you build AI features:\n\n- **Cost estimation**: AI APIs charge per token. If your feature sends a 10-page document with every request, that's roughly 3,000-4,000 tokens of input each time. At $3 per million input tokens (Claude Sonnet pricing), that's about a penny per request -- which adds up fast at scale. Output tokens are even more expensive, typically 3-5x the input price.\n- **Why models \"forget\"**: If a user has a long conversation with your AI chatbot, eventually the oldest messages fall outside the context window. The model doesn't gradually forget -- it completely loses access to anything beyond the limit. This is why a chatbot might ask you something you already answered 30 messages ago.\n- **Prompt design**: Knowing token limits helps you decide what to include in a prompt. If you're building a feature that summarizes meeting notes, you need to know whether those notes fit in the context window or need to be chunked."
+        },
+        {
+          "heading": "how",
+          "content": "Think of the context window as a **desk**. Everything the model is working with -- your question, the conversation history, any reference documents, and the response it's writing -- must fit on the desk at the same time. The desk has a fixed size.\n\nTokens are like the **index cards** spread across the desk. The model reads and writes one card at a time. Each card holds a small chunk of text (a few characters). A bigger desk (larger context window) lets you spread out more cards, but the model still processes them one at a time from left to right.\n\nWhen the conversation gets too long, it's like the desk is full and cards start falling off the far edge. The model can only see what's currently on the desk. This is why AI products implement strategies like:\n\n- **Summarizing** older conversation turns to compress them into fewer tokens\n- **Sliding window** approaches that keep the most recent messages and drop the oldest\n- **RAG** (covered in the next lesson) to selectively pull in only the relevant information instead of stuffing everything onto the desk"
+        },
+        {
+          "heading": "when",
+          "content": "This knowledge matters most when you're:\n\n- **Estimating API costs** for an AI feature. Count the tokens going in and out. A customer support chatbot that includes 5 previous messages and a knowledge base snippet might use 2,000 input tokens and 500 output tokens per turn. Multiply by your expected volume to get monthly costs.\n- **Designing conversation flows**. If your product has multi-turn conversations, you need a strategy for what happens when the conversation exceeds the context window. Do you summarize? Truncate? Start a new conversation?\n- **Structuring prompts**. If the model needs to reference a long document, put the most important parts closest to the beginning or end of the prompt -- models tend to pay more attention to content at those positions (known as the \"lost in the middle\" problem).\n- **Choosing a model**. If your use case involves analyzing very long documents, you need a model with a large context window. For short Q&A interactions, a smaller context window is fine and may be cheaper."
+        }
+      ],
+      "quiz": {
+        "question": "Why is the chatbot forgetting?",
+        "scenario": "Your team built a customer support chatbot. Users report that in long conversations (30+ messages), the bot starts asking for information the user already provided earlier in the chat. The bot works fine for short conversations. What's the most likely cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The conversation exceeded the context window, so the model can't see earlier messages",
+            "correct": true,
+            "explanation": "In long conversations, the total tokens (all messages plus the system prompt) can exceed the model's context window. When this happens, older messages are no longer visible to the model, so it has no memory of what the user said earlier. The fix is to implement conversation management -- summarizing older messages, using a sliding window, or storing key facts separately and re-injecting them into the prompt."
+          },
+          {
+            "id": "b",
+            "text": "The model needs to be fine-tuned on your support data to remember better",
+            "correct": false,
+            "explanation": "Fine-tuning doesn't help with in-conversation memory. Fine-tuning teaches a model new behaviors or knowledge baked into its weights, but it doesn't change how the context window works. The issue here is that the conversation history exceeds the context window limit."
+          },
+          {
+            "id": "c",
+            "text": "The API is rate-limited and dropping messages under load",
+            "correct": false,
+            "explanation": "Rate limiting would cause failed requests or errors, not the model forgetting context. The bot is still responding -- it just doesn't have access to earlier messages because they've fallen outside the context window."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "prompt-vs-finetune-vs-rag",
+      "title": "Prompt Engineering vs Fine-Tuning vs RAG",
+      "description": "The three ways to make AI smarter for your use case.",
+      "estimatedMinutes": 7,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "When an AI model doesn't give you the results you need out of the box, there are three main strategies to improve it:\n\n**Prompt engineering** is crafting better instructions for the model. This includes writing clearer system prompts, providing examples of desired output (called \"few-shot\" prompting), structuring your input in ways the model handles well, and specifying the format you want back. No model changes, no data pipeline -- just better communication.\n\n**RAG (Retrieval-Augmented Generation)** gives the model access to external knowledge at query time. Instead of hoping the model knows about your company's return policy, you retrieve the relevant policy document and include it in the prompt. The model reads the document and answers based on it. This is how most \"chat with your docs\" features work.\n\n**Fine-tuning** means further training the model on your specific data. You provide hundreds or thousands of example input-output pairs, and the model adjusts its internal weights to perform better on that type of task. The model itself changes -- you get a new, customized version."
+        },
+        {
+          "heading": "why",
+          "content": "Most teams jump to the most complex solution when a simpler one would work. This is expensive and slow:\n\n- **Prompt engineering** costs nothing extra and takes hours to iterate on. It should always be your first approach.\n- **RAG** requires building a retrieval pipeline (indexing documents, setting up a vector database, writing search logic) but uses the standard model. It takes days to weeks to set up properly.\n- **Fine-tuning** requires curating a training dataset, running a training job (which costs money and takes hours to days), and maintaining the fine-tuned model over time. It takes weeks to months.\n\nThe overwhelming majority of AI features in production today use prompt engineering alone or prompt engineering plus RAG. Fine-tuning is relatively rare because it's expensive, hard to iterate on, and the results are often disappointing if you haven't exhausted the simpler approaches first."
+        },
+        {
+          "heading": "how",
+          "content": "Think of it like **hiring a new employee**:\n\n**Prompt engineering** is giving them a detailed brief for each task. \"Here's exactly what I need, here's an example of good output, here's what to avoid.\" The employee (model) is capable -- they just need clear instructions. This works surprisingly well for most tasks.\n\n**RAG** is giving them a reference manual to look things up. \"I know you don't have our company's product catalog memorized, so here's the relevant page -- use this to answer the customer's question.\" The employee reads the reference material and applies their general skills to it. This is ideal when the model needs access to specific, up-to-date, or proprietary information.\n\n**Fine-tuning** is sending them to a specialized training course. \"We need you to write in our exact brand voice\" or \"We need you to classify support tickets into our custom categories with 99% accuracy.\" After training, they just *know* how to do it without needing instructions every time. This makes sense when you need a very specific behavior that can't be described in a prompt.\n\nEach approach costs more time and money but solves progressively harder problems."
+        },
+        {
+          "heading": "when",
+          "content": "**Start with prompt engineering (always)**:\n- Write a clear system prompt that describes the role, task, and desired output format\n- Include 2-3 examples of good input/output pairs in the prompt\n- Iterate on the wording until results are consistently good\n\n**Add RAG when the model needs your data**:\n- The model needs to reference company-specific documents, policies, or products\n- Information changes frequently (RAG picks up new docs automatically; fine-tuning requires retraining)\n- Users are asking questions about content the model wasn't trained on\n\n**Consider fine-tuning only when**:\n- You need a very specific output style or behavior that prompt engineering can't achieve consistently\n- You've already optimized prompts and RAG and still aren't hitting your quality bar\n- You have a large, clean dataset of example input-output pairs\n- The task is narrow and well-defined (classification, entity extraction, specific formatting)\n\n**A common and effective pattern**: Use prompt engineering to define behavior, RAG to provide knowledge, and skip fine-tuning entirely. This covers the vast majority of real-world AI product use cases."
+        }
+      ],
+      "quiz": {
+        "question": "Which approach should you try first?",
+        "scenario": "Your company wants to add an AI feature that answers customer questions about your product. The answers need to reference your help docs, pricing page, and changelog. The AI should respond in a friendly but professional tone. Your engineering team is suggesting fine-tuning a model on past support conversations.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Start with prompt engineering for the tone, and RAG for the help docs",
+            "correct": true,
+            "explanation": "The friendly-but-professional tone can be handled by a well-written system prompt (prompt engineering). Access to help docs, pricing, and changelog is a textbook RAG use case -- retrieve the relevant documents and include them in the prompt. This approach is faster to build, cheaper to run, and easier to update when docs change. Fine-tuning past support conversations is overkill and would be slow to iterate on."
+          },
+          {
+            "id": "b",
+            "text": "Fine-tune on past support conversations -- it'll learn both the tone and the answers",
+            "correct": false,
+            "explanation": "Fine-tuning is the slowest and most expensive approach. Past support conversations may contain outdated information, and you'd need to retrain whenever docs change. Prompt engineering can handle tone, and RAG can provide up-to-date document access -- both are faster to implement and easier to maintain."
+          },
+          {
+            "id": "c",
+            "text": "Just use prompt engineering -- paste the entire help docs into the system prompt",
+            "correct": false,
+            "explanation": "If your help docs are small enough to fit in the context window, this could work as a starting point. But most companies have too many docs to paste in entirely, and you'd be paying for all those input tokens on every request even when most aren't relevant. RAG is better because it retrieves only the relevant sections, saving tokens and improving accuracy."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "ai-api-basics",
+      "title": "AI API Basics",
+      "description": "How your app talks to Claude, GPT, and other AI models.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "AI models like Claude and GPT are accessed through **APIs** (Application Programming Interfaces) -- just like Stripe for payments or Twilio for SMS. Your app sends an HTTP POST request with a prompt, and gets back a response with the model's output.\n\nThe basic anatomy of an AI API call:\n\n- **Model**: Which model to use (e.g., `claude-sonnet-4-20250514`, `gpt-4o`)\n- **System prompt**: Instructions that define the model's behavior (\"You are a helpful customer support agent for Acme Corp...\")\n- **Messages**: The conversation history -- an array of objects with `role` (user or assistant) and `content` (the text)\n- **Max tokens**: The maximum length of the response (controls cost and prevents runaway outputs)\n- **Temperature**: A number from 0 to 1 that controls randomness. 0 means the model always picks the most likely next token (deterministic). 1 means more variety and creativity.\n\nThe response comes back as JSON containing the model's generated text, plus metadata like how many tokens were used."
+        },
+        {
+          "heading": "why",
+          "content": "Understanding the API matters even if you're not writing the code yourself:\n\n- **Cost control**: Every API call costs money based on tokens used. Knowing how the API works helps you estimate and optimize costs. A chatbot that sends the entire conversation history with every message gets more expensive over time.\n- **Quality control**: The system prompt and temperature setting dramatically affect output quality. A PM who understands these can specify the right behavior without needing an engineer to experiment.\n- **Error handling**: AI APIs can fail (rate limits, timeouts, model overload). Your product needs graceful fallbacks -- understanding the API helps you spec those out.\n- **Feature scoping**: Knowing what parameters you can control helps you design better AI features. Temperature, max tokens, and system prompts are all product levers, not just engineering details."
+        },
+        {
+          "heading": "how",
+          "content": "Here's what a basic API call to Claude looks like:\n\n```json\n{\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 1024,\n  \"system\": \"You are a helpful assistant for a cooking app. Give concise recipe suggestions.\",\n  \"messages\": [\n    { \"role\": \"user\", \"content\": \"What can I make with chicken and rice?\" }\n  ]\n}\n```\n\nThe response comes back with the model's answer and token usage:\n\n```json\n{\n  \"content\": [{ \"text\": \"Here are three quick chicken and rice dishes...\" }],\n  \"usage\": { \"input_tokens\": 38, \"output_tokens\": 245 }\n}\n```\n\n**Temperature** is the most important parameter to understand:\n- **Temperature 0**: The model gives the same answer every time. Best for factual tasks, classification, data extraction -- anything where consistency matters.\n- **Temperature 0.5-0.7**: A good middle ground for most features. Slight variation keeps things natural without being unpredictable.\n- **Temperature 1.0**: Maximum creativity. Good for brainstorming, creative writing, generating diverse suggestions. But responses can be inconsistent or surprising."
+        },
+        {
+          "heading": "when",
+          "content": "**Use low temperature (0 to 0.3) for:**\n- Customer support answers (consistency matters)\n- Data extraction and classification\n- Code generation\n- Any task where you'd want the same input to produce the same output\n\n**Use medium temperature (0.5 to 0.7) for:**\n- General chat assistants\n- Content drafts that the user will edit\n- Product descriptions and summaries\n\n**Use high temperature (0.8 to 1.0) for:**\n- Brainstorming and ideation\n- Creative writing\n- Generating varied examples or suggestions\n\n**Set max_tokens thoughtfully:**\n- Too low and the response gets cut off mid-sentence\n- Too high and you pay for tokens you don't need (and the model might ramble)\n- For a chatbot response, 500-1000 tokens is usually enough. For document generation, you might need 4000+.\n\n**System prompts are your most powerful product lever.** A well-crafted system prompt can turn a generic model into a specialized assistant. Iterate on it like you'd iterate on product copy -- small changes in wording can significantly change behavior."
+        }
+      ],
+      "quiz": {
+        "question": "What temperature should you use?",
+        "scenario": "You're building a feature that extracts structured data from receipts -- pulling out the store name, date, total amount, and line items. The output needs to be consistent JSON every time. An engineer asks what temperature to set.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Temperature 0 -- you need deterministic, consistent output",
+            "correct": true,
+            "explanation": "Data extraction needs to be reliable and consistent. The same receipt should always produce the same structured output. Temperature 0 makes the model always pick the most likely token, minimizing variation. Higher temperatures would introduce randomness -- the model might format the JSON differently or interpret ambiguous text inconsistently."
+          },
+          {
+            "id": "b",
+            "text": "Temperature 0.7 -- a good default for most features",
+            "correct": false,
+            "explanation": "While 0.7 is fine for conversational features, data extraction requires consistency. You don't want the model to sometimes format the date as \"March 5\" and other times as \"3/5/2024\". Temperature 0 ensures the most predictable, consistent output for structured tasks."
+          },
+          {
+            "id": "c",
+            "text": "Temperature 1.0 -- so the model can creatively interpret messy receipts",
+            "correct": false,
+            "explanation": "High temperature means more randomness, which is the opposite of what you want for data extraction. You need the model to reliably extract the same fields the same way every time. \"Creativity\" in structured data extraction usually means errors and inconsistency."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "streaming-vs-batch",
+      "title": "Streaming vs Batch Responses",
+      "description": "Why ChatGPT types word by word -- and when you should too.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "There are two ways to deliver an AI model's response to the user:\n\n**Batch (non-streaming)**: Your app waits until the model has generated the entire response, then displays it all at once. The user sees nothing, then suddenly sees everything. This is how most traditional APIs work -- you send a request, wait, get a complete response.\n\n**Streaming**: Your app displays tokens as the model generates them, word by word. The user sees the response being \"typed out\" in real time, starting within milliseconds of the request. This is how ChatGPT, Claude, and most AI chat interfaces work.\n\nUnder the hood, streaming uses a technology called **Server-Sent Events (SSE)**. Instead of one HTTP response, the server sends a continuous stream of small chunks. Each chunk contains a few tokens. Your front end reads these chunks and appends them to the display as they arrive."
+        },
+        {
+          "heading": "why",
+          "content": "Streaming dramatically changes how your AI feature *feels* to use:\n\n- **Perceived performance**: A response that takes 8 seconds feels instant with streaming because the user sees words appearing within the first 200 milliseconds. Without streaming, those same 8 seconds feel like the app is broken or frozen.\n- **User engagement**: When users see words appearing, they start reading immediately. They're engaged with the content before it's even finished generating. With batch responses, users stare at a loading spinner and might navigate away.\n- **Early cancellation**: With streaming, if the model starts going off-track, the user (or your code) can cancel the request early and save tokens/money. With batch, you pay for the full response even if it's wrong.\n\nThe difference is significant enough that streaming vs. non-streaming can make or break an AI feature's user experience. Products that feel \"fast\" are almost always streaming."
+        },
+        {
+          "heading": "how",
+          "content": "Think of it like **ordering food**:\n\n**Batch** is like a restaurant where all courses arrive together. You order an appetizer, main, and dessert. The kitchen prepares everything, and 45 minutes later, all three plates land on your table at once. The food is fine, but you sat hungry for 45 minutes.\n\n**Streaming** is like a sushi conveyor belt. Items start appearing on the belt within a minute. You eat the first piece while the chef is still preparing the next one. You're never waiting with nothing to do, and you can stop whenever you're full.\n\nThe technical implementation is straightforward. Most AI SDKs support streaming with a single flag:\n\n```js\n// Batch -- wait for everything\nconst response = await client.messages.create({\n  model: \"claude-sonnet-4-20250514\",\n  messages: [{ role: \"user\", content: \"Explain caching\" }],\n  max_tokens: 1024\n});\n\n// Streaming -- get tokens as they arrive\nconst stream = await client.messages.create({\n  model: \"claude-sonnet-4-20250514\",\n  messages: [{ role: \"user\", content: \"Explain caching\" }],\n  max_tokens: 1024,\n  stream: true\n});\n```\n\nThe front end then reads events from the stream and updates the UI as each chunk arrives."
+        },
+        {
+          "heading": "when",
+          "content": "**Use streaming for:**\n- Chat interfaces and conversational AI -- this is table stakes for any user-facing AI chat\n- Any response the user is going to read (summaries, explanations, drafts)\n- Long-form content generation where the user is waiting\n- Anywhere perceived speed matters\n\n**Use batch for:**\n- Background processing where no user is watching (classifying emails, generating reports overnight)\n- When you need the complete response before taking action (e.g., extracting JSON that you'll parse and store)\n- Internal pipelines where the AI output feeds into another step\n- When the response is very short (a classification label or yes/no) and streaming overhead isn't worth it\n\n**A common pattern**: Use streaming for the user-facing layer and batch for backend processing. Your chatbot streams responses to the user, but your nightly summary job runs in batch mode."
+        }
+      ],
+      "quiz": {
+        "question": "Stream or batch?",
+        "scenario": "You're building two AI features: (1) a chat assistant that helps users write emails, and (2) a nightly job that categorizes the day's support tickets into topics for a dashboard. How should each feature handle AI responses?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Stream the chat assistant, batch the nightly job",
+            "correct": true,
+            "explanation": "The email assistant is user-facing -- the person is watching and waiting, so streaming makes it feel fast and responsive. The nightly categorization job runs in the background with no one watching, and you need the complete category label before storing it. Batch is simpler and sufficient for background processing."
+          },
+          {
+            "id": "b",
+            "text": "Batch both -- simpler to implement",
+            "correct": false,
+            "explanation": "While batch is simpler, the chat assistant would feel painfully slow. Users would stare at a loading spinner for 5-10 seconds per response. Streaming is essential for interactive AI features -- it's the difference between feeling instant and feeling broken."
+          },
+          {
+            "id": "c",
+            "text": "Stream both -- always use the fastest option",
+            "correct": false,
+            "explanation": "Streaming adds front-end complexity (handling partial responses, managing the stream connection). For a background job with no user watching, this complexity is unnecessary. Batch is simpler to implement and debug for server-side processing. Use the right tool for each context."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "ai-cost-latency",
+      "title": "Cost and Latency Tradeoffs",
+      "description": "Why choosing the right model matters for your product and your budget.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "AI models come in different sizes and capabilities, and the tradeoffs are straightforward:\n\n- **Bigger models** (Claude Opus, GPT-4o) are smarter, handle nuance better, and produce higher-quality output -- but they're slower and more expensive.\n- **Smaller models** (Claude Haiku, GPT-4o-mini) are faster and cheaper -- but less capable on complex reasoning tasks.\n\nPricing has two components:\n- **Input tokens**: What you send to the model (your prompt, context, conversation history). Cheaper per token.\n- **Output tokens**: What the model generates back. Typically **3-5x more expensive** than input tokens.\n\nFor example, as of early 2025:\n- **Claude Haiku**: $0.25 / million input tokens, $1.25 / million output tokens\n- **Claude Sonnet**: $3 / million input tokens, $15 / million output tokens\n- **Claude Opus**: $15 / million input tokens, $75 / million output tokens\n\nThat's a 60x price difference between the cheapest and most expensive model for output tokens."
+        },
+        {
+          "heading": "why",
+          "content": "Model selection directly impacts whether your AI feature is profitable or a money pit:\n\n- **Unit economics**: If your AI chatbot costs $0.05 per conversation using Opus but only $0.001 using Haiku, that's a 50x difference. At 100,000 conversations per month, that's $5,000 vs. $100.\n- **User experience**: A model that takes 5 seconds to respond feels broken in a real-time chat. A model that responds in 500ms feels magical. Smaller models are typically 3-10x faster.\n- **Quality bar**: Some tasks genuinely need the smartest model. A legal document reviewer needs Opus-level reasoning. A \"summarize this in one sentence\" feature works great with Haiku.\n\nThe mistake most teams make is using the same model for everything. They pick the smartest model during prototyping (because it gives the best demo) and then get sticker shock when they look at production costs."
+        },
+        {
+          "heading": "how",
+          "content": "Think of model selection like **hiring consultants**:\n\n- **Haiku/GPT-4o-mini** is a competent junior consultant at $50/hour. They handle 80% of tasks perfectly: classification, simple summarization, data extraction, formatting, routing.\n- **Sonnet/GPT-4o** is a senior consultant at $200/hour. They handle complex analysis, nuanced writing, multi-step reasoning, and tricky edge cases.\n- **Opus** is a world-class expert at $500/hour. They handle the hardest problems: complex legal analysis, sophisticated code generation, tasks requiring deep reasoning across many factors.\n\nYou wouldn't hire the $500/hour expert to sort your mail. But you also wouldn't trust the junior consultant with a merger negotiation.\n\n**Smart teams use multiple models in a pipeline:**\n\n1. A fast, cheap model (Haiku) does initial classification: \"Is this a simple FAQ question or a complex issue?\"\n2. Simple questions get answered by the cheap model\n3. Complex questions get routed to the expensive model (Sonnet or Opus)\n\nThis pattern can cut costs by 70-90% while maintaining quality where it matters."
+        },
+        {
+          "heading": "when",
+          "content": "**Use smaller/cheaper models (Haiku, GPT-4o-mini) for:**\n- Classification and routing (\"Is this message spam or not?\")\n- Simple summarization (\"Give me a one-line summary\")\n- Data extraction from structured formats\n- Any high-volume task where speed matters more than nuance\n- The first pass in a multi-model pipeline\n\n**Use mid-tier models (Sonnet, GPT-4o) for:**\n- General-purpose chat assistants\n- Content generation (emails, product descriptions)\n- Code generation and debugging\n- Most user-facing features -- it's the best balance of quality, speed, and cost\n\n**Use the largest models (Opus) for:**\n- Complex reasoning over long documents\n- Tasks where errors are very costly (legal, medical, financial analysis)\n- Evaluating the output of smaller models (\"grading\" quality)\n- Prototyping and benchmarking to establish the quality ceiling\n\n**The golden rule**: Start with the smallest model that meets your quality bar. Only upgrade when you can demonstrate that the smaller model isn't good enough for specific cases."
+        }
+      ],
+      "quiz": {
+        "question": "Which model strategy makes sense?",
+        "scenario": "Your app has an AI-powered inbox that categorizes incoming messages (billing, technical, general) and then generates a draft response for each one. You're getting 50,000 messages per day. Using Opus for everything costs $8,000/month. The CEO wants to cut AI costs without hurting response quality.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Use Haiku for categorization and Sonnet for draft responses",
+            "correct": true,
+            "explanation": "Categorization (billing vs. technical vs. general) is a simple classification task that Haiku handles easily -- it doesn't need Opus-level reasoning. Draft responses benefit from better writing quality, so Sonnet is a good fit. This two-model approach could cut costs by 80%+ while maintaining response quality. You're paying for intelligence only where it matters."
+          },
+          {
+            "id": "b",
+            "text": "Switch everything to Haiku to maximize savings",
+            "correct": false,
+            "explanation": "Haiku would handle categorization well, but draft responses for customer messages may suffer in quality -- especially for nuanced technical issues or sensitive billing complaints. Saving money by degrading the user-facing output quality usually backfires. The right move is to use different models for different tasks."
+          },
+          {
+            "id": "c",
+            "text": "Keep Opus but reduce the context window to use fewer tokens",
+            "correct": false,
+            "explanation": "Reducing context might help marginally, but the main cost driver is using Opus for 50,000 messages daily. The smarter play is model routing -- use cheap models for simple tasks and expensive models only where the quality difference justifies the cost."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "scaling-laws",
+      "title": "Scaling Laws",
+      "description": "Why bigger isn't always better in AI models.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Scaling laws** are the empirically discovered rules that govern how AI model performance improves as you increase three things:\n\n1. **Model size** -- the number of parameters (learned patterns) in the neural network\n2. **Training data** -- the amount and quality of text the model learns from\n3. **Compute** -- the processing power used during training\n\nThe key insight: these three factors must be scaled **together** in the right proportions. Making a model bigger without giving it proportionally more training data leads to diminishing returns. Throwing more compute at a small dataset doesn't help. It's like a three-legged stool -- all three legs need to grow together for the stool to get taller."
+        },
+        {
+          "heading": "why",
+          "content": "Understanding scaling laws helps you evaluate AI models and providers with more nuance than just \"which model is biggest\":\n\n- **Bigger doesn't mean better**: A well-trained 70-billion-parameter model can outperform a poorly trained 280-billion-parameter model. This was dramatically demonstrated by the Chinchilla research, where a 70B model beat a 280B model because it was trained on 4x more data with the same compute budget.\n- **Newer often beats bigger**: This is why newer, smaller models often outperform older, larger ones. The field gets better at training efficiency over time. A 2025 model with 8B parameters might outperform a 2023 model with 175B parameters on many tasks.\n- **It explains model tiers**: Why does Sonnet sometimes match Opus on certain tasks? Because Sonnet may be better optimized for those specific capabilities, even though Opus is larger overall."
+        },
+        {
+          "heading": "how",
+          "content": "Think of training an AI model like **preparing a student for an exam**:\n\n- **Model size** is the student's brain capacity -- how much they can potentially learn\n- **Training data** is the study material -- textbooks, practice problems, examples\n- **Compute** is the study time available\n\nA genius student (huge model) who only reads one textbook (small dataset) will do worse than a good student (medium model) who thoroughly studies a full library (large dataset). And giving a student 1,000 hours to study a single textbook (lots of compute, little data) is wasteful -- after a point, they've extracted everything that book has to offer.\n\nThe Chinchilla finding quantified this: for a given compute budget, there's an optimal ratio of model size to training data. Most early large language models were \"undertrained\" -- they were bigger than they needed to be and hadn't seen enough data. The fix was to train smaller models on much more data, which produced better results at lower cost.\n\nThis principle continues to drive the industry. Model providers are constantly finding ways to get more performance out of less compute by optimizing training recipes, data quality, and architecture."
+        },
+        {
+          "heading": "when",
+          "content": "This knowledge matters when you're:\n\n- **Evaluating AI providers**: Don't just compare parameter counts. Ask about training data quality, benchmark results on tasks relevant to your use case, and test the models yourself. A provider touting a \"1 trillion parameter model\" might be outperformed by a well-trained model half that size.\n- **Understanding model updates**: When Anthropic or OpenAI releases a new model that's \"smaller but better,\" scaling laws explain why. Better training data and techniques can compensate for smaller size.\n- **Planning your AI roadmap**: Model capabilities will keep improving, but not linearly. Expect significant jumps when providers find better training approaches, and plateaus when they hit data or compute bottlenecks.\n- **Setting expectations with stakeholders**: When someone asks \"why can't the AI just get 10x better?\", scaling laws explain that improvement requires exponentially more resources and follows predictable curves, not sudden leaps."
+        }
+      ],
+      "quiz": {
+        "question": "Which model should you choose?",
+        "scenario": "You're evaluating two AI providers for a text classification feature. Provider A offers a 200B parameter model released in 2023. Provider B offers a 30B parameter model released in 2025 that was trained on 10x more data with newer techniques. Provider A's model is 5x more expensive. Both score similarly on public benchmarks.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Provider B -- newer training techniques and more data can compensate for smaller size",
+            "correct": true,
+            "explanation": "Scaling laws tell us that a well-trained smaller model can match or beat a larger but less efficiently trained model. Since both score similarly on benchmarks, Provider B gives you comparable quality at a fraction of the cost. For a classification task (which doesn't require maximum reasoning), the newer, smaller model is the smart choice."
+          },
+          {
+            "id": "b",
+            "text": "Provider A -- more parameters means more capability",
+            "correct": false,
+            "explanation": "Parameter count alone doesn't determine quality. The Chinchilla research showed that a 70B model beat a 280B model when trained on more data. Since both models score similarly on benchmarks, you'd be paying 5x more for Provider A with no quality benefit. Bigger isn't automatically better."
+          },
+          {
+            "id": "c",
+            "text": "Both are equivalent -- just pick the cheapest",
+            "correct": false,
+            "explanation": "While picking the cheaper option is the right conclusion here, the reasoning matters. They're not equivalent in architecture -- Provider B achieves similar results through better training efficiency, which scaling laws predict. Understanding *why* the smaller model competes helps you make better decisions in future evaluations."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "data-quality",
+      "title": "The Data Quality Bottleneck",
+      "description": "Why your AI is only as good as its data.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "There's a ceiling on how well any AI feature can perform, and that ceiling is usually set by **data quality**, not model capability.\n\nThis applies at every level:\n\n- **Model training level**: A model trained on low-quality internet text will produce lower-quality output than one trained on curated, high-quality data. This is why models trained on more carefully selected data often outperform larger models trained on everything.\n- **Product feature level**: Your AI feature is only as good as the data you feed it at runtime. A RAG-based support bot that retrieves poorly written help docs will give poorly written answers -- no matter how smart the model is.\n- **Agent and tool level**: AI agents that use tools (calling APIs, searching databases) perform based on the quality of the tool descriptions and the data those tools return. Vague tool descriptions lead to the agent choosing the wrong tool.\n\nThe pattern is consistent: when an AI feature underperforms, the first thing to investigate is the input data, not the model."
+        },
+        {
+          "heading": "why",
+          "content": "Teams routinely misdiagnose AI quality problems. The conversation usually goes:\n\n1. \"The AI feature isn't good enough\"\n2. \"Let's upgrade to a bigger, more expensive model\"\n3. The bigger model gives slightly better results but still isn't great\n4. Eventually someone looks at the input data and discovers it's messy, outdated, or incomplete\n5. Cleaning up the data with the original model produces better results than the expensive model with bad data\n\nThis happens because data quality problems are invisible in demos but devastating in production. During a demo, you hand-pick a clean example and it works great. In production, the model encounters poorly formatted documents, missing fields, contradictory information, and edge cases that expose every weakness in your data pipeline.\n\nThe cost of ignoring data quality isn't just poor AI output -- it's the time and money spent chasing model upgrades that don't solve the underlying problem."
+        },
+        {
+          "heading": "how",
+          "content": "Think of it like a **chef with ingredients**:\n\nEven a Michelin-star chef can't make a great meal from spoiled produce. The quality of the dish is bottlenecked by the quality of the ingredients. You can upgrade from a home cook to a professional chef (upgrading the model), but if you're still using wilted lettuce and expired milk (bad data), the result will be mediocre.\n\nHere's how data quality issues show up in practice:\n\n- **RAG systems**: If your document store contains outdated policies, duplicate pages with conflicting information, or poorly formatted PDFs that don't parse well, the model will retrieve and cite bad information. The fix isn't a better model -- it's cleaning and structuring your documents.\n- **Prompt context**: If you're feeding user-generated content into the model (e.g., summarizing meeting notes), messy input produces messy output. Preprocessing the input -- correcting formatting, removing noise, structuring the data -- often helps more than prompt engineering.\n- **AI agents**: If your agent has tools with vague descriptions (\"this tool does stuff with users\"), the model can't reliably choose the right tool. Clear, detailed tool descriptions are a data quality issue that directly impacts agent performance."
+        },
+        {
+          "heading": "when",
+          "content": "**Audit data quality first when:**\n- Your AI feature works well in demos but poorly in production (classic sign of data issues)\n- Output quality varies wildly between different inputs\n- The model gives confidently wrong answers (it's probably retrieving or relying on bad data)\n- You've already iterated on prompts and the quality ceiling isn't budging\n\n**Invest in data quality by:**\n- Cleaning and structuring documents before indexing them for RAG\n- Standardizing formats (consistent date formats, clear section headings, removing duplicate content)\n- Writing detailed, specific tool descriptions for AI agents\n- Validating and preprocessing user input before sending it to the model\n- Building feedback loops so you can identify and fix bad data sources over time\n\n**The rule of thumb**: Before upgrading to a more expensive model, spend one sprint improving your data. It almost always has a higher return on investment. A smaller model with excellent data will often outperform a larger model with mediocre data -- and it costs less to run."
+        }
+      ],
+      "quiz": {
+        "question": "What should you fix first?",
+        "scenario": "Your AI-powered HR assistant answers employee questions about company policies using RAG. Employees report that it sometimes gives contradictory answers about the PTO policy -- sometimes saying 15 days, sometimes 20 days. You're currently using Claude Sonnet. Your engineering team suggests upgrading to Opus to improve accuracy.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Audit the policy documents in the RAG system for duplicates and outdated versions",
+            "correct": true,
+            "explanation": "Contradictory answers almost always mean contradictory source data. There are likely multiple versions of the PTO policy in your document store -- an old version saying 15 days and a current one saying 20. The model retrieves whichever version the search returns. Upgrading to Opus won't fix this; the model will just give more confidently wrong answers from the same bad data. Clean the documents first."
+          },
+          {
+            "id": "b",
+            "text": "Upgrade to Opus -- it's better at reasoning through contradictions",
+            "correct": false,
+            "explanation": "Even Opus can't reliably resolve contradictions in source data. If the document store contains two versions of the PTO policy with different numbers, the model has no way to know which is current. It might pick the right one more often, but you're paying 5x more for inconsistent results. The root cause is duplicate/outdated documents."
+          },
+          {
+            "id": "c",
+            "text": "Add a disclaimer that the AI might be wrong and users should verify with HR",
+            "correct": false,
+            "explanation": "While disclaimers are good practice, they don't fix the problem -- they just acknowledge it. If the AI regularly gives wrong PTO information, employees will stop trusting it entirely and go straight to HR, defeating the purpose of the feature. Fix the data so the answers are actually reliable."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "diminishing-returns",
+      "title": "Diminishing Returns and the Compute-Efficient Frontier",
+      "description": "Why 90% accuracy costs 10x more than 80%.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "AI performance improvement follows a **power law** -- each additional unit of investment (bigger model, more data, more compute) yields a smaller and smaller gain. There is no magic threshold where the model suddenly \"gets it.\" Improvement is continuous but decelerating.\n\nIn practical terms:\n\n- Going from 60% accuracy to 80% accuracy might require a $10,000 investment in model and data work\n- Going from 80% to 90% might require another $50,000\n- Going from 90% to 95% might require $200,000\n- Going from 95% to 99% might require $1,000,000+\n\nThe **compute-efficient frontier** is the boundary of the best performance you can achieve for a given budget. Every team operates somewhere on this curve, and moving along it gets exponentially more expensive the higher you go."
+        },
+        {
+          "heading": "why",
+          "content": "This principle is critical for setting realistic expectations and making smart product decisions:\n\n- **Stakeholder management**: When a VP asks \"why can't the AI just be 99% accurate?\", you need to explain that the last few percentage points cost exponentially more than the first. It's not a matter of effort -- it's a fundamental property of how these systems improve.\n- **Feature scoping**: Knowing about diminishing returns helps you set the right accuracy targets. For some features, 85% is plenty. For others, 99% is table stakes. The key is knowing which is which *before* you invest.\n- **Budget planning**: AI costs don't scale linearly with quality. A 2x improvement in accuracy might require 10x the investment. Understanding this curve prevents nasty surprises during scaling.\n- **Competitive strategy**: Your competitor with a 95% accurate feature spent dramatically more than you did to get from your 90% to their 95%. Is that 5% gap worth the investment for your users?"
+        },
+        {
+          "heading": "how",
+          "content": "Think of it like **studying for an exam**:\n\n- Going from a D (60%) to a B (80%) takes about 10 hours of studying. You learn the fundamentals, cover the major topics, and make big gains quickly.\n- Going from a B (80%) to an A (90%) takes another 20 hours. You're now studying edge cases, subtle details, and less common material.\n- Going from an A (90%) to an A+ (95%) takes 40 more hours. You're memorizing obscure exceptions and mastering the trickiest problems.\n- Going from an A+ (95%) to a perfect score (99%+) takes another 100 hours. You're eliminating every possible mistake, studying every edge case, and leaving nothing to chance.\n\nEach level of improvement requires roughly double the effort of the previous one. The total effort to go from 60% to 99% isn't additive -- it's exponential.\n\nIn AI, this manifests as:\n- Needing exponentially more training data to cover rare edge cases\n- Needing larger models with more parameters to capture subtle patterns\n- Needing more sophisticated (and expensive) evaluation and feedback loops\n- Needing human-in-the-loop review for the cases the model can't handle"
+        },
+        {
+          "heading": "when",
+          "content": "**Apply this when scoping AI features:**\n- Define what \"good enough\" means for your use case *before* building. A spam filter at 95% accuracy is fine -- the occasional spam email isn't catastrophic. A medical diagnosis tool at 95% accuracy might not be acceptable.\n- Set accuracy targets based on the consequences of errors, not on what feels like a round number.\n\n**Apply this when building MVPs:**\n- Ship at 80-85% accuracy and see if users find it valuable. If they do, invest in pushing to 90%. If they don't, you saved months of work.\n- The first version of most successful AI features was not particularly accurate. Gmail's Smart Reply, autocorrect, and recommendation engines all shipped rough and improved over time.\n\n**Apply this when planning roadmaps:**\n- Be honest about the cost curve. If leadership expects \"95% accuracy by Q3\" and you're currently at 88%, they need to understand that closing that 7% gap may cost more than getting from 0% to 88% did.\n- Budget for diminishing returns. Quarter-over-quarter AI improvement typically decelerates, not accelerates.\n\n**Apply this when deciding \"good enough\":**\n- For internal tools: 80-85% accuracy with a human review step is often the sweet spot\n- For user-facing features: 90%+ is usually needed, with graceful handling of failures\n- For safety-critical applications: 99%+ is required, which means significant investment and likely human oversight"
+        }
+      ],
+      "quiz": {
+        "question": "Is this worth the investment?",
+        "scenario": "Your AI content moderation system catches 91% of policy-violating posts. The trust and safety team wants to reach 97%. Your ML team estimates this will require 4 months of work, a larger model (3x the API cost), and a custom training dataset. Currently, a human review team handles the 9% the AI misses. What's the right call?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Do a cost analysis: compare the 4-month investment and higher API costs against what you're paying the human review team",
+            "correct": true,
+            "explanation": "This is a business decision, not a technology decision. If the human review team costs $20,000/month and the AI improvement would reduce that to $5,000/month, the 4-month investment might pay for itself within a year. But if the human review is already manageable and the 3x API cost increase is significant, staying at 91% with human backup could be the smarter play. Diminishing returns means you need to justify each increment of improvement."
+          },
+          {
+            "id": "b",
+            "text": "Always push for higher accuracy -- 91% means 9% of violations are getting through",
+            "correct": false,
+            "explanation": "The 9% isn't getting through -- it's being caught by the human review team. The question is whether automating that last 6% (from 91% to 97%) is worth the investment. Going from 91% to 97% falls in the steep part of the diminishing returns curve. The human review team is already handling the gap, so this is a cost optimization question, not a safety question."
+          },
+          {
+            "id": "c",
+            "text": "Stay at 91% -- diminishing returns means it's never worth pushing higher",
+            "correct": false,
+            "explanation": "Diminishing returns doesn't mean you should never invest in improvement -- it means you should be deliberate about when the investment is justified. For content moderation at scale, that extra 6% could represent thousands of violations per day. The right answer is to do the math, not to reflexively avoid improvement."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    }
+  ]
+}
