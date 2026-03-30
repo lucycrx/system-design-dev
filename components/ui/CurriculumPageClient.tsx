@@ -248,13 +248,6 @@ function ModuleCard({
   );
 }
 
-const FUTURE_MODULES = [
-  { num: 3, title: "Architecture Patterns", color: "var(--color-green)" },
-  { num: 4, title: "Making It Real (Deployment)", color: "var(--color-orange)" },
-  { num: 5, title: "Level Up", color: "var(--color-pink)" },
-  { num: 6, title: "AI-Specific Concepts", color: "var(--color-purple)" },
-];
-
 export function CurriculumPageClient({ modules }: { modules: CurriculumModule[] }) {
   const [phase, setPhase] = useState(0);
   const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
@@ -336,39 +329,6 @@ export function CurriculumPageClient({ modules }: { modules: CurriculumModule[] 
           ))}
         </div>
 
-        {/* Future modules — with colored accents */}
-        <div className="mt-6 space-y-3">
-          {FUTURE_MODULES.map((mod, i) => (
-            <div
-              key={mod.num}
-              className="relative bg-surface/50 border border-dashed border-border p-7 flex items-center gap-5 overflow-hidden transition-all duration-700"
-              style={{
-                opacity: phase >= 2 ? 0.35 : 0,
-                transitionDelay: `${(modules.length + i) * 120 + 300}ms`,
-              }}
-            >
-              {/* Subtle left accent */}
-              <div
-                className="absolute left-0 top-0 bottom-0 w-[2px]"
-                style={{ backgroundColor: mod.color, opacity: 0.25 }}
-              />
-              <div
-                className="w-10 h-10 flex items-center justify-center text-lg font-mono border border-border text-text-dim"
-              >
-                {mod.num}
-              </div>
-              <div>
-                <span className="label-mono text-text-dim">
-                  Module {mod.num}
-                </span>
-                <h3 className="text-lg font-bold text-text-muted tracking-[-0.01em] uppercase">
-                  {mod.title}
-                </h3>
-                <p className="label-mono text-text-dim mt-1">Coming soon</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </main>
     </>
   );
