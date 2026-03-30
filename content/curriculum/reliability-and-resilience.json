@@ -62,7 +62,10 @@
           "label": "See this in action: Building a Ride-Sharing App → Scaling to a City"
         }
       ],
-      "relatedGlossary": ["server"]
+      "relatedGlossary": [
+        "server"
+      ],
+      "topicLabel": "Failover & Redundancy"
     },
     {
       "id": "health-checks-and-monitoring",
@@ -118,7 +121,10 @@
           "label": "See this in action: Building a Ride-Sharing App → Scaling to a City"
         }
       ],
-      "relatedGlossary": ["server"]
+      "relatedGlossary": [
+        "server"
+      ],
+      "topicLabel": "Health Checks & Monitoring"
     },
     {
       "id": "graceful-degradation",
@@ -174,7 +180,11 @@
           "label": "See this in action: Building a Ride-Sharing App → Going Nationwide"
         }
       ],
-      "relatedGlossary": ["server", "database"]
+      "relatedGlossary": [
+        "server",
+        "database"
+      ],
+      "topicLabel": "Graceful Degradation"
     },
     {
       "id": "backups-and-disaster-recovery",
@@ -223,7 +233,11 @@
           }
         ]
       },
-      "relatedGlossary": ["database", "persistence"]
+      "relatedGlossary": [
+        "database",
+        "persistence"
+      ],
+      "topicLabel": "Backups & Disaster Recovery"
     },
     {
       "id": "timeouts-and-retries",
@@ -279,7 +293,11 @@
           "label": "See this in action: Building a Ride-Sharing App → Going Nationwide"
         }
       ],
-      "relatedGlossary": ["server", "database"]
+      "relatedGlossary": [
+        "server",
+        "database"
+      ],
+      "topicLabel": "Timeouts & Retries"
     },
     {
       "id": "security-basics",
@@ -329,7 +347,11 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": ["database", "server"]
+      "relatedGlossary": [
+        "database",
+        "server"
+      ],
+      "topicLabel": "Security Basics"
     },
     {
       "id": "testing-basics",
@@ -379,7 +401,65 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": ["database", "api"]
+      "relatedGlossary": [
+        "database",
+        "api"
+      ],
+      "topicLabel": "Testing Basics"
+    },
+    {
+      "id": "logging",
+      "title": "Logging: The black box recorder your app needs",
+      "description": "The black box recorder for your app.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Logging** is the practice of recording events, errors, and data points as your app runs. Every time a user signs in, an [[glossary:api|API]] call fails, a payment is processed, or an error occurs, your app can write a log entry — a timestamped record of what happened.\n\nLogs are different from monitoring: **monitoring** tells you something is wrong (error rate is up), **logging** tells you why (the specific request that failed and the error message). Think of monitoring as the dashboard warning lights in your car, and logs as the mechanic's diagnostic readout."
+        },
+        {
+          "heading": "why",
+          "content": "Logging is essential because:\n\n- **It's the primary tool for debugging production issues** — \"what happened at 3:47 AM that caused the outage?\" Without logs, you're guessing.\n- **It provides an audit trail for compliance and security** — \"who accessed this data and when?\" Regulated industries often require this.\n- **It helps you understand user behavior** — \"which [[glossary:api|API]] endpoints are called most?\" Logs reveal real usage patterns.\n- **Without good logs, every production bug becomes a guessing game** — user reports are vague (\"it didn't work\"), and reproducing production issues locally is often impossible.\n\nUnderstanding logging helps PMs scope observability requirements and understand why engineers push for \"logging infrastructure\" work. It's not glamorous, but it's the difference between resolving an outage in 10 minutes versus 10 hours."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **security camera system** in a building:\n\nThe cameras record everything continuously. Most of the footage is boring and nobody watches it. But when something goes wrong — a break-in, a safety incident — you rewind the tape to see exactly what happened, when, and where. Without cameras, you're relying on witness accounts (user bug reports), which are vague and unreliable.\n\n**Structured logging** means recording logs in a consistent, searchable format (like JSON) rather than free-text. Instead of `\"Error processing order\"`, a structured log says `{\"event\": \"order_failed\", \"order_id\": \"ORD-789\", \"error\": \"payment_declined\", \"user_id\": \"USR-123\", \"timestamp\": \"2026-03-29T15:30:00Z\"}`. This makes logs searchable and filterable — you can instantly find all failed orders for a specific user.\n\n**Log levels** categorize severity:\n\n- **DEBUG** — detailed info for developers during development\n- **INFO** — normal operations (\"user logged in,\" \"order placed\")\n- **WARN** — something concerning but not broken (\"disk usage at 85%\")\n- **ERROR** — something failed (\"payment API returned 500\")\n- **FATAL** — the system is going down (\"database connection lost\")\n\nTools like Datadog, Logtail, and AWS CloudWatch collect, store, and let you search logs from all your [[glossary:server|servers]] in one place — this is called **log aggregation**."
+        },
+        {
+          "heading": "when",
+          "content": "Log everything that would help you debug a problem:\n\n- **[[glossary:api|API]] requests and responses** — especially errors and slow responses\n- **Authentication events** — login, logout, failed attempts (critical for security investigations)\n- **Payment and transaction events** — every step of a financial flow should be traceable\n- **Background job outcomes** — did the nightly report generation succeed or fail?\n- **Any action that changes data** — creates, updates, deletes\n\nDon't log:\n\n- **Sensitive data** like passwords, full credit card numbers, or personal health information — this creates a security liability\n- **High-volume data that isn't useful** — logging every pixel of mouse movement will overwhelm your storage without helping anyone\n\nKeep logs for at least 30 days (longer for audit-critical apps). Set up log alerts for critical errors so you're notified before users report problems."
+        }
+      ],
+      "quiz": {
+        "question": "What should you fix first?",
+        "scenario": "Your SaaS app has a bug where some users' subscription renewals are failing silently — they're being downgraded to the free plan without notification. Your monitoring dashboard shows the overall error rate is normal (below 1%). Engineering says they need to investigate but the app only logs generic messages like \"renewal process completed\" for both successful and failed renewals.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Improve logging to capture renewal outcomes (success/failure), failure reasons, and affected user IDs — then investigate",
+            "correct": true,
+            "explanation": "The current logs can't distinguish successful from failed renewals, making the bug invisible. Better logging turns an unsolvable mystery into a searchable query. Once you're logging the outcome (success/failure), the reason for any failure (payment declined, card expired, API timeout), and the affected user ID, you can immediately find all affected users and identify the root cause."
+          },
+          {
+            "id": "b",
+            "text": "Set up more detailed monitoring dashboards to track renewal success rates",
+            "correct": false,
+            "explanation": "Better monitoring would tell you that renewals are failing at some rate, but it won't tell you why specific renewals fail or which users are affected. Monitoring shows trends and thresholds. To actually debug and fix this issue, you need logs that capture the details of each individual renewal — what happened, why it failed, and for whom. Monitoring and logging work together, but logging is what you need to solve this specific problem."
+          },
+          {
+            "id": "c",
+            "text": "Have engineering review the renewal code to find and fix the bug directly",
+            "correct": false,
+            "explanation": "The engineers can read the code, but without logs that show what's actually happening in production, they're guessing. The code might look correct — the bug could be caused by an edge case (specific payment provider, expired card type, timezone issue) that's invisible in the codebase. Fixing this blind is like a mechanic trying to diagnose an intermittent engine problem without any diagnostic data. Improve the logging first so you can see what's actually happening."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": [
+        "api",
+        "server"
+      ],
+      "topicLabel": "Logging"
     }
   ]
 }

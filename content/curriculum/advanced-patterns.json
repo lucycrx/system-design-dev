@@ -62,7 +62,11 @@
           "label": "See this in action: Building a Ride-Sharing App → Breaking apart the monolith"
         }
       ],
-      "relatedGlossary": ["monolith", "microservices"]
+      "relatedGlossary": [
+        "monolith",
+        "microservices"
+      ],
+      "topicLabel": "Microservices vs Monolith"
     },
     {
       "id": "message-queues",
@@ -118,7 +122,12 @@
           "label": "See this in action: Building a Ride-Sharing App → Handling peak demand"
         }
       ],
-      "relatedGlossary": ["message-queue", "async-processing", "decoupling"]
+      "relatedGlossary": [
+        "message-queue",
+        "async-processing",
+        "decoupling"
+      ],
+      "topicLabel": "Message Queues"
     },
     {
       "id": "event-driven-architecture",
@@ -174,7 +183,12 @@
           "label": "See this in action: Building a Ride-Sharing App → Scaling the platform"
         }
       ],
-      "relatedGlossary": ["event-driven-architecture", "decoupling", "message-queue"]
+      "relatedGlossary": [
+        "event-driven-architecture",
+        "decoupling",
+        "message-queue"
+      ],
+      "topicLabel": "Event-Driven Architecture"
     },
     {
       "id": "api-gateways",
@@ -223,7 +237,12 @@
           }
         ]
       },
-      "relatedGlossary": ["api-gateway", "microservices", "load-balancer"]
+      "relatedGlossary": [
+        "api-gateway",
+        "microservices",
+        "load-balancer"
+      ],
+      "topicLabel": "API Gateways"
     },
     {
       "id": "webhooks",
@@ -273,7 +292,62 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": ["api", "microservices", "message-queue"]
+      "relatedGlossary": [
+        "api",
+        "microservices",
+        "message-queue"
+      ],
+      "topicLabel": "Webhooks"
+    },
+    {
+      "id": "task-scheduling",
+      "title": "Task Scheduling: Running work on a clock, not on demand",
+      "description": "Running work on a timer instead of on demand.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **scheduled task** (or **cron job**) is work that runs automatically at a set time or interval — not triggered by a user action, but by the clock. Examples:\n\n- Sending a daily digest email at 8 AM\n- Generating weekly analytics reports every Monday\n- Cleaning up expired sessions every hour\n- Checking for abandoned carts every 15 minutes and sending reminder emails\n- Syncing data from an external [[glossary:api|API]] every 5 minutes\n\nThis is different from [[glossary:message-queue|message queues]] (event-triggered: \"a user placed an order, process it\") — scheduled tasks are time-triggered (\"it's 8 AM, send the digest\")."
+        },
+        {
+          "heading": "why",
+          "content": "Almost every production app has background work that needs to happen on a schedule. Understanding task scheduling helps you:\n\n- **Scope features that involve periodic work** — daily reports, weekly summaries, recurring billing. These all need scheduling infrastructure, and that affects timelines.\n- **Understand why \"just run it every minute\" isn't always simple at scale** — what if the task takes longer than the interval? What if two [[glossary:server|servers]] both try to run it?\n- **Debug issues where scheduled work isn't happening** — \"the daily report didn't go out\" is a common support escalation that's hard to troubleshoot without understanding how scheduling works.\n- **Plan infrastructure needs** for compute-intensive periodic work (like nightly data aggregation that processes millions of rows)."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **sprinkler system on a timer**:\n\nYou don't stand outside every morning and manually water the lawn. You set the sprinkler to run at 6 AM for 20 minutes. It runs automatically, rain or shine.\n\nBut what happens if the water pressure is low and it takes 40 minutes instead of 20? The next cycle might start before the first one finishes — that's a real problem in task scheduling called **overlapping runs**.\n\nIn practice, simple scheduled tasks use **cron** — a Unix utility where you define a schedule like \"every day at midnight\" or \"every 5 minutes.\" Cloud platforms offer managed versions: AWS EventBridge Scheduler, Vercel Cron Jobs, Railway Cron.\n\nFor distributed systems (multiple [[glossary:server|servers]]), you need to ensure only one server runs the task — this uses a **distributed lock** (a flag in [[glossary:redis|Redis]] or the [[glossary:database|database]] that says \"I'm already running this, don't start another\"). Without a lock, every server runs the task independently, and your users get duplicate emails or corrupted data.\n\nMore complex scheduling needs tools like Temporal or BullMQ, which add features like retries, monitoring, and job history."
+        },
+        {
+          "heading": "when",
+          "content": "Use scheduled tasks for:\n\n- **Periodic reports and summaries** — daily digests, weekly analytics, monthly invoices\n- **Recurring billing and subscription management** — charging customers on their renewal date\n- **Data cleanup and maintenance** — expiring old sessions, removing temporary files, archiving old records\n- **Syncing data between systems** on an interval — pulling data from a third-party API every few minutes\n- **Health checks and heartbeats** — verifying that external services are still responding\n\nUse [[glossary:message-queue|message queues]] instead when:\n\n- The work is triggered by an event, not a timer\n- You need immediate processing\n- The volume is unpredictable and bursty"
+        }
+      ],
+      "quiz": {
+        "question": "Why are users getting duplicate emails?",
+        "scenario": "Your SaaS app sends a \"Weekly Activity Summary\" email every Monday at 9 AM. It works perfectly in staging. In production with 3 servers behind a load balancer, users report receiving 3 copies of the summary email every Monday. The cron job is configured on each server.",
+        "options": [
+          {
+            "id": "a",
+            "text": "All 3 servers are running the same cron job independently — you need a distributed lock or a single dedicated scheduler",
+            "correct": true,
+            "explanation": "All 3 servers are running the same cron job independently, so the task executes 3 times. You need either a distributed lock (so only one server acquires the lock and runs it) or move the cron job to a single dedicated worker/scheduler service. This is a classic distributed scheduling problem — it works in staging because staging typically runs on one server."
+          },
+          {
+            "id": "b",
+            "text": "The load balancer is duplicating the cron job requests — configure it to route scheduled tasks to one server",
+            "correct": false,
+            "explanation": "Load balancers route incoming HTTP requests — they don't have anything to do with cron jobs. Cron runs locally on each server based on its own clock. The load balancer doesn't know the cron job exists and can't prevent it from running. The fix needs to happen at the scheduling layer, not the networking layer."
+          },
+          {
+            "id": "c",
+            "text": "The email service is retrying failed sends — add deduplication logic to the email sending code",
+            "correct": false,
+            "explanation": "If the email service were retrying, you'd see inconsistent duplicate counts (sometimes 2, sometimes 4). Users are consistently getting exactly 3 copies — one from each server. The problem is that the task runs 3 times, not that a single run sends multiple emails. Deduplication could mask the symptom, but the real fix is ensuring the task only runs once."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["message-queue", "redis", "database"]
     }
   ]
 }

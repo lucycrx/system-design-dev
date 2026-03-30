@@ -62,7 +62,12 @@
           "label": "See this in action: Building an Online Store"
         }
       ],
-      "relatedGlossary": ["cache", "redis", "database"]
+      "relatedGlossary": [
+        "cache",
+        "redis",
+        "database"
+      ],
+      "topicLabel": "Caching"
     },
     {
       "id": "load-balancing",
@@ -118,7 +123,12 @@
           "label": "See this in action: Building an Online Store"
         }
       ],
-      "relatedGlossary": ["load-balancer", "server", "horizontal-scaling"]
+      "relatedGlossary": [
+        "load-balancer",
+        "server",
+        "horizontal-scaling"
+      ],
+      "topicLabel": "Load Balancing"
     },
     {
       "id": "cdns",
@@ -174,7 +184,12 @@
           "label": "See this in action: Building an Online Store"
         }
       ],
-      "relatedGlossary": ["cdn", "cache", "latency"]
+      "relatedGlossary": [
+        "cdn",
+        "cache",
+        "latency"
+      ],
+      "topicLabel": "CDNs"
     },
     {
       "id": "horizontal-vs-vertical-scaling",
@@ -230,7 +245,12 @@
           "label": "See this in action: Building an Online Store"
         }
       ],
-      "relatedGlossary": ["horizontal-scaling", "load-balancer", "server"]
+      "relatedGlossary": [
+        "horizontal-scaling",
+        "load-balancer",
+        "server"
+      ],
+      "topicLabel": "Horizontal vs Vertical Scaling"
     },
     {
       "id": "rate-limiting",
@@ -286,7 +306,12 @@
           "label": "See this in action: Building an Online Store"
         }
       ],
-      "relatedGlossary": ["rate-limiting", "redis", "server"]
+      "relatedGlossary": [
+        "rate-limiting",
+        "redis",
+        "server"
+      ],
+      "topicLabel": "Rate Limiting"
     },
     {
       "id": "reverse-proxies",
@@ -336,7 +361,12 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": ["cache", "load-balancer", "server"]
+      "relatedGlossary": [
+        "cache",
+        "load-balancer",
+        "server"
+      ],
+      "topicLabel": "Reverse Proxies"
     },
     {
       "id": "latency-vs-throughput",
@@ -386,7 +416,66 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": ["latency", "cache", "load-balancer"]
+      "relatedGlossary": [
+        "latency",
+        "cache",
+        "load-balancer"
+      ],
+      "topicLabel": "Latency vs Throughput"
+    },
+    {
+      "id": "search-and-indexing",
+      "title": "Search and Indexing: How your app finds things fast",
+      "description": "How search works at scale.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Search is one of the most common features in any app, but it's architecturally different from a regular [[glossary:database|database]] query. A database query says \"find the row where user_id = 42\" — that's a precise lookup. Search says \"find all products that match 'wireless headphones'\" — that's fuzzy, ranked, and much harder.\n\n**Full-text search** is the technique that makes this work. Instead of scanning every document for your search terms, the system builds an **inverted index** — a precomputed map from every word to every document that contains it. Tools like **Elasticsearch** and **Meilisearch** are purpose-built for this."
+        },
+        {
+          "heading": "why",
+          "content": "Understanding search helps PMs because:\n\n- **Almost every app needs search eventually** — products, users, content, messages\n- **Search quality directly impacts user satisfaction and revenue** — poor search results mean users can't find what they're looking for, which means lost conversions\n- **Search is a common source of \"it's slow\" complaints** — unoptimized search queries are one of the first things to break under load\n- **It's one of the most common reasons to add new infrastructure** beyond your main database — search engines are a separate system with their own scaling characteristics\n\nWhen AI tools generate a basic SQL `LIKE '%keyword%'` query, that works for 100 records but falls apart at 100,000."
+        },
+        {
+          "heading": "how",
+          "content": "Think of the **index in the back of a textbook**:\n\nIf you want to find every page that mentions \"photosynthesis,\" you don't read the whole book — you flip to the index, find \"photosynthesis,\" and get page numbers 14, 87, 203. That's an inverted index. The book is your data. The index maps words to locations.\n\nBuilding the index takes time upfront (when documents are added or updated), but lookups are nearly instant.\n\nSearch engines add sophistication on top:\n\n- **Tokenization** — breaking \"wireless headphones\" into [\"wireless\", \"headphones\"] so each word can be looked up independently\n- **Relevance scoring** — ranking results by how well they match, so the best results appear first\n- **Fuzzy matching** — finding \"headphone\" when the user typed \"headphon,\" accounting for typos and partial words\n- **Faceting** — filtering by category, price range, brand, or other attributes (like the sidebar filters on an e-commerce site)\n\nIn practice, your main database (PostgreSQL) stores the data, and a search service (Elasticsearch) maintains a copy optimized for search. When data changes, you update both."
+        },
+        {
+          "heading": "when",
+          "content": "You need a dedicated search solution when:\n\n- **You have more than a few thousand searchable records** — database queries get slow fast when scanning large text fields\n- **Users expect to search by partial matches or natural language** — typing \"blue running shoes\" and finding relevant results even if no product is named exactly that\n- **You need ranked results** — most relevant first, not just any match\n- **You need filters and facets** — like an e-commerce sidebar with category, price range, and brand filters\n\nSimple use cases (searching 200 users by exact name) can stay in your [[glossary:database|database]] with basic queries. The overhead of a dedicated search service isn't worth it until you hit real search complexity or scale."
+        }
+      ],
+      "quiz": {
+        "question": "Why isn't SQL enough here?",
+        "scenario": "Your e-commerce app has 50,000 products. Users complain that searching for \"blue running shoes\" returns no results, even though you have products named \"Men's Blue Running Shoe - Lightweight\" and \"Running Shoes - Royal Blue.\" Your current search uses a SQL query: `SELECT * FROM products WHERE name LIKE '%blue running shoes%'`.",
+        "options": [
+          {
+            "id": "a",
+            "text": "The SQL query requires an exact substring match — 'blue running shoes' doesn't appear as a contiguous phrase in either product name, so a full-text search engine is needed",
+            "correct": true,
+            "explanation": "SQL LIKE requires an exact substring match — \"blue running shoes\" doesn't appear as a contiguous phrase in either product name. A full-text search engine would tokenize the query into individual words, match them independently, and rank results by relevance. It would find both products because they contain \"blue,\" \"running,\" and \"shoe/shoes.\""
+          },
+          {
+            "id": "b",
+            "text": "The database is too slow to search 50,000 records — you need Elasticsearch for the speed improvement",
+            "correct": false,
+            "explanation": "While Elasticsearch is faster for search at scale, speed isn't the core problem here. The issue is that SQL LIKE can't do what users expect from search. Even if the LIKE query ran in 1 millisecond, it would still return zero results because \"blue running shoes\" doesn't appear as an exact substring in any product name. The problem is matching logic, not performance."
+          },
+          {
+            "id": "c",
+            "text": "The SQL query is case-sensitive — switching to ILIKE or adding LOWER() would fix the matching issue",
+            "correct": false,
+            "explanation": "Case sensitivity isn't the issue here. Even with case-insensitive matching, \"blue running shoes\" still doesn't appear as a contiguous substring in \"Men's Blue Running Shoe - Lightweight\" (the words are separated by other text). The fundamental problem is that LIKE searches for exact substrings, while users expect word-by-word matching with relevance ranking."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": [
+        "database",
+        "latency"
+      ],
+      "topicLabel": "Search & Indexing"
     }
   ]
 }
