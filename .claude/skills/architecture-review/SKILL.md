@@ -156,28 +156,38 @@ Read the HTML template at `./html-template.html` (relative to this skill file).
 
 **The template handles all rendering.** You only need to produce valid JSON matching the schema in Step 5. The template's embedded JavaScript reads the JSON and builds the full interactive report.
 
-**How the diagram works — containment model, not drawn lines:**
+**How the diagram works — containment + connection tags:**
 
-The architecture diagram uses spatial relationships to communicate structure. This is a deliberate design choice — SVG connectors fail in self-contained HTML because of absolute coordinate problems, path routing, and no reflow awareness. Instead:
+The architecture diagram uses spatial grouping and inline connection tags to communicate structure. No SVG lines or absolute positioning — everything is CSS-only and reflows naturally.
 
 - **Containment = "belongs to"**: Components are grouped inside category boxes. A component card inside an "External Services" box means it belongs to that layer. Category boxes have floating edge labels (like fieldset legends) identifying the type.
 - **Adjacency = "relates"**: Category boxes placed side by side in the same row are peer systems at the same architectural tier. Two components side by side within a category box are related alternatives or collaborators.
-- **Flow connectors between tiers**: Simple CSS dashed lines with small text labels between rows of category boxes. These are CSS borders and positioned divs, not SVG paths. Labels are extracted from the connection data and describe the relationship between tiers (e.g., "calls LLM APIs", "writes evaluation scores").
-- **Layered layout**: Categories are auto-sorted top-to-bottom by dependency depth (entry points at top, data stores at bottom). The vertical position communicates the flow direction.
-- **Light schematic aesthetic**: The diagram uses a warm light palette consistent with the rest of the page, with category colors providing visual distinction.
-- **Fixed 760px width**: Constrained to avoid reflow problems. No horizontal scrolling.
+- **Connection tags on each component**: Each component card shows its outbound connections as small tagged pills directly below its label (e.g., `-> Docker Runtime: runs code inside containers`). Tags have a pulsing dot animation, highlight the target card on hover, and click to select/scroll to the target. This replaces tier-level flow connectors — connections are always between specific components, not category boxes.
+- **Layered layout**: Categories are auto-sorted top-to-bottom by dependency depth (entry points at top, data stores at bottom). The vertical position communicates the flow direction. Single-category rows are centered at 60% width.
+- **Category icons**: Each category has a Lucide stroke icon (16px, `currentColor`) rendered inline next to the component label. Icons are defined in the `catIcons` map in the template JS and colored per category.
+- **Light schematic aesthetic**: Warm light palette (`--diagram-bg: hsl(48, 10%, 95%)`, white surfaces, dark text) consistent with the rest of the page. Category colors provide visual distinction.
+- **Fluid width**: Diagram fills the available container width. No fixed pixel constraint.
+
+**Interactive behavior:**
+- **Click a component** → Detail panel slides in as a 340px sticky sidebar on the right, shrinking the diagram to make room. Shows full description, key files, and connections list. Panel scrolls independently and stays aligned while scrolling the diagram.
+- **Hover a connection tag** → Target component card highlights with a border and shadow.
+- **Click a connection tag** → Selects the target component (opens its detail panel) and scrolls to it.
+- **Interaction hints** are shown above the diagram so users know how to interact.
+- On mobile (< 768px), the detail panel stacks below the diagram instead of beside it.
 
 **What the template renders:**
 - Sticky header with project identity and risk severity count chips
-- One-sentence health summary
-- Architecture diagram (containment-based, light schematic style) with clickable component cards
+- Stats line (component count, risk counts) + 2-4 sentence architecture overview from `metadata.summary`
+- Interaction hints (click, hover, click-to-jump)
+- Architecture diagram (containment-based, light schematic style) with component cards showing category icons and connection tags
+- Sticky detail sidebar (right side, appears on component click)
 - Expandable risk report sorted by severity (each card has: plain-English explanation, analogy, consequence, evidence, fix recommendation, and "learn more" links to the companion website)
-- Detail panel that shows description, files, and connections when a component is clicked
 
 **Do NOT attempt to:**
 - Draw SVG lines or paths between components
 - Use absolute positioning for diagram nodes
 - Generate Mermaid or other diagram markup (the HTML template handles all visualization)
+- Use tier-level flow connectors between category rows — connections belong on individual component cards
 
 **After generating the HTML**, also present a brief summary in the conversation:
 1. One sentence: what the project is and overall health
@@ -207,9 +217,10 @@ The architecture data JSON is the single input that determines diagram quality. 
 - Relate it to the overall system: "The brain of the system that coordinates..." or "The storage layer where all user data lives permanently."
 
 **Connection labels:**
-- Keep to 5-6 words max. These appear as small text between diagram tiers.
+- Keep to 5-6 words max. These appear as tagged pills on each component card, formatted as `-> Target Name: label`.
 - Use active verbs: "sends prompts", "writes evaluation scores", "reads user sessions" — not "is connected to" or "depends on".
 - Be specific: "calls OpenAI API" not "makes external requests".
+- Every connection must specify a valid `targetId` matching another component's `id`. The template uses this to enable hover-highlight and click-to-navigate between cards.
 
 **Category assignment:**
 - Each component gets exactly one category from the taxonomy. When a component spans categories (e.g., an API route that also does auth), pick the primary responsibility.
