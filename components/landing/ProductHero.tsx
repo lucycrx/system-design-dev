@@ -63,13 +63,13 @@ export function ProductHero() {
             <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold text-text leading-[1.15] tracking-tight mb-10">
               <span className="block">
                 <WordReveal delay={150} visible={phase >= 1}>
-                  Any codebase.
+                  Understand any codebase.
                 </WordReveal>
               </span>
               <span className="block">
                 <WordReveal delay={400} visible={phase >= 1}>
                   <span className="relative text-accent">
-                    Understood.
+                    Build to scale.
                     <span
                       className="absolute -bottom-1 left-0 h-[3px] bg-accent transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left w-full"
                       style={{
