@@ -67,6 +67,50 @@ html {
   }
 }
 
+/* Hero word reveal */
+@keyframes word-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Accent line draw */
+@keyframes line-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Card slide-in from bottom */
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle grid pulse for hero background */
+@keyframes grid-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Diagram animations */
 @keyframes diagram-node-enter {
   from {
