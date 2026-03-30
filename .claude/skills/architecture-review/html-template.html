@@ -118,7 +118,13 @@ body {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  outline: none;
 }
+
+.risk-chip:hover { opacity: 0.8; }
+.risk-chip:focus-visible { outline: 2px solid var(--highlight); outline-offset: 1px; }
 
 .risk-chip[data-severity="critical"] { color: var(--risk-critical); border-color: var(--risk-critical); background: var(--risk-critical-bg); }
 .risk-chip[data-severity="high"] { color: var(--risk-high); border-color: var(--risk-high); background: var(--risk-high-bg); }
@@ -1071,7 +1077,20 @@ body {
     var chip = document.createElement('span');
     chip.className = 'risk-chip';
     chip.setAttribute('data-severity', sev);
+    chip.setAttribute('tabindex', '0');
+    chip.setAttribute('role', 'button');
     chip.innerHTML = '<span class="count">' + count + '</span> ' + sev;
+    function scrollToSeverity(severity) {
+      var target = riskListEl.querySelector('.risk-card[data-severity="' + severity + '"]');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        target.classList.add('expanded');
+      }
+    }
+    chip.addEventListener('click', scrollToSeverity.bind(null, sev));
+    chip.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollToSeverity(sev); }
+    });
     countsEl.appendChild(chip);
   });
 
@@ -1337,6 +1356,7 @@ body {
     var sev = risk.adjustedSeverity || risk.severity;
     var card = document.createElement('div');
     card.className = 'risk-card';
+    card.setAttribute('data-severity', sev);
 
     var h = '<div class="risk-card-header">';
     h += '<span class="risk-severity ' + esc(sev) + '">' + esc(sev) + '</span>';
