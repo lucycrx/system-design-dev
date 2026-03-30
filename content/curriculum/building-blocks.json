@@ -278,6 +278,156 @@
         ]
       },
       "relatedGlossary": []
+    },
+    {
+      "id": "rest-apis",
+      "title": "REST APIs: The rules for how apps talk to each other",
+      "description": "The standard language that lets any app communicate with any other app over the web.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**REST** (Representational State Transfer) is an architectural style for building APIs. It's not a specific technology — it's a set of conventions that nearly every web API follows. REST uses standard HTTP methods to perform operations on **resources** (the \"things\" your app manages, like users, messages, or orders).\n\nThe key ideas:\n\n- Every resource has a **URL** (called an endpoint): `/api/books`, `/api/books/42`\n- You use **HTTP methods** to say what you want to do:\n  - `GET` — read data\n  - `POST` — create something new\n  - `PUT` — update an existing thing (replace it)\n  - `DELETE` — remove something\n- The [[glossary:server|server]] responds with a **status code** telling you what happened: `200 OK`, `201 Created`, `404 Not Found`, `500 Server Error`\n- Each request is **stateless** — the server doesn't remember your previous requests. Every request must include all the info needed to process it."
+        },
+        {
+          "heading": "why",
+          "content": "REST matters because it's the universal standard:\n\n- **Every API you'll encounter follows REST conventions** — Stripe, Twilio, GitHub, OpenAI. Learn the pattern once and you can read any API's documentation.\n- **AI-generated code uses REST by default** — when AI creates an API route for you, it's writing RESTful endpoints. Understanding the conventions helps you verify the code makes sense.\n- **It gives you a shared vocabulary with engineers** — saying \"we need a GET endpoint for fetching user profiles and a POST endpoint for creating new ones\" is clear and precise.\n- **It structures your thinking** — when planning a feature, you can ask: what are the resources, and what operations do we need on each? That maps directly to your API design."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a REST API like a **library card catalog** with standard operations:\n\n- The library has **resources** (books, members, loans)\n- Each resource has a **location** (a shelf address = URL endpoint)\n- You can perform **standard operations** on any resource:\n  - `GET /books` — browse all books\n  - `GET /books/42` — look up a specific book\n  - `POST /books` — donate a new book (send book details in the request)\n  - `PUT /books/42` — replace the info card for book #42\n  - `DELETE /books/42` — remove book #42 from the catalog\n\nThe librarian (server) always responds with a status slip:\n- **200** — \"Here's what you asked for\"\n- **201** — \"Created! The new book is on the shelf\"\n- **404** — \"We don't have that book\"\n- **401** — \"You need a library card first\" (not authenticated)\n- **500** — \"Something broke on our end, sorry\"\n\nIn code, a REST endpoint looks like this:\n\n```js\n// GET /api/books — return all books\napp.get('/api/books', async (req, res) => {\n  const books = await db.getAll('books');\n  res.status(200).json(books);\n});\n\n// POST /api/books — create a new book\napp.post('/api/books', async (req, res) => {\n  const newBook = await db.create('books', req.body);\n  res.status(201).json(newBook);\n});\n```\n\nNotice the pattern: the URL names the resource, the HTTP method names the action."
+        },
+        {
+          "heading": "when",
+          "content": "**Use REST (the default choice) when:**\n- You're building a web or mobile app that needs a backend API\n- You want a straightforward, well-understood API that any developer (or AI tool) can work with\n- Your app has clear resources with standard operations (users, posts, orders, etc.)\n\n**Consider alternatives when:**\n- **GraphQL** — when your front end needs to fetch complex, nested data in a single request (e.g., \"get a user, their posts, and each post's comments\" without multiple round trips)\n- **WebSockets** — when you need [[glossary:real-time|real-time]], two-way communication (chat, live updates) rather than request-response\n\nFor most apps you're building with AI tools, REST is the right choice. It's what AI generates by default, what tutorials teach, and what most services expect."
+        }
+      ],
+      "quiz": {
+        "question": "Which HTTP method fits?",
+        "scenario": "You're building a task management app. A user clicks the 'Mark as Done' button on a task, which should update the task's status from 'in-progress' to 'completed'. Your AI generated code that sends a POST request to `/api/tasks/57`. Does this look right?",
+        "options": [
+          {
+            "id": "a",
+            "text": "No — it should be PUT, because you're updating an existing task, not creating a new one",
+            "correct": true,
+            "explanation": "POST is for creating new resources. PUT (or PATCH) is for updating existing ones. Since task #57 already exists and you're changing its status, the request should be PUT /api/tasks/57 (or PATCH /api/tasks/57 for a partial update). This is a common AI mistake worth catching — using the wrong HTTP method won't always break things, but it violates REST conventions and can confuse other developers."
+          },
+          {
+            "id": "b",
+            "text": "Yes — POST is correct because you're sending data to the server",
+            "correct": false,
+            "explanation": "While POST does send data to the server, in REST conventions POST specifically means 'create a new resource.' For updating an existing task, you should use PUT (full replacement) or PATCH (partial update). The distinction matters for API clarity and for caching behavior."
+          },
+          {
+            "id": "c",
+            "text": "No — it should be GET, because you're just changing a status field",
+            "correct": false,
+            "explanation": "GET is strictly for reading data — it should never change anything on the server. This principle (called 'safe methods') is important because browsers and caches assume GET requests can be repeated without side effects. Updating a task's status is a write operation, so it needs PUT or PATCH."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["client-server", "server"]
+    },
+    {
+      "id": "crud-operations",
+      "title": "CRUD Operations: The four things every app does with data",
+      "description": "Every feature you build maps to just four basic operations on data.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**CRUD** stands for the four basic operations you can perform on any piece of data:\n\n- **Create** — add new data (sign up a user, post a message, upload a photo)\n- **Read** — retrieve existing data (view your profile, load a feed, search products)\n- **Update** — change existing data (edit your bio, mark a task complete, change a price)\n- **Delete** — remove data (delete a comment, remove an item from cart, close an account)\n\nThat's it. Every feature in every app is some combination of these four operations. A social media feed? Read. Posting a photo? Create. Editing a caption? Update. Removing a post? Delete."
+        },
+        {
+          "heading": "why",
+          "content": "CRUD is the most useful mental model for a PM who works with engineers:\n\n- **Scoping features** — when someone proposes a feature, you can break it down: \"So we need Create and Read for launch, and we'll add Update and Delete in v2?\" That's an instant, clear conversation about scope.\n- **Estimating complexity** — Read-only features are simpler. Features that let users Create, Update, and Delete data need more validation, permissions, and edge case handling.\n- **Talking to engineers** — \"Does this page need full CRUD or just read access?\" is a precise, useful question.\n- **Understanding what AI built** — when AI generates a set of API endpoints, you can verify: did it cover all four operations? Are there missing ones?\n- **Mapping to the [[glossary:database|database]]** — CRUD operations translate directly to how data is stored and retrieved."
+        },
+        {
+          "heading": "how",
+          "content": "Think of CRUD like your **phone's contact list**:\n\n- **Create** — tap \"Add Contact,\" type in a name and number, hit Save\n- **Read** — scroll through your contacts or search for someone's name\n- **Update** — open a contact, change their address, hit Save\n- **Delete** — swipe left on a contact and tap Delete\n\nCRUD maps neatly to both HTTP methods (for APIs) and SQL commands (for databases):\n\n| Operation | HTTP Method | SQL Command | Example |\n|-----------|------------|-------------|----------|\n| **Create** | `POST` | `INSERT INTO` | Add a new user |\n| **Read** | `GET` | `SELECT` | Fetch user profile |\n| **Update** | `PUT`/`PATCH` | `UPDATE` | Change email address |\n| **Delete** | `DELETE` | `DELETE FROM` | Remove an account |\n\nSo when you see an API endpoint like `POST /api/users`, you know it's a **Create** operation. When you see a database query like `SELECT * FROM orders`, you know it's a **Read**.\n\nA typical feature might look like:\n\n```js\n// Create — add a new task\napp.post('/api/tasks', ...);\n\n// Read — get all tasks\napp.get('/api/tasks', ...);\n\n// Update — mark a task complete\napp.put('/api/tasks/:id', ...);\n\n// Delete — remove a task\napp.delete('/api/tasks/:id', ...);\n```\n\nThat's a complete CRUD set for tasks. Most features start here."
+        },
+        {
+          "heading": "when",
+          "content": "CRUD isn't something you \"choose to use\" — it's a lens for understanding what any feature actually does with data. Use it to:\n\n- **Break down any feature request** — \"User can manage their saved addresses\" = full CRUD on an addresses resource\n- **Identify missing pieces** — if your app lets users create posts but not delete them, that's a deliberate choice you should be aware of (and users will ask about)\n- **Prioritize for MVP** — many features only need Create + Read for launch. Update and Delete can come later.\n- **Spot over-engineering** — if a feature only needs Read access (like a dashboard), but the code includes Create/Update/Delete endpoints, that's unnecessary complexity\n\nRemember: every screen in your app is either showing data (Read) or changing it (Create/Update/Delete). When something breaks, asking \"which CRUD operation failed?\" is the fastest way to narrow down the bug."
+        }
+      ],
+      "quiz": {
+        "question": "What CRUD operations does this feature need?",
+        "scenario": "You're building an MVP for a restaurant review app. For launch, users can write reviews and browse other people's reviews. They cannot edit or remove reviews after posting. An engineer asks: 'What operations do we need for the reviews resource?'",
+        "options": [
+          {
+            "id": "a",
+            "text": "Create and Read only — write a review and browse reviews",
+            "correct": true,
+            "explanation": "For this MVP, users can write reviews (Create) and browse them (Read). Since they can't edit or remove reviews, you don't need Update or Delete yet. This is a common and smart MVP scoping decision — ship with Create + Read, then add Update and Delete based on user feedback. It also means less code, fewer edge cases, and a faster launch."
+          },
+          {
+            "id": "b",
+            "text": "Full CRUD — you'll need all four eventually, so build them now",
+            "correct": false,
+            "explanation": "Building all four operations now is over-engineering for an MVP. The requirements explicitly say users can't edit or delete reviews at launch. Building Update and Delete now means writing and testing code that nobody will use yet. Ship Create + Read, learn from users, and add the rest when there's demand."
+          },
+          {
+            "id": "c",
+            "text": "Read only — the reviews should come from a pre-loaded dataset",
+            "correct": false,
+            "explanation": "Users need to write their own reviews, which is a Create operation. A read-only app with pre-loaded data isn't a review platform — it's a static directory. You need at least Create (write a review) and Read (browse reviews) to have a functional review app."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["database", "persistence"]
+    },
+    {
+      "id": "mvc-pattern",
+      "title": "MVC Pattern: How code is organized into three layers",
+      "description": "The most common way to structure an app so you know where everything lives.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**MVC** stands for Model-View-Controller, a pattern for organizing code into three distinct layers:\n\n- **Model** — the data and business logic. This is where your app defines what data looks like, how it's validated, and the rules around it. Think: database schemas, data validation, calculations.\n- **View** — what the user sees. This is the user interface — pages, buttons, forms, charts. It displays data from the Model but doesn't decide *how* that data works.\n- **Controller** — the coordinator. It handles user input (clicks, form submissions, URL requests), talks to the Model to get or change data, and tells the View what to display.\n\nThe flow: **User interacts with the View -> Controller handles the input -> Controller asks the Model for data or changes -> Model responds -> Controller updates the View**."
+        },
+        {
+          "heading": "why",
+          "content": "MVC helps you (and AI) keep code organized:\n\n- **Know where to look when something breaks** — display looks wrong? Check the View. Data is incorrect? Check the Model. The wrong thing happens when you click a button? Check the Controller.\n- **Give AI better instructions** — instead of \"fix the bug,\" you can say \"the issue is in the Controller that handles form submission\" or \"the Model's validation logic is wrong.\" This dramatically improves AI-generated fixes.\n- **Understand any project's folder structure** — when you see folders like `models/`, `views/`, `controllers/` (or their modern equivalents like `components/`, `api/`, `lib/`), you instantly know what lives where.\n- **Have architecture conversations** — \"Should this business logic live in the Model or the Controller?\" is a real question engineers discuss, and understanding MVC lets you participate."
+        },
+        {
+          "heading": "how",
+          "content": "Think of MVC like a **restaurant**:\n\n- **The View** is the dining room and menu — what the customer sees and interacts with. The menu shows what's available, the table is where food is served. The dining room doesn't cook anything; it just presents.\n- **The Model** is the kitchen and recipes — the actual food preparation, ingredient rules (\"no nuts in this dish\"), and cooking processes. The kitchen doesn't care what the dining room looks like.\n- **The Controller** is the waiter — takes the customer's order (user input), brings it to the kitchen (Model), picks up the finished dish, and delivers it to the table (View). The waiter doesn't cook and doesn't set the menu.\n\nIn a real web app, this maps to:\n\n| MVC Layer | In a Next.js App | What It Does |\n|-----------|------------------|--------------|\n| **Model** | Database schema, `lib/` folder | Defines data structure, validation, business rules |\n| **View** | React components in `components/` | Renders UI, displays data, captures user input |\n| **Controller** | API routes in `app/api/` | Handles requests, coordinates Model and View |\n\nFor example, when a user submits a \"Create Task\" form:\n\n1. **View** (React form component) captures the task title and sends it to the API\n2. **Controller** (API route `/api/tasks`) receives the request, validates it, and calls the Model\n3. **Model** (database logic) saves the new task and confirms success\n4. **Controller** sends the response back\n5. **View** updates to show the new task in the list"
+        },
+        {
+          "heading": "when",
+          "content": "MVC (or some variation of it) is used in most frameworks:\n\n- **Next.js / React apps** — React components are the View (though they often blend View and Controller logic). API routes are Controllers. Database schemas and utility functions in `lib/` are the Model.\n- **Django (Python)** — explicitly uses MVC (they call it MTV: Model-Template-View, but it's the same idea)\n- **Ruby on Rails** — the framework that popularized MVC for web apps, with clear `models/`, `views/`, `controllers/` folders\n- **Express.js** — doesn't enforce MVC, but well-structured Express apps organize code this way\n\n**Modern reality:** React components often blur the line between View and Controller — a component might both display data and handle click events. That's fine. The mental model is still useful even when the boundaries aren't rigid.\n\n**The practical takeaway:** when you're working with AI on a project, knowing that your codebase has these three layers helps you give precise instructions like:\n- \"Add a validation rule to the User model\" (Model)\n- \"Create a new page that displays the user's order history\" (View)\n- \"Add an API endpoint that lets users cancel their subscription\" (Controller)"
+        }
+      ],
+      "quiz": {
+        "question": "Which layer should the AI change?",
+        "scenario": "Users report that your e-commerce app lets them place an order even when an item is out of stock. The inventory count is stored correctly in the database, but the checkout process doesn't check it before confirming the order. Where should the fix go?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The Model — add a validation rule that checks inventory before allowing an order",
+            "correct": true,
+            "explanation": "This is a business logic rule: 'an order should not be created if the item is out of stock.' Business rules belong in the Model layer. The Model should validate inventory levels before saving an order. Putting this check in the Model ensures it's enforced everywhere — whether the order comes from the website, a mobile app, or an API call. You'd tell AI: 'Add inventory validation to the Order model that rejects orders for out-of-stock items.'"
+          },
+          {
+            "id": "b",
+            "text": "The View — disable the 'Place Order' button when items are out of stock",
+            "correct": false,
+            "explanation": "Disabling the button in the View is good UX (it prevents confusion), but it's not a real fix. A savvy user could bypass the UI and call the API directly. Business rules like 'don't allow orders for out-of-stock items' must be enforced in the Model. You might add a View change too, but the Model is where the real fix belongs."
+          },
+          {
+            "id": "c",
+            "text": "The Controller — add a stock check in the checkout API endpoint",
+            "correct": false,
+            "explanation": "While you could add a check in the Controller, business validation rules should live in the Model. If the stock check is only in the Controller, it could be bypassed by other code paths that create orders (like an admin tool or a batch import). The Model is the single source of truth for business rules. The Controller should call the Model, and the Model should enforce the rule."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["client-server", "server"]
     }
   ]
 }
