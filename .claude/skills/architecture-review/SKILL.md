@@ -167,7 +167,7 @@ The architecture diagram uses spatial grouping and inline connection tags to com
 - **Category icons**: Each category has a Lucide stroke icon (16px, `currentColor`) rendered inline next to the component label. Icons are defined in the `catIcons` map in the template JS and colored per category.
 - **Light schematic aesthetic**: Warm light palette (`--diagram-bg: hsl(48, 10%, 95%)`, white surfaces, dark text) consistent with the rest of the page. Category colors provide visual distinction.
 - **Fluid width**: Diagram fills the available container width. No fixed pixel constraint.
-- **Selected state**: Clicking a component inverts its card to dark fill with light text, making the active selection unmistakable. Risk severity top-borders persist through the inverted state.
+- **Selected state**: Clicking a component highlights it with a category-tinted background (10% category color wash via `color-mix()`), category-colored border, and a 3px left accent border. Each card has a `--cat-color` CSS custom property set in JS. Text stays dark — no inversion. Connection tag borders tint to match.
 
 **Interactive behavior:**
 - **Click a component** → Detail panel slides in as a 340px sticky sidebar on the right via a smooth width-collapse transition (width, padding, border, and opacity animate together). The selected card inverts to dark fill. Shows full description, key files, and connections list. Panel scrolls independently and stays aligned while scrolling the diagram.
