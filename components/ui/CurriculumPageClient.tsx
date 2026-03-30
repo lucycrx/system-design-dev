@@ -224,7 +224,7 @@ function ModuleCard({
                         color: hovered ? "var(--color-text)" : undefined,
                       }}
                     >
-                      {lesson.title}
+                      {lesson.topicLabel || lesson.title}
                     </span>
                   </li>
                 ))}

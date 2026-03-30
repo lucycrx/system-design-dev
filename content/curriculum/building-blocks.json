@@ -55,7 +55,10 @@
           }
         ]
       },
-      "relatedGlossary": ["client-server"]
+      "relatedGlossary": [
+        "client-server"
+      ],
+      "topicLabel": "Frontend Frameworks"
     },
     {
       "id": "backend-frameworks",
@@ -98,7 +101,11 @@
           }
         ]
       },
-      "relatedGlossary": ["server", "client-server"]
+      "relatedGlossary": [
+        "server",
+        "client-server"
+      ],
+      "topicLabel": "Backend Frameworks"
     },
     {
       "id": "sql-vs-nosql",
@@ -148,7 +155,11 @@
           "label": "See databases in action: Building a Chat App → 100 Friends Join"
         }
       ],
-      "relatedGlossary": ["database", "relational-database"]
+      "relatedGlossary": [
+        "database",
+        "relational-database"
+      ],
+      "topicLabel": "SQL vs NoSQL"
     },
     {
       "id": "authentication",
@@ -191,7 +202,8 @@
           }
         ]
       },
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Authentication"
     },
     {
       "id": "env-variables",
@@ -234,7 +246,8 @@
           }
         ]
       },
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Environment Variables"
     },
     {
       "id": "package-managers",
@@ -277,7 +290,8 @@
           }
         ]
       },
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Package Managers"
     },
     {
       "id": "rest-apis",
@@ -327,7 +341,11 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": ["client-server", "server"]
+      "relatedGlossary": [
+        "client-server",
+        "server"
+      ],
+      "topicLabel": "REST APIs"
     },
     {
       "id": "crud-operations",
@@ -377,7 +395,11 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": ["database", "persistence"]
+      "relatedGlossary": [
+        "database",
+        "persistence"
+      ],
+      "topicLabel": "CRUD Operations"
     },
     {
       "id": "mvc-pattern",
@@ -427,7 +449,11 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": ["client-server", "server"]
+      "relatedGlossary": [
+        "client-server",
+        "server"
+      ],
+      "topicLabel": "MVC Pattern"
     },
     {
       "id": "blob-storage",
@@ -477,7 +503,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Blob Storage"
     }
   ]
 }

@@ -143,21 +143,14 @@ export function CurriculumPanel({ modules }: { modules: CurriculumModule[] }) {
                   {mod.subtitle}
                 </p>
                 <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-border/50">
-                  {mod.lessons.slice(0, 3).map((lesson) => (
+                  {mod.lessons.map((lesson) => (
                     <span
                       key={lesson.id}
                       className="label-mono px-2 py-0.5 bg-bg border border-border text-text-dim"
                     >
-                      {lesson.title.length > 30
-                        ? lesson.title.slice(0, 30) + "..."
-                        : lesson.title}
+                      {lesson.topicLabel || lesson.title}
                     </span>
                   ))}
-                  {mod.lessons.length > 3 && (
-                    <span className="label-mono text-text-dim">
-                      +{mod.lessons.length - 3} more
-                    </span>
-                  )}
                 </div>
               </div>
               <span className="text-text-dim group-hover:text-accent group-hover:translate-x-1 transition-all text-lg mt-3 font-mono">

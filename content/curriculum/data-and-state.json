@@ -62,7 +62,11 @@
           "label": "See this in action: Building an Online Store → Growing Pains"
         }
       ],
-      "relatedGlossary": ["database", "relational-database"]
+      "relatedGlossary": [
+        "database",
+        "relational-database"
+      ],
+      "topicLabel": "Database Indexing"
     },
     {
       "id": "read-replicas",
@@ -118,7 +122,11 @@
           "label": "See this in action: Building a Ride-Sharing App → Scaling for Rush Hour"
         }
       ],
-      "relatedGlossary": ["database", "persistence"]
+      "relatedGlossary": [
+        "database",
+        "persistence"
+      ],
+      "topicLabel": "Read Replicas"
     },
     {
       "id": "data-consistency",
@@ -174,7 +182,11 @@
           "label": "See this in action: Building an Online Store → The Flash Sale"
         }
       ],
-      "relatedGlossary": ["database", "persistence"]
+      "relatedGlossary": [
+        "database",
+        "persistence"
+      ],
+      "topicLabel": "Data Consistency"
     },
     {
       "id": "database-sharding",
@@ -230,7 +242,11 @@
           "label": "See this in action: Building an Online Store → Going Global"
         }
       ],
-      "relatedGlossary": ["database", "relational-database"]
+      "relatedGlossary": [
+        "database",
+        "relational-database"
+      ],
+      "topicLabel": "Database Sharding"
     },
     {
       "id": "state-management",
@@ -286,7 +302,66 @@
           "label": "See this in action: Building an Online Store → Growing Pains"
         }
       ],
-      "relatedGlossary": ["database", "persistence", "server"]
+      "relatedGlossary": [
+        "database",
+        "persistence",
+        "server"
+      ],
+      "topicLabel": "State Management"
+    },
+    {
+      "id": "key-value-stores",
+      "title": "Key-Value Stores: The simplest, fastest way to store data",
+      "description": "A database stripped to its essentials — just keys and values — and why it powers caching, sessions, and feature flags everywhere.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **key-value store** is the simplest type of [[glossary:database|database]]. You store data as pairs: a unique key (like a name tag) and a value (the data itself). Think `\"user:123:session\" -> \"{loggedIn: true, lastSeen: '2026-03-29'}\"`. No tables, no columns, no relationships -- just keys and values.\n\nRedis and Memcached are the most common. DynamoDB is Amazon's managed key-value store at massive scale."
+        },
+        {
+          "heading": "why",
+          "content": "Key-value stores are everywhere because they're extremely fast (most operations complete in under 1 millisecond) and simple. Understanding them helps you:\n\n- **Know what Redis actually is** -- it comes up constantly in architecture discussions\n- **Understand where session data, feature flags, and leaderboards live**\n- **Make better decisions** about what goes in your database vs. a KV store\n- **Debug issues** related to caching and session management"
+        },
+        {
+          "heading": "how",
+          "content": "Analogy: a **coat check at a fancy event**.\n\nYou hand over your coat (the value), get a numbered ticket (the key). To get your coat back, you hand in the ticket -- the attendant goes directly to that number and retrieves it instantly. They don't search through all the coats.\n\nThe tradeoff: you can ONLY retrieve by ticket number. You can't ask \"give me all the black coats\" -- there's no way to search by value. That's the fundamental limitation of key-value stores.\n\nCommon uses:\n\n- **Session storage** -- map session tokens to user data\n- **Caching** -- map query hashes to results\n- **Feature flags** -- map flag names to on/off\n- **Rate limiting** -- map user IDs to request counts\n- **Leaderboards** -- Redis sorted sets rank items efficiently\n- **Real-time counters** -- likes, views, online user counts"
+        },
+        {
+          "heading": "when",
+          "content": "Use a key-value store when:\n\n- You always look up data by a known key\n- You need sub-millisecond response times\n- The data is relatively simple (not deeply relational)\n- You need a fast layer in front of a slower database\n\nDon't use it as your primary database -- key-value stores lack the query flexibility of SQL. They're best as a complement to your main database, handling the hot, fast, simple lookups."
+        }
+      ],
+      "quiz": {
+        "question": "How should you handle these flag lookups?",
+        "scenario": "Your app has a feature flag system. Product managers toggle flags in an admin panel to enable/disable features for users. Currently, every page load queries the PostgreSQL database to check which flags are active. With 50,000 daily users loading an average of 10 pages each, that's 500,000 flag queries per day hitting your database. The flags change maybe 2-3 times per week.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Store flags in a key-value store like Redis and update it whenever a flag changes in the admin panel",
+            "correct": true,
+            "explanation": "Flags are a perfect KV use case -- small data, accessed by key (flag name), read millions of times but written rarely. Redis serves these lookups in under 1ms vs. 5-10ms for a database query, and takes load off your primary database. Update Redis whenever a flag changes in the admin panel."
+          },
+          {
+            "id": "b",
+            "text": "Add a database index on the flag name column to speed up the queries",
+            "correct": false,
+            "explanation": "An index would make each individual query faster, but you're still hitting your primary database 500,000 times a day for data that changes twice a week. The issue isn't query speed -- it's unnecessary load on your database. A key-value store eliminates those database round-trips entirely."
+          },
+          {
+            "id": "c",
+            "text": "Cache the flags in the browser's local storage so the app never has to ask the server",
+            "correct": false,
+            "explanation": "Browser caching avoids server calls, but creates a serious consistency problem. When a PM toggles a flag off (say, to disable a buggy feature), users with stale local storage would still have the old flag values until they clear their cache. A server-side key-value store gives you both speed and the ability to update flags for everyone immediately."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": [
+        "database",
+        "persistence"
+      ],
+      "topicLabel": "Key-Value Stores"
     }
   ]
 }

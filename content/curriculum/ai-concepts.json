@@ -56,7 +56,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "LLMs, Tokens & Context Windows"
     },
     {
       "id": "prompt-vs-finetune-vs-rag",
@@ -106,7 +107,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Prompting vs Fine-Tuning vs RAG"
     },
     {
       "id": "ai-api-basics",
@@ -156,7 +158,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "AI API Basics"
     },
     {
       "id": "streaming-vs-batch",
@@ -206,7 +209,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Streaming vs Batch"
     },
     {
       "id": "ai-cost-latency",
@@ -256,7 +260,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Cost & Latency Tradeoffs"
     },
     {
       "id": "scaling-laws",
@@ -306,7 +311,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Scaling Laws"
     },
     {
       "id": "data-quality",
@@ -356,7 +362,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Data Quality"
     },
     {
       "id": "diminishing-returns",
@@ -406,7 +413,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Diminishing Returns"
     }
   ]
 }

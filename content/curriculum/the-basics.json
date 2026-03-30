@@ -62,7 +62,11 @@
           "label": "See this in action: Building a Chat App → Just You and a Friend"
         }
       ],
-      "relatedGlossary": ["client-server", "server"]
+      "relatedGlossary": [
+        "client-server",
+        "server"
+      ],
+      "topicLabel": "Clients & Servers"
     },
     {
       "id": "apis",
@@ -111,7 +115,10 @@
           }
         ]
       },
-      "relatedGlossary": ["client-server"]
+      "relatedGlossary": [
+        "client-server"
+      ],
+      "topicLabel": "APIs"
     },
     {
       "id": "databases",
@@ -161,7 +168,12 @@
           "label": "See this in action: Building a Chat App → 100 Friends Join"
         }
       ],
-      "relatedGlossary": ["database", "relational-database", "persistence"]
+      "relatedGlossary": [
+        "database",
+        "relational-database",
+        "persistence"
+      ],
+      "topicLabel": "Databases"
     },
     {
       "id": "http-requests",
@@ -210,7 +222,10 @@
           }
         ]
       },
-      "relatedGlossary": ["client-server"]
+      "relatedGlossary": [
+        "client-server"
+      ],
+      "topicLabel": "HTTP Requests"
     },
     {
       "id": "json",
@@ -259,7 +274,8 @@
           }
         ]
       },
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "JSON"
     },
     {
       "id": "non-functional-requirements",
@@ -309,7 +325,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Non-Functional Requirements"
     },
     {
       "id": "back-of-the-envelope",
@@ -359,7 +376,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Back-of-Envelope Estimation"
     }
   ]
 }

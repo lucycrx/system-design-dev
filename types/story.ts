@@ -113,6 +113,7 @@ export interface LessonSection {
 export interface Lesson {
   id: string;
   title: string;
+  topicLabel?: string;
   description: string;
   estimatedMinutes: number;
   sections: LessonSection[];

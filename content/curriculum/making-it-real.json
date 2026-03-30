@@ -56,7 +56,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Hosting"
     },
     {
       "id": "domains-and-dns",
@@ -106,7 +107,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Domains, DNS & URLs"
     },
     {
       "id": "environments",
@@ -156,7 +158,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Dev / Staging / Production"
     },
     {
       "id": "ci-cd",
@@ -206,7 +209,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "CI/CD Pipelines"
     },
     {
       "id": "version-control",
@@ -256,7 +260,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Version Control (Git)"
     },
     {
       "id": "technical-debt",
@@ -306,7 +311,8 @@
         ]
       },
       "relatedStories": [],
-      "relatedGlossary": []
+      "relatedGlossary": [],
+      "topicLabel": "Technical Debt"
     }
   ]
 }
