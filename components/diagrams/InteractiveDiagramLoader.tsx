@@ -8,7 +8,7 @@ const InteractiveDiagram = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full min-h-[420px] h-[50vh] max-h-[600px] flex items-center justify-center bg-surface border border-border">
+      <div className="w-full min-h-[440px] h-[55vh] max-h-[700px] flex items-center justify-center bg-surface border border-border">
         <p className="text-sm text-text-dim">Loading diagram...</p>
       </div>
     ),

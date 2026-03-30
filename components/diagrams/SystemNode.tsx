@@ -16,8 +16,8 @@ interface SystemNodeData {
   technology?: string;
 }
 
-const NODE_WIDTH = 164;
-const NODE_HEIGHT = 72;
+const NODE_WIDTH = 180;
+const NODE_HEIGHT = 76;
 
 function SystemNodeComponent({ data }: { data: SystemNodeData }) {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -63,7 +63,7 @@ function SystemNodeComponent({ data }: { data: SystemNodeData }) {
           <NodeIcon type={data.nodeType} />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-[13px] font-medium text-text leading-tight truncate">
+          <span className="text-sm font-medium text-text leading-tight truncate">
             {data.label}
           </span>
           <span className="text-[11px] font-mono text-text-dim leading-tight">

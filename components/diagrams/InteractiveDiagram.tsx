@@ -98,8 +98,7 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "", on
 
     // Fit view after nodes are rendered, then fade in
     const timer = setTimeout(() => {
-      const padding = diagram && diagram.nodes.length > 5 ? 0.15 : 0.3;
-      fitView({ padding, duration: 300 });
+      fitView({ padding: 0.08, duration: 300 });
       setIsVisible(true);
     }, 50);
     return () => clearTimeout(timer);
@@ -107,10 +106,9 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "", on
   }, [diagramId, highlightKey, animateKey]);
 
   const onInit = useCallback(() => {
-    const padding = nodes.length > 5 ? 0.15 : 0.3;
-    fitView({ padding });
+    fitView({ padding: 0.08 });
     setTimeout(() => setIsVisible(true), 100);
-  }, [fitView, nodes.length]);
+  }, [fitView]);
 
   const handleNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     onNodeClick?.(node.id);
@@ -161,7 +159,7 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "", on
           )}
         </div>
       )}
-      <div className="min-h-[380px] h-[45vh] max-h-[540px]">
+      <div className="min-h-[440px] h-[55vh] max-h-[700px]">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -179,9 +177,9 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "", on
         zoomOnScroll={true}
         zoomOnPinch={true}
         minZoom={0.5}
-        maxZoom={2}
+        maxZoom={3}
         fitView
-        fitViewOptions={{ padding: diagram.nodes.length > 5 ? 0.15 : 0.3 }}
+        fitViewOptions={{ padding: 0.08, maxZoom: 1.5 }}
         proOptions={{ hideAttribution: true }}
       >
         {/* Arrow marker definition */}
