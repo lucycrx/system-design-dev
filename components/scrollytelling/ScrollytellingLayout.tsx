@@ -79,16 +79,16 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
 
   const activeDiagram = activeDiagramId ? diagrams[activeDiagramId] || null : null;
 
-  // Inline layout: single column, diagrams at full width between text blocks
+  // Inline layout: single column, diagrams break out wider than prose
   if (layout === "inline") {
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-10">
         {blocks.map((block, i) => {
           if (block.type === "diagram") {
             const diagramBlock = block as DiagramBlockType;
             const diagram = diagrams[diagramBlock.diagramId];
             return (
-              <div key={i} className="bg-surface border border-border p-6">
+              <div key={i} className="max-w-5xl bg-surface border border-border p-6 sm:p-8">
                 {diagram ? (
                   <InteractiveDiagramLoader
                     diagram={diagram}
