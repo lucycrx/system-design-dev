@@ -46,6 +46,19 @@
   --cat-storage: hsl(140, 25%, 50%);
 
   --max-width: 1280px;
+
+  /* Type scale — 1.2 ratio, 6 stops */
+  --text-caption: 0.6875rem;   /* 11px — mono labels only */
+  --text-small: 0.75rem;       /* 12px — chips, meta, file paths */
+  --text-secondary: 0.8125rem; /* 13px — sublabels, evidence, meta values */
+  --text-body: 0.875rem;       /* 14px — descriptions, risk text, connections */
+  --text-subhead: 1rem;        /* 16px — risk titles, summary */
+  --text-heading: 1.25rem;     /* 20px — detail panel title */
+
+  /* Mono label — single canonical treatment */
+  --mono-size: var(--text-caption);
+  --mono-weight: 500;
+  --mono-tracking: 0.14em;
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -84,21 +97,21 @@ body {
 
 .project-name {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  font-size: var(--text-small);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.project-meta { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+.project-meta { font-size: var(--text-secondary); color: var(--text-dim); white-space: nowrap; }
 .risk-counts { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
 .risk-chip {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   padding: 0.25rem 0.6rem;
   border: 1px solid;
@@ -111,22 +124,23 @@ body {
 .risk-chip[data-severity="high"] { color: var(--risk-high); border-color: var(--risk-high); background: var(--risk-high-bg); }
 .risk-chip[data-severity="medium"] { color: var(--risk-medium); border-color: var(--risk-medium); background: var(--risk-medium-bg); }
 .risk-chip[data-severity="low"] { color: var(--risk-low); border-color: var(--risk-low); background: var(--risk-low-bg); }
-.risk-chip .count { font-weight: 700; font-size: 0.85rem; }
+.risk-chip .count { font-weight: 700; font-size: var(--text-body); }
 
 .summary-strip { padding: 1.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-.summary-text { font-size: 1.05rem; line-height: 1.6; }
+.summary-text { font-size: var(--text-subhead); line-height: 1.6; }
 .summary-text strong { font-weight: 600; }
 
 .summary-overview {
-  font-size: 0.88rem;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: 1.65;
   color: var(--text-muted);
   margin-top: 0.6rem;
+  max-width: 72ch;
 }
 
 .diagram-hint {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--mono-size);
   letter-spacing: 0.04em;
   color: var(--text-dim);
   margin-bottom: 0.75rem;
@@ -145,15 +159,15 @@ body {
   display: inline-block;
   border: 1px solid var(--border);
   padding: 0.1rem 0.35rem;
-  font-weight: 500;
+  font-weight: var(--mono-weight);
   color: var(--text-muted);
 }
 
 .section-label {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.15em;
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   color: var(--text-dim);
   margin-bottom: 1rem;
@@ -194,9 +208,9 @@ body {
   top: -0.55rem;
   left: 0.75rem;
   font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   padding: 0 0.4rem;
   background: var(--diagram-surface);
@@ -252,16 +266,16 @@ body {
 }
 
 .comp-label {
-  font-size: 0.82rem;
+  font-size: var(--text-body);
   font-weight: 600;
   color: var(--diagram-text);
   line-height: 1.3;
 }
 
 .comp-sublabel {
-  font-size: 0.68rem;
+  font-size: var(--text-secondary);
   color: var(--diagram-text-dim);
-  margin-top: 0.1rem;
+  margin-top: 0.15rem;
 }
 
 /* Risk indicator — thin top border (persists on selected state) */
@@ -303,7 +317,7 @@ body {
 
 .conn-tag {
   font-family: var(--font-mono);
-  font-size: 0.55rem;
+  font-size: var(--mono-size);
   letter-spacing: 0.03em;
   color: var(--diagram-text-dim);
   background: var(--diagram-surface);
@@ -328,12 +342,11 @@ body {
 }
 
 .conn-tag .conn-arrow {
-  font-size: 0.65rem;
   opacity: 0.5;
 }
 
 .conn-tag .conn-target {
-  font-weight: 600;
+  font-weight: var(--mono-weight);
   color: var(--diagram-text);
 }
 
@@ -403,7 +416,7 @@ body {
 
 .detail-close {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-small);
   color: var(--text-dim);
   cursor: pointer;
   border: 1px solid var(--border);
@@ -414,11 +427,23 @@ body {
 
 .detail-close:hover { border-color: var(--text-muted); color: var(--text); }
 .detail-close:focus-visible { outline: 2px solid var(--highlight); outline-offset: 1px; }
-.detail-title { font-size: 1.05rem; font-weight: 600; }
+.detail-category {
+  font-family: var(--font-mono);
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  color: white;
+  margin-bottom: 0.35rem;
+}
+
+.detail-title { font-size: var(--text-heading); font-weight: 700; line-height: 1.2; }
 
 .detail-description {
-  font-size: 0.88rem;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: 1.65;
   color: var(--text-muted);
   margin-bottom: 1rem;
 }
@@ -427,16 +452,16 @@ body {
 
 .detail-col-title {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  font-size: var(--mono-size);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   color: var(--text-dim);
   margin-bottom: 0.4rem;
 }
 
-.detail-file { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); padding: 0.15rem 0; }
-.detail-connection { font-size: 0.82rem; color: var(--text-muted); padding: 0.2rem 0; }
-.detail-connection-target { font-weight: 500; color: var(--text); }
+.detail-file { font-family: var(--font-mono); font-size: var(--text-small); color: var(--text-muted); padding: 0.2rem 0; }
+.detail-connection { font-size: var(--text-body); color: var(--text-muted); padding: 0.2rem 0; line-height: 1.5; }
+.detail-connection-target { font-weight: 600; color: var(--text); }
 
 /* ---- RISK REPORT ---- */
 
@@ -465,9 +490,9 @@ body {
 
 .risk-severity {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--mono-size);
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   padding: 0.25rem 0;
   text-align: center;
@@ -479,11 +504,11 @@ body {
 .risk-severity.medium { color: var(--risk-medium); border-color: var(--risk-medium); background: var(--risk-medium-bg); }
 .risk-severity.low { color: var(--risk-low); border-color: var(--risk-low); background: var(--risk-low-bg); }
 
-.risk-title { font-size: 0.92rem; font-weight: 500; }
+.risk-title { font-size: var(--text-subhead); font-weight: 500; line-height: 1.45; }
 
 .risk-toggle {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-small);
   color: var(--text-dim);
   transition: transform 0.2s ease;
 }
@@ -504,26 +529,27 @@ body {
 .risk-card.expanded .risk-detail { padding-bottom: 1.5rem; }
 
 .risk-analogy {
-  font-size: 0.85rem;
-  line-height: 1.55;
+  font-size: var(--text-body);
+  line-height: 1.65;
   color: var(--text-muted);
   border-left: 2px solid var(--border);
   padding-left: 1rem;
   margin: 0.5rem 0 0.75rem;
   font-style: italic;
+  max-width: 65ch;
 }
 
-.risk-consequence { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem; }
+.risk-consequence { font-size: var(--text-body); color: var(--text-muted); line-height: 1.65; margin-bottom: 0.75rem; max-width: 65ch; }
 
 .risk-evidence {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-small);
   color: var(--text-dim);
   background: var(--surface-raised);
   border: 1px solid var(--border);
   padding: 0.6rem 0.8rem;
   margin-top: 0.75rem;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .risk-fix {
@@ -535,15 +561,15 @@ body {
 
 .risk-fix-title {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  font-size: var(--mono-size);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   color: var(--text-dim);
   margin-bottom: 0.5rem;
 }
 
-.risk-fix-summary { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.35rem; }
-.risk-fix-detail { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+.risk-fix-summary { font-size: var(--text-body); font-weight: 600; margin-bottom: 0.35rem; }
+.risk-fix-detail { font-size: var(--text-body); color: var(--text-muted); line-height: 1.65; max-width: 65ch; }
 
 .risk-meta {
   display: flex;
@@ -555,20 +581,20 @@ body {
 
 .risk-meta-label {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
+  font-size: var(--mono-size);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   color: var(--text-dim);
   display: block;
   margin-bottom: 0.2rem;
 }
 
-.risk-meta-value { color: var(--text-muted); font-size: 0.78rem; }
+.risk-meta-value { color: var(--text-muted); font-size: var(--text-secondary); }
 .risk-learn-more { margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
 .learn-more-link {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--mono-size);
   letter-spacing: 0.05em;
   color: var(--cat-frontend);
   text-decoration: none;
@@ -589,8 +615,8 @@ body {
   align-items: baseline;
 }
 
-.footer-left { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.05em; }
-.footer-right { font-size: 0.78rem; color: var(--text-dim); }
+.footer-left { font-family: var(--font-mono); font-size: var(--text-small); color: var(--text-dim); letter-spacing: 0.05em; }
+.footer-right { font-size: var(--text-secondary); color: var(--text-dim); }
 .footer-right a { color: var(--cat-frontend); text-decoration: none; }
 .footer-right a:hover { text-decoration: underline; }
 
@@ -670,7 +696,7 @@ body {
       <div class="detail-panel" id="detailPanel">
         <div class="detail-panel-header">
           <div>
-            <span class="node-category" id="detailCategory" style="font-family:var(--font-mono);font-size:0.6rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;display:inline-block;padding:0.05rem 0.35rem;color:white;margin-bottom:0.3rem"></span>
+            <span class="detail-category" id="detailCategory"></span>
             <h2 class="detail-title" id="detailTitle"></h2>
           </div>
           <button class="detail-close" onclick="closeDetail()">close</button>
