@@ -224,6 +224,56 @@
         ]
       },
       "relatedGlossary": ["api-gateway", "microservices", "load-balancer"]
+    },
+    {
+      "id": "webhooks",
+      "title": "Webhooks: How apps notify each other when something happens",
+      "description": "A pattern where one service calls your URL when an event occurs, instead of you constantly checking.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **webhook** is a URL that one service calls when an event happens. Instead of your app constantly asking another service \"Any updates? Any updates? Any updates?\" (that's called **polling**), you give the other service your URL and say, \"Call me when something happens.\"\n\nThe pattern works like this:\n\n1. You **register a webhook URL** with the external service (e.g., `https://yourapp.com/webhooks/stripe`)\n2. When an event occurs (a payment succeeds, a form is submitted, code is pushed), the service sends a **POST request** to your URL with the event data\n3. Your server receives the request, processes the event, and responds with a `200 OK` to acknowledge receipt\n\nYou've encountered webhooks if you've used:\n- **Stripe** — sends a webhook when a payment succeeds, fails, or is refunded\n- **GitHub** — sends a webhook when code is pushed, a PR is opened, or an issue is created\n- **Shopify** — sends a webhook when an order is placed, a product is updated, or a customer signs up"
+        },
+        {
+          "heading": "why",
+          "content": "Webhooks enable real-time integrations without the waste of constant polling:\n\n- **Efficiency** — polling means your app checks for updates every few seconds, even when nothing has changed. That's thousands of unnecessary [[glossary:api|API]] calls per day. Webhooks flip the model: zero traffic when nothing happens, one call exactly when something does.\n- **Real-time** — with polling, there's always a delay (however often you check). Webhooks notify you the moment an event occurs.\n- **Simplicity** — your app doesn't need to manage polling intervals, track what it's already seen, or handle \"no new data\" responses. It just receives events as they come.\n- **Integration backbone** — webhooks are how most SaaS products connect to each other. They're the foundation of automation platforms like Zapier, Make, and IFTTT. When you set up a \"when X happens in Slack, do Y in Google Sheets\" automation, webhooks are the mechanism."
+        },
+        {
+          "heading": "how",
+          "content": "Think of it like **giving a restaurant your phone number** when the wait is long:\n\n- **Polling** is calling the restaurant every 5 minutes: \"Is my table ready yet?\" \"No.\" \"Is my table ready yet?\" \"No.\" \"Is my table ready yet?\" It wastes your time, annoys the host, and you still don't get your table any faster.\n- **A webhook** is giving them your number and saying, \"Call me when it's ready.\" You go about your day. When the table is available, they call you once. You show up immediately.\n\nThe restaurant (the external service) does the notifying. You (your app) just need to be reachable at the number you gave them (your webhook URL).\n\nIn practice, implementing a webhook receiver involves:\n\n1. **Create an endpoint** on your server (e.g., `/webhooks/stripe`) that accepts POST requests\n2. **Register that URL** with the external service through their dashboard or API\n3. **Parse the incoming data** — webhook payloads are usually JSON containing event type and relevant details\n4. **Verify the signature** — most services sign their webhook payloads with a secret key so you can confirm it's really from them and not an attacker\n5. **Respond with 200 quickly** — acknowledge receipt first, then process the event asynchronously. If your endpoint is slow to respond, the service may retry or assume it failed\n6. **Handle retries** — if your endpoint is temporarily down, most services will retry several times with increasing delays. Design your handler to be **idempotent** (processing the same event twice produces the same result)."
+        },
+        {
+          "heading": "when",
+          "content": "Use webhooks when:\n\n- **Receiving events from third-party services** — payment confirmations from Stripe, deployment notifications from GitHub, form submissions from Typeform. This is the most common use case.\n- **Connecting your own [[glossary:microservices|microservices]]** — your order service can send a webhook to your fulfillment service when an order is placed, keeping them loosely coupled.\n- **Building integrations and automations** — Zapier-style workflows are built on webhooks. \"When a new row is added to this spreadsheet, create a task in the project tracker.\"\n- **Real-time notifications** — instead of checking for new messages every second, let the messaging service tell you when one arrives.\n\nWebhooks are less ideal when:\n\n- **You need guaranteed delivery** — webhooks can be missed if your server is down. For critical events, pair them with a polling fallback or use a [[glossary:message-queue|message queue]] for guaranteed delivery.\n- **You need to pull large datasets** — webhooks are for event notifications, not data transfers. If you need to sync thousands of records, use a batch API instead.\n- **The source doesn't support them** — not every API offers webhooks. In that case, polling is your only option."
+        }
+      ],
+      "quiz": {
+        "question": "Which approach fits this integration?",
+        "scenario": "Your app uses Stripe for payments. When a subscription payment fails (like an expired credit card), you need to immediately email the customer, pause their premium features, and log the event for your finance team. Currently, your app polls the Stripe API every 10 minutes to check for failed payments.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Switch to Stripe webhooks so you're notified immediately when a payment fails",
+            "correct": true,
+            "explanation": "Webhooks are the right fit here. Stripe sends a webhook the moment a payment fails, so you can email the customer, pause features, and log the event in near real-time. Polling every 10 minutes means a customer could use premium features for up to 10 minutes after their payment failed, your email notification is delayed, and you're making thousands of unnecessary API calls per day checking for events that haven't happened. Stripe's documentation explicitly recommends webhooks over polling for payment events."
+          },
+          {
+            "id": "b",
+            "text": "Increase polling frequency to every 30 seconds for faster detection",
+            "correct": false,
+            "explanation": "Polling every 30 seconds is 2,880 API calls per day instead of 144, and you're still up to 30 seconds behind. Most of those calls return nothing new. You'd also risk hitting Stripe's rate limits. Webhooks eliminate all of this: zero calls when nothing happens, instant notification when something does. Polling harder is the brute-force approach when a more elegant solution exists."
+          },
+          {
+            "id": "c",
+            "text": "Check payment status only when the user tries to access a premium feature",
+            "correct": false,
+            "explanation": "This is lazy evaluation, and it creates a bad user experience. The customer doesn't find out their payment failed until they try to use a feature and are suddenly blocked. They never got an email warning. Your finance team has no real-time visibility. And if the customer doesn't log in for a week, you've been providing premium service for free. Proactive notification via webhooks is the standard approach for payment status changes."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["api", "microservices", "message-queue"]
     }
   ]
 }

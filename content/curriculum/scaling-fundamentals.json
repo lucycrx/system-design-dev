@@ -287,6 +287,106 @@
         }
       ],
       "relatedGlossary": ["rate-limiting", "redis", "server"]
+    },
+    {
+      "id": "reverse-proxies",
+      "title": "Reverse Proxies: The bouncer between users and your servers",
+      "description": "A server that sits in front of your backend and handles requests on its behalf.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **reverse proxy** is a server that sits in front of your backend servers and forwards client requests to them. The key detail: the client never talks to your actual server directly. Every request goes through the reverse proxy first, and the proxy decides where to send it.\n\nThis is different from a **forward proxy**, which sits in front of *clients* (like a corporate firewall that routes employee web traffic). A reverse proxy sits in front of *servers* and acts on their behalf.\n\nYou've almost certainly interacted with reverse proxies without knowing it. Tools like **Nginx**, **Cloudflare**, and **AWS CloudFront** all act as reverse proxies. When you visit a website behind Cloudflare, you're talking to Cloudflare's servers, not the site's actual backend."
+        },
+        {
+          "heading": "why",
+          "content": "A reverse proxy provides several important benefits:\n\n- **Security** — your real servers are hidden from the public internet. Attackers can't directly target your backend because they don't know its address. The proxy is the only thing exposed.\n- **SSL termination** — the proxy handles the encryption/decryption of HTTPS traffic, so your backend servers don't have to. This simplifies your backend and offloads CPU-intensive crypto work.\n- **Compression** — the proxy can compress responses before sending them to users, reducing bandwidth and improving load times.\n- **Caching static assets** — the proxy can serve images, CSS, and JavaScript files directly from its own [[glossary:cache|cache]], without ever bothering your backend server.\n- **[[glossary:load-balancer|Load balancing]]** — many reverse proxies can distribute traffic across multiple backend servers, combining two roles in one."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a reverse proxy like a **receptionist at an office building**:\n\n- Visitors (users) don't wander the halls looking for the person they need. They go to the front desk first.\n- The receptionist checks if the visitor is allowed in (security), looks up which floor and room to direct them to (routing), and might even hand them a pre-prepared document instead of making them wait for a meeting (caching).\n- The people working in the building never deal with random walk-ins. They only interact with visitors the receptionist has screened and directed.\n\nWithout a receptionist, anyone could walk in, wander into any office, and potentially cause problems. The receptionist is a single, controlled entry point.\n\nIn practice, here's what a reverse proxy does with a typical web request:\n\n1. A user's browser sends a request to `yourapp.com`\n2. DNS resolves to the reverse proxy's IP address (not your server's)\n3. The proxy receives the request, handles SSL, checks its cache\n4. If it has a cached response, it returns it immediately\n5. If not, it forwards the request to one of your backend servers\n6. Your server processes the request and sends the response back through the proxy\n7. The proxy may cache the response, compress it, then sends it to the user"
+        },
+        {
+          "heading": "when",
+          "content": "Use a reverse proxy:\n\n- **Almost always in production** — it's standard practice to put a reverse proxy in front of any web-facing application. The security and performance benefits are too significant to skip.\n- **When you need HTTPS** — let the proxy handle SSL certificates and termination so your backend stays simple.\n- **When serving static files** — a proxy like Nginx serves static assets much more efficiently than most application servers.\n- **When you want DDoS protection** — services like Cloudflare act as reverse proxies that absorb malicious traffic before it reaches your servers.\n\nThe good news: most modern hosting platforms (Vercel, Netlify, Heroku, AWS) include a reverse proxy automatically. You're likely already using one without configuring it yourself."
+        }
+      ],
+      "quiz": {
+        "question": "What's the right setup?",
+        "scenario": "Your team is launching a new web app. The backend runs on a single server with a public IP address. Users connect directly to the server over HTTP (not HTTPS). Your security engineer raises concerns that the server's IP is exposed, there's no encryption, and the server is spending significant CPU on serving static image files alongside handling API requests.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Put a reverse proxy like Nginx or Cloudflare in front of the server to handle SSL, hide the server's IP, and cache static assets",
+            "correct": true,
+            "explanation": "A reverse proxy addresses all three concerns at once. It hides the backend server's real IP from the public (security), handles SSL termination so all traffic is encrypted (HTTPS), and caches static images so the backend server can focus on API requests instead of serving files. This is standard production practice."
+          },
+          {
+            "id": "b",
+            "text": "Add HTTPS directly to the server and move static files to a separate server",
+            "correct": false,
+            "explanation": "This partially solves the problem but misses key benefits. Adding HTTPS directly means your server bears the CPU cost of encryption. A separate static file server adds infrastructure to manage. And the server's IP is still publicly exposed. A reverse proxy solves all three issues in one layer with less operational complexity."
+          },
+          {
+            "id": "c",
+            "text": "Keep the current setup but add a firewall to restrict which IPs can connect",
+            "correct": false,
+            "explanation": "A firewall that restricts IPs would block your actual users, since you don't know their IP addresses in advance. You need the server to be reachable by anyone on the internet — but through a controlled entry point. That's exactly what a reverse proxy provides: public accessibility with security, encryption, and performance benefits layered on top."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["cache", "load-balancer", "server"]
+    },
+    {
+      "id": "latency-vs-throughput",
+      "title": "Latency vs Throughput: The two ways to measure performance",
+      "description": "Understanding the difference between how fast and how much your system can handle.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Performance means two very different things, and mixing them up leads to bad decisions:\n\n- **[[glossary:latency|Latency]]** is the time it takes for **one request** to complete. \"This page loads in 200 milliseconds.\" It measures speed for an individual user.\n- **Throughput** is how many requests your system handles **per unit of time**. \"Our API handles 5,000 requests per second.\" It measures total capacity.\n\nThey're often confused because both relate to \"performance,\" but optimizing for one can actually hurt the other. A system can have low latency but low throughput (fast for each user, but can only serve a few at a time), or high throughput but high latency (handles millions of requests, but each one is slow)."
+        },
+        {
+          "heading": "why",
+          "content": "Mixing up latency and throughput leads to solving the wrong problem:\n\n- **If users complain pages are slow**, that's a latency problem. Adding more servers (which increases throughput) won't help if each individual request is slow because of an unoptimized database query.\n- **If your system crashes during traffic spikes**, that's a throughput problem. Making individual requests faster (reducing latency) won't help if you simply can't handle the volume.\n\nUnderstanding the distinction helps you:\n\n- **Set the right performance goals** — \"page load under 500ms\" is a latency goal. \"Handle 10,000 concurrent users\" is a throughput goal. You need both, but they require different solutions.\n- **Diagnose issues accurately** — when someone says \"the app is slow,\" you can ask the right follow-up: is it slow for everyone (latency) or does it break under load (throughput)?\n- **Evaluate architectural tradeoffs** — [[glossary:message-queue|message queues]] increase throughput but add latency. [[glossary:cache|Caching]] reduces latency but doesn't directly increase throughput."
+        },
+        {
+          "heading": "how",
+          "content": "Think of a **highway**:\n\n- **Latency** is how long it takes one car to drive from Point A to Point B. On an empty highway, a car might make the trip in 30 minutes.\n- **Throughput** is how many cars pass a given point per hour. A two-lane highway might handle 2,000 cars per hour.\n\nNow consider the tradeoffs:\n\n- **Adding more lanes** (more servers) increases throughput — more cars can travel at once. But it doesn't make any single car faster. The trip still takes 30 minutes.\n- **Raising the speed limit** (optimizing code, adding caching) reduces latency — each car arrives sooner. But if the road is already jammed, faster speeds don't help.\n- **Adding a toll booth** (adding authentication, encryption) increases latency for each car but might be necessary for security.\n- **A traffic jam** happens when throughput is exceeded — too many cars for the road's capacity. Individual latency skyrockets because everyone is stuck waiting.\n\nThis is why real-world performance tuning often involves both: optimize individual request speed (latency) AND ensure the system can handle the expected volume (throughput)."
+        },
+        {
+          "heading": "when",
+          "content": "**Latency matters most for:**\n\n- **User-facing requests** — page loads, search results, button clicks. Users notice delays above 100-200ms. Studies show that every 100ms of added latency costs measurable conversion rate drops.\n- **Real-time features** — live chat, gaming, video calls. Even small delays feel broken.\n- **API responses** — if your API is slow, every app built on it is slow too.\n\n**Throughput matters most for:**\n\n- **Batch processing** — sending 100,000 marketing emails, processing nightly reports, importing data. It doesn't matter if each email takes 1 second; what matters is finishing all 100,000 in a reasonable time.\n- **Traffic spikes** — Black Friday, product launches, viral moments. Can your system handle 10x normal traffic without falling over?\n- **Background jobs** — image processing, data syncing, analytics aggregation.\n\nWhen evaluating performance, always ask: \"Are we trying to make individual requests faster, or handle more requests total?\" The answer determines your strategy."
+        }
+      ],
+      "quiz": {
+        "question": "What's the real problem?",
+        "scenario": "Your e-commerce app handles about 200 requests per second with no issues during normal hours. Each page loads in under 300ms. But during a flash sale, traffic jumps to 2,000 requests per second. The site doesn't go down, but page load times spike to 8 seconds and many users abandon their carts.",
+        "options": [
+          {
+            "id": "a",
+            "text": "This is a latency problem — optimize your database queries so each request is faster",
+            "correct": false,
+            "explanation": "During normal traffic (200 req/s), pages load in 300ms — the individual request performance is fine. The slowness only appears at 2,000 req/s, which means the system is being overwhelmed by volume. Optimizing individual queries might shave off a few milliseconds, but it won't solve the core issue: the system can't handle 10x its normal throughput."
+          },
+          {
+            "id": "b",
+            "text": "This is a throughput problem — the system can't handle the volume, so requests queue up and latency suffers",
+            "correct": true,
+            "explanation": "When throughput is exceeded, requests queue up waiting to be processed, which causes latency to spike as a secondary effect. The 8-second load times aren't because individual requests are slow — they're because each request is stuck in line behind thousands of others. The fix is increasing throughput: adding more servers behind a load balancer, caching hot data, or using a CDN for static assets so the servers handle fewer requests."
+          },
+          {
+            "id": "c",
+            "text": "This is both equally — you need to optimize queries AND add more servers",
+            "correct": false,
+            "explanation": "While both latency and throughput optimizations are generally good, the evidence points to throughput as the primary issue. Pages load fine at normal traffic levels (300ms is good). The problem only manifests at 10x traffic. The root cause is insufficient capacity, not slow individual requests. Focus on throughput first — add capacity to handle the spike — then optimize latency if individual requests are still slow under the new capacity."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["latency", "cache", "load-balancer"]
     }
   ]
 }

@@ -280,6 +280,106 @@
         }
       ],
       "relatedGlossary": ["server", "database"]
+    },
+    {
+      "id": "security-basics",
+      "title": "Security Basics: The top things that can go wrong",
+      "description": "Protecting your app from unauthorized access, data theft, and malicious attacks.",
+      "estimatedMinutes": 7,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Security** is about protecting your application from unauthorized access, data theft, and malicious attacks. It covers three core areas:\n\n- **Authentication** — verifying *who* a user is (\"prove you are who you say you are\")\n- **Authorization** — controlling *what* a user can do (\"you're allowed to view this, but not edit it\")\n- **Data protection** — keeping sensitive information safe from exposure or theft\n\nThe **OWASP Top 10** is the industry-standard checklist of the most critical security risks in web applications. It's maintained by the Open Web Application Security Project and updated every few years. If your app is vulnerable to anything on this list, it's a serious problem.\n\nThe most common threats you'll encounter:\n\n- **SQL injection** — an attacker inserts malicious database commands into input fields (like a login form) to read, modify, or delete your data\n- **Cross-site scripting (XSS)** — an attacker injects malicious JavaScript into your site that runs in other users' browsers, stealing their data or session tokens\n- **Cross-site request forgery (CSRF)** — an attacker tricks a logged-in user into performing actions they didn't intend (like transferring money) by exploiting their active session"
+        },
+        {
+          "heading": "why",
+          "content": "Security breaches have real consequences:\n\n- **User trust is destroyed** — once users learn their data was exposed, many will never come back. Trust is hard to build and easy to lose.\n- **Legal and financial penalties** — regulations like GDPR (Europe) and CCPA (California) impose significant fines for data breaches. Healthcare and finance have even stricter rules.\n- **Business continuity** — a breach can shut down your operations for days or weeks while you investigate and remediate.\n- **Reputation damage** — breaches make headlines. \"Company X exposed 10 million user records\" is the kind of press that follows a brand for years.\n\nAs someone who builds with AI tools, security awareness is especially important. AI-generated code often works correctly but may not follow security best practices — it might skip input validation, use deprecated encryption, or store secrets in plain text. Knowing what to look for helps you catch these issues before they ship."
+        },
+        {
+          "heading": "how",
+          "content": "Think of security like **securing a house**:\n\n- **Locks on doors** are authentication. You need a key (password, token) to get in. Without a lock, anyone can walk in.\n- **Only giving keys to family** is authorization. Your neighbor can ring the doorbell, but they can't unlock the back door. Different people have different levels of access.\n- **Not leaving valuables visible through windows** is data protection. Even if someone can't get in, you don't display your jewelry collection in the front window. Don't expose sensitive data in API responses, URLs, or logs.\n- **Checking ID before opening the door** is input validation. Before you trust any data a user sends you, verify it's what you expected. Never trust user input.\n\nPractical security measures every app should have:\n\n- **Use established auth services** like Auth0, Clerk, or Supabase Auth instead of building your own. Authentication is deceptively hard to get right, and a mistake means compromised accounts.\n- **Validate all user input** on the server side. Never trust data from the browser. If a form expects an email, verify it's actually an email before doing anything with it.\n- **Use HTTPS everywhere** — never send data over unencrypted HTTP. Modern hosting platforms handle this automatically.\n- **Use parameterized queries** to prevent SQL injection. Never build database queries by concatenating user input into strings.\n- **Apply the principle of least privilege** — give users and services the minimum permissions they need. An API key that can read user profiles shouldn't also be able to delete the database."
+        },
+        {
+          "heading": "when",
+          "content": "Security isn't a feature you add later — it's built in from the start. Specifically:\n\n- **Day one** — use HTTPS, use an established auth service, validate all input. These are non-negotiable from the first line of code.\n- **Before launch** — review your app against the OWASP Top 10. Run a basic security scan (tools like OWASP ZAP are free).\n- **When handling sensitive data** — user passwords (always hashed, never stored in plain text), payment information (use Stripe or similar, never store card numbers yourself), personal information (encrypt at rest and in transit).\n- **When AI generates your code** — review generated code for security issues. Does it validate input? Does it use parameterized queries? Does it expose sensitive data in error messages?\n- **Ongoing** — keep dependencies updated (known vulnerabilities in outdated libraries are a top attack vector), review access controls as your team grows, and assume you'll be targeted eventually.\n\nThe cost of building security in from the start is minimal. The cost of adding it after a breach is enormous."
+        }
+      ],
+      "quiz": {
+        "question": "What's the biggest risk here?",
+        "scenario": "Your team is building a new user-facing feature. An AI coding assistant generated the backend code. The feature works perfectly in testing. You review the code and notice: (1) the search endpoint takes a user's query and inserts it directly into a SQL string, (2) user authentication is handled by a well-known auth service, and (3) the API returns full user objects including email and hashed password in every response.",
+        "options": [
+          {
+            "id": "a",
+            "text": "The direct SQL string insertion is a critical SQL injection vulnerability that must be fixed before launch",
+            "correct": true,
+            "explanation": "Building SQL queries by inserting user input directly into strings is the textbook definition of SQL injection vulnerability. An attacker could type a malicious query into the search field and read, modify, or delete your entire database. This is OWASP's top risk for good reason. It needs to be converted to a parameterized query immediately. The exposed hashed passwords in API responses (issue 3) is also a real problem that should be fixed, but SQL injection is more immediately dangerous because it gives attackers direct database access."
+          },
+          {
+            "id": "b",
+            "text": "Returning hashed passwords in API responses is the biggest concern since it exposes user credentials",
+            "correct": false,
+            "explanation": "Exposing hashed passwords is definitely a problem — API responses should never include password data, even hashed. But hashed passwords are not immediately exploitable (cracking them takes time and effort). The SQL injection vulnerability (issue 1) is far more urgent because it gives an attacker direct, immediate access to your database without any cracking needed. Fix both, but the SQL injection is the critical priority."
+          },
+          {
+            "id": "c",
+            "text": "The code looks fine — it works in testing and uses a reputable auth service",
+            "correct": false,
+            "explanation": "Working correctly and being secure are two very different things. The code functions as intended, but it has a critical SQL injection vulnerability and leaks sensitive data. Using a good auth service for login doesn't protect you from other vulnerabilities in your own code. This is a common trap with AI-generated code: it often works perfectly but skips security best practices. Always review generated code for security, not just functionality."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["database", "server"]
+    },
+    {
+      "id": "testing-basics",
+      "title": "Testing Basics: Why engineers write code to test their code",
+      "description": "Automated checks that verify your code works correctly and catch bugs before users do.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Automated testing** means writing code that checks whether your other code works correctly. Instead of manually clicking through your app every time you make a change, you write tests that do the checking for you — automatically, consistently, every time.\n\nThere are three main types:\n\n- **Unit tests** test a single function or piece of logic in isolation. \"Does the `calculateTotal` function return the right amount when given 3 items with a 10% discount?\"\n- **Integration tests** test how multiple pieces work together. \"When the checkout endpoint receives an order, does it correctly save to the [[glossary:database|database]] and return the right response?\"\n- **End-to-end (E2E) tests** test the entire flow from the user's perspective. \"Can a user log in, add an item to their cart, enter payment info, and complete a purchase?\"\n\nTests run automatically when code is changed, usually as part of a deployment pipeline. If a test fails, the deployment stops — preventing broken code from reaching users."
+        },
+        {
+          "heading": "why",
+          "content": "Testing matters because software is fragile in ways that aren't obvious:\n\n- **Bugs hide in interactions** — a function might work perfectly on its own but break when combined with another part of the system. Tests catch these surprises.\n- **Changes break things silently** — you fix a bug in the checkout flow and accidentally break the discount calculation. Without tests, you won't know until a user reports it.\n- **Confidence to move fast** — teams with good test coverage can refactor code, add features, and deploy multiple times per day because they trust the tests to catch mistakes.\n- **AI-generated code especially needs testing** — when an AI assistant writes your code, tests are your safety net. The code might look correct, pass a quick review, and still have edge cases that only surface in production. Tests verify behavior, not just appearance.\n\nThe cost of a bug found in testing is a few minutes of developer time. The cost of a bug found in production is angry users, lost revenue, and emergency fixes at midnight."
+        },
+        {
+          "heading": "how",
+          "content": "Think of testing like a **car inspection**:\n\n- **Unit testing** is checking individual parts: do the brakes work? Do the headlights turn on? Does the engine start? Each check is small, fast, and focused on one component.\n- **Integration testing** is checking that parts work together: does the engine connect to the transmission correctly? When you press the brake pedal, do the brake pads actually engage? Individual parts might be fine, but the connections between them can fail.\n- **End-to-end testing** is taking the car for a test drive on real roads. Can you start it, drive to the store, park, and come back? This tests the whole experience from the driver's perspective.\n\nYou need all three, but in different proportions. The widely-used **testing pyramid** suggests:\n\n- **Many unit tests** (fast, cheap, catch most bugs) — the broad base of the pyramid\n- **Fewer integration tests** (slower, test boundaries between components) — the middle layer\n- **Few E2E tests** (slow, brittle, but test real user flows) — the small top\n\nIn practice, tests are written using frameworks like Jest (JavaScript), pytest (Python), or Playwright (E2E). Running `npm test` or `pytest` executes all your tests in seconds and tells you exactly what passed and what broke."
+        },
+        {
+          "heading": "when",
+          "content": "Different types of tests serve different purposes:\n\n- **Unit tests** for business logic — pricing calculations, permission checks, data transformations. Anything where getting the answer wrong would be a real problem.\n- **Integration tests** for [[glossary:api|API]] endpoints and [[glossary:database|database]] queries — does your endpoint return the right data? Does the query filter correctly? These catch bugs at the boundaries where components meet.\n- **End-to-end tests** for critical user flows — signup, checkout, payment, password reset. The flows where a failure directly costs you users or revenue.\n\nWhen to invest in testing:\n\n- **When code handles money or sensitive data** — test thoroughly. Bugs in payment or auth flows are the most costly.\n- **When you deploy frequently** — automated tests are what make frequent deployment safe.\n- **When multiple people work on the same code** — tests protect you from someone else's changes breaking your feature.\n- **When using AI-generated code** — always write tests for AI output. Treat generated code like code from a new hire: it might be great, but verify it."
+        }
+      ],
+      "quiz": {
+        "question": "What kind of test catches this?",
+        "scenario": "Your app has a discount feature. The `applyDiscount` function works perfectly in isolation — given a price and a percentage, it returns the right discounted price. But users report that when they apply a discount code at checkout, they're charged the full price. After investigation, you find that the checkout endpoint calls `applyDiscount` correctly, but then overwrites the result when it re-fetches the price from the database to generate the receipt.",
+        "options": [
+          {
+            "id": "a",
+            "text": "A unit test for the applyDiscount function would have caught this",
+            "correct": false,
+            "explanation": "The unit test would pass, because the function itself works perfectly. Given a price and a discount, it returns the correct result. The bug isn't in the function — it's in how the checkout endpoint uses the function alongside other operations. Unit tests verify individual components, not the interactions between them."
+          },
+          {
+            "id": "b",
+            "text": "An integration test for the checkout endpoint would have caught this",
+            "correct": true,
+            "explanation": "An integration test that sends an order with a discount code to the checkout endpoint and checks the final charged amount would catch this immediately. It would reveal that the endpoint calculates the discount correctly but then overwrites it during receipt generation. This is a classic integration bug — individual pieces work fine, but they interact incorrectly."
+          },
+          {
+            "id": "c",
+            "text": "Only an end-to-end test with a real browser could catch this kind of bug",
+            "correct": false,
+            "explanation": "While an E2E test would also catch this, it's overkill for the problem. The bug is in how backend components interact — the discount function and the receipt generation step within the same endpoint. An integration test that calls the endpoint directly (without a browser) would catch it faster, more reliably, and more cheaply. E2E tests are best reserved for full user flow validation, not backend logic bugs."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["database", "api"]
     }
   ]
 }
