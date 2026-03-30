@@ -92,9 +92,8 @@ export function ProductHero() {
             >
               <div>
                 <p className="font-mono text-[13px] text-text-muted leading-relaxed mb-5">
-                  Scan any codebase. Get an interactive architecture map with
-                  plain-English explanations and risk analysis. No code reading
-                  required.
+                  Get an interactive architecture map with plain-English
+                  explanations and risk analysis. No code reading required.
                 </p>
                 <a
                   href="#get-started"
@@ -109,8 +108,7 @@ export function ProductHero() {
                   For PMs, founders, and vibecoders
                 </div>
                 <div className="font-mono text-[12px] text-text-dim leading-relaxed">
-                  Understand what was built &mdash; and what might break &mdash;
-                  in 5 minutes.
+                  See what was built and what might break &mdash; in 5 minutes.
                 </div>
               </div>
             </div>

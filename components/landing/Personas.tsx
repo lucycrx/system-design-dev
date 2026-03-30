@@ -16,7 +16,7 @@ const PERSONAS = [
     color: "var(--color-blue)",
     bg: "var(--color-blue-dim)",
     description:
-      "Directing AI agents to build your MVP? See what you\u2019ve actually got before hiring engineers or pitching investors.",
+      "Using AI to build your MVP? See what you\u2019ve actually got before hiring engineers or pitching investors.",
   },
   {
     label: "Vibecoders",
@@ -106,7 +106,7 @@ export function Personas() {
       <div className="flex items-baseline gap-5 mb-10">
         <SectionNumber number="03" />
         <h2 className="heading-editorial text-xl sm:text-2xl text-text max-w-lg">
-          Built for People Who Manage Systems, Not Just Build Them.
+          Built for People Who Ship, Not Just Code.
         </h2>
       </div>
 

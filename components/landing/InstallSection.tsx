@@ -6,21 +6,21 @@ import { SectionNumber } from "./SectionNumber";
 const STEPS = [
   {
     number: "1",
-    title: "Skill scans your codebase",
+    title: "Scans your codebase",
     description:
-      "Discovers routes, databases, API integrations, auth patterns, caching layers, and more.",
+      "Routes, databases, APIs, auth, caching \u2014 detected automatically.",
   },
   {
     number: "2",
-    title: "Generates interactive HTML",
+    title: "Generates an interactive map",
     description:
-      "Components grouped by category, risks flagged by severity, everything explained in plain English.",
+      "Components grouped by category, risks flagged by severity, all in plain English.",
   },
   {
     number: "3",
     title: "Opens in your browser",
     description:
-      "One self-contained file. Click through components, read risk reports, share with your team.",
+      "One file. Click through components, read risk reports, share with your team.",
   },
 ];
 
@@ -110,8 +110,7 @@ export function InstallSection() {
         <TypingCommand visible={visible} />
 
         <p className="font-mono text-[13px] text-text-muted leading-relaxed mt-4 mb-2">
-          Run this in Claude Code. The skill scans your codebase and opens an
-          interactive architecture map in your browser.
+          Run in Claude Code. Opens an architecture map in your browser.
         </p>
 
         <div className="flex flex-wrap gap-x-4 gap-y-1 mb-10">

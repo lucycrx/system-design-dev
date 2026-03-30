@@ -38,8 +38,8 @@ export default function HomePage() {
           </h2>
         </div>
         <p className="font-mono text-[13px] text-text-muted leading-relaxed mb-10 max-w-lg">
-          The architecture map shows you what&apos;s there and what&apos;s
-          wrong. These resources explain why it matters.
+          The map shows what&apos;s there and what&apos;s wrong. These
+          resources explain why.
         </p>
 
         <PathCards

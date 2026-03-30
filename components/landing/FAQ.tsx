@@ -6,19 +6,19 @@ import { SectionNumber } from "./SectionNumber";
 const QUESTIONS = [
   {
     q: "What do I need to run this?",
-    a: "Claude Code. The skill runs inside Claude Code\u2019s environment and uses its tools to scan your codebase. No additional setup or dependencies required.",
+    a: "Claude Code. No other setup or dependencies required.",
   },
   {
     q: "Does my code leave my machine?",
-    a: "No. The skill runs locally. It reads your files through Claude Code\u2019s sandbox and generates a local HTML file. Nothing is uploaded or sent externally.",
+    a: "No. Everything runs locally. Nothing is uploaded or sent externally.",
   },
   {
     q: "What frameworks does it support?",
-    a: "Any codebase Claude Code can read. It\u2019s been tested on Next.js, Django, Rails, Express, Flask, FastAPI, Go, and Laravel projects. The skill detects your framework automatically.",
+    a: "Any codebase Claude Code can read. Tested on Next.js, Django, Rails, Express, Flask, FastAPI, Go, and Laravel.",
   },
   {
     q: "What if I don\u2019t understand the output?",
-    a: "Everything is written in plain English with real-world analogies. Each risk in the report links to a deeper explanation on this site\u2019s Build Stories, where you can learn the concepts at your own pace.",
+    a: "Everything is in plain English with real-world analogies. Each risk links to a deeper explanation in our Build Stories.",
   },
   {
     q: "Is it free?",

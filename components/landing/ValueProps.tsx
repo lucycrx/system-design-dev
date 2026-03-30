@@ -9,21 +9,21 @@ const PROPS = [
     color: "var(--color-green)",
     title: "See every component, connection, and layer in your system.",
     description:
-      "Grouped by what they do, not where they live in the file tree. Frontend, API, database, cache, external services \u2014 all laid out in an interactive diagram you can click through.",
+      "Components grouped by function, not file path. Frontend, API, database, cache, external services \u2014 all in one interactive diagram.",
   },
   {
     label: "RISK ANALYSIS",
     color: "var(--color-accent)",
     title: "16 anti-patterns checked automatically.",
     description:
-      "Each risk comes with a plain-English explanation, a real-world analogy, and the fix. Severity is calibrated to your project\u2019s scale \u2014 no one tells a side project to add Kafka.",
+      "Each risk explained in plain English with a real-world analogy and a fix. Severity calibrated to your project\u2019s scale.",
   },
   {
     label: "SHAREABLE ARTIFACT",
     color: "var(--color-blue)",
     title: "One self-contained HTML file.",
     description:
-      "Works offline. Drop it in Slack, pull it up in a meeting, send it to your CTO. No special tools needed to open it.",
+      "Works offline. Drop it in Slack, pull it up in a meeting, send it to your CTO.",
   },
 ];
 
