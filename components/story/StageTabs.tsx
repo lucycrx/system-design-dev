@@ -21,7 +21,7 @@ export function StageTabs({ stages, activeIndex, onSelect }: Props) {
               : "text-text-dim hover:text-text-muted"
           }`}
         >
-          Stage {i + 1}: {stage.userScale.split(",")[0]}
+          Stage {i + 1}: {stage.userScale.match(/^[\d,]+ drivers/)?.[0] || stage.userScale}
           {i === activeIndex && (
             <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-text" />
           )}
