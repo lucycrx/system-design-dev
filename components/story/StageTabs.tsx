@@ -10,7 +10,7 @@ interface Props {
 
 export function StageTabs({ stages, activeIndex, onSelect }: Props) {
   return (
-    <div className="flex overflow-x-auto">
+    <div className="flex overflow-x-auto scrollbar-hide">
       {stages.map((stage, i) => (
         <button
           key={stage.id}

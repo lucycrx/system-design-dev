@@ -55,6 +55,15 @@ html {
   background: var(--color-text-dim);
 }
 
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Cursor blink for install section */
 @keyframes blink {
   0%, 100% { opacity: 1; }
