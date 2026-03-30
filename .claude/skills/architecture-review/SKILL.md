@@ -102,6 +102,7 @@ Construct a structured JSON object with this shape (this is the contract for the
     "language": "string — primary language",
     "scannedAt": "ISO timestamp",
     "scaleAssessment": "prototype | growing | production",
+    "summary": "string — 2-4 sentence plain-English overview of the architecture: what the system does, how the main pieces connect, and the overall data flow",
     "componentCount": "number",
     "riskCount": { "critical": 0, "high": 0, "medium": 0, "low": 0 }
   },

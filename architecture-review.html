@@ -117,6 +117,38 @@ body {
 .summary-text { font-size: 1.05rem; line-height: 1.6; }
 .summary-text strong { font-weight: 600; }
 
+.summary-overview {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-top: 0.6rem;
+}
+
+.diagram-hint {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.diagram-hint span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.hint-key {
+  display: inline-block;
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.35rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
 .section-label {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -556,10 +588,16 @@ body {
 <div class="shell">
   <div class="summary-strip">
     <p class="summary-text" id="summaryText"></p>
+    <p class="summary-overview" id="summaryOverview"></p>
   </div>
 
   <section class="map-section">
     <div class="section-label">Architecture Diagram</div>
+    <div class="diagram-hint">
+      <span><span class="hint-key">click</span> a component for details</span>
+      <span><span class="hint-key">hover</span> a connection tag to highlight its target</span>
+      <span><span class="hint-key">click</span> a connection tag to jump to that component</span>
+    </div>
     <div class="diagram" id="diagram"></div>
     <div class="detail-panel" id="detailPanel">
       <div class="detail-panel-header">
@@ -599,7 +637,13 @@ body {
     "scannedAt": "2026-03-29T18:00:00Z",
     "scaleAssessment": "prototype",
     "componentCount": 8,
-    "riskCount": { "critical": 1, "high": 2, "medium": 2, "low": 1 }
+    "riskCount": {
+      "critical": 1,
+      "high": 2,
+      "medium": 2,
+      "low": 1
+    },
+    "summary": "Hyperagents is an evolutionary AI research system that automatically improves AI agents. A central Generation Loop orchestrates the cycle: it spawns a Meta-Agent to write code improvements, hands them to a Task Agent to test inside Docker containers, then scores the results using domain-specific evaluators. Everything talks to external LLM providers (OpenAI, Anthropic, Google) through a unified interface, and the full history of every experiment is recorded in a file-based archive that feeds the next generation."
   },
   "components": [
     {
@@ -607,13 +651,32 @@ body {
       "category": "api-layer",
       "label": "Generation Loop (Orchestrator)",
       "description": "The brain of the system. A 2,800-line Python script that coordinates everything: it picks which AI model to improve, runs it, evaluates the results, and decides what to try next. Think of it as the project manager who assigns work and checks quality.",
-      "files": ["generate_loop.py", "select_next_parent.py", "ensemble.py"],
+      "files": [
+        "generate_loop.py",
+        "select_next_parent.py",
+        "ensemble.py"
+      ],
       "connections": [
-        { "targetId": "meta-agent", "label": "spawns to generate improvements" },
-        { "targetId": "task-agent", "label": "spawns to solve tasks" },
-        { "targetId": "docker-runtime", "label": "runs code inside containers" },
-        { "targetId": "domain-evaluators", "label": "triggers evaluation" },
-        { "targetId": "archive-store", "label": "reads/writes generation history" }
+        {
+          "targetId": "meta-agent",
+          "label": "spawns to generate improvements"
+        },
+        {
+          "targetId": "task-agent",
+          "label": "spawns to solve tasks"
+        },
+        {
+          "targetId": "docker-runtime",
+          "label": "runs code inside containers"
+        },
+        {
+          "targetId": "domain-evaluators",
+          "label": "triggers evaluation"
+        },
+        {
+          "targetId": "archive-store",
+          "label": "reads/writes generation history"
+        }
       ]
     },
     {
@@ -621,10 +684,19 @@ body {
       "category": "background-jobs",
       "label": "Meta-Agent (Self-Improver)",
       "description": "An AI agent whose job is to improve other AI agents. It reads the current code, thinks about what could work better, and writes patches (code changes). It is the 'researcher' that proposes experiments.",
-      "files": ["meta_agent.py", "run_meta_agent.py"],
+      "files": [
+        "meta_agent.py",
+        "run_meta_agent.py"
+      ],
       "connections": [
-        { "targetId": "llm-interface", "label": "calls LLM APIs to think and generate code" },
-        { "targetId": "archive-store", "label": "reads past attempts and scores" }
+        {
+          "targetId": "llm-interface",
+          "label": "calls LLM APIs to think and generate code"
+        },
+        {
+          "targetId": "archive-store",
+          "label": "reads past attempts and scores"
+        }
       ]
     },
     {
@@ -632,10 +704,20 @@ body {
       "category": "background-jobs",
       "label": "Task Agent (Problem Solver)",
       "description": "An AI agent that actually solves problems: writing code, playing games, reviewing papers, proving math theorems. Each 'generation' of the task agent is a different version that the meta-agent created.",
-      "files": ["task_agent.py", "run_task_agent.py", "agent/base_agent.py"],
+      "files": [
+        "task_agent.py",
+        "run_task_agent.py",
+        "agent/base_agent.py"
+      ],
       "connections": [
-        { "targetId": "llm-interface", "label": "calls LLM APIs to reason and act" },
-        { "targetId": "docker-runtime", "label": "executes generated code safely" }
+        {
+          "targetId": "llm-interface",
+          "label": "calls LLM APIs to reason and act"
+        },
+        {
+          "targetId": "docker-runtime",
+          "label": "executes generated code safely"
+        }
       ]
     },
     {
@@ -643,9 +725,17 @@ body {
       "category": "external-services",
       "label": "LLM API Interface (litellm)",
       "description": "A unified wrapper that lets the system talk to multiple AI providers (OpenAI, Anthropic, Google) through one interface. Handles retries, timeouts, and switching between models like GPT-4o, Claude, and Gemini.",
-      "files": ["agent/llm.py", "agent/llm_withtools.py", "agent/tools/bash.py", "agent/tools/edit.py"],
+      "files": [
+        "agent/llm.py",
+        "agent/llm_withtools.py",
+        "agent/tools/bash.py",
+        "agent/tools/edit.py"
+      ],
       "connections": [
-        { "targetId": "external-llm-providers", "label": "sends prompts, receives completions" }
+        {
+          "targetId": "external-llm-providers",
+          "label": "sends prompts, receives completions"
+        }
       ]
     },
     {
@@ -653,7 +743,9 @@ body {
       "category": "external-services",
       "label": "External LLM Providers",
       "description": "The actual AI services the system depends on: OpenAI (GPT-4o, GPT-5), Anthropic (Claude), and Google (Gemini). API keys stored in a .env file. These are the 'contractors' the system hires to do the thinking.",
-      "files": [".env"],
+      "files": [
+        ".env"
+      ],
       "connections": []
     },
     {
@@ -661,9 +753,16 @@ body {
       "category": "storage",
       "label": "Docker Execution Environment",
       "description": "Isolated containers where AI-generated code runs safely. Built on NVIDIA CUDA for GPU access. Each evaluation spins up a container, runs the code inside, and captures the results. This is the 'lab' where experiments happen.",
-      "files": ["utils/docker_utils.py", "Dockerfile", "setup_initial.sh"],
+      "files": [
+        "utils/docker_utils.py",
+        "Dockerfile",
+        "setup_initial.sh"
+      ],
       "connections": [
-        { "targetId": "domain-evaluators", "label": "hosts evaluation runs" }
+        {
+          "targetId": "domain-evaluators",
+          "label": "hosts evaluation runs"
+        }
       ]
     },
     {
@@ -671,9 +770,19 @@ body {
       "category": "background-jobs",
       "label": "Domain Evaluators",
       "description": "Specialized test suites for different problem types: game-playing (BALROG), robotics (Genesis), math (IMO), code generation (Polyglot/SWE-bench), paper review, and search. Each domain scores how well a task agent performed.",
-      "files": ["domains/harness.py", "domains/balrog/evaluator.py", "domains/genesis/", "domains/imo/", "domains/polyglot/", "domains/run_eval.py"],
+      "files": [
+        "domains/harness.py",
+        "domains/balrog/evaluator.py",
+        "domains/genesis/",
+        "domains/imo/",
+        "domains/polyglot/",
+        "domains/run_eval.py"
+      ],
       "connections": [
-        { "targetId": "archive-store", "label": "writes evaluation scores" }
+        {
+          "targetId": "archive-store",
+          "label": "writes evaluation scores"
+        }
       ]
     },
     {
@@ -681,7 +790,11 @@ body {
       "category": "database",
       "label": "Archive (File-Based State Store)",
       "description": "The system's memory. An append-only JSONL file that records every generation attempt: what was tried, what code was written, and how well it scored. Also stores metadata, diffs, and evaluation reports as files on disk.",
-      "files": ["utils/gl_utils.py", "archive.jsonl", "gen_*/metadata.json"],
+      "files": [
+        "utils/gl_utils.py",
+        "archive.jsonl",
+        "gen_*/metadata.json"
+      ],
       "connections": []
     }
   ],
@@ -690,7 +803,11 @@ body {
       "patternId": "untrusted-code-execution",
       "severity": "critical",
       "adjustedSeverity": "critical",
-      "affectedComponents": ["docker-runtime", "task-agent", "meta-agent"],
+      "affectedComponents": [
+        "docker-runtime",
+        "task-agent",
+        "meta-agent"
+      ],
       "evidence": "agent/tools/bash.py executes arbitrary commands via asyncio.subprocess. agent/tools/edit.py writes to arbitrary file paths. generate_loop.py applies git patches from LLM output. Docker containers run with NVIDIA GPU access and no visible resource limits (memory, CPU, disk).",
       "explanation": {
         "plain": "This system is designed to execute code written by AI models. The AI writes code, and the system runs it. While Docker containers provide some isolation, there are no visible resource limits (memory, CPU, disk) on those containers, and the bash tool can run arbitrary commands.",
@@ -710,7 +827,10 @@ body {
       "patternId": "single-file-state-store",
       "severity": "high",
       "adjustedSeverity": "high",
-      "affectedComponents": ["archive-store", "generation-loop"],
+      "affectedComponents": [
+        "archive-store",
+        "generation-loop"
+      ],
       "evidence": "utils/gl_utils.py appends to archive.jsonl with no file locking, no transactions, and no backup mechanism. The entire evolutionary history lives in one file. Metadata per generation stored as individual JSON files with no atomic write guarantees.",
       "explanation": {
         "plain": "The entire history of every experiment the system has ever run lives in a single file called archive.jsonl. There is no backup, no redundancy, and no protection against the file being corrupted by a crash or concurrent write.",
@@ -722,7 +842,10 @@ body {
         "detail": "Write to a temporary file first, then atomically rename it (write-then-rename pattern). Add file locking (fcntl.flock) before writes. Create periodic snapshots or use SQLite instead of raw JSONL for structured state that needs transaction safety."
       },
       "learnMore": {
-        "glossaryTerms": ["database", "persistence"],
+        "glossaryTerms": [
+          "database",
+          "persistence"
+        ],
         "buildStory": null
       }
     },
@@ -730,7 +853,10 @@ body {
       "patternId": "secrets-in-source",
       "severity": "high",
       "adjustedSeverity": "high",
-      "affectedComponents": ["external-llm-providers", "llm-interface"],
+      "affectedComponents": [
+        "external-llm-providers",
+        "llm-interface"
+      ],
       "evidence": "API keys loaded via dotenv.load_dotenv() in agent/llm.py and baselines/sft_openai/run.py. The .env file pattern is used but there is no .env.example documenting required variables, and .gitignore may not cover all secret files. The fine-tuning baseline sends actual training data to OpenAI's API.",
       "explanation": {
         "plain": "Your API keys for OpenAI, Anthropic, and Google are stored in a .env file. While .env is better than hardcoding, there is no documentation of what keys are needed, and the fine-tuning code sends training data directly to OpenAI's servers.",
@@ -750,7 +876,9 @@ body {
       "patternId": "monolith-no-boundaries",
       "severity": "medium",
       "adjustedSeverity": "medium",
-      "affectedComponents": ["generation-loop"],
+      "affectedComponents": [
+        "generation-loop"
+      ],
       "evidence": "generate_loop.py is 2,800+ lines containing orchestration logic, container management, evaluation triggers, selection strategies, file I/O, and reporting all in one file. Functions reach across domains, utils, and agent modules freely.",
       "explanation": {
         "plain": "The main orchestration file is nearly 3,000 lines long and handles everything: managing experiments, running containers, evaluating results, picking what to try next, and writing reports. Changing one part risks breaking another.",
@@ -762,15 +890,23 @@ body {
         "detail": "Split generate_loop.py into focused modules: a selection module (picking parents), an evaluation coordinator, a container lifecycle manager, and a reporting module. Each module should have a clear interface. The main loop becomes a thin coordinator that calls these modules."
       },
       "learnMore": {
-        "glossaryTerms": ["monolith"],
-        "buildStory": { "slug": "ride-sharing", "stageId": "stage-5" }
+        "glossaryTerms": [
+          "monolith"
+        ],
+        "buildStory": {
+          "slug": "ride-sharing",
+          "stageId": "stage-5"
+        }
       }
     },
     {
       "patternId": "no-error-boundary",
       "severity": "medium",
       "adjustedSeverity": "medium",
-      "affectedComponents": ["generation-loop", "domain-evaluators"],
+      "affectedComponents": [
+        "generation-loop",
+        "domain-evaluators"
+      ],
       "evidence": "727 try/except blocks across the codebase. Many catch broad exceptions and continue silently. No centralized error monitoring or alerting. Errors logged to per-thread rotating files with no aggregation. Container failures may lose in-memory state.",
       "explanation": {
         "plain": "The system has hundreds of try/except blocks that catch errors and keep going. While this prevents crashes, it means errors can happen silently. There is no central place to see what went wrong, and no alerting when experiments fail in unexpected ways.",
@@ -782,7 +918,10 @@ body {
         "detail": "Create an error aggregation module that collects all exceptions into a summary report after each generation loop. Classify errors as recoverable (retry) vs. critical (stop the loop). Log error counts and types to a single summary file that researchers can check at a glance."
       },
       "learnMore": {
-        "glossaryTerms": ["graceful-degradation", "monitoring"],
+        "glossaryTerms": [
+          "graceful-degradation",
+          "monitoring"
+        ],
         "buildStory": null
       }
     },
@@ -790,7 +929,10 @@ body {
       "patternId": "no-health-check",
       "severity": "low",
       "adjustedSeverity": "low",
-      "affectedComponents": ["docker-runtime", "generation-loop"],
+      "affectedComponents": [
+        "docker-runtime",
+        "generation-loop"
+      ],
       "evidence": "No health check endpoint or monitoring dashboard. Long-running experiments (hours to days) have no external visibility into progress. Container status checked only via Docker API calls during execution. No heartbeat or progress reporting mechanism.",
       "explanation": {
         "plain": "When this system runs a long experiment (which can take hours or days), there is no easy way to check on it from the outside. You have to SSH into the machine and read log files to know if things are working.",
@@ -802,8 +944,14 @@ body {
         "detail": "Write a periodic status file (e.g., status.json) that records: current generation, last evaluation score, elapsed time, and any errors. A simple watcher script or even a tail -f on this file gives researchers visibility into long-running experiments."
       },
       "learnMore": {
-        "glossaryTerms": ["health-check", "monitoring"],
-        "buildStory": { "slug": "ride-sharing", "stageId": "stage-3" }
+        "glossaryTerms": [
+          "health-check",
+          "monitoring"
+        ],
+        "buildStory": {
+          "slug": "ride-sharing",
+          "stageId": "stage-3"
+        }
       }
     }
   ]
@@ -895,6 +1043,11 @@ body {
   }
   s += '.';
   document.getElementById('summaryText').innerHTML = s;
+
+  // Architecture overview (2-4 sentence plain-English summary)
+  if (meta.summary) {
+    document.getElementById('summaryOverview').textContent = meta.summary;
+  }
 
   // ============================================
   // CONTAINMENT-BASED ARCHITECTURE DIAGRAM

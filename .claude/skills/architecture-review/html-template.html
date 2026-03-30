@@ -117,6 +117,38 @@ body {
 .summary-text { font-size: 1.05rem; line-height: 1.6; }
 .summary-text strong { font-weight: 600; }
 
+.summary-overview {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-top: 0.6rem;
+}
+
+.diagram-hint {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.diagram-hint span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.hint-key {
+  display: inline-block;
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.35rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
 .section-label {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -556,10 +588,16 @@ body {
 <div class="shell">
   <div class="summary-strip">
     <p class="summary-text" id="summaryText"></p>
+    <p class="summary-overview" id="summaryOverview"></p>
   </div>
 
   <section class="map-section">
     <div class="section-label">Architecture Diagram</div>
+    <div class="diagram-hint">
+      <span><span class="hint-key">click</span> a component for details</span>
+      <span><span class="hint-key">hover</span> a connection tag to highlight its target</span>
+      <span><span class="hint-key">click</span> a connection tag to jump to that component</span>
+    </div>
     <div class="diagram" id="diagram"></div>
     <div class="detail-panel" id="detailPanel">
       <div class="detail-panel-header">
@@ -679,6 +717,11 @@ body {
   }
   s += '.';
   document.getElementById('summaryText').innerHTML = s;
+
+  // Architecture overview (2-4 sentence plain-English summary)
+  if (meta.summary) {
+    document.getElementById('summaryOverview').textContent = meta.summary;
+  }
 
   // ============================================
   // CONTAINMENT-BASED ARCHITECTURE DIAGRAM
