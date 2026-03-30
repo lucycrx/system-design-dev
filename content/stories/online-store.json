@@ -8,6 +8,7 @@
   "estimatedMinutes": 22,
   "concepts": ["cache", "cdn", "load-balancer", "horizontal-scaling", "rate-limiting", "index", "read-replica"],
   "prerequisites": ["chat-app"],
+  "layout": "inline",
   "stages": [
     {
       "id": "stage-1",

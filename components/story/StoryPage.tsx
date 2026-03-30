@@ -182,7 +182,7 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
                   diagrams={allStageDiagrams[i]}
                   glossaryMap={glossaryMap}
                   stickyTop={STICKY_HEADER_HEIGHT}
-                  layout={story.layout || "scrollytelling"}
+                  layout={story.layout || "inline"}
                 />
               ) : (
                 <div className="max-w-3xl">

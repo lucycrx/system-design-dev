@@ -8,6 +8,7 @@
   "estimatedMinutes": 28,
   "concepts": ["consistency", "race-condition", "in-memory-store", "eventual-consistency", "microservices", "message-queue", "event-driven", "failover", "monitoring", "circuit-breaker"],
   "prerequisites": ["chat-app", "online-store"],
+  "layout": "inline",
   "stages": [
     {
       "id": "stage-1",
