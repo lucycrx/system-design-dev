@@ -101,7 +101,10 @@ export function WorksWith() {
         <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-bg to-transparent z-10 pointer-events-none" />
 
         {/* Scrolling track — duplicated for seamless loop */}
-        <div className="flex items-center animate-[marquee_25s_linear_infinite]">
+        <div
+          className="flex items-center"
+          style={{ animation: "marquee 25s linear infinite" }}
+        >
           {FRAMEWORKS.map((fw) => (
             <FrameworkItem key={fw.name} fw={fw} />
           ))}
