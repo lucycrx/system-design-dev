@@ -201,41 +201,34 @@ function ModuleCard({
               {mod.subtitle}
             </p>
 
-            {/* Lesson progress bar */}
-            <div className="flex gap-1 mt-4 mb-3">
-              {mod.lessons.map((_, j) => (
-                <div
-                  key={j}
-                  className="h-1 flex-1 transition-all duration-500"
-                  style={{
-                    backgroundColor: hovered ? colors.color : "var(--color-border)",
-                    opacity: hovered ? 0.3 + (j / mod.lessons.length) * 0.7 : 0.4,
-                    transitionDelay: hovered ? `${j * 60}ms` : "0ms",
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Lesson tags */}
-            <div className="flex flex-wrap gap-1.5 pt-4 border-t border-border/50">
-              {mod.lessons.slice(0, 3).map((lesson) => (
-                <span
-                  key={lesson.id}
-                  className="label-mono px-2 py-0.5 bg-bg border border-border text-text-dim transition-colors duration-200"
-                  style={{
-                    borderColor: hovered ? colors.color + "30" : undefined,
-                  }}
-                >
-                  {lesson.title.length > 30
-                    ? lesson.title.slice(0, 30) + "..."
-                    : lesson.title}
-                </span>
-              ))}
-              {mod.lessons.length > 3 && (
-                <span className="label-mono text-text-dim">
-                  +{mod.lessons.length - 3} more
-                </span>
-              )}
+            {/* Lesson list */}
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+                {mod.lessons.map((lesson, j) => (
+                  <li
+                    key={lesson.id}
+                    className="flex items-baseline gap-2 label-mono text-text-muted transition-colors duration-200"
+                  >
+                    <span
+                      className="flex-shrink-0 text-[10px] font-mono tabular-nums w-4 text-right transition-colors duration-200"
+                      style={{
+                        color: hovered ? colors.color : "var(--color-text-dim)",
+                        opacity: hovered ? 0.7 : 0.5,
+                      }}
+                    >
+                      {String(j + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className="transition-colors duration-200"
+                      style={{
+                        color: hovered ? "var(--color-text)" : undefined,
+                      }}
+                    >
+                      {lesson.title}
+                    </span>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
 
