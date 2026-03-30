@@ -10,18 +10,20 @@ interface Props {
 
 export function StageTabs({ stages, activeIndex, onSelect }: Props) {
   return (
-    <div className="flex overflow-x-auto scrollbar-hide">
+    <div className="flex">
       {stages.map((stage, i) => (
         <button
           key={stage.id}
           onClick={() => onSelect(i)}
-          className={`relative flex-shrink-0 px-6 py-3 text-[11px] font-mono tracking-[2px] uppercase transition-colors ${
+          className={`relative min-w-0 px-5 first:pl-0 py-3 text-[11px] font-mono tracking-[2px] uppercase transition-colors ${
             i === activeIndex
               ? "text-text"
               : "text-text-dim hover:text-text-muted"
           }`}
         >
-          Stage {i + 1}: {stage.userScale}
+          <span className="block truncate">
+            Stage {i + 1}: {stage.userScale}
+          </span>
           {i === activeIndex && (
             <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-text" />
           )}
