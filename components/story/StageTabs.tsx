@@ -15,15 +15,13 @@ export function StageTabs({ stages, activeIndex, onSelect }: Props) {
         <button
           key={stage.id}
           onClick={() => onSelect(i)}
-          className={`relative min-w-0 px-5 first:pl-0 py-3 text-[11px] font-mono tracking-[2px] uppercase transition-colors ${
+          className={`relative px-5 first:pl-0 py-3 text-[11px] font-mono tracking-[2px] uppercase whitespace-nowrap transition-colors ${
             i === activeIndex
               ? "text-text"
               : "text-text-dim hover:text-text-muted"
           }`}
         >
-          <span className="block truncate">
-            Stage {i + 1}: {stage.userScale}
-          </span>
+          Stage {i + 1}: {stage.userScale.split(",")[0]}
           {i === activeIndex && (
             <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-text" />
           )}
