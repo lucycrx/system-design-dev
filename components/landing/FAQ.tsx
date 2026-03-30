@@ -14,7 +14,7 @@ const QUESTIONS = [
   },
   {
     q: "What frameworks does it support?",
-    a: "Any codebase Claude Code can read. Tested on Next.js, Django, Rails, Express, Flask, FastAPI, Go, and Laravel.",
+    a: "Any codebase Claude Code can read. Best support for Next.js, Django, Rails, and Express.",
   },
   {
     q: "What if I don\u2019t understand the output?",

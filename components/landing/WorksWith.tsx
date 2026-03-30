@@ -8,10 +8,7 @@ const FRAMEWORKS = [
   "Django",
   "Rails",
   "Express",
-  "Flask",
-  "FastAPI",
-  "Go",
-  "Laravel",
+  "and any codebase Claude can read",
 ];
 
 export function WorksWith() {
