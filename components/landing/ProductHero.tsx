@@ -57,10 +57,10 @@ export function ProductHero() {
         </div>
 
         {/* Two-column: headline left, mini-diagram right */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-16 items-start">
           <div>
             {/* Main title */}
-            <h1 className="text-5xl sm:text-7xl lg:text-[4.25rem] font-bold text-text leading-[1.02] tracking-tight mb-10">
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold text-text leading-[1.02] tracking-tight mb-10">
               <span className="block">
                 <WordReveal delay={150} visible={phase >= 1}>
                   ANY
