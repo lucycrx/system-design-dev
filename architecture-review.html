@@ -357,27 +357,30 @@ body {
 /* ---- DETAIL PANEL ---- */
 
 .detail-panel {
-  display: none;
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 1.5rem;
-  width: 340px;
   flex-shrink: 0;
   position: sticky;
   top: 5rem;
   align-self: flex-start;
   max-height: calc(100vh - 6rem);
-  overflow-y: auto;
+  overflow: hidden;
+  width: 0;
+  padding: 0;
+  border-width: 0;
+  opacity: 0;
+  transition: width 0.3s cubic-bezier(0.25, 0, 0.2, 1),
+              padding 0.3s cubic-bezier(0.25, 0, 0.2, 1),
+              border-width 0.3s cubic-bezier(0.25, 0, 0.2, 1),
+              opacity 0.25s cubic-bezier(0.25, 0, 0.2, 1);
 }
 
 .detail-panel.visible {
-  display: block;
-  animation: panelIn 0.25s cubic-bezier(0.25, 0, 0.2, 1) both;
-}
-
-@keyframes panelIn {
-  from { opacity: 0; transform: translateX(8px); }
-  to { opacity: 1; transform: translateX(0); }
+  width: 340px;
+  padding: 1.5rem;
+  border-width: 1px;
+  opacity: 1;
+  overflow-y: auto;
 }
 
 .detail-panel-header {
@@ -596,7 +599,8 @@ body {
   .header-inner { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
   .map-layout { flex-direction: column; }
   .diagram { padding: 1rem; }
-  .detail-panel { width: 100%; position: static; max-height: none; }
+  .detail-panel { position: static; max-height: none; }
+  .detail-panel.visible { width: 100%; }
   .diagram-row { flex-direction: column; }
   .comp-row { flex-direction: column; }
   .risk-card-header { grid-template-columns: auto 1fr auto; gap: 0.75rem; }
