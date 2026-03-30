@@ -21,7 +21,7 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Your ride-sharing app is live, and it works like this: a rider requests a ride, your server looks at a list of available drivers, picks the nearest one, and sends them the request. The driver accepts, picks up the rider, completes the trip, and the cycle repeats.\n\nFifty drivers, a few hundred riders, one city. Everything runs on a single server with a single database. Life is simple."
+          "content": "Your ride-sharing app is live, and it works like this: a rider requests a ride, your [[node:server|server]] looks at a list of available drivers, picks the nearest one, and sends them the request. The driver accepts, picks up the rider, completes the trip, and the cycle repeats.\n\nFifty drivers, a few hundred riders, one city. Everything runs on a single [[node:server|server]] with a single [[node:database|database]]. Life is simple."
         },
         {
           "type": "callout",
@@ -30,7 +30,7 @@
         },
         {
           "type": "text",
-          "content": "But there's something interesting about the data flowing through your system. Some of it is **persistent** -- things you need to keep forever, like trip history, payment records, and user profiles. This goes in your [[glossary:database|database]].\n\nOther data is **ephemeral** -- it changes constantly and you don't need to store it long-term. The most important example: **driver locations**. Every few seconds, each driver's phone sends a GPS update. These coordinates are only useful *right now*. Nobody cares where a driver was standing 30 minutes ago when matching a new ride."
+          "content": "But there's something interesting about the data flowing through your system. Some of it is **persistent** -- things you need to keep forever, like trip history, payment records, and user profiles. This goes in your [[glossary:database|database]].\n\nOther data is **ephemeral** -- it changes constantly and you don't need to store it long-term. The most important example: **driver locations**. Every few seconds, each [[node:driver|driver's phone]] sends a GPS update. These coordinates are only useful *right now*. Nobody cares where a driver was standing 30 minutes ago when matching a new ride."
         },
         {
           "type": "diagram",
@@ -44,7 +44,7 @@
         },
         {
           "type": "text",
-          "content": "Right now, your matching logic is straightforward:\n\n1. Rider requests a ride with a pickup location\n2. Server queries all available drivers\n3. Server calculates the distance from each driver to the pickup\n4. Server picks the closest driver and sends them the request\n5. Driver has 15 seconds to accept\n6. If they decline or time out, the server tries the next closest driver\n\nWith fifty drivers, this loop finishes in milliseconds. The server barely breaks a sweat."
+          "content": "Right now, your matching logic is straightforward:\n\n1. [[node:rider|Rider]] requests a ride with a pickup location\n2. [[node:server|Server]] queries all available drivers\n3. Server calculates the distance from each driver to the pickup\n4. Server picks the closest driver and sends them the request\n5. Driver has 15 seconds to accept\n6. If they decline or time out, the server tries the next closest driver\n\nWith fifty drivers, this loop finishes in milliseconds. The server barely breaks a sweat."
         },
         {
           "type": "callout",
@@ -94,7 +94,7 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Two fires just broke out at the same time, and you need to deal with both.\n\n**Fire number one: your database is drowning.** With 5,000 drivers sending GPS updates every 3 seconds, that's roughly 1,700 writes per second -- just for location data. Your database is spending so much effort processing these throwaway updates that the queries you actually care about (trip lookups, payment processing, user profiles) are getting slower and slower."
+          "content": "Two fires just broke out at the same time, and you need to deal with both.\n\n**Fire number one: your [[node:database|database]] is drowning.** With 5,000 drivers sending GPS updates every 3 seconds, that's roughly 1,700 writes per second -- just for location data. Your database is spending so much effort processing these throwaway updates that the queries you actually care about (trip lookups, payment processing, user profiles) are getting slower and slower."
         },
         {
           "type": "text",
@@ -107,7 +107,7 @@
         },
         {
           "type": "text",
-          "content": "Let's tackle these problems one at a time.\n\n## Fixing the database bottleneck\n\nThe solution for the GPS flood is an [[glossary:in-memory-store|in-memory store]] like Redis. Instead of writing driver locations to your disk-based database, you store them in Redis -- which keeps everything in RAM (your server's fast, temporary memory).\n\nRedis can handle hundreds of thousands of operations per second because it skips the slow step of writing to disk. Since driver locations are ephemeral anyway -- you only care about the *latest* position -- this is a perfect fit. Old locations are simply overwritten by new ones."
+          "content": "Let's tackle these problems one at a time.\n\n## Fixing the database bottleneck\n\nThe solution for the GPS flood is an [[glossary:in-memory-store|in-memory store]] like Redis. Instead of writing driver locations to your disk-based [[node:database|database]], you store them in [[node:redis|Redis]] -- which keeps everything in RAM (your server's fast, temporary memory).\n\nRedis can handle hundreds of thousands of operations per second because it skips the slow step of writing to disk. Since driver locations are ephemeral anyway -- you only care about the *latest* position -- this is a perfect fit. Old locations are simply overwritten by new ones."
         },
         {
           "type": "diagram",
@@ -215,11 +215,11 @@
         },
         {
           "type": "text",
-          "content": "The solution is to split your monolith into [[glossary:microservices|microservices]] -- independent services that each handle one part of the business. For your ride-sharing app, this might look like:\n\n- **Matching Service** -- finds and assigns drivers to riders\n- **Payment Service** -- handles charges, refunds, driver payouts\n- **Notification Service** -- sends push notifications and SMS\n- **Pricing Service** -- calculates fares and surge pricing\n- **Trip Service** -- manages trip lifecycle and history\n\nEach service runs independently, has its own database, and can be deployed, scaled, and restarted without affecting the others. If the Payment Service crashes, riders can still get matched with drivers."
+          "content": "The solution is to split your monolith into [[glossary:microservices|microservices]] -- independent services that each handle one part of the business. For your ride-sharing app, this might look like:\n\n- [[node:matching|Matching Service]] -- finds and assigns drivers to riders\n- [[node:payment|Payment Service]] -- handles charges, refunds, driver payouts\n- [[node:notification|Notification Service]] -- sends push notifications and SMS\n- **Pricing Service** -- calculates fares and surge pricing\n- **Trip Service** -- manages trip lifecycle and history\n\nEach service runs independently, has its own database, and can be deployed, scaled, and restarted without affecting the others. If the [[node:payment|Payment Service]] crashes, riders can still get matched with drivers."
         },
         {
           "type": "text",
-          "content": "But splitting into services creates a new question: **how do these services talk to each other?**\n\nYour first instinct might be direct calls -- the Matching Service calls the Notification Service to say \"tell the rider their driver is on the way.\" This works, but it creates tight coupling. If the Notification Service is slow or down, the Matching Service has to wait -- or fail.\n\nA better approach for many interactions is a [[glossary:message-queue|message queue]]. Instead of calling the Notification Service directly, the Matching Service drops a message onto a queue: *\"Ride #4521 was matched, notify the rider.\"* The Notification Service picks up that message whenever it's ready."
+          "content": "But splitting into services creates a new question: **how do these services talk to each other?**\n\nYour first instinct might be direct calls -- the [[node:matching|Matching Service]] calls the [[node:notification|Notification Service]] to say \"tell the rider their driver is on the way.\" This works, but it creates tight coupling. If the [[node:notification|Notification Service]] is slow or down, the [[node:matching|Matching Service]] has to wait -- or fail.\n\nA better approach for many interactions is a [[glossary:message-queue|message queue]]. Instead of calling the [[node:notification|Notification Service]] directly, the [[node:matching|Matching Service]] drops a message onto the [[node:queue|queue]]: *\"Ride #4521 was matched, notify the rider.\"* The [[node:notification|Notification Service]] picks up that message whenever it's ready."
         },
         {
           "type": "callout",
