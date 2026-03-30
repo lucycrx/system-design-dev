@@ -28,20 +28,45 @@ function WordReveal({
 }
 
 function GridPattern({ visible }: { visible: boolean }) {
+  // Architectural blueprint grid — spans full width, staggered reveal
+  const vLines = [80, 160, 240, 320, 400, 480, 560, 640, 720];
+  const hLines = [60, 120, 180, 240, 300, 360];
+
+  const nodes: { x: number; y: number; color: string; size: number }[] = [
+    { x: 320, y: 120, color: "var(--color-accent)", size: 10 },
+    { x: 480, y: 180, color: "var(--color-blue)", size: 8 },
+    { x: 640, y: 60, color: "var(--color-green)", size: 8 },
+    { x: 560, y: 300, color: "var(--color-accent)", size: 6 },
+    { x: 400, y: 240, color: "var(--color-blue)", size: 10 },
+    { x: 720, y: 180, color: "var(--color-orange)", size: 6 },
+  ];
+
+  // Connector lines between select nodes
+  const connectors = [
+    { x1: 325, y1: 125, x2: 480, y2: 180 },
+    { x1: 485, y1: 180, x2: 640, y2: 65 },
+    { x1: 405, y1: 245, x2: 560, y2: 300 },
+    { x1: 485, y1: 185, x2: 400, y2: 240 },
+  ];
+
   return (
     <div
-      className="absolute inset-0 pointer-events-none transition-opacity duration-1000 delay-700"
-      style={{ opacity: visible ? 1 : 0 }}
+      className="absolute inset-0 pointer-events-none overflow-hidden"
     >
       <svg
-        className="absolute top-0 right-0 w-[50%] h-full"
-        preserveAspectRatio="none"
-        viewBox="0 0 400 400"
+        className="absolute top-0 left-0 w-full h-full transition-opacity duration-1200"
+        style={{
+          opacity: visible ? 1 : 0,
+          transitionDelay: "600ms",
+          transitionDuration: "1200ms",
+        }}
+        preserveAspectRatio="xMaxYMid slice"
+        viewBox="0 0 800 400"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Vertical lines */}
-        {[100, 200, 300].map((x) => (
+        {/* Grid lines — solid, more visible */}
+        {vLines.map((x, i) => (
           <line
             key={`v-${x}`}
             x1={x}
@@ -49,43 +74,101 @@ function GridPattern({ visible }: { visible: boolean }) {
             x2={x}
             y2="400"
             stroke="var(--color-border)"
-            strokeWidth="0.5"
-            strokeDasharray="4 8"
-            opacity="0.5"
+            strokeWidth={x === 320 || x === 480 ? "1" : "0.5"}
+            opacity={x === 320 || x === 480 ? "0.7" : "0.4"}
           />
         ))}
-        {/* Horizontal lines */}
-        {[80, 160, 240, 320].map((y) => (
+        {hLines.map((y) => (
           <line
             key={`h-${y}`}
             x1="0"
             y1={y}
-            x2="400"
+            x2="800"
             y2={y}
             stroke="var(--color-border)"
-            strokeWidth="0.5"
-            strokeDasharray="4 8"
-            opacity="0.5"
+            strokeWidth={y === 180 ? "1" : "0.5"}
+            opacity={y === 180 ? "0.7" : "0.4"}
           />
         ))}
-        {/* Accent node */}
-        <rect
-          x="196"
-          y="156"
-          width="8"
-          height="8"
-          fill="var(--color-accent)"
-          opacity="0.6"
-        />
-        <rect
-          x="296"
-          y="236"
-          width="8"
-          height="8"
-          fill="var(--color-blue)"
-          opacity="0.5"
-        />
+
+        {/* Connector lines between nodes — dashed, colored */}
+        {connectors.map((c, i) => (
+          <line
+            key={`conn-${i}`}
+            x1={c.x1}
+            y1={c.y1}
+            x2={c.x2}
+            y2={c.y2}
+            stroke="var(--color-accent)"
+            strokeWidth="1"
+            strokeDasharray="3 6"
+            opacity="0.25"
+          />
+        ))}
+
+        {/* Accent nodes at intersections */}
+        {nodes.map((n, i) => (
+          <g key={`node-${i}`}>
+            {/* Outer ring */}
+            <rect
+              x={n.x - n.size}
+              y={n.y - n.size}
+              width={n.size * 2}
+              height={n.size * 2}
+              fill="none"
+              stroke={n.color}
+              strokeWidth="1"
+              opacity="0.3"
+            />
+            {/* Inner fill */}
+            <rect
+              x={n.x - n.size / 2}
+              y={n.y - n.size / 2}
+              width={n.size}
+              height={n.size}
+              fill={n.color}
+              opacity="0.7"
+            />
+          </g>
+        ))}
+
+        {/* Crosshair marks at key intersections */}
+        {[
+          { x: 160, y: 120 },
+          { x: 240, y: 300 },
+          { x: 640, y: 240 },
+        ].map((p, i) => (
+          <g key={`cross-${i}`} opacity="0.3">
+            <line
+              x1={p.x - 6}
+              y1={p.y}
+              x2={p.x + 6}
+              y2={p.y}
+              stroke="var(--color-text)"
+              strokeWidth="1"
+            />
+            <line
+              x1={p.x}
+              y1={p.y - 6}
+              x2={p.x}
+              y2={p.y + 6}
+              stroke="var(--color-text)"
+              strokeWidth="1"
+            />
+          </g>
+        ))}
       </svg>
+
+      {/* Fade-out gradient so grid doesn't compete with text */}
+      <div
+        className="absolute inset-0 transition-opacity duration-1200"
+        style={{
+          background:
+            "linear-gradient(to right, var(--color-bg) 25%, transparent 60%, transparent 90%, var(--color-bg) 100%)",
+          opacity: visible ? 1 : 0,
+          transitionDelay: "600ms",
+        }}
+      />
     </div>
   );
 }
