@@ -260,6 +260,106 @@
         ]
       },
       "relatedGlossary": []
+    },
+    {
+      "id": "non-functional-requirements",
+      "title": "Non-Functional Requirements: The invisible qualities that matter most",
+      "description": "The \"-ilities\" that make or break your system.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Functional requirements are WHAT your app does (users can sign up, place orders). Non-functional requirements (NFRs) are HOW WELL it does them. The main ones:\n\n- **Availability** — what percentage of the time is the system up? 99.9% = ~8 hours downtime/year\n- **Reliability** — does the system produce correct results consistently?\n- **Scalability** — can it handle growth in users, data, traffic?\n- **Maintainability** — how easy is it to change, debug, and extend?\n- **Fault Tolerance** — does it keep working when components fail?\n\nThese are often called the \"-ilities.\""
+        },
+        {
+          "heading": "why",
+          "content": "Engineers and PMs often focus on features and forget NFRs until something breaks. Understanding NFRs helps you:\n\n- Set realistic SLAs with customers\n- Prioritize engineering investments (should we build a new feature or improve uptime?)\n- Ask the right questions in design reviews (\"what happens if this service goes down?\")\n- Understand why engineers push back on \"simple\" feature requests (the feature is simple, but making it reliable at scale isn't)"
+        },
+        {
+          "heading": "how",
+          "content": "Analogy: building a house. Functional requirements are the rooms, kitchen, bathrooms — what the house HAS. Non-functional requirements are the structural integrity, insulation, plumbing reliability, fire resistance — how WELL the house performs.\n\nA house can have a beautiful kitchen (feature) but terrible insulation (NFR), making it miserable to live in.\n\nNFRs often conflict with each other:\n\n- Optimizing for **availability** (more redundancy) increases cost\n- Optimizing for **consistency** (strong guarantees) reduces performance\n\nA PM's job is to help the team decide which NFRs matter most for THEIR users and make conscious tradeoffs."
+        },
+        {
+          "heading": "when",
+          "content": "You should think about NFRs when scoping any feature:\n\n- What uptime do users expect?\n- How fast should it be?\n- What happens during a traffic spike?\n- What happens if a component fails?\n\nDifferent products have different NFR priorities:\n\n- A **banking app** prioritizes reliability and consistency\n- A **social media feed** prioritizes availability and performance\n- An **internal admin tool** can tolerate lower availability"
+        }
+      ],
+      "quiz": {
+        "question": "Which non-functional requirement should you prioritize?",
+        "scenario": "You're a PM at a fintech startup launching a money transfer feature. The engineering lead asks you to rank priorities: fast transfers (low latency), always-available service (high availability), or guaranteed correct balances (strong consistency). During your beta, a bug caused one user to see an incorrect balance for 3 seconds, which triggered a support escalation and a compliance review.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Strong consistency — correct balances are non-negotiable for financial products",
+            "correct": true,
+            "explanation": "For financial transactions, showing incorrect balances even briefly can violate regulations and destroy trust. Users will tolerate a transfer taking 2 seconds instead of 200ms, and brief planned maintenance windows, but they will NOT tolerate seeing wrong numbers in their account."
+          },
+          {
+            "id": "b",
+            "text": "High availability — the service should never go down",
+            "correct": false,
+            "explanation": "Availability matters, but for a financial product, showing incorrect data is worse than brief downtime. Users understand scheduled maintenance. They don't understand seeing the wrong balance. The beta incident — a compliance review over 3 seconds of wrong data — shows where the real risk is."
+          },
+          {
+            "id": "c",
+            "text": "Low latency — fast transfers create the best user experience",
+            "correct": false,
+            "explanation": "Speed is nice, but users expect financial transfers to take a moment. Nobody panics if a transfer takes 2 seconds. But everyone panics if their balance looks wrong. The compliance review triggered by the beta bug tells you exactly which NFR carries the highest stakes."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "back-of-the-envelope",
+      "title": "Back-of-the-Envelope Estimation: How to size a problem in 5 minutes",
+      "description": "Roughly sizing problems before building solutions.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Back-of-the-envelope estimation is the practice of making rough calculations to understand the scale of a problem before designing a solution. You don't need exact numbers — you need the right **order of magnitude**. Is this a problem that involves thousands of requests or millions? Gigabytes of storage or terabytes? Knowing the ballpark changes the architecture completely."
+        },
+        {
+          "heading": "why",
+          "content": "Estimation helps you:\n\n- **Catch unrealistic proposals early** — \"we need to handle 1 million concurrent users\" — do you though?\n- **Choose the right tools** — a problem at 100 requests/second needs a very different solution than 100,000\n- **Have credible conversations** with engineers about capacity planning\n- **Understand cost implications** before committing to an architecture"
+        },
+        {
+          "heading": "how",
+          "content": "Analogy: estimating how much food to order for a party. You don't need to know exactly how many slices of pizza each person eats. You need to know: how many people (50? 500?), roughly how much each person eats (2-3 slices), and from that you can estimate pizzas needed.\n\n**Key numbers to know for tech estimation:**\n\n- 1 million seconds ~ 11.5 days\n- 1 billion seconds ~ 31.7 years\n- A typical web page is 2-5 MB\n- A [[glossary:database|database]] row is roughly 100 bytes to 1 KB\n- A typical [[glossary:server|server]] handles 1,000-10,000 requests per second\n- 1 TB of cloud storage costs about $20-25/month\n\n**The basic formula:** Start with users, estimate actions per user per day, multiply out to get requests per second (total daily actions / 86,400 seconds).\n\n**Example:** 100,000 users x 10 actions/day = 1 million actions/day = about 12 requests per second average, maybe 50-100 at peak. One server handles that easily."
+        },
+        {
+          "heading": "when",
+          "content": "Use estimation:\n\n- **Before any architecture discussion** — how big is this problem actually?\n- **Before choosing infrastructure** — do we need a distributed system or will one server do?\n- **When evaluating vendor proposals** — is this service overkill or right-sized?\n- **When scoping MVP vs. full-scale solutions** — can we start simple and scale later?\n\nYou don't need to be precise — being within 10x of the real answer is usually enough to make the right architectural choice."
+        }
+      ],
+      "quiz": {
+        "question": "Does this scale justify the solution?",
+        "scenario": "Your team is planning a photo-sharing app. The PM estimates 50,000 daily active users, each uploading an average of 2 photos per day. Each photo is about 3 MB. An engineer proposes building a custom distributed file storage system from scratch to handle the load. You do the math: 50,000 x 2 x 3 MB = 300 GB per day, about 9 TB per month.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Use a managed blob storage service like S3 — 9 TB/month is routine for cloud storage",
+            "correct": true,
+            "explanation": "9 TB/month is well within what any cloud storage service handles trivially for under $200/month. Building custom distributed storage for this scale is massive over-engineering. The estimation revealed the problem is much smaller than it sounded."
+          },
+          {
+            "id": "b",
+            "text": "Build the custom system — photo storage will be a core competitive advantage",
+            "correct": false,
+            "explanation": "Storage is a commodity, not a differentiator. At 9 TB/month, managed services like S3 handle this effortlessly and cheaply. Building custom distributed storage would take months of engineering time for a problem that's already solved. Your competitive advantage is in the product, not the file system."
+          },
+          {
+            "id": "c",
+            "text": "Delay the decision — we need exact numbers before choosing an approach",
+            "correct": false,
+            "explanation": "That's the whole point of back-of-the-envelope estimation: you don't need exact numbers. Whether the real number is 5 TB or 15 TB per month, the answer is the same — use managed storage. Waiting for precision wastes time when the order of magnitude already tells you the answer."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
     }
   ]
 }

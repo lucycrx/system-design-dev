@@ -428,6 +428,56 @@
       },
       "relatedStories": [],
       "relatedGlossary": ["client-server", "server"]
+    },
+    {
+      "id": "blob-storage",
+      "title": "Blob Storage: Where files, images, and videos actually live",
+      "description": "Where your app stores files, images, and videos.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "A **blob store** (Binary Large Object store) is a service designed to store unstructured files — images, videos, PDFs, backups, user uploads — anything that isn't rows in a [[glossary:database|database]]. Services like Amazon S3, Cloudflare R2, and Google Cloud Storage are blob stores.\n\nUnlike a database, which stores structured data in rows and columns, a blob store is essentially a giant, infinitely scalable filing cabinet where you toss files and get back a URL to retrieve them."
+        },
+        {
+          "heading": "why",
+          "content": "Almost every app needs to store files at some point: profile pictures, product images, document uploads, video content. Understanding blob storage helps you:\n\n- Know **why engineers don't store images in the database** (it's technically possible but terrible for performance and cost)\n- Make decisions about **file upload limits and image processing**\n- Understand your **hosting bill** (storage + bandwidth are the main costs)\n- Architect **AI features** that process documents or images"
+        },
+        {
+          "heading": "how",
+          "content": "Analogy: a storage unit facility. Your apartment (the database) is for your everyday things — organized, easy to find, limited space. But when you have large items that don't fit neatly in drawers — furniture, bikes, boxes of old photos — you rent a storage unit (blob storage). Each unit has a number (the file key/URL). You can store anything in it. You pay based on how much space you use and how often you access it.\n\nIn practice: your app uploads a file to S3, gets back a URL like `https://my-bucket.s3.amazonaws.com/uploads/photo-123.jpg`, and stores that URL in the database. The database holds the reference, the blob store holds the actual file.\n\nMost blob stores also offer features like:\n\n- **Automatic redundancy** — your file is copied across multiple data centers\n- **Access control** — public vs. private files\n- **Lifecycle policies** — automatically delete files after 90 days\n- **CDN integration** — serve files fast globally"
+        },
+        {
+          "heading": "when",
+          "content": "**Use blob storage for:**\n\n- User-uploaded files (profile photos, documents, attachments)\n- App assets that are too large for your codebase (videos, large images)\n- Backups and exports\n- Any file over a few KB that needs to be served to users\n\n**Don't store files in your database** — it bloats the database, slows queries, and costs more.\n\n**Don't store files on your web [[glossary:server|server]]'s disk** — you'll lose them on redeploy and can't scale horizontally."
+        }
+      ],
+      "quiz": {
+        "question": "Why are uploaded files disappearing?",
+        "scenario": "Your app lets users upload project documents (PDFs, spreadsheets, images). Currently, files are saved to the web server's local disk in an `/uploads` folder. Everything works fine in development and early production with one server. Now you're scaling to two servers behind a load balancer. Users report that sometimes uploaded files are \"missing\" — they upload a file on one request, but the next request returns a 404.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Files on one server's disk aren't accessible from the other — move to blob storage like S3",
+            "correct": true,
+            "explanation": "Files saved to one server's local disk aren't accessible from the other server. The load balancer might send the upload to Server A and the download request to Server B. Moving to blob storage (like S3) solves this because both servers read from and write to the same central storage."
+          },
+          {
+            "id": "b",
+            "text": "The load balancer is dropping requests — configure sticky sessions",
+            "correct": false,
+            "explanation": "Sticky sessions (routing a user to the same server) would mask the symptom but not fix the root cause. If Server A goes down, all its files become inaccessible. The real fix is centralizing file storage so it doesn't depend on which server handles the request."
+          },
+          {
+            "id": "c",
+            "text": "The servers need to sync their `/uploads` folders with each other",
+            "correct": false,
+            "explanation": "File syncing between servers is fragile, slow, and doesn't scale. What happens when you add a third server? A tenth? Blob storage services like S3 are purpose-built for this problem — centralized, scalable, redundant file storage that any server can access."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
     }
   ]
 }
