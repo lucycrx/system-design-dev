@@ -104,7 +104,7 @@
       "analogy": "Suppliers and contractors your business relies on. You don't make everything in-house — you outsource to specialists.",
       "icon": "lucide:plug",
       "diagramNodeType": "server",
-      "color": "#C44536",
+      "color": "#2A7A6B",
       "signals": [
         "API keys in environment variables",
         "HTTP client calls to external URLs",

@@ -83,7 +83,7 @@ Each node type maps to a category color. These are defined in the site's design 
 | `database` | Database | Forest green | `#256B3B` |
 | `cache` | Cache | Warm gold | `#C49A1D` |
 | `auth` | Auth | Deep red | `#8C3B3B` |
-| `external-service` | External | Burnt orange | `#C44536` |
+| `external-service` | External | Deep teal | `#2A7A6B` |
 | `queue`, `background-job` | Background Jobs | Muted purple | `#6B5B8A` |
 | `load-balancer`, `cdn` | Infrastructure | Steel blue | `#4A708E` |
 | `storage` | Storage | Sage green | `#5A7A5A` |

@@ -87,7 +87,7 @@
       "description": "A third-party service your system depends on — payment processors, email providers, AI APIs, analytics",
       "analogy": "Suppliers and contractors your business relies on. You don't make everything in-house — you outsource to specialists.",
       "icon": "lucide:plug",
-      "color": "#C44536",
+      "color": "#2A7A6B",
       "cssVar": "--color-accent"
     },
     {
