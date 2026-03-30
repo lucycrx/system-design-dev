@@ -56,57 +56,54 @@ export function ProductHero() {
           </span>
         </div>
 
-        {/* Two-column: headline left, mini-diagram right */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          <div>
-            {/* Main title */}
-            <h1 className="text-5xl sm:text-7xl lg:text-[5.5rem] font-bold text-text leading-[1.02] tracking-tight mb-10">
-              <span className="block">
-                <WordReveal delay={150} visible={phase >= 1}>
-                  ANY
-                </WordReveal>{" "}
-                <WordReveal delay={300} visible={phase >= 1}>
-                  CODEBASE.
-                </WordReveal>
+        {/* Main title — full width, never blocked */}
+        <h1 className="text-5xl sm:text-7xl lg:text-[5.5rem] font-bold text-text leading-[1.02] tracking-tight mb-10">
+          <span className="block">
+            <WordReveal delay={150} visible={phase >= 1}>
+              ANY
+            </WordReveal>{" "}
+            <WordReveal delay={300} visible={phase >= 1}>
+              CODEBASE.
+            </WordReveal>
+          </span>
+          <span className="block">
+            <WordReveal delay={500} visible={phase >= 1}>
+              <span className="relative">
+                UNDERSTOOD.
+                <span
+                  className="absolute -bottom-2 left-0 h-[3px] bg-accent transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left w-full"
+                  style={{
+                    transform: phase >= 2 ? "scaleX(1)" : "scaleX(0)",
+                  }}
+                />
               </span>
-              <span className="block">
-                <WordReveal delay={500} visible={phase >= 1}>
-                  <span className="relative">
-                    UNDERSTOOD.
-                    <span
-                      className="absolute -bottom-2 left-0 h-[3px] bg-accent transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left w-full"
-                      style={{
-                        transform: phase >= 2 ? "scaleX(1)" : "scaleX(0)",
-                      }}
-                    />
-                  </span>
-                </WordReveal>
-              </span>
-            </h1>
+            </WordReveal>
+          </span>
+        </h1>
 
-            {/* Two-column bottom: subtitle left, annotation right */}
-            <div
-              className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 transition-all duration-700"
-              style={{
-                opacity: phase >= 2 ? 1 : 0,
-                transform: phase >= 2 ? "translateY(0)" : "translateY(12px)",
-                transitionDelay: "200ms",
-              }}
-            >
-              <p className="font-mono text-[13px] text-text-muted leading-relaxed">
-                Scan any codebase. Get an interactive architecture map with
-                plain-English explanations and risk analysis. No code reading
-                required.
-              </p>
+        {/* Tagline left + mini diagram right */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-10 lg:gap-16 items-start">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 transition-all duration-700"
+            style={{
+              opacity: phase >= 2 ? 1 : 0,
+              transform: phase >= 2 ? "translateY(0)" : "translateY(12px)",
+              transitionDelay: "200ms",
+            }}
+          >
+            <p className="font-mono text-[13px] text-text-muted leading-relaxed">
+              Scan any codebase. Get an interactive architecture map with
+              plain-English explanations and risk analysis. No code reading
+              required.
+            </p>
 
-              <div className="border-t border-text/15 pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-8">
-                <div className="label-mono text-accent mb-2">
-                  For PMs, founders, and vibecoders
-                </div>
-                <div className="font-mono text-[12px] text-text-dim leading-relaxed">
-                  Understand what was built &mdash; and what might break &mdash;
-                  in 5 minutes.
-                </div>
+            <div className="border-t border-text/15 pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-8">
+              <div className="label-mono text-accent mb-2">
+                For PMs, founders, and vibecoders
+              </div>
+              <div className="font-mono text-[12px] text-text-dim leading-relaxed">
+                Understand what was built &mdash; and what might break &mdash;
+                in 5 minutes.
               </div>
             </div>
           </div>
