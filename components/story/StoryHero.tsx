@@ -8,9 +8,9 @@ const difficultyColors = {
 
 export function StoryHero({ story }: { story: Story }) {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-16">
+    <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Story header */}
-      <div className="mb-14">
+      <div className="mb-14 max-w-3xl">
         <div className="flex items-center gap-3 mb-5">
           <span
             className={`label-mono px-2.5 py-1 ${difficultyColors[story.difficulty]}`}
@@ -33,7 +33,7 @@ export function StoryHero({ story }: { story: Story }) {
       </div>
 
       {/* Concepts you'll learn */}
-      <div>
+      <div className="max-w-3xl">
         <h2 className="label-mono text-text-dim mb-4">
           Concepts You&apos;ll Learn
         </h2>
