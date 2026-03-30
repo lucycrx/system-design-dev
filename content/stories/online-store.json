@@ -30,7 +30,7 @@
         },
         {
           "type": "text",
-          "content": "Here's how a typical request flows right now:\n\n1. A customer visits your site -- their browser sends a request to **your server**\n2. The server asks the [[glossary:database|database]] for the product catalog\n3. The database returns the data -- names, prices, images, stock levels\n4. The server assembles an HTML page and sends it back to the browser\n5. The customer sees your beautiful storefront\n\nEvery single page load follows this path. Product listing? Server asks the database. Product detail page? Server asks the database. Shopping cart? Server asks the database. You get the idea."
+          "content": "Here's how a typical request flows right now:\n\n1. A customer visits your site -- their browser sends a request to **[[node:server|your server]]**\n2. The server asks the [[glossary:database|database]] for the product catalog\n3. The database returns the data -- names, prices, images, stock levels\n4. The server assembles an HTML page and sends it back to the browser\n5. The customer sees your beautiful storefront\n\nEvery single page load follows this path. Product listing? Server asks the database. Product detail page? Server asks the database. Shopping cart? Server asks the database. You get the idea."
         },
         {
           "type": "diagram",
@@ -90,7 +90,7 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Yesterday: 50 visitors. Today: 10,000 per hour. Your inbox is full of customer complaints -- *\"Your site is so slow!\"* and *\"I keep getting error pages.\"*\n\nYou pull up your server dashboard and the problem is obvious: your database is completely overwhelmed. Here's why.\n\nRemember how every page load queries the database? Your product catalog has 200 items. It barely changes -- maybe you add a new candle once a week. But with 10,000 visitors per hour, your database is answering the **exact same question** (\"What products do you have?\") roughly 2,800 times per minute. It's like a librarian being asked for the same book by a new person every fraction of a second."
+          "content": "Yesterday: 50 visitors. Today: 10,000 per hour. Your inbox is full of customer complaints -- *\"Your site is so slow!\"* and *\"I keep getting error pages.\"*\n\nYou pull up your server dashboard and the problem is obvious: your [[node:database|database]] is completely overwhelmed. Here's why.\n\nRemember how every page load queries the database? Your product catalog has 200 items. It barely changes -- maybe you add a new candle once a week. But with 10,000 visitors per hour, your database is answering the **exact same question** (\"What products do you have?\") roughly 2,800 times per minute. It's like a librarian being asked for the same book by a new person every fraction of a second."
         },
         {
           "type": "callout",
@@ -99,7 +99,7 @@
         },
         {
           "type": "text",
-          "content": "The solution is a [[glossary:cache|cache]] -- a fast, temporary storage layer that sits between your server and your database. Instead of querying the database for every request, your server checks the cache first.\n\nThe most popular tool for this is **Redis**, an in-memory data store that's extremely fast because it keeps everything in RAM (like the server's short-term memory).\n\nHere's the new flow:\n\n1. Customer requests the product catalog\n2. Server checks the cache: *\"Do I already have this?\"*\n3. **Cache hit**: Yes! Return the cached data instantly (no database query needed)\n4. **Cache miss**: Nope. Query the database, store the result in the cache for next time, then return it\n\nNow the first visitor in any given minute hits the database. The next 2,799 visitors get the cached version -- nearly instantly."
+          "content": "The solution is a [[glossary:cache|cache]] -- a fast, temporary storage layer that sits between your server and your database. Instead of querying the [[node:database|database]] for every request, your server checks the [[node:cache|cache]] first.\n\nThe most popular tool for this is **[[node:cache|Redis]]**, an in-memory data store that's extremely fast because it keeps everything in RAM (like the server's short-term memory).\n\nHere's the new flow:\n\n1. Customer requests the product catalog\n2. Server checks the cache: *\"Do I already have this?\"*\n3. **Cache hit**: Yes! Return the cached data instantly (no database query needed)\n4. **Cache miss**: Nope. Query the database, store the result in the cache for next time, then return it\n\nNow the first visitor in any given minute hits the database. The next 2,799 visitors get the cached version -- nearly instantly."
         },
         {
           "type": "diagram",
@@ -115,7 +115,7 @@
         },
         {
           "type": "text",
-          "content": "But there's another bottleneck: **images**. Your product photos are large files (1-3 MB each), and every visitor downloads them from your single server. If someone in Tokyo visits your store hosted in Virginia, those images travel halfway around the world.\n\nThis is where a [[glossary:cdn|CDN (Content Delivery Network)]] comes in. A CDN copies your static files -- images, CSS, JavaScript -- to servers all around the world. When a customer in Tokyo requests a candle photo, they get it from a server in Tokyo, not Virginia."
+          "content": "But there's another bottleneck: **images**. Your product photos are large files (1-3 MB each), and every visitor downloads them from your single server. If someone in Tokyo visits your store hosted in Virginia, those images travel halfway around the world.\n\nThis is where a [[glossary:cdn|CDN (Content Delivery Network)]] comes in. A [[node:cdn|CDN]] copies your static files -- images, CSS, JavaScript -- to servers all around the world. When a customer in Tokyo requests a candle photo, they get it from a server in Tokyo, not Virginia."
         },
         {
           "type": "callout",
@@ -200,7 +200,7 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Midnight. 100,000 people slam your site at the exact same moment.\n\nYour single server -- even with Redis caching and a CDN -- simply cannot process that many requests at once. One server has limited CPU, limited memory, and limited network bandwidth. It's like trying to funnel a stadium's worth of people through a single door.\n\nYou need more doors. In system design, this is called [[glossary:horizontal-scaling|horizontal scaling]] -- instead of making one server bigger (vertical scaling), you add more servers."
+          "content": "Midnight. 100,000 people slam your site at the exact same moment.\n\nYour single server -- even with [[node:cache|Redis]] caching and a [[node:cdn|CDN]] -- simply cannot process that many requests at once. One server has limited CPU, limited memory, and limited network bandwidth. It's like trying to funnel a stadium's worth of people through a single door.\n\nYou need more doors. In system design, this is called [[glossary:horizontal-scaling|horizontal scaling]] -- instead of making one server bigger (vertical scaling), you add more servers."
         },
         {
           "type": "callout",
@@ -218,7 +218,7 @@
         },
         {
           "type": "text",
-          "content": "With a load balancer and 5 servers, your setup now looks like this:\n\n1. Customer's browser sends a request to your domain (e.g., `yourstore.com`)\n2. The [[glossary:load-balancer|load balancer]] receives the request\n3. It picks one of your 5 servers (using strategies like round-robin or least-connections)\n4. That server handles the request, checking the cache or database as needed\n5. The response goes back through the load balancer to the customer\n\nThe customer has no idea there are 5 servers behind the scenes. To them, it's still just `yourstore.com`."
+          "content": "With a load balancer and 5 servers, your setup now looks like this:\n\n1. Customer's browser sends a request to your domain (e.g., `yourstore.com`)\n2. The [[glossary:load-balancer|load balancer]] receives the request\n3. It picks one of your 5 [[node:server-1|servers]] (using strategies like round-robin or least-connections)\n4. That server handles the request, checking the cache or database as needed\n5. The response goes back through the load balancer to the customer\n\nThe customer has no idea there are 5 servers behind the scenes. To them, it's still just `yourstore.com`."
         },
         {
           "type": "diagram",
@@ -229,7 +229,7 @@
         },
         {
           "type": "text",
-          "content": "Your servers are handling the traffic now, but a new bottleneck emerges: **the database**. Five servers all querying one database means the database gets 5x the load.\n\nFor reads (loading product pages, checking order history), you can add [[glossary:read-replica|read replicas]]. A read replica is a copy of your database that stays in sync with the primary. Your servers read from the replicas and write to the primary.\n\nSince an online store is **read-heavy** (hundreds of people browsing for every one person buying), spreading reads across replicas dramatically reduces the load on your primary database."
+          "content": "Your servers are handling the traffic now, but a new bottleneck emerges: **the database**. Five servers all querying one database means the database gets 5x the load.\n\nFor reads (loading product pages, checking order history), you can add [[glossary:read-replica|read replicas]]. A [[node:read-replica|read replica]] is a copy of your [[node:database|database]] that stays in sync with the primary. Your servers read from the replicas and write to the primary.\n\nSince an online store is **read-heavy** (hundreds of people browsing for every one person buying), spreading reads across replicas dramatically reduces the load on your primary database."
         },
         {
           "type": "callout",
