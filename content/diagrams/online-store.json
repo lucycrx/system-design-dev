@@ -1,26 +1,28 @@
 {
   "online-store-stage-1": {
     "id": "online-store-stage-1",
+    "title": "The Starting Point",
+    "description": "One server handles everything",
     "nodes": [
       {
         "id": "client-1",
         "type": "client",
         "label": "Customer Browser",
-        "position": { "x": 0, "y": 100 },
+        "position": { "x": 0, "y": 120 },
         "explanation": "The customer's web browser where they browse products and place orders"
       },
       {
         "id": "server",
         "type": "server",
         "label": "Server",
-        "position": { "x": 300, "y": 100 },
+        "position": { "x": 375, "y": 120 },
         "explanation": "A single server that handles all requests, queries the database, and returns pages to the browser"
       },
       {
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 600, "y": 100 },
+        "position": { "x": 750, "y": 120 },
         "explanation": "Stores all product listings, inventory counts, customer accounts, and order history"
       }
     ],
@@ -33,19 +35,21 @@
   },
   "online-store-stage-2": {
     "id": "online-store-stage-2",
+    "title": "Adding Speed",
+    "description": "CDN and caching reduce load on the server",
     "nodes": [
       {
         "id": "client-1",
         "type": "client",
         "label": "Customer Browser",
-        "position": { "x": 0, "y": 150 },
+        "position": { "x": 0, "y": 185 },
         "explanation": "The customer's web browser where they browse products and place orders"
       },
       {
         "id": "cdn",
         "type": "cdn",
         "label": "CDN",
-        "position": { "x": 200, "y": 0 },
+        "position": { "x": 250, "y": 0 },
         "explanation": "Serves static assets like product images, CSS, and JavaScript from edge servers close to the customer",
         "isNew": true
       },
@@ -53,22 +57,23 @@
         "id": "server",
         "type": "server",
         "label": "Server",
-        "position": { "x": 350, "y": 150 },
+        "position": { "x": 435, "y": 185 },
         "explanation": "Handles dynamic requests like product catalog lookups and checkout processing"
       },
       {
         "id": "cache",
         "type": "cache",
         "label": "Redis Cache",
-        "position": { "x": 550, "y": 0 },
+        "position": { "x": 690, "y": 0 },
         "explanation": "Stores frequently-accessed data in memory so the server can skip the database for repeated queries",
-        "isNew": true
+        "isNew": true,
+        "technology": "Redis"
       },
       {
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 700, "y": 150 },
+        "position": { "x": 875, "y": 185 },
         "explanation": "Stores all product listings, inventory counts, customer accounts, and order history"
       }
     ],
@@ -83,26 +88,28 @@
   },
   "online-store-stage-3": {
     "id": "online-store-stage-3",
+    "title": "Scaling Out",
+    "description": "Multiple servers share the work behind a load balancer",
     "nodes": [
       {
         "id": "client-1",
         "type": "client",
         "label": "Customer Browser",
-        "position": { "x": 0, "y": 200 },
+        "position": { "x": 0, "y": 250 },
         "explanation": "The customer's web browser where they browse products and place orders"
       },
       {
         "id": "cdn",
         "type": "cdn",
         "label": "CDN",
-        "position": { "x": 200, "y": 0 },
+        "position": { "x": 250, "y": 0 },
         "explanation": "Serves static assets like product images, CSS, and JavaScript from edge servers close to the customer"
       },
       {
         "id": "load-balancer",
         "type": "load-balancer",
         "label": "Load Balancer",
-        "position": { "x": 300, "y": 200 },
+        "position": { "x": 375, "y": 250 },
         "explanation": "Distributes incoming traffic across multiple servers so no single server is overwhelmed",
         "isNew": true
       },
@@ -110,14 +117,14 @@
         "id": "server-1",
         "type": "server",
         "label": "Server 1",
-        "position": { "x": 550, "y": 100 },
+        "position": { "x": 690, "y": 125 },
         "explanation": "One of several identical servers handling customer requests in parallel"
       },
       {
         "id": "server-2",
         "type": "server",
         "label": "Server 2",
-        "position": { "x": 550, "y": 300 },
+        "position": { "x": 690, "y": 375 },
         "explanation": "A second server instance that shares the traffic load with Server 1",
         "isNew": true
       },
@@ -125,21 +132,23 @@
         "id": "cache",
         "type": "cache",
         "label": "Redis Cache",
-        "position": { "x": 800, "y": 0 },
-        "explanation": "Shared cache that all servers check before querying the database"
+        "position": { "x": 1000, "y": 0 },
+        "explanation": "Shared cache that all servers check before querying the database",
+        "technology": "Redis"
       },
       {
         "id": "database",
         "type": "database",
         "label": "Primary DB",
-        "position": { "x": 800, "y": 200 },
-        "explanation": "The primary database that handles all write operations like placing orders and updating inventory"
+        "position": { "x": 1000, "y": 250 },
+        "explanation": "The primary database that handles all write operations like placing orders and updating inventory",
+        "technology": "PostgreSQL"
       },
       {
         "id": "read-replica",
         "type": "database",
         "label": "Read Replica",
-        "position": { "x": 800, "y": 400 },
+        "position": { "x": 1000, "y": 500 },
         "explanation": "A synchronized copy of the primary database that handles read-heavy queries like browsing products",
         "isNew": true
       }

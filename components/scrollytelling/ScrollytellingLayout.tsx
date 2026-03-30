@@ -20,6 +20,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
   const [activeDiagramId, setActiveDiagramId] = useState<string | null>(null);
   const [activeHighlightNodes, setActiveHighlightNodes] = useState<string[]>([]);
   const [activeAnimateFlow, setActiveAnimateFlow] = useState<string[]>([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const diagramRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -80,7 +81,7 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
   return (
     <div className="flex flex-col lg:flex-row lg:gap-8">
       {/* Left panel — scrollable narrative */}
-      <div className="lg:w-[55%] space-y-8">
+      <div className="lg:w-[50%] space-y-8">
         {blocks.map((block, i) => {
           if (block.type === "diagram") {
             const diagramBlock = block as DiagramBlockType;
@@ -129,20 +130,21 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
 
           return (
             <div key={i}>
-              {renderBlock(block, glossaryMap)}
+              {renderBlock(block, glossaryMap, selectedNodeId)}
             </div>
           );
         })}
       </div>
 
       {/* Right panel — sticky diagram (desktop only) */}
-      <div className="hidden lg:block lg:w-[45%]">
+      <div className="hidden lg:block lg:w-[50%]">
         <div className="sticky" style={{ top: stickyTop }}>
           <div className="bg-surface border border-border p-6">
             <InteractiveDiagramLoader
               diagram={activeDiagram}
               highlightNodes={activeHighlightNodes}
               animateFlow={activeAnimateFlow}
+              onNodeClick={setSelectedNodeId}
             />
           </div>
         </div>
@@ -151,10 +153,10 @@ export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop 
   );
 }
 
-function renderBlock(block: Block, glossaryMap: Record<string, GlossaryTerm>) {
+function renderBlock(block: Block, glossaryMap: Record<string, GlossaryTerm>, selectedNodeId: string | null) {
   switch (block.type) {
     case "text":
-      return <TextBlock block={block} glossaryMap={glossaryMap} />;
+      return <TextBlock block={block} glossaryMap={glossaryMap} selectedNodeId={selectedNodeId} />;
     case "callout":
       return <CalloutBlock block={block} />;
     case "checkpoint":

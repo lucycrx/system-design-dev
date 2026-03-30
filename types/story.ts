@@ -170,6 +170,7 @@ export interface DiagramNode {
   explanation: string;
   glossaryLink?: string;
   isNew?: boolean;
+  technology?: string;
 }
 
 export interface DiagramEdge {
@@ -179,10 +180,13 @@ export interface DiagramEdge {
   label?: string;
   animated?: boolean;
   style?: "solid" | "dashed";
+  protocol?: string;
 }
 
 export interface Diagram {
   id: string;
+  title?: string;
+  description?: string;
   nodes: DiagramNode[];
   edges: DiagramEdge[];
 }

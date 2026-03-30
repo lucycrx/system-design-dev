@@ -1,296 +1,182 @@
 {
   "ride-sharing-stage-1": {
     "id": "ride-sharing-stage-1",
+    "title": "The Monolith",
+    "description": "One server does everything for riders and drivers",
     "nodes": [
       {
         "id": "rider",
         "type": "client",
-        "label": "Rider App",
+        "label": "Rider's Phone",
         "position": { "x": 0, "y": 0 },
-        "explanation": "The rider's phone app where they request rides and see driver locations"
+        "explanation": "The rider's app — shows nearby drivers on a map and lets you tap 'Request Ride' to get picked up"
       },
       {
         "id": "driver",
         "type": "client",
-        "label": "Driver App",
-        "position": { "x": 0, "y": 300 },
-        "explanation": "The driver's phone app that sends GPS updates and receives ride assignments"
+        "label": "Driver's Phone",
+        "position": { "x": 0, "y": 250 },
+        "explanation": "The driver's app — sends GPS location every few seconds and receives ride requests from the server"
       },
       {
         "id": "server",
         "type": "server",
-        "label": "Server",
-        "position": { "x": 300, "y": 150 },
-        "explanation": "A single server that matches riders with the nearest available driver"
+        "label": "The Server",
+        "position": { "x": 375, "y": 125 },
+        "explanation": "Does everything — receives ride requests, tracks driver locations, finds the nearest available driver, and records completed trips"
       },
       {
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 600, "y": 150 },
-        "explanation": "Stores everything -- driver locations, trip history, user profiles, and payment records"
+        "position": { "x": 750, "y": 125 },
+        "explanation": "Stores everything in one place: trip history, user profiles, payment records, and right now, driver GPS locations too",
+        "glossaryLink": "database"
       }
     ],
     "edges": [
-      {
-        "id": "e-rider-server",
-        "source": "rider",
-        "target": "server",
-        "label": "request ride",
-        "animated": true,
-        "style": "solid"
-      },
-      {
-        "id": "e-server-database",
-        "source": "server",
-        "target": "database",
-        "label": "find nearest driver",
-        "style": "solid"
-      },
-      {
-        "id": "e-server-driver",
-        "source": "server",
-        "target": "driver",
-        "label": "assign ride",
-        "animated": true,
-        "style": "solid"
-      },
-      {
-        "id": "e-driver-server",
-        "source": "driver",
-        "target": "server",
-        "label": "GPS updates",
-        "style": "dashed"
-      }
+      { "id": "e-rider-server", "source": "rider", "target": "server", "label": "request ride", "style": "solid" },
+      { "id": "e-driver-server", "source": "driver", "target": "server", "label": "send GPS location", "style": "solid", "animated": true },
+      { "id": "e-server-driver", "source": "server", "target": "driver", "label": "assign ride request", "style": "solid" },
+      { "id": "e-server-db", "source": "server", "target": "database", "label": "store trips + locations", "style": "solid" },
+      { "id": "e-db-server", "source": "database", "target": "server", "label": "read driver positions", "style": "dashed" }
     ]
   },
   "ride-sharing-stage-2": {
     "id": "ride-sharing-stage-2",
+    "title": "Splitting Hot and Cold Data",
+    "description": "Redis handles fast-changing GPS data, database keeps permanent records",
     "nodes": [
       {
         "id": "rider",
         "type": "client",
-        "label": "Rider App",
+        "label": "Rider's Phone",
         "position": { "x": 0, "y": 0 },
-        "explanation": "The rider's phone app where they request rides and see driver locations"
+        "explanation": "Requests a ride and waits for a driver match — the app doesn't know or care what changed on the backend"
       },
       {
         "id": "driver",
         "type": "client",
-        "label": "Driver App",
-        "position": { "x": 0, "y": 300 },
-        "explanation": "The driver's phone app that sends GPS updates and receives ride assignments"
+        "label": "Driver's Phone",
+        "position": { "x": 0, "y": 250 },
+        "explanation": "Sends GPS updates every 3 seconds — with 5,000 drivers, that's 1,700 updates per second hitting the system"
       },
       {
         "id": "server",
         "type": "server",
-        "label": "Server",
-        "position": { "x": 300, "y": 150 },
-        "explanation": "Handles ride matching with optimistic locking to prevent double-assignments"
+        "label": "The Server",
+        "position": { "x": 375, "y": 125 },
+        "explanation": "Matches riders to drivers using optimistic locking — checks availability and assigns in one atomic step so two riders can't grab the same driver",
+        "glossaryLink": "race-condition"
       },
       {
-        "id": "cache",
+        "id": "redis",
         "type": "cache",
         "label": "Redis",
-        "position": { "x": 550, "y": 0 },
-        "explanation": "In-memory store for fast-changing driver locations and availability status",
-        "isNew": true
+        "position": { "x": 750, "y": 0 },
+        "explanation": "Fast in-memory store for driver locations and availability — handles 100,000+ operations per second because it skips writing to disk. Old locations are simply overwritten by new ones.",
+        "glossaryLink": "in-memory-store",
+        "isNew": true,
+        "technology": "Redis"
       },
       {
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 550, "y": 300 },
-        "explanation": "Stores persistent data like trip history, payment records, and user profiles"
+        "position": { "x": 750, "y": 250 },
+        "explanation": "Now only stores persistent data — trip records, payment history, user profiles. No longer drowning in throwaway GPS writes.",
+        "glossaryLink": "database"
       }
     ],
     "edges": [
-      {
-        "id": "e-driver-server",
-        "source": "driver",
-        "target": "server",
-        "label": "GPS updates",
-        "style": "dashed"
-      },
-      {
-        "id": "e-server-cache-store",
-        "source": "server",
-        "target": "cache",
-        "label": "store location",
-        "animated": true,
-        "style": "solid"
-      },
-      {
-        "id": "e-rider-server",
-        "source": "rider",
-        "target": "server",
-        "label": "request ride",
-        "animated": true,
-        "style": "solid"
-      },
-      {
-        "id": "e-server-cache-find",
-        "source": "server",
-        "target": "cache",
-        "label": "find nearest",
-        "style": "solid"
-      },
-      {
-        "id": "e-server-database",
-        "source": "server",
-        "target": "database",
-        "label": "ride history, payments",
-        "style": "dashed"
-      },
-      {
-        "id": "e-server-driver",
-        "source": "server",
-        "target": "driver",
-        "label": "assign with lock",
-        "animated": true,
-        "style": "solid"
-      }
+      { "id": "e-rider-server", "source": "rider", "target": "server", "label": "request ride", "style": "solid" },
+      { "id": "e-driver-server", "source": "driver", "target": "server", "label": "send GPS update", "style": "solid", "animated": true },
+      { "id": "e-server-redis-write", "source": "server", "target": "redis", "label": "write driver location", "style": "solid", "animated": true },
+      { "id": "e-redis-server", "source": "redis", "target": "server", "label": "find nearest driver", "style": "dashed" },
+      { "id": "e-server-driver", "source": "server", "target": "driver", "label": "assign ride request", "style": "solid" },
+      { "id": "e-server-db", "source": "server", "target": "database", "label": "store trip record", "style": "solid" }
     ]
   },
   "ride-sharing-stage-3": {
     "id": "ride-sharing-stage-3",
+    "title": "Microservices",
+    "description": "Independent services so a payment bug can't take down ride matching",
     "nodes": [
       {
         "id": "rider",
         "type": "client",
-        "label": "Rider App",
+        "label": "Rider's Phone",
         "position": { "x": 0, "y": 0 },
-        "explanation": "The rider's phone app that sends ride requests through the API gateway"
+        "explanation": "Sends ride requests to the Matching Service and receives real-time updates about driver assignment and trip progress"
       },
       {
         "id": "driver",
         "type": "client",
-        "label": "Driver App",
-        "position": { "x": 0, "y": 300 },
-        "explanation": "The driver's phone app that sends GPS updates and receives assignments"
+        "label": "Driver's Phone",
+        "position": { "x": 0, "y": 310 },
+        "explanation": "Sends GPS updates and receives ride assignments — now routed through dedicated services instead of one big server"
       },
       {
-        "id": "api-gateway",
-        "type": "api-gateway",
-        "label": "API Gateway",
-        "position": { "x": 250, "y": 150 },
-        "explanation": "Single entry point that routes requests to the appropriate microservice",
-        "isNew": true
-      },
-      {
-        "id": "matching-service",
+        "id": "matching",
         "type": "server",
         "label": "Matching Service",
-        "position": { "x": 500, "y": 0 },
-        "explanation": "Dedicated service that finds and assigns the nearest available driver",
+        "position": { "x": 350, "y": 0 },
+        "explanation": "Finds the nearest available driver for each ride request — runs independently so a payment bug can never take down ride matching",
+        "glossaryLink": "microservices",
         "isNew": true
       },
       {
-        "id": "cache",
+        "id": "redis",
         "type": "cache",
         "label": "Redis",
-        "position": { "x": 750, "y": 0 },
-        "explanation": "In-memory store for real-time driver locations and availability"
+        "position": { "x": 350, "y": 155 },
+        "explanation": "Still holds ephemeral driver locations and availability — the Matching Service reads from here to find the nearest driver in microseconds",
+        "technology": "Redis"
       },
       {
         "id": "queue",
         "type": "queue",
         "label": "Message Queue",
-        "position": { "x": 500, "y": 300 },
-        "explanation": "Decouples services so a failure in one does not cascade to others",
+        "position": { "x": 350, "y": 310 },
+        "explanation": "The to-do board connecting all services — when a ride is matched, the event waits here until Payment and Notification services are ready to process it",
+        "glossaryLink": "message-queue",
         "isNew": true
       },
       {
-        "id": "payment-service",
-        "type": "server",
-        "label": "Payment Service",
-        "position": { "x": 750, "y": 200 },
-        "explanation": "Handles charges, refunds, and driver payouts independently of other services",
-        "isNew": true
-      },
-      {
-        "id": "notification-service",
-        "type": "server",
-        "label": "Notification Service",
-        "position": { "x": 750, "y": 400 },
-        "explanation": "Sends push notifications and SMS to riders and drivers",
+        "id": "notification",
+        "type": "external-service",
+        "label": "Notifications",
+        "position": { "x": 725, "y": 0 },
+        "explanation": "Sends push notifications and SMS — 'Your driver is 3 minutes away.' Picks up events from the queue whenever it's ready, even after a brief outage",
         "isNew": true
       },
       {
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 1000, "y": 150 },
-        "explanation": "Persistent storage for trip records, payment history, and user accounts"
+        "position": { "x": 725, "y": 155 },
+        "explanation": "The system of record — stores completed trips, payment history, and user accounts. Each service writes its own data here"
+      },
+      {
+        "id": "payment",
+        "type": "server",
+        "label": "Payment Service",
+        "position": { "x": 725, "y": 310 },
+        "explanation": "Handles charges, refunds, and driver payouts. If it slows down, the circuit breaker trips and payments get queued — rides keep going",
+        "glossaryLink": "circuit-breaker",
+        "isNew": true
       }
     ],
     "edges": [
-      {
-        "id": "e-rider-api-gateway",
-        "source": "rider",
-        "target": "api-gateway",
-        "label": "request ride",
-        "animated": true,
-        "style": "solid"
-      },
-      {
-        "id": "e-driver-api-gateway",
-        "source": "driver",
-        "target": "api-gateway",
-        "label": "GPS updates",
-        "style": "dashed"
-      },
-      {
-        "id": "e-api-gateway-matching-service",
-        "source": "api-gateway",
-        "target": "matching-service",
-        "label": "route request",
-        "animated": true,
-        "style": "solid"
-      },
-      {
-        "id": "e-matching-service-cache",
-        "source": "matching-service",
-        "target": "cache",
-        "label": "find nearest driver",
-        "style": "solid"
-      },
-      {
-        "id": "e-matching-service-queue",
-        "source": "matching-service",
-        "target": "queue",
-        "label": "ride completed event",
-        "animated": true,
-        "style": "solid"
-      },
-      {
-        "id": "e-queue-payment-service",
-        "source": "queue",
-        "target": "payment-service",
-        "label": "process payment",
-        "style": "solid"
-      },
-      {
-        "id": "e-queue-notification-service",
-        "source": "queue",
-        "target": "notification-service",
-        "label": "send notification",
-        "style": "solid"
-      },
-      {
-        "id": "e-payment-service-database",
-        "source": "payment-service",
-        "target": "database",
-        "label": "store payment",
-        "style": "dashed"
-      },
-      {
-        "id": "e-matching-service-database",
-        "source": "matching-service",
-        "target": "database",
-        "label": "store trip record",
-        "style": "dashed"
-      }
+      { "id": "e-rider-matching", "source": "rider", "target": "matching", "label": "request ride", "style": "solid" },
+      { "id": "e-driver-matching", "source": "driver", "target": "matching", "label": "send GPS update", "style": "solid", "animated": true },
+      { "id": "e-matching-redis", "source": "matching", "target": "redis", "label": "find nearest driver", "style": "dashed" },
+      { "id": "e-matching-driver", "source": "matching", "target": "driver", "label": "assign ride", "style": "solid" },
+      { "id": "e-matching-queue", "source": "matching", "target": "queue", "label": "publish 'ride matched'", "style": "solid", "animated": true },
+      { "id": "e-queue-notification", "source": "queue", "target": "notification", "label": "trigger rider alert", "style": "solid" },
+      { "id": "e-queue-payment", "source": "queue", "target": "payment", "label": "process fare", "style": "solid" },
+      { "id": "e-payment-db", "source": "payment", "target": "database", "label": "store payment record", "style": "solid" },
+      { "id": "e-matching-db", "source": "matching", "target": "database", "label": "store trip record", "style": "dashed" }
     ]
   }
 }

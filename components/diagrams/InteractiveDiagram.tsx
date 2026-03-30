@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ReactFlow,
   Background,
+  Controls,
   type Node,
   type Edge,
   useNodesState,
@@ -12,22 +13,24 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import type { Diagram } from "@/types/story";
+import type { Diagram, DiagramNodeType } from "@/types/story";
 import { SystemNode } from "./SystemNode";
 import { AnimatedEdge } from "./AnimatedEdge";
+import { DiagramLegend } from "./DiagramLegend";
 
 interface Props {
   diagram: Diagram | null;
   highlightNodes?: string[];
   animateFlow?: string[];
   className?: string;
+  onNodeClick?: (nodeId: string | null) => void;
 }
 
 const nodeTypes = { system: SystemNode };
 const edgeTypes = { animated: AnimatedEdge };
 const EMPTY_ARRAY: string[] = [];
 
-function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: Props) {
+function DiagramInner({ diagram, highlightNodes, animateFlow, className = "", onNodeClick }: Props) {
   const stableHighlight = highlightNodes ?? EMPTY_ARRAY;
   const stableAnimate = animateFlow ?? EMPTY_ARRAY;
 
@@ -68,6 +71,7 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
         glossaryLink: node.glossaryLink,
         isNew: node.isNew,
         isHighlighted: highlightSet.has(node.id),
+        technology: node.technology,
       },
     }));
 
@@ -83,6 +87,7 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
         data: {
           animated: isAnimated,
           edgeStyle: edge.style || "solid",
+          protocol: edge.protocol,
         },
       };
     });
@@ -93,7 +98,8 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
 
     // Fit view after nodes are rendered, then fade in
     const timer = setTimeout(() => {
-      fitView({ padding: 0.3, duration: 300 });
+      const padding = diagram && diagram.nodes.length > 5 ? 0.15 : 0.3;
+      fitView({ padding, duration: 300 });
       setIsVisible(true);
     }, 50);
     return () => clearTimeout(timer);
@@ -101,9 +107,34 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
   }, [diagramId, highlightKey, animateKey]);
 
   const onInit = useCallback(() => {
-    fitView({ padding: 0.3 });
+    const padding = nodes.length > 5 ? 0.15 : 0.3;
+    fitView({ padding });
     setTimeout(() => setIsVisible(true), 100);
-  }, [fitView]);
+  }, [fitView, nodes.length]);
+
+  const handleNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    onNodeClick?.(node.id);
+  }, [onNodeClick]);
+
+  const handlePaneClick = useCallback(() => {
+    onNodeClick?.(null);
+  }, [onNodeClick]);
+
+  const legendNodeTypes = useMemo(() => {
+    if (!diagram) return [];
+    const seen = new Set<DiagramNodeType>();
+    return diagram.nodes.reduce<DiagramNodeType[]>((acc, node) => {
+      if (!seen.has(node.type)) {
+        seen.add(node.type);
+        acc.push(node.type);
+      }
+      return acc;
+    }, []);
+  }, [diagram]);
+
+  const hasDashedEdges = useMemo(() => {
+    return diagram?.edges.some((e) => e.style === "dashed") ?? false;
+  }, [diagram]);
 
   if (!diagram) {
     return (
@@ -114,7 +145,23 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
   }
 
   return (
-    <div className={`w-full ${className} transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"}`} style={{ height: 360 }}>
+    <div className={`w-full ${className} transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"}`}>
+      {/* Diagram header */}
+      {(diagram.title || diagram.description) && (
+        <div className="mb-2">
+          {diagram.title && (
+            <p className="text-[11px] font-mono text-text-dim uppercase tracking-[0.15em]">
+              {diagram.title}
+            </p>
+          )}
+          {diagram.description && (
+            <p className="text-xs text-text-muted mt-0.5">
+              {diagram.description}
+            </p>
+          )}
+        </div>
+      )}
+      <div className="min-h-[380px] h-[45vh] max-h-[540px]">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -123,6 +170,8 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         onInit={onInit}
+        onNodeClick={handleNodeClick}
+        onPaneClick={handlePaneClick}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
@@ -132,7 +181,7 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
         minZoom={0.5}
         maxZoom={2}
         fitView
-        fitViewOptions={{ padding: 0.3 }}
+        fitViewOptions={{ padding: diagram.nodes.length > 5 ? 0.15 : 0.3 }}
         proOptions={{ hideAttribution: true }}
       >
         {/* Arrow marker definition */}
@@ -153,11 +202,18 @@ function DiagramInner({ diagram, highlightNodes, animateFlow, className = "" }: 
             </marker>
           </defs>
         </svg>
+        <Controls
+          showInteractive={false}
+          position="top-right"
+          className="!bg-surface !border-border !shadow-none [&>button]:!bg-surface [&>button]:!border-border [&>button]:!text-text-dim [&>button:hover]:!bg-bg"
+        />
         <Background color="var(--color-border)" gap={32} size={1} />
       </ReactFlow>
+      </div>
 
-      {/* Caption */}
-      <div className="mt-2 text-center">
+      {/* Legend and caption */}
+      <DiagramLegend nodeTypes={legendNodeTypes} hasDashedEdges={hasDashedEdges} />
+      <div className="mt-1.5 text-center">
         <p className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em]">
           {diagram.nodes.length} components -- zoom and pan to explore
         </p>

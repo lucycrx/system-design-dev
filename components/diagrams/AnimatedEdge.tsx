@@ -6,6 +6,7 @@ import { BaseEdge, getBezierPath, type EdgeProps } from "@xyflow/react";
 interface AnimatedEdgeData {
   animated?: boolean;
   edgeStyle?: "solid" | "dashed";
+  protocol?: string;
 }
 
 function AnimatedEdgeComponent({
@@ -30,6 +31,7 @@ function AnimatedEdgeComponent({
 
   const isDashed = data?.edgeStyle === "dashed";
   const isAnimated = data?.animated;
+  const protocol = data?.protocol;
 
   return (
     <>
@@ -54,15 +56,16 @@ function AnimatedEdgeComponent({
       {/* Label */}
       {label && (
         <foreignObject
-          x={labelX - 50}
-          y={labelY - 12}
-          width={100}
-          height={24}
+          x={labelX - 60}
+          y={labelY - 14}
+          width={120}
+          height={28}
           className="pointer-events-none overflow-visible"
         >
           <div className="flex items-center justify-center h-full">
-            <span className="px-1.5 py-0.5 text-[9px] font-mono text-text-dim bg-bg rounded whitespace-nowrap">
+            <span className="px-1.5 py-0.5 text-[11px] font-mono text-text-dim bg-bg rounded whitespace-nowrap">
               {label as string}
+              {protocol && <span className="text-text-dim/50"> ({protocol})</span>}
             </span>
           </div>
         </foreignObject>
