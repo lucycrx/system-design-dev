@@ -1,0 +1,312 @@
+{
+  "id": "making-it-real",
+  "slug": "making-it-real",
+  "title": "Making It Real",
+  "subtitle": "From your laptop to the internet",
+  "description": "Building an app is one thing. Getting it in front of users is another. This module covers how code goes from your machine to a live URL — and the tools and practices that keep it running smoothly once it's there.",
+  "moduleNumber": 7,
+  "icon": "🌐",
+  "color": "green",
+  "lessons": [
+    {
+      "id": "hosting",
+      "title": "What is hosting and where does my app actually live?",
+      "description": "Your app needs a home on the internet — hosting is how it gets one.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "When you build an app on your laptop, only you can use it. For anyone else to access it, your code needs to run on a computer that's connected to the internet 24/7, has a public address, and never sleeps. That computer is called a **server**, and **hosting** is the service of renting one.\n\nHosting providers like Vercel, Railway, and AWS give you access to servers without having to buy, maintain, or physically manage hardware. You upload your code, they run it, and your app gets a URL that anyone in the world can visit."
+        },
+        {
+          "heading": "why",
+          "content": "Choosing the right hosting provider is one of the first real infrastructure decisions you'll make, and it affects more than you'd think:\n\n- **Cost** — some hosts are free for small projects, others charge hundreds per month. Picking the wrong tier wastes money; picking too cheap a tier means your app crashes under load.\n- **Speed** — where your server physically sits matters. A server in Virginia is fast for East Coast users but slower for someone in Tokyo. Good hosting providers run servers in multiple regions.\n- **Reliability** — cheap shared hosting might go down when another site on the same server gets a traffic spike. Better hosting isolates you from noisy neighbors.\n- **Developer experience** — modern hosts like Vercel deploy automatically when you push code. Older-school hosts require manual uploads and SSH commands."
+        },
+        {
+          "heading": "how",
+          "content": "Think of hosting like **renting a place to live**:\n\n- **Shared hosting** is like renting an apartment in a big building. It's cheap, but you share resources (CPU, memory) with dozens of other tenants. If your neighbor throws a huge party (traffic spike), your apartment gets noisy too. Services like traditional web hosts work this way.\n- **A VPS (Virtual Private Server)** is like renting a house. You have your own dedicated space and resources. You're responsible for maintenance (updates, security), but nobody else affects your performance. DigitalOcean and Linode offer this.\n- **Cloud hosting** is like staying in a hotel. You pay per night (per usage), you can upgrade to a bigger room instantly, and someone else handles all the maintenance. AWS, Google Cloud, and Azure work this way.\n- **Managed platforms** like Vercel, Netlify, and Railway are like serviced apartments — they handle almost everything for you (deploys, scaling, SSL certificates) in exchange for less control and sometimes higher cost at scale.\n\nFor most projects built with AI tools, managed platforms are the sweet spot. You push code, and minutes later it's live."
+        },
+        {
+          "heading": "when",
+          "content": "The right choice depends on what you're building:\n\n- **Vercel or Netlify** — best for frontend apps, Next.js projects, and static sites. Free tiers are generous. This is where most vibe-coded projects should start.\n- **Railway or Render** — best for backend services, APIs, and apps that need a database. Simple setup with affordable pricing.\n- **AWS, Google Cloud, or Azure** — best for complex infrastructure needs, large-scale apps, or when you need specific services (machine learning, video processing, global CDNs). Much steeper learning curve.\n\nStart simple. You can always migrate to more powerful hosting later. A Vercel free tier can handle thousands of users — you don't need AWS on day one."
+        }
+      ],
+      "quiz": {
+        "question": "Which hosting fits?",
+        "scenario": "You've built a Next.js app with Claude Code and want to share it with beta testers. You expect maybe 50 users. You've never configured a server before and want the simplest path from code to live URL.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Deploy to Vercel — it's built for Next.js and handles everything automatically",
+            "correct": true,
+            "explanation": "Vercel is purpose-built for Next.js apps. You connect your GitHub repo, and every push automatically deploys. The free tier easily handles 50 users, you don't need to configure servers, and you get a live URL in minutes. This is the simplest path for your situation."
+          },
+          {
+            "id": "b",
+            "text": "Set up an AWS EC2 instance for maximum control and scalability",
+            "correct": false,
+            "explanation": "AWS EC2 gives you a raw virtual machine — you'd need to install Node.js, configure nginx, set up SSL certificates, manage security updates, and handle deployments manually. That's massive overkill for 50 beta testers and a steep learning curve for someone who hasn't configured a server before."
+          },
+          {
+            "id": "c",
+            "text": "Use shared hosting since it's the cheapest option",
+            "correct": false,
+            "explanation": "Traditional shared hosting is designed for PHP sites and WordPress, not modern Next.js apps. You'd struggle to get a Next.js app running on most shared hosts, and the developer experience would be painful. Vercel's free tier is actually free too — and purpose-built for what you need."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "domains-and-dns",
+      "title": "How people find your app: domains, DNS, and URLs",
+      "description": "The internet's phone book — how human-readable names become server addresses.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Every server on the internet has an **IP address** — a string of numbers like `142.250.80.46` that identifies it uniquely. But nobody wants to type numbers into their browser. **DNS** (Domain Name System) is the system that translates human-friendly names like `google.com` into IP addresses that computers can route to.\n\nA **domain name** is the human-readable address you buy (like `myapp.com`). **DNS** is the system that maps that name to the actual server. When someone types your domain into their browser, DNS looks up where your server lives and routes them there."
+        },
+        {
+          "heading": "why",
+          "content": "You don't need to become a DNS expert, but understanding the basics helps you in three common situations:\n\n- **Setting up a custom domain** — when you deploy to Vercel, you get a URL like `my-app.vercel.app`. To use `myapp.com` instead, you need to configure DNS records. Knowing what an A record or CNAME is turns a confusing task into a simple one.\n- **Debugging \"site not found\" errors** — when your domain isn't working, it's almost always a DNS issue. Understanding DNS tells you whether the problem is with your domain registrar, your hosting provider, or just propagation delay.\n- **Configuring email** — custom email addresses (like `hello@myapp.com`) require DNS records too. MX records tell the internet where to deliver email for your domain."
+        },
+        {
+          "heading": "how",
+          "content": "Think of DNS like **calling directory assistance (411)**:\n\n1. You tell the operator a name: \"Google\"\n2. The operator looks it up in a massive directory\n3. They give you the phone number: `142.250.80.46`\n4. You use that number to connect\n\nYour browser does this every time you visit a website. It asks a DNS server, \"Where is `myapp.com`?\" and gets back an IP address.\n\nThe key DNS records you'll encounter:\n\n- **A record** — points your domain directly to an IP address. Like saying \"myapp.com lives at 123.45.67.89.\"\n- **CNAME record** — points your domain to another domain name. Like saying \"www.myapp.com is the same as myapp.vercel.app.\" This is how most Vercel and Netlify custom domains work.\n- **MX record** — tells the internet where to deliver email for your domain.\n- **TTL (Time to Live)** — how long DNS servers should cache the answer before checking again. A TTL of 3600 means \"remember this for one hour.\" This is why DNS changes aren't instant — old answers are cached around the world.\n\nWhen you change DNS records, the update can take anywhere from minutes to 48 hours to fully propagate worldwide. This delay is called **DNS propagation** and it's the most common source of confusion when setting up domains."
+        },
+        {
+          "heading": "when",
+          "content": "You'll need to touch DNS when:\n\n- **Buying and connecting a custom domain** — you'll register a domain at a registrar (like Namecheap, Google Domains, or Cloudflare) and add DNS records pointing to your host.\n- **Setting up email** — custom email addresses require MX records and sometimes TXT records for spam verification.\n- **Debugging** — if your site works at `my-app.vercel.app` but not at `myapp.com`, the issue is almost certainly DNS configuration.\n- **Moving hosts** — when you migrate from one hosting provider to another, you update your DNS records to point to the new server.\n\nFor most projects, you'll configure DNS once during setup and rarely touch it again. But when something goes wrong, knowing how DNS works saves you hours of guessing."
+        }
+      ],
+      "quiz": {
+        "question": "Why isn't the domain working?",
+        "scenario": "You deployed your app to Vercel an hour ago and it works fine at `my-app.vercel.app`. You bought `myapp.com` and added a CNAME record pointing to `my-app.vercel.app`. But when you visit `myapp.com`, your browser says \"This site can't be reached.\"",
+        "options": [
+          {
+            "id": "a",
+            "text": "DNS propagation — the records haven't spread to all DNS servers yet",
+            "correct": true,
+            "explanation": "DNS changes aren't instant. When you add or update DNS records, it takes time for the change to propagate across DNS servers worldwide. Since the app works at the Vercel URL, the app itself is fine. The CNAME record just hasn't propagated yet. Give it a few hours (up to 48 in rare cases) and it will resolve."
+          },
+          {
+            "id": "b",
+            "text": "Vercel is down and not serving your app",
+            "correct": false,
+            "explanation": "If Vercel were down, your app wouldn't work at `my-app.vercel.app` either. But it does work there — the problem is only with the custom domain, which points to DNS configuration, not hosting."
+          },
+          {
+            "id": "c",
+            "text": "You need an A record instead of a CNAME record",
+            "correct": false,
+            "explanation": "CNAME records are the standard way to connect custom domains to platforms like Vercel. A CNAME pointing to `my-app.vercel.app` is correct. The issue is timing — DNS propagation takes time, not a wrong record type."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "environments",
+      "title": "Dev vs staging vs production: why you need multiple versions of your app",
+      "description": "Separate copies of your app for building, testing, and serving real users.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "An **environment** is a complete, self-contained copy of your application — its code, database, configuration, and external service connections. Most apps have at least two, often three:\n\n- **Development (dev)** — runs on your laptop. This is where you build features, experiment, and break things freely. It uses a local or test database with fake data.\n- **Staging** — a copy that mirrors production as closely as possible, but isn't visible to real users. This is where you test features in realistic conditions before releasing them.\n- **Production (prod)** — the live version that real users interact with. This has real data, real payments, and real consequences.\n\nEach environment has its own database, its own API keys (test keys for Stripe in staging, live keys in production), and its own URL."
+        },
+        {
+          "heading": "why",
+          "content": "Without separate environments, every change you make is immediately live. That means:\n\n- A bug in your code instantly breaks the app for all users\n- Testing a payment flow charges real credit cards\n- A database migration that goes wrong corrupts real user data\n- You can't experiment without risk\n\nEnvironments create a safety net. You make mistakes in dev (where nobody cares), catch problems in staging (where the stakes are low), and only ship to production once you're confident. This matters even for solo projects — accidentally dropping your production database is a lesson you only want to learn once."
+        },
+        {
+          "heading": "how",
+          "content": "Think of it like **putting on a theater production**:\n\n- **Development** is rehearsing in your living room. You're learning your lines, trying different blocking, and it's fine if you mess up. The furniture is makeshift and nobody's watching.\n- **Staging** is the dress rehearsal on the actual stage. You're in full costume, using real props, running the full show end-to-end. The set is real, but there's no audience. If something goes wrong, you fix it before opening night.\n- **Production** is opening night. The audience is in their seats, the critics are watching, and everything needs to work. You don't experiment during the show.\n\nIn practice, environments are managed through **environment variables** — configuration values that change per environment. Your code stays the same, but the variables tell it where to connect:\n\n- `DATABASE_URL` in dev points to your local database; in production, it points to the real one\n- `STRIPE_KEY` in dev uses Stripe's test mode; in production, it charges real cards\n- `API_URL` in dev points to `localhost:3000`; in production, it points to `myapp.com`\n\nMost hosting platforms (Vercel, Railway) have built-in support for managing environment variables per environment."
+        },
+        {
+          "heading": "when",
+          "content": "At minimum, every project needs a dev and production environment — even solo projects. Staging becomes valuable when:\n\n- Multiple people are working on the app\n- The app handles real money or sensitive data\n- You're making database changes that could affect existing data\n- You want to demo features to stakeholders before they go live\n\nThe golden rule: **production is sacred**. Never test in production. Never use production as a playground. Never run experimental code against real user data. If you follow one rule from this lesson, let it be that one."
+        }
+      ],
+      "quiz": {
+        "question": "Which environment is wrong?",
+        "scenario": "Your team is about to launch a new checkout flow. The developer says, \"I tested it on my machine and it works. Let's push it straight to production — we don't have time to set up staging.\"",
+        "options": [
+          {
+            "id": "a",
+            "text": "Push back — skipping staging for a checkout flow risks charging real customers incorrectly",
+            "correct": true,
+            "explanation": "A checkout flow handles real money. Testing only in dev (the developer's machine) misses issues that only appear in production-like conditions: real payment processing, production database behavior, and live API keys. Skipping staging for a feature that charges real credit cards is exactly how you end up double-charging customers or losing orders."
+          },
+          {
+            "id": "b",
+            "text": "It's fine — if it works in dev, it'll work in production",
+            "correct": false,
+            "explanation": "Dev environments differ from production in critical ways: different databases, test vs. live API keys, different server configurations, and different data volumes. A checkout flow that works with Stripe's test mode on localhost can easily fail with live payments on a production server. This is the classic 'it works on my machine' problem."
+          },
+          {
+            "id": "c",
+            "text": "Just test it in production quickly before real users notice",
+            "correct": false,
+            "explanation": "Testing in production means real consequences. For a checkout flow, that means real charges on real credit cards. There's no 'quickly' testing payment processing — if something goes wrong, you've charged real customers incorrectly, and reversing charges is a painful process that damages trust."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "ci-cd",
+      "title": "CI/CD: How code goes from your laptop to the internet",
+      "description": "Automated testing and deployment — making releases boring and routine instead of scary.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**CI/CD** stands for two related practices:\n\n- **Continuous Integration (CI)** — every time someone pushes code, automated checks run immediately. These checks might run tests, check for code style issues, or verify the app builds without errors. The goal: catch problems the moment they're introduced, not days later.\n- **Continuous Deployment (CD)** — if all the automated checks pass, the code is automatically deployed to production (or staging) without any manual steps. No clicking \"deploy\" buttons, no uploading files, no SSH-ing into servers.\n\nTogether, CI/CD creates a pipeline: code goes in one end, automated checks verify it in the middle, and a deployed app comes out the other end."
+        },
+        {
+          "heading": "why",
+          "content": "Without CI/CD, deploying looks like this: someone manually runs tests (or forgets to), bundles the code, uploads it to the server, hopes nothing breaks, and stays up late fixing things when it inevitably does. Deploys become rare, scary events that everyone dreads.\n\nWith CI/CD, deploying looks like this: you push code to GitHub. Ten minutes later, it's live. If something's wrong, the pipeline catches it and blocks the deploy before it reaches users.\n\nCI/CD matters because:\n\n- **It eliminates \"it works on my machine\"** — the tests run in a clean environment, not on someone's laptop with mystery configuration.\n- **It catches bugs before users see them** — a failing test blocks the deploy automatically.\n- **It makes deploys routine** — when you deploy ten times a day, each deploy is small and easy to debug. When you deploy once a month, each deploy is massive and terrifying.\n- **It frees up mental energy** — you stop worrying about deployment steps and focus on building features."
+        },
+        {
+          "heading": "how",
+          "content": "Think of CI/CD as an **assembly line with quality checkpoints**:\n\nRaw materials (your code) enter at one end. At each station along the line, an inspector checks something specific:\n\n- Station 1: \"Does the code compile? Can we build the app?\"\n- Station 2: \"Do all the tests pass?\"\n- Station 3: \"Are there any security vulnerabilities?\"\n- Station 4: \"Does the app look right? (visual regression tests)\"\n\nIf the product passes every inspection, it rolls off the line and ships to customers (deploy). If it fails any checkpoint, the line stops and the team gets notified.\n\nThe most common tool for this is **GitHub Actions**. You write a configuration file that describes your pipeline, and GitHub runs it automatically every time code is pushed. A simple pipeline might look like:\n\n1. Someone pushes code or opens a pull request\n2. GitHub Actions spins up a fresh server\n3. It installs your app's dependencies\n4. It runs your test suite\n5. If tests pass, it deploys to Vercel/Railway/wherever your app lives\n6. If tests fail, it blocks the merge and notifies you\n\nPlatforms like Vercel actually have built-in CI/CD — every push to your main branch automatically triggers a deploy, and every pull request gets a preview URL. You might already be using CD without realizing it."
+        },
+        {
+          "heading": "when",
+          "content": "Set up CI/CD as soon as you have two things:\n\n1. **Tests** — even a handful of basic tests give CI something to check. Without tests, CI can still verify the app builds, but it's less valuable.\n2. **A production environment** — CD needs somewhere to deploy to.\n\nEven a minimal pipeline — \"run tests when code is pushed, deploy if they pass\" — prevents a surprising number of embarrassing bugs. You don't need a complex setup. Start with the basics and add more checks as your app grows.\n\nIf you're deploying on Vercel or Netlify, you already have CD. Adding CI (automated tests on pull requests) is the next step, and GitHub Actions makes it straightforward."
+        }
+      ],
+      "quiz": {
+        "question": "What does the pipeline tell you?",
+        "scenario": "A teammate opens a pull request. GitHub Actions runs the CI pipeline and reports: build succeeded, but 3 out of 47 tests failed. The failures are in the payment processing module. Your teammate says, \"Those tests are flaky, just merge it.\"",
+        "options": [
+          {
+            "id": "a",
+            "text": "Don't merge — failing payment tests need investigation before deploying",
+            "correct": true,
+            "explanation": "The CI pipeline is doing exactly what it's supposed to: catching potential problems before they reach production. Payment processing is one of the highest-stakes parts of any app. Even if the tests have been flaky before, merging without investigating means you might deploy a real bug to production that affects real transactions. Fix the tests or fix the code — but don't ignore the signal."
+          },
+          {
+            "id": "b",
+            "text": "Merge it — 44 out of 47 tests passing is good enough",
+            "correct": false,
+            "explanation": "CI isn't about a passing percentage. Three failing tests in the payment module could mean customers get charged incorrectly, payments silently fail, or refunds break. The whole point of CI is to treat test failures as blockers, not suggestions. Ignoring them defeats the purpose of having a pipeline."
+          },
+          {
+            "id": "c",
+            "text": "Delete the failing tests so the pipeline passes",
+            "correct": false,
+            "explanation": "Deleting tests to make CI pass is like disconnecting a smoke alarm because it keeps beeping. The tests exist to catch bugs in payment processing — one of the most critical parts of any app. If tests are genuinely flaky (failing randomly), the right fix is to make them reliable, not remove them."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "version-control",
+      "title": "Version control (Git): Why it exists and the commands you need",
+      "description": "A system that tracks every change to your code — who made it, when, and why.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Git** is a version control system — it tracks every change made to your code, who made it, and when. Think of it as an unlimited undo history for your entire project. **GitHub** is the platform where teams host their Git repositories (repos) online, collaborate through pull requests, and manage their code.\n\nThe core concepts are:\n\n- **Repository (repo)** — your project's folder, tracked by Git\n- **Commit** — a snapshot of your code at a point in time, with a message describing what changed\n- **Branch** — a parallel version of your code where you can work on a feature without affecting the main app\n- **Merge** — combining changes from one branch into another\n- **Pull request (PR)** — a proposal to merge a branch, where others can review the changes before they're accepted"
+        },
+        {
+          "heading": "why",
+          "content": "Version control solves problems you don't realize you have until it's too late:\n\n- **Undo mistakes safely** — broke something? Roll back to the last working version in seconds. Without Git, \"undo\" means hoping you remember what you changed.\n- **Work on features in parallel** — branches let you build a new feature without risking the stable version. If the feature doesn't work out, you just delete the branch.\n- **Collaborate without chaos** — two people can edit the same codebase simultaneously. Git tracks who changed what and helps merge the changes together.\n- **Understand what happened** — six months from now, you can look at the Git history and see exactly what changed, when, and why (if the commit messages are good).\n\nAI tools like Claude Code work directly with Git — they read your repo to understand context, create commits, and open pull requests. Understanding Git makes you a more effective collaborator with both humans and AI."
+        },
+        {
+          "heading": "how",
+          "content": "Think of Git like **Google Docs version history, but for code**:\n\nIn Google Docs, every edit is tracked. You can see who changed what, when they changed it, and revert to any previous version. Git works the same way, but with explicit save points.\n\nThe difference: Google Docs saves every keystroke automatically. Git requires you to **commit** — deliberately save a snapshot with a description. This is better for code because you want meaningful checkpoints (\"added user login\" or \"fixed payment bug\"), not a record of every character typed.\n\n**Branches** are like making a copy of a Google Doc to try a risky rewrite. If the rewrite works, you replace the original. If it doesn't, you throw away the copy and the original is untouched.\n\n**Pull requests** are like sharing your rewrite copy and asking a colleague, \"Does this look good?\" before replacing the original. They review the changes, leave comments, and approve (or request changes).\n\nThe basic Git workflow:\n\n1. **Pull** the latest code from GitHub (get everyone else's changes)\n2. **Create a branch** for your feature\n3. Make changes and **commit** them with a descriptive message\n4. **Push** your branch to GitHub\n5. Open a **pull request** for review\n6. After approval, **merge** into the main branch"
+        },
+        {
+          "heading": "when",
+          "content": "**Always.** Even solo projects benefit from version control. Here's why:\n\n- You will break things. Git lets you get back to working code instantly.\n- You'll want to experiment. Branches let you try ideas without risk.\n- AI coding tools expect Git. Claude Code reads your Git history and repo structure to give better suggestions.\n- If you ever add a collaborator, you'll already have a clean history.\n\nIf you're using AI coding tools, you're likely already using Git even if you don't realize it. Most project scaffolding tools initialize a Git repo automatically. The key habit to build: **commit frequently with clear messages**. Small, frequent commits are infinitely more useful than one giant commit labeled \"updates.\""
+        }
+      ],
+      "quiz": {
+        "question": "What's the safe move?",
+        "scenario": "You're building a new onboarding flow for your app. Your main branch is live and working. You've been coding for three hours directly on the main branch, and you just realized the new flow has a major bug that also broke the existing login page.",
+        "options": [
+          {
+            "id": "a",
+            "text": "You should have used a branch — revert the main branch to the last working commit and start the feature on a new branch",
+            "correct": true,
+            "explanation": "This is exactly why branches exist. If you'd started on a feature branch, main would still be working perfectly and your broken code would be isolated. The fix now is to revert main to the last good commit (Git makes this easy) and redo the work on a branch. Lesson learned: never build features directly on main."
+          },
+          {
+            "id": "b",
+            "text": "Keep debugging on main until you fix it — reverting would lose three hours of work",
+            "correct": false,
+            "explanation": "The longer you debug on main, the longer your live app is broken. Reverting main restores the working app immediately for users. Your three hours of work aren't lost — Git has every commit. You can cherry-pick the good parts onto a new branch. The priority is fixing the live app, not preserving unfinished work on main."
+          },
+          {
+            "id": "c",
+            "text": "Copy your code into a text file, revert main, and paste it back later",
+            "correct": false,
+            "explanation": "This is the manual version of what Git does automatically. Git already has every change you've made in its history. You can create a branch from your current broken state, revert main to the last good commit, and continue working on the branch. No copy-pasting needed — that's the whole point of version control."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    },
+    {
+      "id": "technical-debt",
+      "title": "Technical debt: Why \"it works\" isn't always good enough",
+      "description": "The shortcuts in your code that make future development harder — and how to manage them.",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Technical debt** is the accumulated cost of shortcuts, quick fixes, and compromises in your codebase. It's code that works *right now* but is written in a way that makes future changes harder, slower, or riskier.\n\nExamples of technical debt:\n\n- Copy-pasting the same logic in five places instead of creating a reusable function\n- Hardcoding values that should be configurable\n- Skipping error handling because \"it probably won't fail\"\n- Using a quick hack to ship a deadline instead of building the proper solution\n- Not writing tests because \"we'll add them later\" (you won't)\n\nLike financial debt, technical debt isn't inherently bad. Sometimes borrowing makes sense. The problem is when it accumulates unmanaged and you're paying interest on every future change."
+        },
+        {
+          "heading": "why",
+          "content": "Technical debt matters to PMs because it directly affects what you can ship and how fast:\n\n- **Slowing velocity** — as debt accumulates, features that used to take a day start taking a week. Developers spend more time working around old hacks than building new things.\n- **Increasing bugs** — quick fixes and copy-pasted code create fragile systems. Change one thing and three unrelated features break.\n- **Making estimates unreliable** — \"this should take two days\" turns into two weeks because nobody realized the feature touches three deeply-hacked systems.\n- **Developer morale** — engineers who spend all their time fighting a messy codebase burn out and leave.\n\nUnderstanding technical debt helps you negotiate engineering time for invisible but critical work. When an engineer says \"we need a refactoring sprint,\" they're saying the interest payments on technical debt are eating into feature development. Dismissing this request is like ignoring minimum payments on a credit card."
+        },
+        {
+          "heading": "how",
+          "content": "Think of technical debt like **credit card debt**:\n\n- **Taking on debt** = buying something on credit. You get the feature now (ship by the deadline), but you haven't truly paid for it. The quick hack is the purchase; the proper solution is the full price.\n- **Interest payments** = every future change costs more because developers have to work around the hack. A 2-hour task becomes 8 hours because the code is tangled.\n- **Minimum payments** = small fixes that keep things running but don't pay down the principal. You patch bugs but never fix the underlying architecture.\n- **Paying it off** = refactoring. Replacing the hack with the proper solution. It takes time now but makes everything cheaper going forward.\n- **Bankruptcy** = the codebase is so messy that it's cheaper to rewrite from scratch than to fix it. This is the worst-case scenario and it's more common than you'd think.\n\nSome debt is **deliberate and strategic**: \"We know this isn't ideal, but shipping by Friday matters more. We'll clean it up in the next sprint.\" This is fine — it's like a planned loan with a repayment schedule.\n\nThe dangerous kind is **accidental and ignored**: hacks that pile up because nobody tracks them, nobody allocates time to fix them, and the codebase slowly becomes unmaintainable. This is like not opening your credit card statements."
+        },
+        {
+          "heading": "when",
+          "content": "It's reasonable to take on technical debt when:\n\n- **You're validating an idea** — if you're not sure users want a feature, a quick hack to test it makes sense. If it works, pay down the debt. If it doesn't, you saved the time of building it properly.\n- **You have a hard deadline** — a demo, a launch, a contractual obligation. Ship now, fix later. But actually schedule the \"later.\"\n- **The cost of delay is higher than the cost of debt** — if not shipping costs you a customer or a market opportunity, the hack is worth it.\n\nPay down technical debt when:\n\n- **You're about to build on top of it** — adding features to a hacked system multiplies the debt. Clean it up first.\n- **Bugs keep appearing in the same area** — repeated bugs signal underlying debt that patching won't fix.\n- **Developer estimates are ballooning** — if simple tasks take surprisingly long, debt is likely the cause.\n\nA healthy practice is dedicating 15-20% of each sprint to debt reduction. Some teams do periodic \"refactoring sprints\" focused entirely on paying down accumulated debt. The key is treating technical debt as a first-class priority, not something you do \"when there's time\" — because there's never time unless you make it."
+        }
+      ],
+      "quiz": {
+        "question": "Is the debt worth it?",
+        "scenario": "Your team is building a dashboard feature. The proper approach takes 3 weeks and creates a reusable charting system. A developer proposes a shortcut: hardcode the charts for just this dashboard in 4 days. You have a big client demo in 2 weeks, and the sales team says this deal is worth $200K. Three more teams have asked for dashboards in the next quarter.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Take the shortcut for the demo, but immediately schedule the proper solution for the sprint after",
+            "correct": true,
+            "explanation": "This is strategic, deliberate debt. The $200K deal justifies the shortcut, and you have a concrete repayment plan. The key is actually following through: schedule the refactoring before the next team needs dashboards. If you ship the hack and never build the proper system, you'll end up with four hardcoded dashboards that are a nightmare to maintain."
+          },
+          {
+            "id": "b",
+            "text": "Build the proper reusable system — missing the demo is worth the long-term investment",
+            "correct": false,
+            "explanation": "This sounds principled but ignores business reality. A $200K deal and three more teams waiting for dashboards means the charting system will definitely get used. But the demo is in 2 weeks and the proper build takes 3 weeks — you'd miss it. Strategic debt with a repayment plan is the right call here."
+          },
+          {
+            "id": "c",
+            "text": "Take the shortcut, and take shortcuts for the other three dashboards too when they come up",
+            "correct": false,
+            "explanation": "This is how technical debt spirals out of control. One hardcoded dashboard is manageable. Four means every change requires updating four separate implementations. When the client asks for a date filter on all dashboards, you're doing the same work four times. The interest payments on this debt will quickly exceed the cost of building the proper system."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": []
+    }
+  ]
+}
