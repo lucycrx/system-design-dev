@@ -167,13 +167,34 @@ The architecture diagram uses spatial grouping and inline connection tags to com
 - **Category icons**: Each category has a Lucide stroke icon (16px, `currentColor`) rendered inline next to the component label. Icons are defined in the `catIcons` map in the template JS and colored per category.
 - **Light schematic aesthetic**: Warm light palette (`--diagram-bg: hsl(48, 10%, 95%)`, white surfaces, dark text) consistent with the rest of the page. Category colors provide visual distinction.
 - **Fluid width**: Diagram fills the available container width. No fixed pixel constraint.
+- **Selected state**: Clicking a component inverts its card to dark fill with light text, making the active selection unmistakable. Risk severity top-borders persist through the inverted state.
 
 **Interactive behavior:**
-- **Click a component** → Detail panel slides in as a 340px sticky sidebar on the right, shrinking the diagram to make room. Shows full description, key files, and connections list. Panel scrolls independently and stays aligned while scrolling the diagram.
-- **Hover a connection tag** → Target component card highlights with a border and shadow.
+- **Click a component** → Detail panel slides in as a 340px sticky sidebar on the right via a smooth width-collapse transition (width, padding, border, and opacity animate together). The selected card inverts to dark fill. Shows full description, key files, and connections list. Panel scrolls independently and stays aligned while scrolling the diagram.
+- **Hover a connection tag** → Target component card highlights with a border outline (no box-shadows per design system).
 - **Click a connection tag** → Selects the target component (opens its detail panel) and scrolls to it.
+- **Keyboard navigation** → All component cards, connection tags, and risk cards are focusable (`tabindex="0"`) and respond to Enter/Space. Focus-visible indicators appear on keyboard navigation.
 - **Interaction hints** are shown above the diagram so users know how to interact.
 - On mobile (< 768px), the detail panel stacks below the diagram instead of beside it.
+
+**Typography system:**
+The template uses a 6-stop type scale on a ~1.2 ratio, defined as CSS custom properties. All font sizes reference these tokens — no hardcoded values.
+
+| Token | Size | Role |
+|---|---|---|
+| `--text-caption` (0.6875rem) | 11px | Mono labels only |
+| `--text-small` (0.75rem) | 12px | Chips, file paths, evidence blocks |
+| `--text-secondary` (0.8125rem) | 13px | Sublabels, meta values |
+| `--text-body` (0.875rem) | 14px | Descriptions, risk text, connections |
+| `--text-subhead` (1rem) | 16px | Risk titles, summary line |
+| `--text-heading` (1.25rem) | 20px | Detail panel title |
+
+Mono labels share a single canonical treatment via `--mono-size`, `--mono-weight`, and `--mono-tracking` tokens.
+
+**Entrance animations:**
+- Category groups and component cards use staggered `slideUp` animations (opacity + translateY) with cubic-bezier easing
+- Risk cards stagger their entrance delays
+- All animations respect `prefers-reduced-motion: reduce`
 
 **What the template renders:**
 - Sticky header with project identity and risk severity count chips
@@ -181,7 +202,7 @@ The architecture diagram uses spatial grouping and inline connection tags to com
 - Interaction hints (click, hover, click-to-jump)
 - Architecture diagram (containment-based, light schematic style) with component cards showing category icons and connection tags
 - Sticky detail sidebar (right side, appears on component click)
-- Expandable risk report sorted by severity (each card has: plain-English explanation, analogy, consequence, evidence, fix recommendation, and "learn more" links to the companion website)
+- Expandable risk report sorted by severity with smooth grid-template-rows expand/collapse transitions (each card has: plain-English explanation, analogy, consequence, evidence, fix recommendation, and "learn more" links to the companion website)
 
 **Do NOT attempt to:**
 - Draw SVG lines or paths between components
