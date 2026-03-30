@@ -260,7 +260,7 @@ export function MiniDiagram({ className = "" }: { className?: string }) {
   return (
     <div className={className}>
       <div
-        className="border p-4 sm:p-5"
+        className="border p-3 sm:p-4"
         style={{
           background: "hsl(48, 10%, 95%)",
           borderColor: "hsl(40, 8%, 84%)",
