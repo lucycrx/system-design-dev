@@ -232,16 +232,14 @@ body {
 .comp-card:focus-visible { border-color: var(--highlight); outline: 2px solid var(--highlight); outline-offset: 1px; }
 
 .comp-card.selected {
-  background: var(--text);
-  border-color: var(--text);
+  background: color-mix(in oklch, var(--cat-color) 10%, var(--diagram-surface));
+  border-color: var(--cat-color);
+  border-left: 3px solid var(--cat-color);
 }
-.comp-card.selected .comp-label { color: var(--bg); }
-.comp-card.selected .comp-sublabel { color: hsl(0, 0%, 65%); }
-.comp-card.selected .comp-icon { color: var(--bg); opacity: 1; }
-.comp-card.selected .conn-tag { border-color: hsl(0, 0%, 35%); color: hsl(0, 0%, 65%); background: hsl(0, 0%, 18%); }
-.comp-card.selected .conn-tag .conn-target { color: var(--bg); }
-.comp-card.selected .conn-tag:hover { border-color: hsl(0, 0%, 55%); color: hsl(0, 0%, 80%); }
-.comp-card.selected .conn-tag::before { background: var(--bg); }
+.comp-card.selected .comp-label { color: var(--text); }
+.comp-card.selected .comp-icon { opacity: 1; }
+.comp-card.selected .conn-tag { border-color: color-mix(in oklch, var(--cat-color) 30%, var(--diagram-border)); }
+.comp-card.selected .conn-tag:hover { border-color: var(--cat-color); }
 
 .comp-card + .comp-card { margin-top: 0.4rem; }
 
@@ -277,11 +275,11 @@ body {
   margin-top: 0.15rem;
 }
 
-/* Risk indicator — thin top border (persists on selected state) */
-.comp-card.risk-critical, .comp-card.selected.risk-critical { border-top: 2px solid var(--risk-critical); }
-.comp-card.risk-high, .comp-card.selected.risk-high { border-top: 2px solid var(--risk-high); }
-.comp-card.risk-medium, .comp-card.selected.risk-medium { border-top: 2px solid var(--risk-medium); }
-.comp-card.risk-low, .comp-card.selected.risk-low { border-top: 2px solid var(--risk-low); }
+/* Risk indicator — thin top border */
+.comp-card.risk-critical { border-top: 2px solid var(--risk-critical); }
+.comp-card.risk-high { border-top: 2px solid var(--risk-high); }
+.comp-card.risk-medium { border-top: 2px solid var(--risk-medium); }
+.comp-card.risk-low { border-top: 2px solid var(--risk-low); }
 
 /* Side-by-side components inside a group */
 .comp-row {
@@ -1263,6 +1261,7 @@ body {
     var card = document.createElement('div');
     card.className = 'comp-card';
     card.setAttribute('data-id', comp.id);
+    card.style.setProperty('--cat-color', catColors[comp.category] || 'var(--diagram-label)');
 
     var riskSev = componentRiskMap[comp.id];
     if (riskSev) card.classList.add('risk-' + riskSev);
