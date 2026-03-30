@@ -234,94 +234,75 @@ body {
 
 .diagram-row .cat-group { flex: 1; }
 
-/* ---- Flow connectors between rows ----
-   CSS-only vertical lines with animated directional dots */
+/* ---- Tier spacing ---- */
 
-.flow-connector {
+.diagram-row + .diagram-row { margin-top: 0.75rem; }
+
+/* ---- Component connection tags ---- */
+
+.comp-connections {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.35rem 0;
-  position: relative;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
 }
 
-/* Vertical dashed stem */
-.flow-stem {
-  width: 0;
-  height: 18px;
-  border-left: 2px dashed var(--diagram-text-dim);
-  position: relative;
-  overflow: visible;
-}
-
-/* Animated directional dot */
-.flow-stem::after {
-  content: '';
-  position: absolute;
-  left: -4px;
-  top: -3px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--cat-frontend);
-  animation: flowDot 2s ease-in-out infinite;
-}
-
-@keyframes flowDot {
-  0% { top: -3px; opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { top: calc(100% - 3px); opacity: 0; }
-}
-
-/* Label between two stems */
-.flow-label {
+.conn-tag {
   font-family: var(--font-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.04em;
+  font-size: 0.55rem;
+  letter-spacing: 0.03em;
   color: var(--diagram-text-dim);
-  padding: 0 0.6rem;
-  white-space: nowrap;
+  background: var(--diagram-surface);
+  border: 1px dashed var(--diagram-border);
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-.flow-label .flow-endpoint {
+.conn-tag:hover {
+  border-color: var(--diagram-text-dim);
+  color: var(--diagram-text);
+}
+
+.conn-tag .conn-arrow {
+  font-size: 0.65rem;
+  opacity: 0.5;
+}
+
+.conn-tag .conn-target {
   font-weight: 600;
   color: var(--diagram-text);
 }
 
-.flow-label .flow-arrow {
-  color: var(--diagram-text-dim);
-  padding: 0 0.15rem;
+/* Animated dot on connection tags */
+.conn-tag::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--cat-frontend);
+  animation: connPulse 2s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
-/* Multi-connector row: single column of labeled flows */
-.flow-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0.5rem 0;
-  gap: 0.15rem;
+@keyframes connPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
 }
 
-.flow-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.1rem 0;
-}
+/* Stagger pulse animation */
+.comp-connections .conn-tag:nth-child(2)::before { animation-delay: 0.3s; }
+.comp-connections .conn-tag:nth-child(3)::before { animation-delay: 0.6s; }
+.comp-connections .conn-tag:nth-child(4)::before { animation-delay: 0.9s; }
 
-.flow-item .flow-stem { height: 10px; }
-
-/* Stagger animation for multiple connectors */
-.flow-item:nth-child(1) .flow-stem::after { animation-delay: 0s; }
-.flow-item:nth-child(2) .flow-stem::after { animation-delay: 0.4s; }
-.flow-item:nth-child(3) .flow-stem::after { animation-delay: 0.8s; }
-
-/* Only animate the first stem in each flow-item */
-.flow-item .flow-stem:last-child::after { display: none; }
-
-.flow-item .flow-label {
-  padding: 0;
+/* Highlight target card when hovering a connection tag */
+.comp-card.conn-highlight {
+  border-color: var(--highlight);
+  box-shadow: 0 0 0 1px var(--highlight);
 }
 
 /* ---- DETAIL PANEL ---- */
@@ -551,12 +532,12 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .cat-group, .risk-card { animation: none; }
-  .flow-stem::after { animation: none; display: none; }
+  .conn-tag::before { animation: none; }
   * { transition-duration: 0.01ms !important; }
 }
 
 @media print {
-  .flow-stem::after { display: none; }
+  .conn-tag::before { display: none; }
 }
 </style>
 </head>
@@ -755,79 +736,12 @@ body {
   var diagramEl = document.getElementById('diagram');
   var animDelay = 0;
 
-  // Collect connection summaries between tiers for flow labels
-  // Map: sourceCat|targetCat -> [{source, target, label}]
-  var catConnections = {};
-  components.forEach(function(c) {
-    var sourceName = c.label.split('(')[0].trim();
-    (c.connections || []).forEach(function(conn) {
-      var target = compMap[conn.targetId];
-      if (!target) return;
-      if (c.category === target.category) return; // skip intra-category
-      var targetName = target.label.split('(')[0].trim();
-      var key = c.category + '|' + target.category;
-      if (!catConnections[key]) catConnections[key] = [];
-      if (catConnections[key].length < 2) { // max 2 labels per relationship
-        catConnections[key].push({ source: sourceName, target: targetName, label: conn.label });
-      }
-    });
-  });
-
-  // Render groups and flow connectors
-  var prevRowCats = [];
+  // Render category groups in tier rows
 
   for (var i = 0; i < sortedCats.length; i += 2) {
     var rowCats = [sortedCats[i]];
     if (i + 1 < sortedCats.length) rowCats.push(sortedCats[i + 1]);
 
-    // Flow connector between previous row and this row
-    if (prevRowCats.length > 0) {
-      var flowEntries = [];
-      prevRowCats.forEach(function(pCat) {
-        rowCats.forEach(function(rCat) {
-          var key = pCat + '|' + rCat;
-          if (catConnections[key]) {
-            catConnections[key].forEach(function(entry) {
-              if (flowEntries.length < 3) flowEntries.push(entry);
-            });
-          }
-        });
-      });
-      // Also check reverse: this row's cats connecting to prev row's cats
-      rowCats.forEach(function(rCat) {
-        prevRowCats.forEach(function(pCat) {
-          var key = rCat + '|' + pCat;
-          if (catConnections[key]) {
-            catConnections[key].forEach(function(entry) {
-              if (flowEntries.length < 3) flowEntries.push(entry);
-            });
-          }
-        });
-      });
-
-      if (flowEntries.length > 0) {
-        var flowRow = document.createElement('div');
-        flowRow.className = 'flow-row';
-        flowEntries.forEach(function(entry) {
-          var item = document.createElement('div');
-          item.className = 'flow-item';
-          var labelHtml = '<span class="flow-endpoint">' + esc(entry.source) + '</span>'
-            + '<span class="flow-arrow">\u2192</span>'
-            + '<span class="flow-endpoint">' + esc(entry.target) + '</span> '
-            + esc(entry.label);
-          item.innerHTML = '<div class="flow-stem"></div><div class="flow-label">' + labelHtml + '</div><div class="flow-stem"></div>';
-          flowRow.appendChild(item);
-        });
-        diagramEl.appendChild(flowRow);
-      } else {
-        var simpleStem = document.createElement('div');
-        simpleStem.className = 'flow-connector';
-        simpleStem.innerHTML = '<div class="flow-stem" style="height:24px"></div>';
-        diagramEl.appendChild(simpleStem);
-      }
-    }
-
-    // Render row of category groups
     var row = document.createElement('div');
     row.className = 'diagram-row';
 
@@ -874,7 +788,6 @@ body {
     }
 
     diagramEl.appendChild(row);
-    prevRowCats = rowCats;
   }
 
   function makeCompCard(comp) {
@@ -894,11 +807,50 @@ body {
     var h = '<div class="comp-top">' + iconHtml + '<div class="comp-label">' + esc(mainLabel) + '</div></div>';
     if (paren) h += '<div class="comp-sublabel">' + esc(paren[1]) + '</div>';
 
+    // Connection tags
+    var conns = comp.connections || [];
+    if (conns.length > 0) {
+      h += '<div class="comp-connections">';
+      conns.forEach(function(conn) {
+        var target = compMap[conn.targetId];
+        var targetName = target ? target.label.split('(')[0].trim() : conn.targetId;
+        h += '<span class="conn-tag" data-target="' + esc(conn.targetId) + '">'
+          + '<span class="conn-arrow">\u2192</span>'
+          + '<span class="conn-target">' + esc(targetName) + '</span> '
+          + esc(conn.label)
+          + '</span>';
+      });
+      h += '</div>';
+    }
+
     card.innerHTML = h;
     card.addEventListener('click', function(e) {
       e.stopPropagation();
       selectComponent(comp);
     });
+
+    // Connection tag hover: highlight target card
+    card.querySelectorAll('.conn-tag').forEach(function(tag) {
+      var targetId = tag.getAttribute('data-target');
+      tag.addEventListener('mouseenter', function() {
+        var targetCard = diagramEl.querySelector('[data-id="' + targetId + '"]');
+        if (targetCard) targetCard.classList.add('conn-highlight');
+      });
+      tag.addEventListener('mouseleave', function() {
+        var targetCard = diagramEl.querySelector('[data-id="' + targetId + '"]');
+        if (targetCard) targetCard.classList.remove('conn-highlight');
+      });
+      tag.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var target = compMap[targetId];
+        if (target) {
+          selectComponent(target);
+          var targetCard = diagramEl.querySelector('[data-id="' + targetId + '"]');
+          if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
     return card;
   }
 
