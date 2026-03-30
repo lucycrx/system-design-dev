@@ -43,7 +43,27 @@ const FRAMEWORKS = [
       </svg>
     ),
   },
+  {
+    name: "+ any codebase",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M8 12h8M12 8v8" />
+      </svg>
+    ),
+  },
 ];
+
+function FrameworkItem({ fw }: { fw: (typeof FRAMEWORKS)[0] }) {
+  return (
+    <div className="flex items-center gap-2.5 text-text-muted flex-shrink-0 px-6">
+      <span className="opacity-60">{fw.icon}</span>
+      <span className="font-mono text-[13px] tracking-wide whitespace-nowrap">
+        {fw.name}
+      </span>
+    </div>
+  );
+}
 
 export function WorksWith() {
   const [visible, setVisible] = useState(false);
@@ -75,30 +95,20 @@ export function WorksWith() {
       }}
     >
       <p className="label-mono text-text-dim mb-6 text-center">Works with</p>
-      <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12">
-        {FRAMEWORKS.map((fw, i) => (
-          <div
-            key={fw.name}
-            className="flex items-center gap-2.5 text-text-muted transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(8px)",
-              transitionDelay: `${i * 80}ms`,
-            }}
-          >
-            <span className="opacity-60">{fw.icon}</span>
-            <span className="font-mono text-[13px] tracking-wide">{fw.name}</span>
-          </div>
-        ))}
-        <span
-          className="font-mono text-[12px] text-text-dim transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          style={{
-            opacity: visible ? 1 : 0,
-            transitionDelay: `${FRAMEWORKS.length * 80}ms`,
-          }}
-        >
-          + any codebase Claude can read
-        </span>
+      <div className="relative overflow-hidden">
+        {/* Fade edges */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-bg to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-bg to-transparent z-10 pointer-events-none" />
+
+        {/* Scrolling track — duplicated for seamless loop */}
+        <div className="flex items-center animate-[marquee_25s_linear_infinite]">
+          {FRAMEWORKS.map((fw) => (
+            <FrameworkItem key={fw.name} fw={fw} />
+          ))}
+          {FRAMEWORKS.map((fw) => (
+            <FrameworkItem key={`dup-${fw.name}`} fw={fw} />
+          ))}
+        </div>
       </div>
     </div>
   );
