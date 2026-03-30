@@ -197,7 +197,7 @@ Mono labels share a single canonical treatment via `--mono-size`, `--mono-weight
 - All animations respect `prefers-reduced-motion: reduce`
 
 **What the template renders:**
-- Sticky header with project identity and risk severity count chips
+- Sticky header with project identity and clickable risk severity chips (clicking a chip smooth-scrolls to the first risk card of that severity and auto-expands it)
 - Stats line (component count, risk counts) + 2-4 sentence architecture overview from `metadata.summary`
 - Interaction hints (click, hover, click-to-jump)
 - Architecture diagram (containment-based, light schematic style) with component cards showing category icons and connection tags
