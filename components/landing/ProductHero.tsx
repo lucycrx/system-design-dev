@@ -93,11 +93,19 @@ export function ProductHero() {
                 transitionDelay: "200ms",
               }}
             >
-              <p className="font-mono text-[13px] text-text-muted leading-relaxed">
-                Scan any codebase. Get an interactive architecture map with
-                plain-English explanations and risk analysis. No code reading
-                required.
-              </p>
+              <div>
+                <p className="font-mono text-[13px] text-text-muted leading-relaxed mb-5">
+                  Scan any codebase. Get an interactive architecture map with
+                  plain-English explanations and risk analysis. No code reading
+                  required.
+                </p>
+                <a
+                  href="#get-started"
+                  className="inline-block font-mono text-[12px] font-medium tracking-wide uppercase border border-text bg-text text-bg px-5 py-2.5 hover:bg-transparent hover:text-text transition-colors duration-200"
+                >
+                  Get Started
+                </a>
+              </div>
 
               <div className="border-t border-text/15 pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-8">
                 <div className="label-mono text-accent mb-2">
