@@ -30,7 +30,7 @@
         },
         {
           "type": "text",
-          "content": "Right now, your setup is about as simple as it gets:\n\n1. **Your browser** (the client) sends a message to the server\n2. **The server** receives it and sends it to your friend's browser\n3. Your friend's browser displays the message\n\nThat's it. One client, one server, two happy users."
+          "content": "Right now, your setup is about as simple as it gets:\n\n1. **[[node:client-1|Your browser]]** (the client) sends a message to [[node:server|the server]]\n2. [[node:server|The server]] receives it and sends it to [[node:client-2|your friend's browser]]\n3. Your friend's browser displays the message\n\nThat's it. One client, one server, two happy users."
         },
         {
           "type": "diagram",
@@ -44,7 +44,7 @@
         },
         {
           "type": "text",
-          "content": "There's one thing to notice right now: your server is keeping all the messages **in memory**. That means they live in the server's temporary workspace — like writing notes on a whiteboard. Fast and easy, but..."
+          "content": "There's one thing to notice right now: your [[node:server|server]] is keeping all the messages **in memory**. That means they live in the server's temporary workspace — like writing notes on a whiteboard. Fast and easy, but..."
         },
         {
           "type": "checkpoint",
@@ -89,7 +89,7 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Things were going great — until they weren't.\n\nYour server restarted overnight (a routine update from your hosting provider), and **every message disappeared**. Poof. Gone. A hundred users woke up to empty chat rooms."
+          "content": "Things were going great — until they weren't.\n\nYour [[node:server|server]] restarted overnight (a routine update from your hosting provider), and **every message disappeared**. Poof. Gone. A hundred users woke up to empty chat rooms."
         },
         {
           "type": "callout",
@@ -98,7 +98,7 @@
         },
         {
           "type": "text",
-          "content": "That filing cabinet is called a [[glossary:database|database]]. A database stores your data on disk (not just in memory), so it survives restarts, crashes, and updates.\n\nHere's how your app works now:\n\n1. User sends a message → server receives it\n2. Server **writes the message to the database** (permanent storage)\n3. Server sends the message to other users in the chat\n4. When someone opens the app, the server **reads their messages from the database**\n\nNo more disappearing messages."
+          "content": "That filing cabinet is called a [[glossary:database|database]]. A database stores your data on disk (not just in memory), so it survives restarts, crashes, and updates.\n\nHere's how your app works now:\n\n1. User sends a message → server receives it\n2. [[node:server|Server]] **writes the message to the [[node:database|database]]** (permanent storage)\n3. Server sends the message to other users in the chat\n4. When someone opens the app, the server **reads their messages from the database**\n\nNo more disappearing messages."
         },
         {
           "type": "diagram",
@@ -179,7 +179,7 @@
         },
         {
           "type": "text",
-          "content": "The fix is a technology called [[glossary:websockets|WebSockets]]. Instead of the client constantly asking for updates, a WebSocket creates a **persistent, two-way connection** between the client and server."
+          "content": "The fix is a technology called [[glossary:websockets|WebSockets]]. Instead of the client constantly asking for updates, a WebSocket creates a **persistent, two-way connection** between the client and [[node:server|server]]."
         },
         {
           "type": "callout",
@@ -188,7 +188,7 @@
         },
         {
           "type": "text",
-          "content": "With WebSockets:\n\n1. When a user opens the app, their browser opens a WebSocket connection to the server (like picking up the phone)\n2. The connection **stays open** as long as the user is on the app\n3. When someone sends a message, the server **immediately pushes** it to every connected client in that chat room\n4. No more asking. No more waiting. Messages appear **instantly**.\n\nThis is how every real-time app works — Slack, Discord, WhatsApp Web, Google Docs collaboration."
+          "content": "With WebSockets:\n\n1. When a user opens the app, their browser opens a WebSocket connection to the server (like picking up the phone)\n2. The connection **stays open** as long as the user is on the app\n3. When someone sends a message, [[node:server|the server]] **immediately pushes** it to every connected client in that chat room\n4. No more asking. No more waiting. Messages appear **instantly**.\n\nThis is how every real-time app works — Slack, Discord, WhatsApp Web, Google Docs collaboration."
         },
         {
           "type": "diagram",
