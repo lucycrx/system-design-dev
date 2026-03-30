@@ -46,6 +46,19 @@
   --cat-storage: hsl(140, 25%, 50%);
 
   --max-width: 1280px;
+
+  /* Type scale — 1.2 ratio, 6 stops */
+  --text-caption: 0.6875rem;   /* 11px — mono labels only */
+  --text-small: 0.75rem;       /* 12px — chips, meta, file paths */
+  --text-secondary: 0.8125rem; /* 13px — sublabels, evidence, meta values */
+  --text-body: 0.875rem;       /* 14px — descriptions, risk text, connections */
+  --text-subhead: 1rem;        /* 16px — risk titles, summary */
+  --text-heading: 1.25rem;     /* 20px — detail panel title */
+
+  /* Mono label — single canonical treatment */
+  --mono-size: var(--text-caption);
+  --mono-weight: 500;
+  --mono-tracking: 0.14em;
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -84,21 +97,21 @@ body {
 
 .project-name {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  font-size: var(--text-small);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.project-meta { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+.project-meta { font-size: var(--text-secondary); color: var(--text-dim); white-space: nowrap; }
 .risk-counts { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
 .risk-chip {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   padding: 0.25rem 0.6rem;
   border: 1px solid;
@@ -111,22 +124,22 @@ body {
 .risk-chip[data-severity="high"] { color: var(--risk-high); border-color: var(--risk-high); background: var(--risk-high-bg); }
 .risk-chip[data-severity="medium"] { color: var(--risk-medium); border-color: var(--risk-medium); background: var(--risk-medium-bg); }
 .risk-chip[data-severity="low"] { color: var(--risk-low); border-color: var(--risk-low); background: var(--risk-low-bg); }
-.risk-chip .count { font-weight: 700; font-size: 0.85rem; }
+.risk-chip .count { font-weight: 700; font-size: var(--text-body); }
 
 .summary-strip { padding: 1.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-.summary-text { font-size: 1.05rem; line-height: 1.6; }
+.summary-text { font-size: var(--text-subhead); line-height: 1.6; }
 .summary-text strong { font-weight: 600; }
 
 .summary-overview {
-  font-size: 0.88rem;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: 1.65;
   color: var(--text-muted);
   margin-top: 0.6rem;
 }
 
 .diagram-hint {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--mono-size);
   letter-spacing: 0.04em;
   color: var(--text-dim);
   margin-bottom: 0.75rem;
@@ -145,15 +158,15 @@ body {
   display: inline-block;
   border: 1px solid var(--border);
   padding: 0.1rem 0.35rem;
-  font-weight: 500;
+  font-weight: var(--mono-weight);
   color: var(--text-muted);
 }
 
 .section-label {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.15em;
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   color: var(--text-dim);
   margin-bottom: 1rem;
@@ -194,9 +207,9 @@ body {
   top: -0.55rem;
   left: 0.75rem;
   font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   padding: 0 0.4rem;
   background: var(--diagram-surface);
@@ -209,12 +222,26 @@ body {
   padding: 0.6rem 0.75rem;
   background: var(--diagram-bg);
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease, color 0.2s ease;
   position: relative;
+  outline: none;
 }
 
-.comp-card:hover { border-color: var(--diagram-label); }
-.comp-card.selected { border-color: var(--highlight); }
+.comp-card:hover { border-color: var(--diagram-label); transform: translateY(-1px); }
+.comp-card:active { transform: translateY(0); background: var(--diagram-surface); }
+.comp-card:focus-visible { border-color: var(--highlight); outline: 2px solid var(--highlight); outline-offset: 1px; }
+
+.comp-card.selected {
+  background: var(--text);
+  border-color: var(--text);
+}
+.comp-card.selected .comp-label { color: var(--bg); }
+.comp-card.selected .comp-sublabel { color: hsl(0, 0%, 65%); }
+.comp-card.selected .comp-icon { color: var(--bg); opacity: 1; }
+.comp-card.selected .conn-tag { border-color: hsl(0, 0%, 35%); color: hsl(0, 0%, 65%); background: hsl(0, 0%, 18%); }
+.comp-card.selected .conn-tag .conn-target { color: var(--bg); }
+.comp-card.selected .conn-tag:hover { border-color: hsl(0, 0%, 55%); color: hsl(0, 0%, 80%); }
+.comp-card.selected .conn-tag::before { background: var(--bg); }
 
 .comp-card + .comp-card { margin-top: 0.4rem; }
 
@@ -238,23 +265,23 @@ body {
 }
 
 .comp-label {
-  font-size: 0.82rem;
+  font-size: var(--text-body);
   font-weight: 600;
   color: var(--diagram-text);
   line-height: 1.3;
 }
 
 .comp-sublabel {
-  font-size: 0.68rem;
+  font-size: var(--text-secondary);
   color: var(--diagram-text-dim);
-  margin-top: 0.1rem;
+  margin-top: 0.15rem;
 }
 
-/* Risk indicator — thin top border */
-.comp-card.risk-critical { border-top: 2px solid var(--risk-critical); }
-.comp-card.risk-high { border-top: 2px solid var(--risk-high); }
-.comp-card.risk-medium { border-top: 2px solid var(--risk-medium); }
-.comp-card.risk-low { border-top: 2px solid var(--risk-low); }
+/* Risk indicator — thin top border (persists on selected state) */
+.comp-card.risk-critical, .comp-card.selected.risk-critical { border-top: 2px solid var(--risk-critical); }
+.comp-card.risk-high, .comp-card.selected.risk-high { border-top: 2px solid var(--risk-high); }
+.comp-card.risk-medium, .comp-card.selected.risk-medium { border-top: 2px solid var(--risk-medium); }
+.comp-card.risk-low, .comp-card.selected.risk-low { border-top: 2px solid var(--risk-low); }
 
 /* Side-by-side components inside a group */
 .comp-row {
@@ -289,7 +316,7 @@ body {
 
 .conn-tag {
   font-family: var(--font-mono);
-  font-size: 0.55rem;
+  font-size: var(--mono-size);
   letter-spacing: 0.03em;
   color: var(--diagram-text-dim);
   background: var(--diagram-surface);
@@ -308,13 +335,17 @@ body {
   color: var(--diagram-text);
 }
 
+.conn-tag:focus-visible {
+  outline: 2px solid var(--highlight);
+  outline-offset: 1px;
+}
+
 .conn-tag .conn-arrow {
-  font-size: 0.65rem;
   opacity: 0.5;
 }
 
 .conn-tag .conn-target {
-  font-weight: 600;
+  font-weight: var(--mono-weight);
   color: var(--diagram-text);
 }
 
@@ -342,26 +373,38 @@ body {
 /* Highlight target card when hovering a connection tag */
 .comp-card.conn-highlight {
   border-color: var(--highlight);
-  box-shadow: 0 0 0 1px var(--highlight);
+  outline: 1px solid var(--highlight);
+  outline-offset: -1px;
 }
 
 /* ---- DETAIL PANEL ---- */
 
 .detail-panel {
-  display: none;
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 1.5rem;
-  width: 340px;
   flex-shrink: 0;
   position: sticky;
   top: 5rem;
   align-self: flex-start;
   max-height: calc(100vh - 6rem);
-  overflow-y: auto;
+  overflow: hidden;
+  width: 0;
+  padding: 0;
+  border-width: 0;
+  opacity: 0;
+  transition: width 0.3s cubic-bezier(0.25, 0, 0.2, 1),
+              padding 0.3s cubic-bezier(0.25, 0, 0.2, 1),
+              border-width 0.3s cubic-bezier(0.25, 0, 0.2, 1),
+              opacity 0.25s cubic-bezier(0.25, 0, 0.2, 1);
 }
 
-.detail-panel.visible { display: block; }
+.detail-panel.visible {
+  width: 340px;
+  padding: 1.5rem;
+  border-width: 1px;
+  opacity: 1;
+  overflow-y: auto;
+}
 
 .detail-panel-header {
   display: flex;
@@ -372,20 +415,34 @@ body {
 
 .detail-close {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-small);
   color: var(--text-dim);
   cursor: pointer;
   border: 1px solid var(--border);
   background: none;
   padding: 0.2rem 0.5rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.detail-close:hover { border-color: var(--text-muted); }
-.detail-title { font-size: 1.05rem; font-weight: 600; }
+.detail-close:hover { border-color: var(--text-muted); color: var(--text); }
+.detail-close:focus-visible { outline: 2px solid var(--highlight); outline-offset: 1px; }
+.detail-category {
+  font-family: var(--font-mono);
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+  letter-spacing: var(--mono-tracking);
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  color: white;
+  margin-bottom: 0.35rem;
+}
+
+.detail-title { font-size: var(--text-heading); font-weight: 700; line-height: 1.2; }
 
 .detail-description {
-  font-size: 0.88rem;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: 1.65;
   color: var(--text-muted);
   margin-bottom: 1rem;
 }
@@ -394,16 +451,16 @@ body {
 
 .detail-col-title {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  font-size: var(--mono-size);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   color: var(--text-dim);
   margin-bottom: 0.4rem;
 }
 
-.detail-file { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); padding: 0.15rem 0; }
-.detail-connection { font-size: 0.82rem; color: var(--text-muted); padding: 0.2rem 0; }
-.detail-connection-target { font-weight: 500; color: var(--text); }
+.detail-file { font-family: var(--font-mono); font-size: var(--text-small); color: var(--text-muted); padding: 0.2rem 0; }
+.detail-connection { font-size: var(--text-body); color: var(--text-muted); padding: 0.2rem 0; line-height: 1.5; }
+.detail-connection-target { font-weight: 600; color: var(--text); }
 
 /* ---- RISK REPORT ---- */
 
@@ -417,8 +474,9 @@ body {
   border: 1px solid var(--border);
 }
 
-.risk-card { background: var(--surface); cursor: pointer; transition: background 0.15s ease; }
+.risk-card { background: var(--surface); cursor: pointer; transition: background 0.15s ease; outline: none; }
 .risk-card:hover { background: var(--surface-raised); }
+.risk-card:focus-visible { outline: 2px solid var(--highlight); outline-offset: -2px; }
 
 .risk-card-header {
   display: grid;
@@ -426,13 +484,14 @@ body {
   align-items: center;
   padding: 1rem 1.25rem;
   gap: 1rem;
+  user-select: none;
 }
 
 .risk-severity {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--mono-size);
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   padding: 0.25rem 0;
   text-align: center;
@@ -444,40 +503,52 @@ body {
 .risk-severity.medium { color: var(--risk-medium); border-color: var(--risk-medium); background: var(--risk-medium-bg); }
 .risk-severity.low { color: var(--risk-low); border-color: var(--risk-low); background: var(--risk-low-bg); }
 
-.risk-title { font-size: 0.92rem; font-weight: 500; }
+.risk-title { font-size: var(--text-subhead); font-weight: 500; line-height: 1.45; }
 
 .risk-toggle {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-small);
   color: var(--text-dim);
   transition: transform 0.2s ease;
 }
 
 .risk-card.expanded .risk-toggle { transform: rotate(90deg); }
-.risk-detail { display: none; padding: 0 1.25rem 1.5rem; padding-left: calc(5rem + 2.25rem); }
-.risk-card.expanded .risk-detail { display: block; }
+
+.risk-detail-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.25, 0, 0.2, 1);
+}
+
+.risk-card.expanded .risk-detail-wrapper {
+  grid-template-rows: 1fr;
+}
+
+.risk-detail { overflow: hidden; padding: 0 1.25rem 0; padding-left: calc(5rem + 2.25rem); transition: padding-bottom 0.3s cubic-bezier(0.25, 0, 0.2, 1); }
+.risk-card.expanded .risk-detail { padding-bottom: 1.5rem; }
 
 .risk-analogy {
-  font-size: 0.85rem;
-  line-height: 1.55;
+  font-size: var(--text-body);
+  line-height: 1.65;
   color: var(--text-muted);
   border-left: 2px solid var(--border);
   padding-left: 1rem;
   margin: 0.5rem 0 0.75rem;
   font-style: italic;
+  max-width: 65ch;
 }
 
-.risk-consequence { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem; }
+.risk-consequence { font-size: var(--text-body); color: var(--text-muted); line-height: 1.65; margin-bottom: 0.75rem; max-width: 65ch; }
 
 .risk-evidence {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-small);
   color: var(--text-dim);
   background: var(--surface-raised);
   border: 1px solid var(--border);
   padding: 0.6rem 0.8rem;
   margin-top: 0.75rem;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .risk-fix {
@@ -489,15 +560,15 @@ body {
 
 .risk-fix-title {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  font-size: var(--mono-size);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   color: var(--text-dim);
   margin-bottom: 0.5rem;
 }
 
-.risk-fix-summary { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.35rem; }
-.risk-fix-detail { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+.risk-fix-summary { font-size: var(--text-body); font-weight: 600; margin-bottom: 0.35rem; }
+.risk-fix-detail { font-size: var(--text-body); color: var(--text-muted); line-height: 1.65; max-width: 65ch; }
 
 .risk-meta {
   display: flex;
@@ -509,20 +580,20 @@ body {
 
 .risk-meta-label {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
+  font-size: var(--mono-size);
+  letter-spacing: var(--mono-tracking);
   text-transform: uppercase;
   color: var(--text-dim);
   display: block;
   margin-bottom: 0.2rem;
 }
 
-.risk-meta-value { color: var(--text-muted); font-size: 0.78rem; }
+.risk-meta-value { color: var(--text-muted); font-size: var(--text-secondary); }
 .risk-learn-more { margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
 .learn-more-link {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--mono-size);
   letter-spacing: 0.05em;
   color: var(--cat-frontend);
   text-decoration: none;
@@ -531,6 +602,7 @@ body {
 }
 
 .learn-more-link:hover { border-color: var(--cat-frontend); }
+.learn-more-link:focus-visible { outline: 2px solid var(--highlight); outline-offset: 1px; }
 
 /* ---- FOOTER ---- */
 
@@ -542,14 +614,16 @@ body {
   align-items: baseline;
 }
 
-.footer-left { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.05em; }
-.footer-right { font-size: 0.78rem; color: var(--text-dim); }
+.footer-left { font-family: var(--font-mono); font-size: var(--text-small); color: var(--text-dim); letter-spacing: 0.05em; }
+.footer-right { font-size: var(--text-secondary); color: var(--text-dim); }
 .footer-right a { color: var(--cat-frontend); text-decoration: none; }
 .footer-right a:hover { text-decoration: underline; }
 
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.cat-group { animation: fadeIn 0.4s ease-out both; }
-.risk-card { animation: fadeIn 0.3s ease-out both; }
+.cat-group { animation: slideUp 0.4s cubic-bezier(0.25, 0, 0.2, 1) both; }
+.comp-card { animation: slideUp 0.35s cubic-bezier(0.25, 0, 0.2, 1) both; }
+.risk-card { animation: slideUp 0.3s cubic-bezier(0.25, 0, 0.2, 1) both; }
 .risk-list .risk-card:nth-child(1) { animation-delay: 0.1s; }
 .risk-list .risk-card:nth-child(2) { animation-delay: 0.15s; }
 .risk-list .risk-card:nth-child(3) { animation-delay: 0.2s; }
@@ -561,7 +635,8 @@ body {
   .header-inner { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
   .map-layout { flex-direction: column; }
   .diagram { padding: 1rem; }
-  .detail-panel { width: 100%; position: static; max-height: none; }
+  .detail-panel { position: static; max-height: none; }
+  .detail-panel.visible { width: 100%; }
   .diagram-row { flex-direction: column; }
   .comp-row { flex-direction: column; }
   .risk-card-header { grid-template-columns: auto 1fr auto; gap: 0.75rem; }
@@ -571,16 +646,18 @@ body {
 
 @media print {
   .header { position: static; border-bottom: 2px solid var(--text); }
-  .cat-group, .risk-card { animation: none; break-inside: avoid; }
-  .risk-card .risk-detail { display: block; }
+  .cat-group, .comp-card, .risk-card { animation: none; break-inside: avoid; }
+  .risk-card .risk-detail-wrapper { grid-template-rows: 1fr; }
+  .risk-card .risk-detail { padding-bottom: 1.5rem; }
   .risk-toggle, .detail-close { display: none; }
   body { background: white; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cat-group, .risk-card { animation: none; }
+  .cat-group, .comp-card, .risk-card { animation: none; }
   .conn-tag::before { animation: none; }
   * { transition-duration: 0.01ms !important; }
+  .risk-detail-wrapper { transition: none; }
 }
 
 @media print {
@@ -618,7 +695,7 @@ body {
       <div class="detail-panel" id="detailPanel">
         <div class="detail-panel-header">
           <div>
-            <span class="node-category" id="detailCategory" style="font-family:var(--font-mono);font-size:0.6rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;display:inline-block;padding:0.05rem 0.35rem;color:white;margin-bottom:0.3rem"></span>
+            <span class="detail-category" id="detailCategory"></span>
             <h2 class="detail-title" id="detailTitle"></h2>
           </div>
           <button class="detail-close" onclick="closeDetail()">close</button>
@@ -850,6 +927,12 @@ body {
     diagramEl.appendChild(row);
   }
 
+  // Stagger comp-card entrance animations
+  var allCompCards = diagramEl.querySelectorAll('.comp-card');
+  allCompCards.forEach(function(c, i) {
+    c.style.animationDelay = (0.1 + i * 0.06) + 's';
+  });
+
   function makeCompCard(comp) {
     var card = document.createElement('div');
     card.className = 'comp-card';
@@ -874,7 +957,7 @@ body {
       conns.forEach(function(conn) {
         var target = compMap[conn.targetId];
         var targetName = target ? target.label.split('(')[0].trim() : conn.targetId;
-        h += '<span class="conn-tag" data-target="' + esc(conn.targetId) + '">'
+        h += '<span class="conn-tag" tabindex="0" data-target="' + esc(conn.targetId) + '">'
           + '<span class="conn-arrow">\u2192</span>'
           + '<span class="conn-target">' + esc(targetName) + '</span> '
           + esc(conn.label)
@@ -884,9 +967,13 @@ body {
     }
 
     card.innerHTML = h;
+    card.setAttribute('tabindex', '0');
     card.addEventListener('click', function(e) {
       e.stopPropagation();
       selectComponent(comp);
+    });
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); selectComponent(comp); }
     });
 
     // Connection tag hover: highlight target card
@@ -900,7 +987,7 @@ body {
         var targetCard = diagramEl.querySelector('[data-id="' + targetId + '"]');
         if (targetCard) targetCard.classList.remove('conn-highlight');
       });
-      tag.addEventListener('click', function(e) {
+      function jumpToTarget(e) {
         e.stopPropagation();
         var target = compMap[targetId];
         if (target) {
@@ -908,6 +995,10 @@ body {
           var targetCard = diagramEl.querySelector('[data-id="' + targetId + '"]');
           if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+      }
+      tag.addEventListener('click', jumpToTarget);
+      tag.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jumpToTarget(e); }
       });
     });
 
@@ -1000,8 +1091,12 @@ body {
     }
     d += '</div>';
 
-    card.innerHTML = h + d;
+    card.innerHTML = h + '<div class="risk-detail-wrapper">' + d + '</div>';
+    card.setAttribute('tabindex', '0');
     card.querySelector('.risk-card-header').addEventListener('click', function() { card.classList.toggle('expanded'); });
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('expanded'); }
+    });
     riskListEl.appendChild(card);
   });
 
