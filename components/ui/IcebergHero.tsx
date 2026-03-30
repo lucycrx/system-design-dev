@@ -32,21 +32,22 @@ function GridPattern({ visible }: { visible: boolean }) {
   const vLines = [80, 160, 240, 320, 400, 480, 560, 640, 720];
   const hLines = [60, 120, 180, 240, 300, 360];
 
+  // All nodes pushed to the right third — clear of hero text
   const nodes: { x: number; y: number; color: string; size: number }[] = [
-    { x: 320, y: 120, color: "var(--color-accent)", size: 10 },
-    { x: 480, y: 180, color: "var(--color-blue)", size: 8 },
-    { x: 640, y: 60, color: "var(--color-green)", size: 8 },
-    { x: 560, y: 300, color: "var(--color-accent)", size: 6 },
-    { x: 400, y: 240, color: "var(--color-blue)", size: 10 },
-    { x: 720, y: 180, color: "var(--color-orange)", size: 6 },
+    { x: 560, y: 80, color: "var(--color-accent)", size: 10 },
+    { x: 640, y: 180, color: "var(--color-blue)", size: 8 },
+    { x: 720, y: 60, color: "var(--color-green)", size: 8 },
+    { x: 720, y: 300, color: "var(--color-accent)", size: 6 },
+    { x: 640, y: 300, color: "var(--color-blue)", size: 10 },
+    { x: 560, y: 240, color: "var(--color-orange)", size: 6 },
   ];
 
-  // Connector lines between select nodes
+  // Connector lines between nodes — right-side cluster
   const connectors = [
-    { x1: 325, y1: 125, x2: 480, y2: 180 },
-    { x1: 485, y1: 180, x2: 640, y2: 65 },
-    { x1: 405, y1: 245, x2: 560, y2: 300 },
-    { x1: 485, y1: 185, x2: 400, y2: 240 },
+    { x1: 565, y1: 85, x2: 640, y2: 180 },
+    { x1: 645, y1: 180, x2: 720, y2: 65 },
+    { x1: 565, y1: 240, x2: 640, y2: 300 },
+    { x1: 645, y1: 300, x2: 720, y2: 300 },
   ];
 
   return (
@@ -132,11 +133,11 @@ function GridPattern({ visible }: { visible: boolean }) {
           </g>
         ))}
 
-        {/* Crosshair marks at key intersections */}
+        {/* Crosshair marks at right-side intersections */}
         {[
-          { x: 160, y: 120 },
-          { x: 240, y: 300 },
-          { x: 640, y: 240 },
+          { x: 560, y: 180 },
+          { x: 720, y: 180 },
+          { x: 640, y: 120 },
         ].map((p, i) => (
           <g key={`cross-${i}`} opacity="0.3">
             <line
@@ -164,7 +165,7 @@ function GridPattern({ visible }: { visible: boolean }) {
         className="absolute inset-0 transition-opacity duration-1200"
         style={{
           background:
-            "linear-gradient(to right, var(--color-bg) 25%, transparent 60%, transparent 90%, var(--color-bg) 100%)",
+            "linear-gradient(to right, var(--color-bg) 35%, color-mix(in srgb, var(--color-bg) 85%, transparent) 55%, transparent 75%, transparent 92%, var(--color-bg) 100%)",
           opacity: visible ? 1 : 0,
           transitionDelay: "600ms",
         }}
