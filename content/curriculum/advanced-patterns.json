@@ -348,6 +348,106 @@
       },
       "relatedStories": [],
       "relatedGlossary": ["message-queue", "redis", "database"]
+    },
+    {
+      "id": "pub-sub",
+      "title": "Pub-Sub: Broadcasting events to anyone who's listening",
+      "description": "A messaging pattern where publishers broadcast to a topic and any number of subscribers receive every message -- unlike queues, where each message goes to one worker.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "**Pub-Sub** (Publish-Subscribe) is a messaging pattern where senders (publishers) broadcast messages to a **topic**, and any number of receivers (subscribers) can listen to that topic. The publisher doesn't know who's subscribed. Subscribers don't know who published. The topic is the intermediary.\n\nThis is different from a [[glossary:message-queue|message queue]] where each message is consumed by ONE worker. In pub-sub, each message is delivered to ALL subscribers. If 5 services subscribe to the \"order.placed\" topic, all 5 get a copy of every message."
+        },
+        {
+          "heading": "why",
+          "content": "Pub-sub matters because it's the backbone of [[glossary:event-driven-architecture|event-driven systems]] at scale. It enables:\n\n- **Fan-out** -- one event triggers many reactions across different services\n- **Decoupled services** -- publishers and subscribers evolve independently\n- **Real-time features** -- push notifications, live updates, chat\n- **Reliable delivery** -- messages persist in the topic even if a subscriber is temporarily down\n\nUnderstanding the difference between queues and pub-sub helps you scope features correctly -- \"notify all subscribers\" is pub-sub, \"assign this task to one worker\" is a queue."
+        },
+        {
+          "heading": "how",
+          "content": "Analogy: a **podcast**.\n\nThe host (publisher) records an episode and uploads it to a platform (topic). Every subscriber automatically gets the episode. The host doesn't know how many listeners they have or what they do with the episode -- one person listens while running, another takes notes, a third shares clips on social media. New subscribers can join anytime without the host changing anything. If a subscriber's phone is offline, they get the episode when they reconnect.\n\nCompare this to a **phone call** (direct messaging) where you speak to ONE person and have to call each person individually. Or a **voicemail queue** where the first person to check it \"consumes\" the message. Pub-sub delivers to everyone.\n\nPopular tools: Google Cloud Pub/Sub, Amazon SNS, Apache Kafka (which can act as both a queue and pub-sub), Redis Pub/Sub (simpler, no persistence)."
+        },
+        {
+          "heading": "when",
+          "content": "Use pub-sub when:\n\n- One event needs to trigger actions in multiple independent services\n- You need to broadcast updates (price changes, config updates, notifications)\n- You're building real-time features (live feeds, collaborative editing, notifications)\n- You want an audit log of all events\n\nUse a regular [[glossary:message-queue|message queue]] instead when:\n\n- Each task should be processed by exactly one worker (like sending an individual email or processing a single payment)"
+        }
+      ],
+      "quiz": {
+        "question": "What pattern should you adopt?",
+        "scenario": "Your e-commerce platform needs to handle what happens when a product's price changes. Currently, the pricing service directly calls the search index, the recommendation engine, the email notification service (to alert users watching the product), and the analytics service. Adding a new price comparison feature requires modifying the pricing service to also call the new comparison service. Your team is tired of updating the pricing service every time a new consumer of price data appears.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Have the pricing service publish a \"price.changed\" event to a pub-sub topic, and let each service subscribe independently",
+            "correct": true,
+            "explanation": "Each service (search, recommendations, email, analytics, comparison) subscribes to the \"price.changed\" topic independently. Adding the next consumer is zero changes to the pricing service. The pricing service just announces what happened; it doesn't need to know or care who's listening."
+          },
+          {
+            "id": "b",
+            "text": "Create a shared library that the pricing service uses to call all consumers, so adding a new one is just a config change",
+            "correct": false,
+            "explanation": "A shared library still means the pricing service is responsible for calling every consumer. Even if adding a consumer is a config change, the pricing service still has to deploy that config, manage connections to each consumer, and handle failures in each one. You've made the coupling slightly more convenient but haven't eliminated it."
+          },
+          {
+            "id": "c",
+            "text": "Put price changes into a message queue and have each service poll the queue for updates",
+            "correct": false,
+            "explanation": "A standard message queue delivers each message to ONE consumer. If the search service picks up a price change message, the recommendation engine never sees it. You'd need a separate queue for each consumer, which recreates the original problem of managing individual connections. Pub-sub's fan-out delivers every message to all subscribers automatically."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["message-queue", "event-driven-architecture", "decoupling"]
+    },
+    {
+      "id": "payment-systems",
+      "title": "Payment Systems: How money actually moves through your app",
+      "description": "The multi-step process behind every checkout -- authorization, capture, settlement -- and why idempotency keys prevent double charges.",
+      "estimatedMinutes": 6,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Payment processing seems simple -- user clicks \"Pay,\" money moves. In reality, it's a multi-step process with strict rules. The key stages:\n\n- **Authorization** -- checking if the card is valid and has funds. No money moves yet.\n- **Capture** -- actually charging the card. Money moves.\n- **Settlement** -- the money arriving in your bank account, usually 2-3 business days later.\n\nMany apps separate authorization and capture: a hotel authorizes $500 when you check in but only captures the actual total when you check out.\n\nThe critical concept is **idempotency** -- ensuring that if something goes wrong and a request is retried, the customer isn't charged twice. Payment processors like Stripe handle this with **idempotency keys**: a unique ID you send with each charge request so the processor knows \"I already processed this one, don't charge again.\""
+        },
+        {
+          "heading": "why",
+          "content": "Payments are one of the highest-stakes features in any app. Getting it wrong means:\n\n- **Charging customers twice** -- refund + angry user + potential chargeback fees\n- **Not charging at all** -- lost revenue\n- **Falling out of PCI compliance** -- legal consequences\n\nUnderstanding payment flows helps you:\n\n- **Scope checkout features realistically** -- it's never \"just add a pay button\"\n- **Understand why payment features take longer to build than expected**\n- **Debug payment issues** -- \"the charge was authorized but never captured\"\n- **Evaluate payment providers** -- Stripe, Square, Adyen"
+        },
+        {
+          "heading": "how",
+          "content": "Analogy: **buying a house**.\n\nYou don't hand over a suitcase of cash. First, the bank verifies you have the funds and issues a pre-approval (authorization). Then at closing, the actual money transfer happens (capture). Days later, the funds arrive in the seller's account (settlement). If the deal falls through after pre-approval, no money moved -- the authorization is simply voided.\n\nIn a typical Stripe integration:\n\n1. User enters card details (handled by Stripe's UI component -- you never see the card number)\n2. Stripe creates a PaymentIntent (authorization)\n3. If the charge is confirmed, Stripe captures the funds\n4. Stripe sends a **webhook** to your [[glossary:server|server]] confirming success\n5. Your app fulfills the order\n\nThe webhook pattern is critical -- never rely on the client to confirm payment. A user could close their browser mid-checkout. The webhook from Stripe is the source of truth."
+        },
+        {
+          "heading": "when",
+          "content": "Use a managed payment processor (Stripe, Square) for almost everything -- never build payment processing yourself.\n\nThink about payment edge cases when scoping:\n\n- Refunds and partial refunds\n- Subscription billing and failed renewals\n- Currency conversion for international users\n- Authorization holds vs. immediate charges\n- Handling disputed charges (chargebacks)\n\nThese edge cases typically take 3-5x longer than the \"happy path\" checkout flow."
+        }
+      ],
+      "quiz": {
+        "question": "How do you prevent the double charges?",
+        "scenario": "Your app charges users when they place an order. Occasionally, users report being charged twice for a single order. Your engineering team investigates and finds that sometimes the network times out after sending the charge request to Stripe, so the app retries the request -- which creates a second charge. The order itself is only created once.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add an idempotency key (like the order ID) to every Stripe charge request so retries don't create duplicate charges",
+            "correct": true,
+            "explanation": "If the same idempotency key is sent twice, Stripe recognizes it as a retry and returns the original result instead of processing a new charge. This is the standard pattern for preventing duplicate payments. Using the order ID as the key is natural since each order should only be charged once."
+          },
+          {
+            "id": "b",
+            "text": "Check if the order has already been charged before sending the request to Stripe",
+            "correct": false,
+            "explanation": "This creates a race condition. The first request times out -- your app doesn't know if Stripe processed it or not. Checking your own database won't tell you what Stripe did. You might see \"not charged\" in your database while Stripe actually did charge the card. The idempotency key solves this at the Stripe level, where the truth about the charge lives."
+          },
+          {
+            "id": "c",
+            "text": "Increase the network timeout so requests don't time out in the first place",
+            "correct": false,
+            "explanation": "Longer timeouts reduce the frequency of the problem but don't eliminate it. Networks are unreliable -- timeouts, dropped connections, and server errors will always happen eventually. The idempotency key is the correct solution because it makes retries safe regardless of why they happen. You need a system that handles failure gracefully, not one that assumes failure won't occur."
+          }
+        ]
+      },
+      "relatedStories": [],
+      "relatedGlossary": ["api", "server"]
     }
   ]
 }
