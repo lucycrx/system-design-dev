@@ -22,6 +22,10 @@
   --color-orange-dim: #C49A1D1A;
   --color-purple: #4E5E6E;
   --color-purple-dim: #4E5E6E1A;
+  --color-sage: #5A7A5A;
+  --color-sage-dim: #5A7A5A1A;
+  --color-queue: #6B5B8A;
+  --color-queue-dim: #6B5B8A1A;
 
   /* Fonts */
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;

@@ -128,6 +128,22 @@ function NodeIcon({ type }: { type: DiagramNodeType }) {
   }
 }
 
+const typeColors: Record<DiagramNodeType, string> = {
+  client: "var(--color-blue)",
+  server: "var(--color-purple)",
+  database: "var(--color-green)",
+  cache: "var(--color-orange)",
+  queue: "var(--color-queue)",
+  "load-balancer": "var(--color-blue)",
+  cdn: "var(--color-blue)",
+  "api-gateway": "var(--color-purple)",
+  auth: "var(--color-pink)",
+  "external-service": "var(--color-accent)",
+  "background-job": "var(--color-queue)",
+  storage: "var(--color-sage)",
+  agent: "var(--color-purple)",
+};
+
 const typeLabels: Record<DiagramNodeType, string> = {
   client: "client",
   server: "server",
@@ -184,7 +200,7 @@ function SystemNodeComponent({ data }: { data: SystemNodeData }) {
           animationDelay: isNew ? "200ms" : undefined,
         }}
       >
-        <div className="text-text-muted">
+        <div style={{ color: typeColors[data.nodeType] }}>
           <NodeIcon type={data.nodeType} />
         </div>
         <div className="flex flex-col min-w-0">

@@ -1,0 +1,121 @@
+{
+  "nodeTypes": [
+    {
+      "id": "client",
+      "label": "Frontend / Client",
+      "description": "What users see and interact with — the browser, mobile app, or any screen where someone uses the product",
+      "analogy": "The storefront window and counters of a business. Everything the customer touches and sees.",
+      "icon": "lucide:monitor",
+      "color": "#4A708E",
+      "cssVar": "--color-blue"
+    },
+    {
+      "id": "server",
+      "label": "Server",
+      "description": "The backend that does the thinking — receives requests, runs business logic, and coordinates other components",
+      "analogy": "The back office of a restaurant. Customers never see it, but every order flows through here.",
+      "icon": "lucide:server",
+      "color": "#4E5E6E",
+      "cssVar": "--color-purple"
+    },
+    {
+      "id": "database",
+      "label": "Database",
+      "description": "Where your data lives permanently — the system of record that remembers everything even after restarts",
+      "analogy": "The filing cabinet that stores all your important records. Slower to access than your desk, but nothing gets lost.",
+      "icon": "lucide:database",
+      "color": "#256B3B",
+      "cssVar": "--color-green"
+    },
+    {
+      "id": "cache",
+      "label": "Cache",
+      "description": "A fast, temporary storage layer that keeps frequently accessed data close at hand to avoid slow database lookups",
+      "analogy": "A cookbook on the kitchen counter instead of in the bookshelf. Limited space, but anything there is instant to grab.",
+      "icon": "lucide:zap",
+      "color": "#C49A1D",
+      "cssVar": "--color-orange"
+    },
+    {
+      "id": "queue",
+      "label": "Message Queue",
+      "description": "A waiting line for tasks — lets one part of the system hand off work to another without waiting for it to finish",
+      "analogy": "A ticket counter where you drop off your request and get a number. You don't have to stand there while they process it.",
+      "icon": "lucide:list-ordered",
+      "color": "#6B5B8A",
+      "cssVar": "--color-queue"
+    },
+    {
+      "id": "load-balancer",
+      "label": "Load Balancer",
+      "description": "A traffic director that spreads incoming requests evenly across multiple servers so no single one gets overwhelmed",
+      "analogy": "A host at a restaurant who seats guests at different tables to keep every section equally busy.",
+      "icon": "lucide:split",
+      "color": "#4A708E",
+      "cssVar": "--color-blue"
+    },
+    {
+      "id": "cdn",
+      "label": "CDN (Content Delivery Network)",
+      "description": "A global network of servers that stores copies of your static files (images, scripts) close to users around the world",
+      "analogy": "Having branch offices in every city instead of one headquarters — customers get what they need from the nearest location.",
+      "icon": "lucide:globe",
+      "color": "#4A708E",
+      "cssVar": "--color-blue"
+    },
+    {
+      "id": "api-gateway",
+      "label": "API Gateway",
+      "description": "The single front door that receives all incoming requests and routes them to the right backend service",
+      "analogy": "The front desk at a hotel. Every guest request goes through the front desk, which figures out who to call.",
+      "icon": "lucide:route",
+      "color": "#4E5E6E",
+      "cssVar": "--color-purple"
+    },
+    {
+      "id": "auth",
+      "label": "Authentication",
+      "description": "How the system verifies who you are and what you're allowed to do",
+      "analogy": "The security guard at the building entrance who checks your ID badge and makes sure you only go to floors you have access to.",
+      "icon": "lucide:shield-check",
+      "color": "#8C3B3B",
+      "cssVar": "--color-pink"
+    },
+    {
+      "id": "external-service",
+      "label": "External Service",
+      "description": "A third-party service your system depends on — payment processors, email providers, AI APIs, analytics",
+      "analogy": "Suppliers and contractors your business relies on. You don't make everything in-house — you outsource to specialists.",
+      "icon": "lucide:plug",
+      "color": "#C44536",
+      "cssVar": "--color-accent"
+    },
+    {
+      "id": "background-job",
+      "label": "Background Job",
+      "description": "Tasks that run behind the scenes without making the user wait — sending emails, processing images, syncing data",
+      "analogy": "The back office that handles paperwork after the customer leaves. The customer doesn't wait while their receipt is filed.",
+      "icon": "lucide:workflow",
+      "color": "#6B5B8A",
+      "cssVar": "--color-queue"
+    },
+    {
+      "id": "storage",
+      "label": "File Storage",
+      "description": "Where files, images, documents, and uploads are kept — separate from the database, optimized for large binary data",
+      "analogy": "The warehouse where you store physical inventory. Different from the office filing cabinet (database) — this is for bulky items.",
+      "icon": "lucide:hard-drive",
+      "color": "#5A7A5A",
+      "cssVar": "--color-sage"
+    },
+    {
+      "id": "agent",
+      "label": "AI Agent",
+      "description": "An autonomous AI component that can reason, make decisions, and take actions — often orchestrating calls to LLMs and tools",
+      "analogy": "A skilled assistant who can figure out what needs to happen and do it, rather than just following a fixed script.",
+      "icon": "lucide:brain",
+      "color": "#4E5E6E",
+      "cssVar": "--color-purple"
+    }
+  ]
+}
