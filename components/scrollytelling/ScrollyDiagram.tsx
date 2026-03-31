@@ -61,15 +61,20 @@ const ICONS: Partial<Record<DiagramNodeType, React.ReactNode>> = {
 };
 
 // ── Constants ─────────────────────────────────────────────────────
-const ICON_SIZE = 60;
-const NODE_H = 84;
+// Sized for a ~440-wide normalized coordinate space (matching the prototype)
+const ICON_SIZE = 30;
+const NODE_H = 46;
+const LABEL_GAP = 12; // gap from icon bottom to label baseline
 
 // Logical node widths per type (for edge routing)
 const NODE_W: Partial<Record<DiagramNodeType, number>> = {
-  server: 75,
-  database: 75,
+  server: 55,
+  database: 55,
 };
-const DEFAULT_W = 68;
+const DEFAULT_W = 50;
+
+// Target viewBox width — positions are normalized to fit this space
+const TARGET_VB_WIDTH = 440;
 
 function nodeW(type: DiagramNodeType) {
   return NODE_W[type] ?? DEFAULT_W;
@@ -109,7 +114,11 @@ function mergeAllNodes(diagrams: Record<string, Diagram>) {
   return Array.from(map.values());
 }
 
-function computeViewBox(nodes: MergedNode[], diagrams: Record<string, Diagram>) {
+/**
+ * Compute the scale factor to normalize diagram positions into a ~440-wide space,
+ * and return the viewBox for the normalized coordinates.
+ */
+function computeLayout(nodes: MergedNode[]) {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
   for (const node of nodes) {
@@ -122,12 +131,36 @@ function computeViewBox(nodes: MergedNode[], diagrams: Record<string, Diagram>) 
     }
   }
 
-  const pad = 20;
+  const rawWidth = maxX - minX;
+  const rawHeight = maxY - minY;
+  const pad = 30;
+
+  // Scale factor: fit the raw coordinate range into TARGET_VB_WIDTH (with padding)
+  const usableWidth = TARGET_VB_WIDTH - pad * 2;
+  const scale = rawWidth > 0 ? usableWidth / rawWidth : 1;
+
   return {
-    x: minX - pad,
-    y: minY - pad,
-    width: maxX - minX + pad * 2,
-    height: maxY - minY + pad * 2,
+    scale,
+    offsetX: minX,
+    offsetY: minY,
+    viewBox: {
+      x: 0,
+      y: 0,
+      width: TARGET_VB_WIDTH,
+      height: rawHeight * scale + pad * 2,
+    },
+    pad,
+  };
+}
+
+/** Transform a raw diagram position into normalized coordinates */
+function normalizePos(
+  x: number, y: number,
+  layout: { scale: number; offsetX: number; offsetY: number; pad: number }
+) {
+  return {
+    x: (x - layout.offsetX) * layout.scale + layout.pad,
+    y: (y - layout.offsetY) * layout.scale + layout.pad,
   };
 }
 
@@ -194,7 +227,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
 
   const mergedNodes = useMemo(() => mergeAllNodes(allDiagrams), [allDiagrams]);
-  const viewBox = useMemo(() => computeViewBox(mergedNodes, allDiagrams), [mergedNodes, allDiagrams]);
+  const layout = useMemo(() => computeLayout(mergedNodes), [mergedNodes]);
 
   // Collect all edges across all diagrams
   const allEdges = useMemo(() => {
@@ -217,22 +250,26 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
   // Current diagram's node positions
   const activeDiagram = activeDiagramId ? allDiagrams[activeDiagramId] : null;
 
-  // Build a position map for the active diagram
+  // Build a position map for the active diagram (normalized to target viewBox)
   const activeNodeMap = useMemo(() => {
     const map = new Map<string, { x: number; y: number; type: DiagramNodeType }>();
     if (!activeDiagram) return map;
     for (const node of activeDiagram.nodes) {
-      map.set(node.id, { x: node.position.x, y: node.position.y, type: node.type });
+      const pos = normalizePos(node.position.x, node.position.y, layout);
+      map.set(node.id, { x: pos.x, y: pos.y, type: node.type });
     }
     // For nodes not in active diagram, use their nearest known position
     for (const merged of mergedNodes) {
       if (!map.has(merged.id)) {
         const fallback = Object.values(merged.positions)[0];
-        if (fallback) map.set(merged.id, { ...fallback, type: merged.type });
+        if (fallback) {
+          const pos = normalizePos(fallback.x, fallback.y, layout);
+          map.set(merged.id, { x: pos.x, y: pos.y, type: merged.type });
+        }
       }
     }
     return map;
-  }, [activeDiagram, mergedNodes]);
+  }, [activeDiagram, mergedNodes, layout]);
 
   // Active diagram's edge set
   const activeEdgeIds = useMemo(() => {
@@ -266,12 +303,12 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
   return (
     <div className="flex-1 relative">
       <svg
-        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
+        viewBox={`${layout.viewBox.x} ${layout.viewBox.y} ${layout.viewBox.width} ${layout.viewBox.height}`}
         className="w-full h-full overflow-visible"
       >
         <defs>
-          <marker id="scrolly-arrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
-            <polygon points="0 0, 10 4, 0 8" className="fill-border" />
+          <marker id="scrolly-arrow" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <polygon points="0 0, 7 2.5, 0 5" className="fill-border" />
           </marker>
         </defs>
 
@@ -303,7 +340,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
               <path
                 d={d}
                 className="fill-none stroke-border transition-[d,opacity] duration-500 ease-linear"
-                strokeWidth="2"
+                strokeWidth="1.2"
                 markerEnd="url(#scrolly-arrow)"
                 style={{
                   opacity: visible ? 1 : 0,
@@ -314,7 +351,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
                 <text
                   className="font-mono uppercase fill-accent transition-[transform,opacity] duration-500 ease-linear"
                   style={{
-                    fontSize: 14,
+                    fontSize: 10,
                     letterSpacing: "0.1em",
                     transform: `translate(${labelX}px, ${labelY}px)`,
                     opacity: visible ? 1 : 0,
@@ -371,9 +408,9 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
               {/* Label */}
               <text
                 x={w / 2}
-                y={ICON_SIZE + 22}
+                y={ICON_SIZE + LABEL_GAP}
                 className="font-mono font-medium uppercase fill-text-dim"
-                style={{ fontSize: 17, letterSpacing: "0.12em" }}
+                style={{ fontSize: 10, letterSpacing: "0.15em" }}
                 textAnchor="middle"
               >
                 {node.label}
