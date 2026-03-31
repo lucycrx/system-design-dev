@@ -54,10 +54,10 @@ export function ProductHero() {
         }}
       />
 
-      <div className="relative max-w-5xl mx-auto px-6 pt-24 sm:pt-28 pb-16">
+      <div className="relative max-w-5xl mx-auto px-6 pt-14 sm:pt-16 pb-8">
         {/* Top label */}
         <div
-          className="mb-14 transition-all duration-500"
+          className="mb-8 transition-all duration-500"
           style={{
             opacity: phase >= 1 ? 1 : 0,
             transform: phase >= 1 ? "translateY(0)" : "translateY(12px)",
@@ -72,7 +72,7 @@ export function ProductHero() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-16 items-start">
           <div>
             {/* Main title — dramatic scale with weight contrast */}
-            <h1 className="heading-hero text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] text-text mb-12">
+            <h1 className="heading-hero text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] text-text mb-8">
               <span className="block font-light">
                 <WordReveal delay={150} visible={phase >= 1}>
                   Understand any codebase.
@@ -95,7 +95,7 @@ export function ProductHero() {
 
             {/* Two-column bottom: subtitle left, annotation right */}
             <div
-              className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 transition-all duration-700"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 transition-all duration-700"
               style={{
                 opacity: phase >= 2 ? 1 : 0,
                 transform: phase >= 2 ? "translateY(0)" : "translateY(16px)",
@@ -140,7 +140,7 @@ export function ProductHero() {
         </div>
 
         {/* Animated divider */}
-        <div className="mt-10 overflow-hidden">
+        <div className="mt-6 overflow-hidden">
           <div
             className="border-t border-border transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left"
             style={{
