@@ -132,11 +132,9 @@ function computeViewBox(nodes: MergedNode[], diagrams: Record<string, Diagram>) 
 }
 
 // ── Edge path computation ─────────────────────────────────────────
-// perpOffset shifts the line perpendicular to its direction (for parallel edges)
 function edgePath(
   edge: DiagramEdge,
   nodeMap: Map<string, { x: number; y: number; type: DiagramNodeType }>,
-  perpOffset: number = 0,
 ): string {
   const src = nodeMap.get(edge.source);
   const tgt = nodeMap.get(edge.target);
@@ -153,13 +151,11 @@ function edgePath(
   const dy = tCy - sCy;
 
   if (Math.abs(dy) > Math.abs(dx)) {
-    // Vertical: offset horizontally
     const down = dy > 0;
-    return `M${sCx + perpOffset},${down ? src.y + NODE_H + 1 : src.y - 1} L${tCx + perpOffset},${down ? tgt.y - 1 : tgt.y + NODE_H + 1}`;
+    return `M${sCx},${down ? src.y + NODE_H + 1 : src.y - 1} L${tCx},${down ? tgt.y - 1 : tgt.y + NODE_H + 1}`;
   }
-  // Horizontal / diagonal: offset vertically
   const right = dx > 0;
-  return `M${right ? src.x + sw + 1 : src.x - 1},${sCy + perpOffset} L${right ? tgt.x - 1 : tgt.x + tw + 1},${tCy + perpOffset}`;
+  return `M${right ? src.x + sw + 1 : src.x - 1},${sCy} L${right ? tgt.x - 1 : tgt.x + tw + 1},${tCy}`;
 }
 
 // ── Tooltip ───────────────────────────────────────────────────────
@@ -283,40 +279,11 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
         {allEdges.map(({ edge }) => {
           const visible = activeEdgeIds.has(edge.id);
 
-          // Use the ACTIVE diagram's version of this edge for label/style (not the merged one)
+          // Use the active diagram's edge for style info
           const activeEdge = activeDiagram?.edges.find((e) => e.id === edge.id);
-          const label = activeEdge?.label || "";
           const isDashed = activeEdge?.style === "dashed" || (!activeEdge && edge.style === "dashed");
 
-          // Check if there's a reverse edge currently visible
-          const hasVisibleReverse = activeDiagram?.edges.some(
-            (other) =>
-              other.id !== edge.id &&
-              other.source === edge.target &&
-              other.target === edge.source
-          ) ?? false;
-
-          // Offset bidirectional edges: one left/up, one right/down
-          const perpOff = hasVisibleReverse
-            ? (edge.source < edge.target ? -12 : 12)
-            : 0;
-
-          const d = edgePath(edge, activeNodeMap, perpOff);
-
-          // Label position: midpoint of the edge, shifted further out from the line
-          const src = activeNodeMap.get(edge.source);
-          const tgt = activeNodeMap.get(edge.target);
-          let labelX = 0, labelY = 0;
-          if (src && tgt) {
-            const sw = nodeW(src.type), tw = nodeW(tgt.type);
-            const isVert = Math.abs(tgt.y - src.y) > Math.abs((tgt.x + tw/2) - (src.x + sw/2));
-            const mx = (src.x + sw/2 + tgt.x + tw/2) / 2;
-            const my = (src.y + NODE_H + tgt.y) / 2;
-            // Push label away from the line (perpendicular, further than the line offset)
-            const labelOff = hasVisibleReverse ? (perpOff > 0 ? perpOff + 50 : perpOff - 50) : (isVert ? 40 : 0);
-            labelX = mx + (isVert ? labelOff : 0);
-            labelY = my + (isVert ? 0 : labelOff);
-          }
+          const d = edgePath(edge, activeNodeMap);
 
           return (
             <g key={edge.id}>
@@ -330,20 +297,6 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
                   strokeDasharray: isDashed ? "5 4" : undefined,
                 }}
               />
-              {label && (
-                <text
-                  className="font-mono uppercase fill-accent transition-[transform,opacity] duration-500 ease-linear"
-                  style={{
-                    fontSize: 16,
-                    letterSpacing: "0.08em",
-                    transform: `translate(${labelX}px, ${labelY}px)`,
-                    opacity: visible ? 1 : 0,
-                  }}
-                  textAnchor="middle"
-                >
-                  {label}
-                </text>
-              )}
             </g>
           );
         })}

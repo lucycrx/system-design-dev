@@ -27,8 +27,8 @@
       }
     ],
     "edges": [
-      { "id": "e-client1-server", "source": "client-1", "target": "server", "label": "send message", "style": "solid" },
-      { "id": "e-server-client2", "source": "server", "target": "client-2", "label": "deliver message", "style": "solid" }
+      { "id": "e-client1-server", "source": "client-1", "target": "server", "style": "solid" },
+      { "id": "e-server-client2", "source": "server", "target": "client-2", "style": "solid" }
     ]
   },
   "chat-app-stage-2": {
@@ -67,10 +67,9 @@
       }
     ],
     "edges": [
-      { "id": "e-client1-server", "source": "client-1", "target": "server", "label": "send message", "style": "solid" },
-      { "id": "e-server-client2", "source": "server", "target": "client-2", "label": "deliver message", "style": "solid" },
-      { "id": "e-server-db", "source": "server", "target": "database", "label": "write to disk", "style": "solid", "animated": true },
-      { "id": "e-db-server", "source": "database", "target": "server", "label": "read history", "style": "dashed" }
+      { "id": "e-client1-server", "source": "client-1", "target": "server", "style": "solid" },
+      { "id": "e-server-client2", "source": "server", "target": "client-2", "style": "solid" },
+      { "id": "e-server-db", "source": "server", "target": "database", "style": "solid", "animated": true }
     ]
   },
   "chat-app-stage-3": {
@@ -117,10 +116,10 @@
       }
     ],
     "edges": [
-      { "id": "e-client1-server", "source": "client-1", "target": "server", "label": "WebSocket", "style": "solid", "animated": true },
-      { "id": "e-server-client2", "source": "server", "target": "client-2", "label": "push", "style": "solid", "animated": true },
-      { "id": "e-server-client3", "source": "server", "target": "client-3", "label": "push", "style": "solid", "animated": true },
-      { "id": "e-server-db", "source": "server", "target": "database", "label": "persist", "style": "dashed" }
+      { "id": "e-client1-server", "source": "client-1", "target": "server", "style": "solid", "animated": true },
+      { "id": "e-server-client2", "source": "server", "target": "client-2", "style": "solid", "animated": true },
+      { "id": "e-server-client3", "source": "server", "target": "client-3", "style": "solid", "animated": true },
+      { "id": "e-server-db", "source": "server", "target": "database", "style": "dashed" }
     ]
   }
 }
