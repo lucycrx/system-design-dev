@@ -61,15 +61,15 @@ const ICONS: Partial<Record<DiagramNodeType, React.ReactNode>> = {
 };
 
 // ── Constants ─────────────────────────────────────────────────────
-const ICON_SIZE = 80;
-const NODE_H = 110;
+const ICON_SIZE = 60;
+const NODE_H = 84;
 
 // Logical node widths per type (for edge routing)
 const NODE_W: Partial<Record<DiagramNodeType, number>> = {
-  server: 100,
-  database: 100,
+  server: 75,
+  database: 75,
 };
-const DEFAULT_W = 90;
+const DEFAULT_W = 68;
 
 function nodeW(type: DiagramNodeType) {
   return NODE_W[type] ?? DEFAULT_W;
@@ -270,8 +270,8 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
         className="w-full h-full overflow-visible"
       >
         <defs>
-          <marker id="scrolly-arrow" markerWidth="14" markerHeight="10" refX="14" refY="5" orient="auto">
-            <polygon points="0 0, 14 5, 0 10" className="fill-border" />
+          <marker id="scrolly-arrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+            <polygon points="0 0, 10 4, 0 8" className="fill-border" />
           </marker>
         </defs>
 
@@ -314,7 +314,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
                 <text
                   className="font-mono uppercase fill-accent transition-[transform,opacity] duration-500 ease-linear"
                   style={{
-                    fontSize: 18,
+                    fontSize: 14,
                     letterSpacing: "0.1em",
                     transform: `translate(${labelX}px, ${labelY}px)`,
                     opacity: visible ? 1 : 0,
@@ -373,7 +373,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
                 x={w / 2}
                 y={ICON_SIZE + 22}
                 className="font-mono font-medium uppercase fill-text-dim"
-                style={{ fontSize: 22, letterSpacing: "0.12em" }}
+                style={{ fontSize: 17, letterSpacing: "0.12em" }}
                 textAnchor="middle"
               >
                 {node.label}

@@ -7,7 +7,7 @@
       {
         "id": "client-1",
         "type": "client",
-        "label": "Your Browser",
+        "label": "Client",
         "position": { "x": 100, "y": 120 },
         "explanation": "The client — your web browser running the chat app UI"
       },
@@ -21,7 +21,7 @@
       {
         "id": "client-2",
         "type": "client",
-        "label": "Friend's Browser",
+        "label": "Client",
         "position": { "x": 600, "y": 120 },
         "explanation": "Your friend's browser — also a client connected to the same server"
       }
@@ -39,7 +39,7 @@
       {
         "id": "client-1",
         "type": "client",
-        "label": "Your Browser",
+        "label": "Client",
         "position": { "x": 100, "y": 60 },
         "explanation": "The client — your web browser running the chat app UI"
       },
@@ -53,7 +53,7 @@
       {
         "id": "client-2",
         "type": "client",
-        "label": "Friend's Browser",
+        "label": "Client",
         "position": { "x": 600, "y": 60 },
         "explanation": "Your friend's browser — also a client connected to the same server"
       },
@@ -80,7 +80,7 @@
       {
         "id": "client-1",
         "type": "client",
-        "label": "User A",
+        "label": "Client",
         "position": { "x": 100, "y": 120 },
         "explanation": "A connected client with a persistent WebSocket connection to the server"
       },
@@ -95,14 +95,14 @@
       {
         "id": "client-2",
         "type": "client",
-        "label": "User B",
+        "label": "Client",
         "position": { "x": 560, "y": 40 },
         "explanation": "Another connected client receiving messages instantly via WebSocket"
       },
       {
         "id": "client-3",
         "type": "client",
-        "label": "User C",
+        "label": "Client",
         "position": { "x": 560, "y": 210 },
         "explanation": "A third client — the server pushes messages to all connected clients simultaneously",
         "isNew": true
