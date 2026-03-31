@@ -22,16 +22,16 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Congratulations — you shipped something! Your chat app is live. You type a message, hit send, and your friend sees it almost instantly. Life is good.\n\nBut let's peek under the hood. Even this simple app has a structure that every application on the internet shares. It's called the [[glossary:client-server|client-server model]]."
+          "content": "Your chat app is live. You type a message, hit send, and your friend sees it. Even this simple app uses a structure every internet application shares: the [[glossary:client-server|client-server model]]."
         },
         {
-          "type": "callout",
-          "style": "analogy",
+          "type": "reveal",
+          "label": "Real-world analogy: the restaurant",
           "content": "Think of your app like a restaurant. **The client** (your browser) is the customer placing an order. **The server** is the kitchen receiving the order and sending back food. The customer never walks into the kitchen — they communicate through a waiter (the internet)."
         },
         {
           "type": "text",
-          "content": "Right now, your setup is about as simple as it gets:\n\n1. **[[node:client-1|Your browser]]** (the client) sends a message to [[node:server|the server]]\n2. [[node:server|The server]] receives it and sends it to [[node:client-2|your friend's browser]]\n3. Your friend's browser displays the message\n\nThat's it. One client, one server, two happy users."
+          "content": "Here's how it works:\n\n1. **[[node:client-1|Your browser]]** (the client) sends a message to [[node:server|the server]]\n2. [[node:server|The server]] receives it and sends it to [[node:client-2|your friend's browser]]\n3. Your friend's browser displays the message\n\nOne client, one server, two happy users."
         },
         {
           "type": "diagram",
@@ -41,11 +41,11 @@
         {
           "type": "callout",
           "style": "insight",
-          "content": "Every app you've ever used — Instagram, Slack, Uber — started with this same basic pattern: a client talks to a server. The difference is what happens when millions of clients show up at once."
+          "content": "Every app you've ever used — Instagram, Slack, Uber — started with this same pattern: a client talks to a server. The difference is what happens when millions of clients show up at once."
         },
         {
           "type": "text",
-          "content": "There's one thing to notice right now: your [[node:server|server]] is keeping all the messages **in memory**. That means they live in the server's temporary workspace — like writing notes on a whiteboard. Fast and easy, but..."
+          "content": "One thing to notice: your [[node:server|server]] keeps all messages **in memory** — like writing notes on a whiteboard. Fast and easy, but temporary."
         },
         {
           "type": "checkpoint",
@@ -55,19 +55,19 @@
               "id": "a",
               "text": "They disappear forever",
               "correct": true,
-              "explanation": "Exactly right. Data stored in memory is temporary — it vanishes when the server stops. It's like erasing a whiteboard. This will become a real problem very soon..."
+              "explanation": "Data in memory is temporary — it vanishes when the server stops. This will become a real problem very soon..."
             },
             {
               "id": "b",
               "text": "They're saved automatically",
               "correct": false,
-              "explanation": "Not yet! Right now the messages only exist in the server's memory (RAM). Memory is wiped clean every time the server restarts. We'll need something more permanent."
+              "explanation": "Not yet! Messages only exist in the server's RAM, which is wiped on restart. We'll need something more permanent."
             },
             {
               "id": "c",
               "text": "They're stored in the user's browser",
               "correct": false,
-              "explanation": "The browser only shows messages — it doesn't store the full history. Once you refresh, the browser asks the server for messages again. And if the server forgot them... they're gone."
+              "explanation": "The browser only displays messages — it doesn't store history. On refresh, it asks the server, and if the server forgot them... they're gone."
             }
           ]
         }
@@ -84,22 +84,22 @@
       "userScale": "100 users",
       "narrative": {
         "setup": "You shared your app on social media. A hundred friends and friends-of-friends signed up overnight. People are creating group chats, sharing memes, making plans.",
-        "problem": "Then someone reports a bug: 'I sent a message last night but it's gone this morning.' You check — the server restarted overnight (servers do that sometimes), and every single message was lost. Your users are not happy.",
+        "problem": "Then someone reports a bug: 'I sent a message last night but it's gone this morning.' You check — the server restarted overnight, and every single message was lost.",
         "resolution": "You need a database — a permanent home for your data that survives server restarts."
       },
       "blocks": [
         {
           "type": "text",
-          "content": "Things were going great — until they weren't.\n\nYour [[node:server|server]] restarted overnight (a routine update from your hosting provider), and **every message disappeared**. Poof. Gone. A hundred users woke up to empty chat rooms."
+          "content": "Your [[node:server|server]] restarted overnight, and **every message disappeared**. A hundred users woke up to empty chat rooms."
         },
         {
-          "type": "callout",
-          "style": "analogy",
-          "content": "Storing data in memory is like writing notes on a whiteboard in your office. Great for quick access, but if someone erases the board (or you switch offices), everything is lost. What you need is a **filing cabinet** — somewhere permanent to store things."
+          "type": "reveal",
+          "label": "Real-world analogy: whiteboard vs. filing cabinet",
+          "content": "Storing data in memory is like writing notes on a whiteboard — great for quick access, but if someone erases it, everything is lost. A **database** is like a filing cabinet: permanent storage that survives restarts, crashes, and updates."
         },
         {
           "type": "text",
-          "content": "That filing cabinet is called a [[glossary:database|database]]. A database stores your data on disk (not just in memory), so it survives restarts, crashes, and updates.\n\nHere's how your app works now:\n\n1. User sends a message → server receives it\n2. [[node:server|Server]] **writes the message to the [[node:database|database]]** (permanent storage)\n3. Server sends the message to other users in the chat\n4. When someone opens the app, the server **reads their messages from the database**\n\nNo more disappearing messages."
+          "content": "The fix is a [[glossary:database|database]] — storage on disk, not just in memory.\n\n1. User sends a message → server receives it\n2. [[node:server|Server]] **writes the message to the [[node:database|database]]**\n3. Server sends the message to other users in the chat\n4. When someone opens the app, the server **reads messages from the database**\n\nNo more disappearing messages."
         },
         {
           "type": "diagram",
@@ -110,43 +110,43 @@
         },
         {
           "type": "text",
-          "content": "The most popular type of database for structured data like chat messages is a [[glossary:relational-database|relational database]] (like PostgreSQL or MySQL). It stores data in tables — think spreadsheets with rows and columns.\n\nYour messages table might look like:\n\n| id | chat_room | sender | message | sent_at |\n|---|---|---|---|---|\n| 1 | general | alice | hey everyone! | 2024-01-15 9:00am |\n| 2 | general | bob | 👋 hello! | 2024-01-15 9:01am |\n| 3 | random | charlie | check this out | 2024-01-15 9:02am |"
+          "content": "The most popular type for structured data like messages is a [[glossary:relational-database|relational database]] (like PostgreSQL). It stores data in tables — think spreadsheets:\n\n| id | chat_room | sender | message | sent_at |\n|---|---|---|---|---|\n| 1 | general | alice | hey everyone! | 2024-01-15 9:00am |\n| 2 | general | bob | hello! | 2024-01-15 9:01am |\n| 3 | random | charlie | check this out | 2024-01-15 9:02am |"
         },
         {
           "type": "callout",
           "style": "insight",
-          "content": "Notice how the database is a **separate system** from your server. This is a fundamental pattern in system design: **separate your compute (the server that runs your code) from your storage (the database that holds your data)**. This way, if your server crashes, your data is safe."
+          "content": "The database is a **separate system** from your server. This is a fundamental pattern: **separate compute (server) from storage (database)**. If your server crashes, your data is safe."
         },
         {
           "type": "challenge",
-          "scenario": "Your chat app is growing! But users in the 'general' chat room are complaining that loading the chat history takes 5+ seconds. The room has 50,000 messages. Every time someone opens the room, your server asks the database for ALL 50,000 messages.",
+          "scenario": "Users in the 'general' chat room complain that loading history takes 5+ seconds. The room has 50,000 messages, and your server fetches ALL of them every time someone opens the room.",
           "question": "What's the smartest first fix?",
           "options": [
             {
               "id": "a",
               "text": "Only load the last 50 messages, then load more as the user scrolls up",
               "correct": true,
-              "explanation": "This is called **pagination** — loading data in small chunks instead of all at once. It's the same pattern you see on Twitter/X (infinite scroll) or Google (page 1, 2, 3). It's almost always the right first move for large datasets.",
+              "explanation": "This is called **pagination** — loading data in small chunks instead of all at once. It's the same pattern behind infinite scroll on Twitter/X or page numbers on Google.",
               "conceptLink": "pagination"
             },
             {
               "id": "b",
               "text": "Buy a faster, more powerful server",
               "correct": false,
-              "explanation": "This is called **vertical scaling** — making your single machine beefier. It works up to a point, but it's expensive and has hard limits. A $10,000 server won't load 50K messages much faster if the real problem is that you're requesting too much data at once."
+              "explanation": "**Vertical scaling** (beefier hardware) works up to a point, but it won't help much when the real problem is requesting too much data at once."
             },
             {
               "id": "c",
               "text": "Delete old messages to keep the database small",
               "correct": false,
-              "explanation": "Users generally don't love having their messages deleted! This might work for ephemeral content (like Snapchat), but for a chat app people want their history. There are much better solutions."
+              "explanation": "Users don't love having their messages deleted! This might work for ephemeral content (like Snapchat), but chat apps need history."
             }
           ]
         },
         {
           "type": "reveal",
-          "label": "Want to go deeper? How does the database actually store data on disk?",
-          "content": "When you write a message to a database like PostgreSQL, here's what actually happens:\n\n1. The message arrives at the database server\n2. It's first written to a **write-ahead log** (WAL) — a sequential record that ensures no data is lost even if the power goes out mid-write\n3. Then it's organized into the table's **data file** on disk, indexed so it can be found quickly later\n\nThis is why databases are reliable — they're designed to survive crashes at any point in the write process. Your data is safe even if someone trips over the power cord."
+          "label": "Deep dive: how does a database store data on disk?",
+          "content": "When you write a message to a database like PostgreSQL:\n\n1. The message arrives at the database server\n2. It's first written to a **write-ahead log** (WAL) — a sequential record that ensures no data is lost even if the power goes out mid-write\n3. Then it's organized into the table's **data file** on disk, indexed so it can be found quickly later\n\nThis is why databases are reliable — they're designed to survive crashes at any point in the write process."
         }
       ],
       "suggestedQuestions": [
@@ -167,29 +167,29 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Your users are complaining: *\"Why does it take so long for messages to appear?\"*\n\nLet's figure out why. Right now, your app uses a technique called [[glossary:polling|polling]] to check for new messages. Here's how it works:"
+          "content": "Users are complaining: *\"Why does it take so long for messages to appear?\"*\n\nRight now, your app uses [[glossary:polling|polling]] — each client asks the server *\"Any new messages?\"* every 3 seconds."
         },
         {
-          "type": "callout",
-          "style": "analogy",
-          "content": "Imagine you're waiting for a package. **Polling** is like walking to your front door every 30 seconds to check: *\"Is it here yet? Is it here yet? Is it here yet?\"* Most trips, there's nothing there. It's exhausting — for you and for the delivery person who has to keep answering the door."
-        },
-        {
-          "type": "text",
-          "content": "Your app does the same thing:\n\n1. Every 3 seconds, each client asks the server: *\"Any new messages?\"*\n2. The server checks the database and responds (usually with *\"Nope\"*)\n3. Multiply this by 1,000 users = **~333 requests per second** just for checking\n\nMost of these requests are completely wasted — there's nothing new to report. But your server has to handle every single one. It's like having 1,000 kids in a car all asking *\"Are we there yet?\"* at the same time."
+          "type": "reveal",
+          "label": "Real-world analogy: checking for a package",
+          "content": "**Polling** is like walking to your front door every 30 seconds to check: *\"Is my package here yet?\"* Most trips, there's nothing there. It's exhausting for you and for the delivery person who keeps answering the door."
         },
         {
           "type": "text",
-          "content": "The fix is a technology called [[glossary:websockets|WebSockets]]. Instead of the client constantly asking for updates, a WebSocket creates a **persistent, two-way connection** between the client and [[node:server|server]]."
-        },
-        {
-          "type": "callout",
-          "style": "analogy",
-          "content": "WebSockets are like a **phone call** instead of texting. With texting (polling), you send a message and wait for a reply each time. With a phone call (WebSocket), you open a line and both sides can talk whenever they have something to say — no need to keep dialing."
+          "content": "With 1,000 users polling every 3 seconds, that's **~333 requests per second** just for checking — and most return nothing new. Your server is drowning in *\"Are we there yet?\"* requests."
         },
         {
           "type": "text",
-          "content": "With WebSockets:\n\n1. When a user opens the app, their browser opens a WebSocket connection to the server (like picking up the phone)\n2. The connection **stays open** as long as the user is on the app\n3. When someone sends a message, [[node:server|the server]] **immediately pushes** it to every connected client in that chat room\n4. No more asking. No more waiting. Messages appear **instantly**.\n\nThis is how every real-time app works — Slack, Discord, WhatsApp Web, Google Docs collaboration."
+          "content": "The fix: [[glossary:websockets|WebSockets]]. Instead of constant asking, a WebSocket creates a **persistent, two-way connection** between client and [[node:server|server]]."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: phone call vs. texting",
+          "content": "WebSockets are like a **phone call** instead of texting. With texting (polling), you send a message and wait for a reply each time. With a phone call (WebSocket), the line stays open and both sides can talk whenever they have something to say."
+        },
+        {
+          "type": "text",
+          "content": "With WebSockets:\n\n1. User opens the app → browser opens a persistent connection to the server\n2. When someone sends a message, [[node:server|the server]] **pushes it instantly** to every connected client\n3. No more asking. No more waiting. Messages appear instantly.\n\nThis is how Slack, Discord, and WhatsApp Web all work."
         },
         {
           "type": "diagram",
@@ -200,39 +200,39 @@
         },
         {
           "type": "challenge",
-          "scenario": "You've switched to WebSockets and messages are now instant. But you notice something: when a user's internet connection drops for 30 seconds and reconnects, they're missing the messages that were sent during the disconnect.",
+          "scenario": "You've switched to WebSockets and messages are instant. But when a user's internet drops for 30 seconds and reconnects, they're missing messages sent during the disconnect.",
           "question": "How would you handle this?",
           "options": [
             {
               "id": "a",
               "text": "When reconnecting, fetch missed messages from the database using a timestamp",
               "correct": true,
-              "explanation": "This is the standard approach. When a client reconnects, it tells the server: *\"Last message I saw was at 9:15:32 AM.\"* The server queries the database for everything after that time and sends it over. This combines the best of both worlds: real-time delivery via WebSockets, with the database as a reliable backup.",
+              "explanation": "The standard approach. On reconnect, the client says *\"Last message I saw was at 9:15:32 AM\"* and the server sends everything after that. Real-time delivery via WebSockets, database as the reliable backup.",
               "conceptLink": "database"
             },
             {
               "id": "b",
               "text": "Just accept that some messages might be lost",
               "correct": false,
-              "explanation": "For a chat app, losing messages is unacceptable — people are having real conversations! This might be okay for something like a live stock ticker where old data is irrelevant, but not for messaging."
+              "explanation": "For a chat app, losing messages is unacceptable. This might work for a live stock ticker, but not for conversations."
             },
             {
               "id": "c",
               "text": "Keep the old polling system as a backup alongside WebSockets",
               "correct": false,
-              "explanation": "This adds complexity without much benefit. You'd have two systems doing similar jobs. The simpler approach is to use WebSockets for real-time delivery and the database for catching up on anything missed. You already have both — just use them together."
+              "explanation": "Two systems doing the same job adds complexity. Simpler: use WebSockets for real-time and the database for catch-up. You already have both."
             }
           ]
         },
         {
           "type": "callout",
           "style": "insight",
-          "content": "Notice a pattern here: **the database isn't just for saving data — it's your safety net**. WebSockets handle the fast, real-time delivery. The database handles reliability and history. This pattern of combining a fast-but-fragile system with a slow-but-reliable one shows up everywhere in system design."
+          "content": "**The database isn't just for saving data — it's your safety net.** WebSockets handle fast, real-time delivery. The database handles reliability and history. Combining a fast-but-fragile system with a slow-but-reliable one is a pattern you'll see everywhere in system design."
         },
         {
           "type": "reveal",
-          "label": "Curious? How does a WebSocket connection actually work?",
-          "content": "A WebSocket connection starts as a regular HTTP request (the same kind your browser makes to load any webpage). But it includes a special header that says: *\"Hey, I'd like to upgrade this to a WebSocket connection.\"*\n\nIf the server agrees, the connection is \"upgraded\" — instead of the usual request-response cycle (ask → answer → hang up), the connection stays open. Both sides can now send data at any time.\n\nTechnically:\n1. Client sends: `GET /chat HTTP/1.1` with `Upgrade: websocket` header\n2. Server responds: `101 Switching Protocols`\n3. Now both sides can send frames (small packets of data) whenever they want\n\nThe connection stays open until one side explicitly closes it, or the network drops."
+          "label": "Deep dive: how does a WebSocket connection actually work?",
+          "content": "A WebSocket starts as a regular HTTP request with a special header: *\"I'd like to upgrade this to a WebSocket.\"*\n\nIf the server agrees, the connection is \"upgraded\" — instead of request-response-hangup, both sides can send data at any time.\n\n1. Client sends: `GET /chat HTTP/1.1` with `Upgrade: websocket` header\n2. Server responds: `101 Switching Protocols`\n3. Both sides can now send frames (small data packets) whenever they want\n\nThe connection stays open until one side closes it, or the network drops."
         }
       ],
       "suggestedQuestions": [
