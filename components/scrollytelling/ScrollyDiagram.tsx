@@ -162,7 +162,8 @@ function edgePath(
 
 function edgeMidpoint(
   edge: DiagramEdge,
-  nodeMap: Map<string, { x: number; y: number; type: DiagramNodeType }>
+  nodeMap: Map<string, { x: number; y: number; type: DiagramNodeType }>,
+  xOffset: number = 0,
 ): { x: number; y: number } {
   const src = nodeMap.get(edge.source);
   const tgt = nodeMap.get(edge.target);
@@ -170,10 +171,13 @@ function edgeMidpoint(
 
   const sw = nodeW(src.type);
   const tw = nodeW(tgt.type);
+  const dx = (tgt.x + tw / 2) - (src.x + sw / 2);
+  const dy = (tgt.y) - (src.y);
+  const isVertical = Math.abs(dy) > Math.abs(dx);
 
   return {
-    x: (src.x + sw / 2 + tgt.x + tw / 2) / 2,
-    y: (src.y + tgt.y) / 2 + NODE_H / 2 - 10,
+    x: (src.x + sw / 2 + tgt.x + tw / 2) / 2 + (isVertical ? xOffset : 0),
+    y: (src.y + tgt.y) / 2 + NODE_H / 2 - 10 + (isVertical ? 0 : xOffset),
   };
 }
 
@@ -319,8 +323,22 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
         {/* Edge labels */}
         {activeDiagram?.edges
           .filter((e) => e.label)
-          .map((edge) => {
-            const mid = edgeMidpoint(edge, activeNodeMap);
+          .map((edge, i, arr) => {
+            // Check if another labeled edge connects the same two nodes (bidirectional)
+            const hasSibling = arr.some(
+              (other) =>
+                other.id !== edge.id &&
+                other.label &&
+                ((other.source === edge.target && other.target === edge.source) ||
+                 (other.source === edge.source && other.target === edge.target))
+            );
+            // Offset siblings to avoid overlap
+            let xOff = 0;
+            if (hasSibling) {
+              const isForward = edge.source < edge.target;
+              xOff = isForward ? -60 : 60;
+            }
+            const mid = edgeMidpoint(edge, activeNodeMap, xOff);
             return (
               <text
                 key={`label-${edge.id}`}
