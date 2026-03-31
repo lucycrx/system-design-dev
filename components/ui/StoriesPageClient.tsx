@@ -199,7 +199,7 @@ function StoryCard({
 
         {/* Title */}
         <h3
-          className="text-lg font-bold leading-snug tracking-[-0.01em] uppercase mb-1 transition-colors duration-200"
+          className="text-lg font-bold leading-snug tracking-[-0.01em] mb-1 transition-colors duration-200"
           style={{ color: hovered ? config.color : "var(--color-text)" }}
         >
           {story.title}
@@ -275,7 +275,7 @@ export function StoriesPageClient({ stories }: { stories: Story[] }) {
           </div>
 
           <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text leading-[1.02] tracking-tight mb-6 uppercase transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text leading-[1.02] tracking-tight mb-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{
               opacity: phase >= 1 ? 1 : 0,
               transform: phase >= 1 ? "translateY(0)" : "translateY(20px)",

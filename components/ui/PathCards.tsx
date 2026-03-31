@@ -86,7 +86,7 @@ function PathCard({
           {label}
         </span>
         <h2
-          className="text-xl font-bold text-text tracking-[-0.01em] uppercase mb-3 transition-colors duration-200"
+          className="text-xl font-bold text-text tracking-[-0.01em] mb-3 transition-colors duration-200"
           style={{ color: hovered ? accentColor : undefined }}
         >
           {title}

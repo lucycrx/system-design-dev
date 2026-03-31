@@ -192,7 +192,7 @@ function ModuleCard({
             </div>
 
             <h2
-              className="text-xl font-bold leading-snug tracking-[-0.01em] uppercase mb-1.5 transition-colors duration-200"
+              className="text-xl font-bold leading-snug tracking-[-0.01em] mb-1.5 transition-colors duration-200"
               style={{ color: hovered ? colors.color : "var(--color-text)" }}
             >
               {mod.title}
@@ -279,7 +279,7 @@ export function CurriculumPageClient({ modules }: { modules: CurriculumModule[] 
           </div>
 
           <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text leading-[1.02] tracking-tight mb-6 uppercase transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text leading-[1.02] tracking-tight mb-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{
               opacity: phase >= 1 ? 1 : 0,
               transform: phase >= 1 ? "translateY(0)" : "translateY(20px)",
