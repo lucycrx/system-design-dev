@@ -297,18 +297,49 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
             : 0;
 
           const d = edgePath(edge, activeNodeMap, perpOff);
+
+          // Label position: midpoint of the edge, shifted further out from the line
+          const src = activeNodeMap.get(edge.source);
+          const tgt = activeNodeMap.get(edge.target);
+          let labelX = 0, labelY = 0;
+          if (src && tgt) {
+            const sw = nodeW(src.type), tw = nodeW(tgt.type);
+            const isVert = Math.abs(tgt.y - src.y) > Math.abs((tgt.x + tw/2) - (src.x + sw/2));
+            const mx = (src.x + sw/2 + tgt.x + tw/2) / 2;
+            const my = (src.y + NODE_H + tgt.y) / 2;
+            // Push label away from the line (perpendicular, further than the line offset)
+            const labelOff = hasReverse ? (perpOff > 0 ? perpOff + 30 : perpOff - 30) : (isVert ? 30 : 0);
+            labelX = mx + (isVert ? labelOff : 0);
+            labelY = my + (isVert ? 0 : labelOff);
+          }
+
           return (
-            <path
-              key={edge.id}
-              d={d}
-              className="fill-none stroke-border transition-[d,opacity] duration-500 ease-linear"
-              strokeWidth="1"
-              markerEnd="url(#scrolly-arrow)"
-              style={{
-                opacity: visible ? 1 : 0,
-                strokeDasharray: isDashed ? "5 4" : undefined,
-              }}
-            />
+            <g key={edge.id}>
+              <path
+                d={d}
+                className="fill-none stroke-border transition-[d,opacity] duration-500 ease-linear"
+                strokeWidth="1"
+                markerEnd="url(#scrolly-arrow)"
+                style={{
+                  opacity: visible ? 1 : 0,
+                  strokeDasharray: isDashed ? "5 4" : undefined,
+                }}
+              />
+              {edge.label && (
+                <text
+                  className="font-mono uppercase fill-accent transition-[transform,opacity] duration-500 ease-linear"
+                  style={{
+                    fontSize: 16,
+                    letterSpacing: "0.08em",
+                    transform: `translate(${labelX}px, ${labelY}px)`,
+                    opacity: visible ? 1 : 0,
+                  }}
+                  textAnchor="middle"
+                >
+                  {edge.label}
+                </text>
+              )}
+            </g>
           );
         })}
 
