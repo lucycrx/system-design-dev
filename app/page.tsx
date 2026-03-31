@@ -24,8 +24,8 @@ export default function HomePage() {
         <div className="border-t border-border" />
       </div>
 
-      <ExampleOutput />
       <ValueProps />
+      <ExampleOutput />
       <Personas />
       <InstallSection />
 
