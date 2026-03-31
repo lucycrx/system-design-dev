@@ -8,21 +8,21 @@
         "id": "client-1",
         "type": "client",
         "label": "Your Browser",
-        "position": { "x": 0, "y": 120 },
+        "position": { "x": 100, "y": 120 },
         "explanation": "The client — your web browser running the chat app UI"
       },
       {
         "id": "server",
         "type": "server",
         "label": "Server",
-        "position": { "x": 375, "y": 120 },
+        "position": { "x": 350, "y": 120 },
         "explanation": "A single server that receives and forwards messages between clients"
       },
       {
         "id": "client-2",
         "type": "client",
         "label": "Friend's Browser",
-        "position": { "x": 750, "y": 120 },
+        "position": { "x": 600, "y": 120 },
         "explanation": "Your friend's browser — also a client connected to the same server"
       }
     ],
@@ -40,28 +40,28 @@
         "id": "client-1",
         "type": "client",
         "label": "Your Browser",
-        "position": { "x": 0, "y": 60 },
+        "position": { "x": 100, "y": 60 },
         "explanation": "The client — your web browser running the chat app UI"
       },
       {
         "id": "server",
         "type": "server",
         "label": "Server",
-        "position": { "x": 375, "y": 60 },
+        "position": { "x": 350, "y": 60 },
         "explanation": "The server that processes messages and stores them in the database"
       },
       {
         "id": "client-2",
         "type": "client",
         "label": "Friend's Browser",
-        "position": { "x": 750, "y": 60 },
+        "position": { "x": 600, "y": 60 },
         "explanation": "Your friend's browser — also a client connected to the same server"
       },
       {
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 375, "y": 310 },
+        "position": { "x": 350, "y": 280 },
         "explanation": "A database that permanently stores all messages on disk — survives server restarts",
         "isNew": true
       }
@@ -81,14 +81,14 @@
         "id": "client-1",
         "type": "client",
         "label": "User A",
-        "position": { "x": 0, "y": 120 },
+        "position": { "x": 80, "y": 120 },
         "explanation": "A connected client with a persistent WebSocket connection to the server"
       },
       {
         "id": "server",
         "type": "server",
         "label": "Server",
-        "position": { "x": 375, "y": 120 },
+        "position": { "x": 340, "y": 120 },
         "explanation": "The server maintains open WebSocket connections with all active clients",
         "technology": "WebSocket"
       },
@@ -96,14 +96,14 @@
         "id": "client-2",
         "type": "client",
         "label": "User B",
-        "position": { "x": 750, "y": 0 },
+        "position": { "x": 580, "y": 30 },
         "explanation": "Another connected client receiving messages instantly via WebSocket"
       },
       {
         "id": "client-3",
         "type": "client",
         "label": "User C",
-        "position": { "x": 750, "y": 250 },
+        "position": { "x": 580, "y": 220 },
         "explanation": "A third client — the server pushes messages to all connected clients simultaneously",
         "isNew": true
       },
@@ -111,12 +111,12 @@
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 375, "y": 370 },
+        "position": { "x": 340, "y": 330 },
         "explanation": "Still stores all messages permanently — acts as the safety net when clients reconnect"
       }
     ],
     "edges": [
-      { "id": "e-client1-server", "source": "client-1", "target": "server", "style": "solid", "animated": true },
+      { "id": "e-client1-server", "source": "client-1", "target": "server", "label": "WebSocket", "style": "solid", "animated": true },
       { "id": "e-server-client2", "source": "server", "target": "client-2", "style": "solid", "animated": true },
       { "id": "e-server-client3", "source": "server", "target": "client-3", "style": "solid", "animated": true },
       { "id": "e-server-db", "source": "server", "target": "database", "style": "dashed" }

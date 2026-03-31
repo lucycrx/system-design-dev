@@ -285,6 +285,19 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
 
           const d = edgePath(edge, activeNodeMap);
 
+          // Edge label (e.g. "WebSocket") — positioned above the midpoint
+          const activeLabel = activeEdge?.label || "";
+          let labelX = 0, labelY = 0;
+          if (activeLabel) {
+            const src = activeNodeMap.get(edge.source);
+            const tgt = activeNodeMap.get(edge.target);
+            if (src && tgt) {
+              const sw = nodeW(src.type), tw = nodeW(tgt.type);
+              labelX = (src.x + sw / 2 + tgt.x + tw / 2) / 2;
+              labelY = (src.y + tgt.y) / 2 + NODE_H / 2 - 20;
+            }
+          }
+
           return (
             <g key={edge.id}>
               <path
@@ -297,6 +310,20 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
                   strokeDasharray: isDashed ? "5 4" : undefined,
                 }}
               />
+              {activeLabel && (
+                <text
+                  className="font-mono uppercase fill-accent transition-[transform,opacity] duration-500 ease-linear"
+                  style={{
+                    fontSize: 18,
+                    letterSpacing: "0.1em",
+                    transform: `translate(${labelX}px, ${labelY}px)`,
+                    opacity: visible ? 1 : 0,
+                  }}
+                  textAnchor="middle"
+                >
+                  {activeLabel}
+                </text>
+              )}
             </g>
           );
         })}
