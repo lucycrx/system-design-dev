@@ -132,9 +132,11 @@ function computeViewBox(nodes: MergedNode[], diagrams: Record<string, Diagram>) 
 }
 
 // ── Edge path computation ─────────────────────────────────────────
+// perpOffset shifts the line perpendicular to its direction (for parallel edges)
 function edgePath(
   edge: DiagramEdge,
-  nodeMap: Map<string, { x: number; y: number; type: DiagramNodeType }>
+  nodeMap: Map<string, { x: number; y: number; type: DiagramNodeType }>,
+  perpOffset: number = 0,
 ): string {
   const src = nodeMap.get(edge.source);
   const tgt = nodeMap.get(edge.target);
@@ -151,34 +153,13 @@ function edgePath(
   const dy = tCy - sCy;
 
   if (Math.abs(dy) > Math.abs(dx)) {
-    // Vertical
+    // Vertical: offset horizontally
     const down = dy > 0;
-    return `M${sCx},${down ? src.y + NODE_H + 1 : src.y - 1} L${tCx},${down ? tgt.y - 1 : tgt.y + NODE_H + 1}`;
+    return `M${sCx + perpOffset},${down ? src.y + NODE_H + 1 : src.y - 1} L${tCx + perpOffset},${down ? tgt.y - 1 : tgt.y + NODE_H + 1}`;
   }
-  // Horizontal / diagonal
+  // Horizontal / diagonal: offset vertically
   const right = dx > 0;
-  return `M${right ? src.x + sw + 1 : src.x - 1},${sCy} L${right ? tgt.x - 1 : tgt.x + tw + 1},${tCy}`;
-}
-
-function edgeMidpoint(
-  edge: DiagramEdge,
-  nodeMap: Map<string, { x: number; y: number; type: DiagramNodeType }>,
-  xOffset: number = 0,
-): { x: number; y: number } {
-  const src = nodeMap.get(edge.source);
-  const tgt = nodeMap.get(edge.target);
-  if (!src || !tgt) return { x: 0, y: 0 };
-
-  const sw = nodeW(src.type);
-  const tw = nodeW(tgt.type);
-  const dx = (tgt.x + tw / 2) - (src.x + sw / 2);
-  const dy = (tgt.y) - (src.y);
-  const isVertical = Math.abs(dy) > Math.abs(dx);
-
-  return {
-    x: (src.x + sw / 2 + tgt.x + tw / 2) / 2 + (isVertical ? xOffset : 0),
-    y: (src.y + tgt.y) / 2 + NODE_H / 2 - 10 + (isVertical ? 0 : xOffset),
-  };
+  return `M${right ? src.x + sw + 1 : src.x - 1},${sCy + perpOffset} L${right ? tgt.x - 1 : tgt.x + tw + 1},${tCy + perpOffset}`;
 }
 
 // ── Tooltip ───────────────────────────────────────────────────────
@@ -298,18 +279,29 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
           </marker>
         </defs>
 
-        {/* Edges */}
-        {allEdges.map(({ edge, diagrams }) => {
+        {/* Edges — bidirectional pairs get parallel offset lines (like the prototype) */}
+        {allEdges.map(({ edge }) => {
           const visible = activeEdgeIds.has(edge.id);
           const isDashed = edge.style === "dashed";
-          const d = edgePath(edge, activeNodeMap);
+
+          // Check if there's a reverse edge (bidirectional pair)
+          const hasReverse = allEdges.some(
+            ({ edge: other }) =>
+              other.id !== edge.id &&
+              other.source === edge.target &&
+              other.target === edge.source
+          );
+          // Offset bidirectional edges: one left/up, one right/down
+          const perpOff = hasReverse
+            ? (edge.source < edge.target ? -12 : 12)
+            : 0;
+
+          const d = edgePath(edge, activeNodeMap, perpOff);
           return (
             <path
               key={edge.id}
               d={d}
-              className={`fill-none stroke-border transition-[d,opacity] duration-500 ease-linear ${
-                isDashed ? "stroke-dasharray-[5_4]" : ""
-              }`}
+              className="fill-none stroke-border transition-[d,opacity] duration-500 ease-linear"
               strokeWidth="1"
               markerEnd="url(#scrolly-arrow)"
               style={{
@@ -319,37 +311,6 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
             />
           );
         })}
-
-        {/* Edge labels */}
-        {activeDiagram?.edges
-          .filter((e) => e.label)
-          .map((edge, i, arr) => {
-            // Check if another labeled edge connects the same two nodes (bidirectional)
-            const hasSibling = arr.some(
-              (other) =>
-                other.id !== edge.id &&
-                other.label &&
-                ((other.source === edge.target && other.target === edge.source) ||
-                 (other.source === edge.source && other.target === edge.target))
-            );
-            // Offset siblings to avoid overlap
-            let xOff = 0;
-            if (hasSibling) {
-              const isForward = edge.source < edge.target;
-              xOff = isForward ? -60 : 60;
-            }
-            const mid = edgeMidpoint(edge, activeNodeMap, xOff);
-            return (
-              <text
-                key={`label-${edge.id}`}
-                className="font-mono uppercase fill-accent transition-transform duration-500 ease-linear"
-                style={{ fontSize: 18, letterSpacing: "0.1em", transform: `translate(${mid.x}px, ${mid.y}px)` }}
-                textAnchor="middle"
-              >
-                {edge.label}
-              </text>
-            );
-          })}
 
         {/* Nodes */}
         {mergedNodes.map((node) => {
