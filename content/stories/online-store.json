@@ -22,16 +22,16 @@
       "blocks": [
         {
           "type": "text",
-          "content": "You did it -- you launched your own online store. Handmade candles, pottery, knitted scarves. A handful of loyal customers browse the catalog, add items to their cart, and check out. Ten orders on a good day.\n\nIf you went through the chat app story, the architecture here should look familiar. Your store follows the same [[glossary:client-server|client-server model]] you already know, with one important addition: this time you're not just storing messages -- you're storing products, inventory counts, customer accounts, and orders."
+          "content": "Your online store is live. Handmade candles, pottery, knitted scarves. A handful of loyal customers browse, add items to their cart, and check out. Ten orders on a good day.\n\nThe architecture follows the same [[glossary:client-server|client-server model]] from the chat app, with one addition: you're now storing products, inventory counts, customer accounts, and orders."
         },
         {
-          "type": "callout",
-          "style": "analogy",
+          "type": "reveal",
+          "label": "Real-world analogy: the farmer's market booth",
           "content": "Think of your store like a small farmer's market booth. **The client** (a customer's browser) walks up and browses your table. **The server** is you, the vendor, answering questions and handling payments. **The database** is the notebook under the table where you track inventory and orders. At this scale, one person can handle everything."
         },
         {
           "type": "text",
-          "content": "Here's how a typical request flows right now:\n\n1. A customer visits your site -- their browser sends a request to **[[node:server|your server]]**\n2. The server asks the [[glossary:database|database]] for the product catalog\n3. The database returns the data -- names, prices, images, stock levels\n4. The server assembles an HTML page and sends it back to the browser\n5. The customer sees your beautiful storefront\n\nEvery single page load follows this path. Product listing? Server asks the database. Product detail page? Server asks the database. Shopping cart? Server asks the database. You get the idea."
+          "content": "Here's how a typical request flows:\n\n1. A customer visits your site -- their browser sends a request to **[[node:server|your server]]**\n2. The server asks the [[glossary:database|database]] for the product catalog\n3. The database returns names, prices, images, stock levels\n4. The server assembles an HTML page and sends it back\n\nEvery single page load follows this path. Product listing, product detail, shopping cart -- each one queries the database."
         },
         {
           "type": "diagram",
@@ -41,12 +41,12 @@
         {
           "type": "callout",
           "style": "insight",
-          "content": "Notice that every page view triggers a database query. With 10 orders a day, maybe 50 visitors, this is completely fine. Your database can handle a few dozen queries per second without breaking a sweat. But keep this in the back of your mind -- it's going to matter very soon."
+          "content": "Every page view triggers a database query. With 50 visitors a day, this is fine. But keep it in the back of your mind -- it's going to matter very soon."
         },
         {
           "type": "callout",
           "style": "tip",
-          "content": "At this scale, your biggest risk isn't technical -- it's spending weeks over-engineering instead of getting customers. Many successful stores ran on a single server for years. The right time to scale is when you have evidence you need to, not before."
+          "content": "At this scale, your biggest risk isn't technical -- it's over-engineering instead of getting customers. Many successful stores ran on a single server for years. Scale when you have evidence you need to, not before."
         },
         {
           "type": "checkpoint",
@@ -56,19 +56,19 @@
               "id": "a",
               "text": "The browser already has the products cached from a previous visit",
               "correct": false,
-              "explanation": "Not yet -- you haven't set up any caching. Every visit means a fresh trip to the server and database. Caching is a great optimization, but it's not something you get for free."
+              "explanation": "You haven't set up any caching yet. Every visit means a fresh trip to the server and database."
             },
             {
               "id": "b",
               "text": "The server queries the database and sends the product data back to the browser",
               "correct": true,
-              "explanation": "Exactly. Right now, every page load is a round trip: browser asks the server, server asks the database, database returns the data, server sends it to the browser. Simple and reliable at this scale."
+              "explanation": "Every page load is a round trip: browser asks the server, server asks the database, database returns the data, server sends it to the browser."
             },
             {
               "id": "c",
               "text": "The browser connects directly to the database to fetch products",
               "correct": false,
-              "explanation": "Browsers never connect directly to the database -- that would be a massive security risk. The server acts as a gatekeeper, deciding what data to share and with whom. This separation is fundamental to how web apps work."
+              "explanation": "Browsers never connect directly to the database -- that would be a massive security risk. The server acts as a gatekeeper, deciding what data to share and with whom."
             }
           ]
         }
@@ -91,16 +91,16 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Yesterday: 50 visitors. Today: 10,000 per hour. Your inbox is full of customer complaints -- *\"Your site is so slow!\"* and *\"I keep getting error pages.\"*\n\nYou pull up your server dashboard and the problem is obvious: your [[node:database|database]] is completely overwhelmed. Here's why.\n\nRemember how every page load queries the database? Your product catalog has 200 items. It barely changes -- maybe you add a new candle once a week. But with 10,000 visitors per hour, your database is answering the **exact same question** (\"What products do you have?\") roughly 2,800 times per minute. It's like a librarian being asked for the same book by a new person every fraction of a second."
+          "content": "Yesterday: 50 visitors. Today: 10,000 per hour. Your [[node:database|database]] is completely overwhelmed.\n\nYour product catalog has 200 items and barely changes -- maybe a new candle once a week. But with 10,000 visitors per hour, your database answers the **exact same question** (\"What products do you have?\") roughly 2,800 times per minute."
         },
         {
-          "type": "callout",
-          "style": "analogy",
-          "content": "Imagine a restaurant where every customer asks the waiter to go back to the kitchen and ask the chef what's on the menu -- even though the menu hasn't changed all day. Eventually the chef snaps: *\"Just post the menu on the wall!\"* That posted menu is a **cache**."
+          "type": "reveal",
+          "label": "Real-world analogy: the restaurant menu",
+          "content": "Imagine every customer asks the waiter to go back to the kitchen and ask the chef what's on the menu -- even though the menu hasn't changed all day. Eventually the chef snaps: *\"Just post the menu on the wall!\"* That posted menu is a **cache**."
         },
         {
           "type": "text",
-          "content": "The solution is a [[glossary:cache|cache]] -- a fast, temporary storage layer that sits between your server and your database. Instead of querying the [[node:database|database]] for every request, your server checks the [[node:cache|cache]] first.\n\nThe most popular tool for this is **[[node:cache|Redis]]**, an in-memory data store that's extremely fast because it keeps everything in RAM (like the server's short-term memory).\n\nHere's the new flow:\n\n1. Customer requests the product catalog\n2. Server checks the cache: *\"Do I already have this?\"*\n3. **Cache hit**: Yes! Return the cached data instantly (no database query needed)\n4. **Cache miss**: Nope. Query the database, store the result in the cache for next time, then return it\n\nNow the first visitor in any given minute hits the database. The next 2,799 visitors get the cached version -- nearly instantly."
+          "content": "The solution is a [[glossary:cache|cache]] -- a fast, temporary storage layer between your server and database. Instead of querying the [[node:database|database]] for every request, your server checks the [[node:cache|cache]] first.\n\nThe most popular tool is **[[node:cache|Redis]]**, an in-memory data store.\n\n1. Customer requests the product catalog\n2. Server checks the cache: *\"Do I already have this?\"*\n3. **Cache hit**: Return the cached data instantly (no database query)\n4. **Cache miss**: Query the database, store the result in cache, then return it\n\nThe first visitor hits the database. The next 2,799 get the cached version instantly."
         },
         {
           "type": "diagram",
@@ -112,20 +112,20 @@
         {
           "type": "callout",
           "style": "warning",
-          "content": "Caching introduces a tradeoff: **freshness vs. speed**. If you cache product data for 5 minutes and update a price, some customers will see the old price for up to 5 minutes. For a product catalog this is usually fine. For inventory counts on a limited-edition drop, stale data could mean selling items you don't have. Always think about what happens when your cache is wrong."
+          "content": "Caching introduces a tradeoff: **freshness vs. speed**. If you cache product data for 5 minutes and update a price, some customers see the old price for up to 5 minutes. For a catalog this is usually fine. For inventory counts on a limited-edition drop, stale data could mean selling items you don't have."
         },
         {
           "type": "text",
-          "content": "But there's another bottleneck: **images**. Your product photos are large files (1-3 MB each), and every visitor downloads them from your single server. If someone in Tokyo visits your store hosted in Virginia, those images travel halfway around the world.\n\nThis is where a [[glossary:cdn|CDN (Content Delivery Network)]] comes in. A [[node:cdn|CDN]] copies your static files -- images, CSS, JavaScript -- to servers all around the world. When a customer in Tokyo requests a candle photo, they get it from a server in Tokyo, not Virginia."
+          "content": "There's another bottleneck: **images**. Your product photos are 1-3 MB each, and every visitor downloads them from your single server.\n\nA [[glossary:cdn|CDN (Content Delivery Network)]] copies your static files -- images, CSS, JavaScript -- to servers worldwide. A customer in Tokyo gets the candle photo from a server in Tokyo, not Virginia."
         },
         {
-          "type": "callout",
-          "style": "analogy",
+          "type": "reveal",
+          "label": "Real-world analogy: regional warehouses",
           "content": "A CDN is like a chain of regional warehouses. Instead of shipping every package from one central warehouse in Virginia, you stock popular items in warehouses in Tokyo, London, and Sao Paulo. Customers get their orders faster because the goods are already nearby."
         },
         {
           "type": "text",
-          "content": "One more fix while we're at it: [[glossary:index|database indexes]]. Your product table has thousands of rows now (products, reviews, order history), and some queries are scanning every single row to find what they need.\n\nAn index is like the index at the back of a textbook. Instead of reading every page to find the section on \"soy candles,\" you flip to the index, find the page number, and go straight there. Adding an index on frequently-queried columns (like `category` or `product_name`) can turn a 2-second query into a 2-millisecond query."
+          "content": "One more fix: [[glossary:index|database indexes]]. Your product table has thousands of rows now, and some queries scan every single row.\n\nAn index is like the index at the back of a textbook -- instead of reading every page, you look up the page number and go straight there. Adding an index on columns like `category` or `product_name` can turn a 2-second query into a 2-millisecond one."
         },
         {
           "type": "checkpoint",
@@ -135,52 +135,52 @@
               "id": "a",
               "text": "3 times -- once for each page load",
               "correct": false,
-              "explanation": "That would be the old behavior without caching. The whole point of the cache is to avoid redundant database queries."
+              "explanation": "That would be the old behavior without caching. The whole point of the cache is to avoid redundant queries."
             },
             {
               "id": "b",
               "text": "At most 1 time -- the first request caches the result for the next 5 minutes",
               "correct": true,
-              "explanation": "Correct! The first request might be a cache miss (if the cache expired), so it queries the database and stores the result. The next two requests find the data in the cache and skip the database entirely. That's the power of caching -- 3 requests become 1 database query."
+              "explanation": "The first request may be a cache miss, so it queries the database and stores the result. The next two find the data in cache and skip the database entirely."
             },
             {
               "id": "c",
               "text": "0 times -- the CDN handles all product data",
               "correct": false,
-              "explanation": "The CDN handles static files like images, CSS, and JavaScript. Dynamic data like product catalogs (which come from the database) are handled by the server-side cache. CDNs and caches solve different problems."
+              "explanation": "The CDN handles static files like images, CSS, and JavaScript. Dynamic data like product catalogs are handled by the server-side cache. CDNs and caches solve different problems."
             }
           ]
         },
         {
           "type": "challenge",
-          "scenario": "Your cache is working great for the product catalog, but you just launched a 'limited edition' candle with only 50 units. Customers are adding it to their carts, but some are getting errors at checkout: 'Sorry, this item is out of stock.' The cache says 50 are available, but the database says 0. The cache hasn't expired yet.",
+          "scenario": "Your cache is working great for the product catalog, but you just launched a 'limited edition' candle with only 50 units. Customers are adding it to their carts, but some get errors at checkout: 'Sorry, this item is out of stock.' The cache says 50 are available, but the database says 0.",
           "question": "How should you handle inventory for limited-stock items?",
           "options": [
             {
               "id": "a",
               "text": "Bypass the cache for inventory checks -- always query the database for stock levels at checkout",
               "correct": true,
-              "explanation": "This is the right approach. Cache the things that rarely change (product descriptions, images, prices) but go directly to the database for things that change rapidly and where accuracy matters (inventory counts, especially for limited items). This pattern is called **selective caching** -- you don't have to cache everything the same way.",
+              "explanation": "Cache things that rarely change (descriptions, images, prices) but go directly to the database for things that change rapidly and where accuracy matters (inventory counts). This is called **selective caching**.",
               "conceptLink": "cache"
             },
             {
               "id": "b",
               "text": "Set the cache to expire every 1 second instead of every 5 minutes",
               "correct": false,
-              "explanation": "A 1-second cache expiry would help with freshness, but it largely defeats the purpose of caching -- you'd be hitting the database almost as often as before. It also still leaves a 1-second window where the data could be stale, which is enough time to oversell a hot item."
+              "explanation": "A 1-second expiry largely defeats the purpose of caching. It also still leaves a 1-second window for stale data -- enough to oversell a hot item."
             },
             {
               "id": "c",
               "text": "Show 'limited stock' instead of exact counts so the cache doesn't need to be precise",
               "correct": false,
-              "explanation": "Showing 'limited stock' is a nice UX touch, but it doesn't solve the core problem. Customers can still add out-of-stock items to their cart and get errors at checkout. You need accurate stock checks at the moment of purchase, regardless of what you show on the product page."
+              "explanation": "A nice UX touch, but it doesn't solve the core problem. Customers can still add out-of-stock items to their cart. You need accurate stock checks at the moment of purchase."
             }
           ]
         },
         {
           "type": "reveal",
-          "label": "Curious? How does Redis actually make things faster?",
-          "content": "Redis stores data in your server's RAM (memory), not on disk. Accessing RAM is roughly **100,000 times faster** than accessing a spinning hard drive, and about **100 times faster** than an SSD.\n\nHere's what happens under the hood:\n\n1. Your server sends a key to Redis, like `product_catalog:homepage`\n2. Redis looks up that key in a hash table stored in memory -- this takes microseconds\n3. If the key exists, Redis returns the stored value (your cached product data)\n4. If not, your server queries the database, then tells Redis: *\"Store this result under this key, and expire it in 300 seconds\"*\n\nRedis can handle over **100,000 operations per second** on modest hardware. Compare that to a typical database which might handle a few thousand complex queries per second. That's why putting Redis in front of your database makes such a dramatic difference."
+          "label": "Deep dive: how does Redis actually make things faster?",
+          "content": "Redis stores data in your server's RAM (memory), not on disk. Accessing RAM is roughly **100,000 times faster** than a spinning hard drive, and about **100 times faster** than an SSD.\n\n1. Your server sends a key to Redis, like `product_catalog:homepage`\n2. Redis looks up that key in a hash table stored in memory -- this takes microseconds\n3. If the key exists, Redis returns the stored value (your cached product data)\n4. If not, your server queries the database, then tells Redis: *\"Store this result under this key, and expire it in 300 seconds\"*\n\nRedis can handle over **100,000 operations per second** on modest hardware, compared to a few thousand complex queries per second for a typical database."
         }
       ],
       "suggestedQuestions": [
@@ -201,25 +201,25 @@
       "blocks": [
         {
           "type": "text",
-          "content": "Midnight. 100,000 people slam your site at the exact same moment.\n\nYour single server -- even with [[node:cache|Redis]] caching and a [[node:cdn|CDN]] -- simply cannot process that many requests at once. One server has limited CPU, limited memory, and limited network bandwidth. It's like trying to funnel a stadium's worth of people through a single door.\n\nYou need more doors. In system design, this is called [[glossary:horizontal-scaling|horizontal scaling]] -- instead of making one server bigger (vertical scaling), you add more servers."
+          "content": "Midnight. 100,000 people slam your site simultaneously.\n\nYour single server -- even with [[node:cache|Redis]] and a [[node:cdn|CDN]] -- can't handle it. One server has limited CPU, memory, and bandwidth. You need more servers.\n\nIn system design, this is [[glossary:horizontal-scaling|horizontal scaling]] -- adding more servers instead of making one bigger."
         },
         {
-          "type": "callout",
-          "style": "analogy",
-          "content": "Imagine a grocery store on Black Friday. One cashier can handle maybe 30 customers per hour. When 500 customers show up, you don't replace your cashier with a super-fast robot (vertical scaling). You **open more checkout lanes** (horizontal scaling). Each lane handles a share of the customers, and the total throughput multiplies."
-        },
-        {
-          "type": "text",
-          "content": "But here's the question: if you have 5 servers instead of 1, how does a customer's browser know which server to talk to? You can't just list all 5 server addresses and hope for the best.\n\nThe answer is a [[glossary:load-balancer|load balancer]]. It sits in front of your servers and acts as a traffic cop, distributing incoming requests across all available servers."
-        },
-        {
-          "type": "callout",
-          "style": "analogy",
-          "content": "A load balancer is like the host at a busy restaurant. When you walk in, you don't pick a random table -- the host checks which sections have availability and seats you accordingly. The diners don't need to know anything about the restaurant's layout; they just talk to the host."
+          "type": "reveal",
+          "label": "Real-world analogy: checkout lanes",
+          "content": "Imagine a grocery store on Black Friday. One cashier handles maybe 30 customers per hour. When 500 show up, you don't replace your cashier with a super-fast robot (vertical scaling). You **open more checkout lanes** (horizontal scaling). Each lane handles a share, and total throughput multiplies."
         },
         {
           "type": "text",
-          "content": "With a load balancer and 5 servers, your setup now looks like this:\n\n1. Customer's browser sends a request to your domain (e.g., `yourstore.com`)\n2. The [[glossary:load-balancer|load balancer]] receives the request\n3. It picks one of your 5 [[node:server-1|servers]] (using strategies like round-robin or least-connections)\n4. That server handles the request, checking the cache or database as needed\n5. The response goes back through the load balancer to the customer\n\nThe customer has no idea there are 5 servers behind the scenes. To them, it's still just `yourstore.com`."
+          "content": "With 5 servers, how does a customer's browser know which one to talk to? A [[glossary:load-balancer|load balancer]] sits in front of your servers and distributes incoming requests across all of them."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: the restaurant host",
+          "content": "A load balancer is like the host at a busy restaurant. When you walk in, you don't pick a random table -- the host checks which sections have availability and seats you accordingly. The diners don't need to know the restaurant's layout; they just talk to the host."
+        },
+        {
+          "type": "text",
+          "content": "With a load balancer and 5 servers:\n\n1. Customer's browser sends a request to `yourstore.com`\n2. The [[glossary:load-balancer|load balancer]] receives and routes it to one of your 5 [[node:server-1|servers]]\n3. That server handles the request, checking cache or database as needed\n4. The response goes back through the load balancer\n\nThe customer has no idea there are 5 servers. To them, it's still just `yourstore.com`."
         },
         {
           "type": "diagram",
@@ -230,26 +230,26 @@
         },
         {
           "type": "text",
-          "content": "Your servers are handling the traffic now, but a new bottleneck emerges: **the database**. Five servers all querying one database means the database gets 5x the load.\n\nFor reads (loading product pages, checking order history), you can add [[glossary:read-replica|read replicas]]. A [[node:read-replica|read replica]] is a copy of your [[node:database|database]] that stays in sync with the primary. Your servers read from the replicas and write to the primary.\n\nSince an online store is **read-heavy** (hundreds of people browsing for every one person buying), spreading reads across replicas dramatically reduces the load on your primary database."
+          "content": "New bottleneck: **the database**. Five servers all querying one database means 5x the load.\n\nFor reads, you add [[glossary:read-replica|read replicas]] -- copies of your [[node:database|database]] that stay in sync with the primary. Servers read from replicas and write to the primary.\n\nSince online stores are **read-heavy** (hundreds browsing for every one buying), spreading reads across replicas dramatically reduces primary database load."
         },
         {
           "type": "callout",
           "style": "insight",
-          "content": "Read replicas work so well for online stores because of a fundamental asymmetry: for every customer who places an order (a write), hundreds of customers are just browsing (reads). A typical e-commerce site has a 100:1 read-to-write ratio. Splitting those reads across 3 replicas means your primary database only handles the writes and stays healthy."
+          "content": "A typical e-commerce site has a 100:1 read-to-write ratio. Splitting reads across 3 replicas means your primary database only handles writes and stays healthy."
         },
         {
           "type": "text",
-          "content": "There's one more problem to solve. During your flash sale, you noticed some suspicious behavior: a handful of IP addresses sending hundreds of requests per second. Bots. Scalpers. They're trying to buy up your entire limited-edition stock.\n\n[[glossary:rate-limiting|Rate limiting]] puts a cap on how many requests a single user (or IP address) can make in a given time window. If someone exceeds the limit -- say, more than 60 requests per minute -- they get temporarily blocked with a `429 Too Many Requests` error."
+          "content": "One more problem: during your flash sale, some IP addresses sent hundreds of requests per second. Bots. Scalpers.\n\n[[glossary:rate-limiting|Rate limiting]] caps how many requests a single user can make in a time window. Exceed the limit and they get a `429 Too Many Requests` error."
         },
         {
-          "type": "callout",
-          "style": "analogy",
+          "type": "reveal",
+          "label": "Real-world analogy: the bouncer with a clicker",
           "content": "Rate limiting is like a bouncer with a clicker counter at a nightclub. \"We allow 2 entries per person tonight. You've already been in twice -- back of the line.\" It doesn't stop everyone from getting in, but it prevents one person from monopolizing the door."
         },
         {
           "type": "callout",
           "style": "warning",
-          "content": "Rate limiting has to be tuned carefully. Too aggressive and you block real customers who are refreshing because your site is slow (making their experience worse, not better). Too lenient and the bots sail right through. Start with generous limits and tighten based on real traffic patterns."
+          "content": "Rate limiting has to be tuned carefully. Too aggressive and you block real customers refreshing because your site is slow. Too lenient and bots sail through. Start generous, tighten based on real traffic patterns."
         },
         {
           "type": "checkpoint",
@@ -259,57 +259,57 @@
               "id": "a",
               "text": "One-third of all requests fail until Server 2 is restarted",
               "correct": false,
-              "explanation": "This would happen with a very basic setup, but modern load balancers are smarter than that. They actively monitor the health of each server."
+              "explanation": "Modern load balancers are smarter than that -- they actively monitor server health."
             },
             {
               "id": "b",
               "text": "The load balancer detects the failure and routes all traffic to Servers 1 and 3",
               "correct": true,
-              "explanation": "Correct! Load balancers perform regular **health checks** -- pinging each server to verify it's alive. When a server stops responding, the load balancer removes it from rotation and distributes its traffic to the remaining healthy servers. Users might not even notice the failure."
+              "explanation": "Load balancers perform regular **health checks**. When a server stops responding, it's removed from rotation and traffic shifts to healthy servers. Users might not even notice."
             },
             {
               "id": "c",
               "text": "The site goes down completely until all servers are healthy",
               "correct": false,
-              "explanation": "This would defeat the purpose of having multiple servers! The whole point of horizontal scaling is resilience. If one server fails, the others pick up the slack. Your site stays online."
+              "explanation": "That would defeat the purpose of multiple servers. The whole point of horizontal scaling is resilience -- if one fails, the others pick up the slack."
             }
           ]
         },
         {
           "type": "challenge",
-          "scenario": "Your flash sale is live. You have 50 units of a limited-edition candle. With 5 servers behind a load balancer, each server could potentially process orders simultaneously. Server 1 checks the database: '10 units left.' Server 3 checks the database at the same instant: '10 units left.' Both servers accept an order and decrement the count. Now your database says 9 units left -- but you just sold 2.",
+          "scenario": "Your flash sale is live with 50 units of a limited-edition candle. Server 1 checks the database: '10 units left.' Server 3 checks at the same instant: '10 units left.' Both accept an order and decrement. Now the database says 9 -- but you sold 2.",
           "question": "How do you prevent overselling when multiple servers process orders simultaneously?",
           "options": [
             {
               "id": "a",
               "text": "Use a database transaction with row-level locking so only one order at a time can modify the inventory count",
               "correct": true,
-              "explanation": "This is the standard solution. When a server wants to decrement inventory, it acquires a **lock** on that specific row. Other servers trying to modify the same row have to wait until the lock is released. The database guarantees that the check-and-decrement happens as a single atomic operation: 'Decrement stock by 1, but only if stock is greater than 0.' This prevents overselling even with dozens of servers processing orders simultaneously.",
+              "explanation": "The database guarantees the check-and-decrement is a single atomic operation: 'Decrement stock by 1, but only if stock > 0.' This prevents overselling even with dozens of servers.",
               "conceptLink": "database"
             },
             {
               "id": "b",
               "text": "Assign each server a portion of the inventory -- Server 1 gets 10 units, Server 2 gets 10, etc.",
               "correct": false,
-              "explanation": "This approach (called sharding inventory) creates new problems. What if all the traffic goes to Server 1 and it sells out its 10 units while Servers 2-5 still have stock? Customers see 'out of stock' even though 40 units remain. Inventory management across distributed servers is much harder than letting the database handle it with transactions."
+              "explanation": "If all traffic hits Server 1, it sells out while Servers 2-5 still have stock. Customers see 'out of stock' with 40 units remaining."
             },
             {
               "id": "c",
               "text": "Process all orders through a single designated server to avoid conflicts",
               "correct": false,
-              "explanation": "This throws away the benefit of horizontal scaling! Funneling all orders through one server creates the exact bottleneck you were trying to avoid. The database's built-in transaction and locking mechanisms exist precisely to handle concurrent writes safely."
+              "explanation": "This throws away horizontal scaling. The database's built-in transaction and locking mechanisms exist precisely to handle concurrent writes safely."
             }
           ]
         },
         {
           "type": "reveal",
-          "label": "Want to go deeper? How does a load balancer decide where to send each request?",
-          "content": "Load balancers use different algorithms to distribute traffic:\n\n**Round Robin**: Send request 1 to Server A, request 2 to Server B, request 3 to Server C, then back to A. Simple and fair, but doesn't account for how busy each server is.\n\n**Least Connections**: Send the next request to whichever server currently has the fewest active connections. Better for uneven workloads -- if one request is a quick product page load and another is a complex checkout, the servers stay balanced.\n\n**Weighted**: Assign weights based on server capacity. If Server A is twice as powerful as Server B, it gets twice the traffic.\n\n**IP Hash**: Use the customer's IP address to consistently route them to the same server. Useful when server-side sessions matter (though stateless architectures avoid this need).\n\nMost cloud providers (AWS ALB, Cloudflare, etc.) default to round robin or least connections, and that works well for the vast majority of applications."
+          "label": "Deep dive: how does a load balancer decide where to send each request?",
+          "content": "Load balancers use different algorithms to distribute traffic:\n\n**Round Robin**: Send request 1 to Server A, request 2 to Server B, request 3 to Server C, then back to A. Simple and fair, but doesn't account for how busy each server is.\n\n**Least Connections**: Send the next request to whichever server has the fewest active connections. Better for uneven workloads.\n\n**Weighted**: Assign weights based on server capacity. If Server A is twice as powerful as Server B, it gets twice the traffic.\n\n**IP Hash**: Use the customer's IP to consistently route them to the same server. Useful when server-side sessions matter.\n\nMost cloud providers default to round robin or least connections, which works well for the vast majority of applications."
         },
         {
           "type": "reveal",
-          "label": "Curious? What does the final Black Friday architecture look like end-to-end?",
-          "content": "Here's the full request flow when a customer visits your store during the flash sale:\n\n1. **DNS** resolves `yourstore.com` to your load balancer's IP address\n2. **CDN** intercepts requests for static assets (images, CSS, JS) and serves them from the nearest edge server -- these never reach your servers at all\n3. **Rate limiter** checks if this IP has exceeded its request quota. If so, return `429 Too Many Requests`\n4. **Load balancer** picks a healthy server and forwards the request\n5. **Server** checks the **Redis cache** for the requested data\n6. On a cache miss, the server queries a **read replica** for read operations\n7. For writes (placing an order), the server talks to the **primary database** with appropriate locking\n8. Response flows back through the load balancer to the customer\n\nEach layer in this stack solves a specific bottleneck. Remove any one of them and the system breaks under Black Friday traffic. Together, they turn a single-server weekend project into a platform that can serve 100,000 simultaneous users."
+          "label": "Deep dive: the full Black Friday architecture end-to-end",
+          "content": "Here's the full request flow during the flash sale:\n\n1. **DNS** resolves `yourstore.com` to your load balancer's IP\n2. **CDN** intercepts static asset requests and serves them from the nearest edge server\n3. **Rate limiter** checks if this IP exceeded its quota. If so, return `429`\n4. **Load balancer** picks a healthy server and forwards the request\n5. **Server** checks the **Redis cache** for the requested data\n6. On a cache miss, the server queries a **read replica**\n7. For writes (placing an order), the server talks to the **primary database** with locking\n8. Response flows back through the load balancer\n\nEach layer solves a specific bottleneck. Together, they turn a single-server project into a platform serving 100,000 simultaneous users."
         }
       ],
       "suggestedQuestions": [
