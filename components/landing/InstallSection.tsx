@@ -24,47 +24,72 @@ const STEPS = [
   },
 ];
 
-function TypingCommand({ visible }: { visible: boolean }) {
-  const [charCount, setCharCount] = useState(0);
-  const command = "/architecture-review";
+const INSTALL_LINES = [
+  "/install lucycrx/architecture-review",
+];
 
-  useEffect(() => {
-    if (!visible) return;
-    const start = setTimeout(() => {
-      const interval = setInterval(() => {
-        setCharCount((c) => {
-          if (c >= command.length) {
-            clearInterval(interval);
-            return c;
-          }
-          return c + 1;
-        });
-      }, 60);
-      return () => clearInterval(interval);
-    }, 400);
-    return () => clearTimeout(start);
-  }, [visible]);
+const USAGE_LINE = "/architecture-review";
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div className="bg-[#1A1A1A] border border-[#333] p-5 sm:p-6">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="w-2.5 h-2.5 rounded-full bg-[#444]" />
-        <span className="w-2.5 h-2.5 rounded-full bg-[#444]" />
-        <span className="w-2.5 h-2.5 rounded-full bg-[#444]" />
+    <button
+      onClick={handleCopy}
+      className="font-mono text-[11px] text-[#666] hover:text-[#999] transition-colors"
+      aria-label="Copy to clipboard"
+    >
+      {copied ? "copied" : "copy"}
+    </button>
+  );
+}
+
+function TerminalBlock({
+  visible,
+  lines,
+  label,
+  delay = 0,
+}: {
+  visible: boolean;
+  lines: string[];
+  label: string;
+  delay?: number;
+}) {
+  return (
+    <div
+      className="transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(12px)",
+        transitionDelay: `${delay}ms`,
+      }}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="font-mono text-[11px] text-text-dim uppercase tracking-wider">
+          {label}
+        </span>
+        <CopyButton text={lines.join("\n")} />
       </div>
-      <div className="font-mono text-lg sm:text-xl text-[#E0E0E0] tracking-wide">
-        <span className="text-[#666]">$ </span>
-        {command.slice(0, charCount)}
-        <span
-          className="inline-block w-[2px] h-[1.2em] bg-[#E0E0E0] ml-0.5 align-middle"
-          style={{
-            animation:
-              charCount >= command.length
-                ? "blink 1s step-end infinite"
-                : "none",
-            opacity: charCount >= command.length ? undefined : 1,
-          }}
-        />
+      <div className="bg-[#1A1A1A] border border-[#333] p-5 sm:p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#444]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#444]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#444]" />
+        </div>
+        <div className="font-mono text-base sm:text-lg text-[#E0E0E0] tracking-wide space-y-1">
+          {lines.map((line, i) => (
+            <div key={i}>
+              <span className="text-[#666]">$ </span>
+              {line}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -106,14 +131,27 @@ export function InstallSection() {
           transform: visible ? "translateY(0)" : "translateY(20px)",
         }}
       >
-        {/* Command block */}
-        <TypingCommand visible={visible} />
+        {/* Install command */}
+        <TerminalBlock
+          visible={visible}
+          lines={INSTALL_LINES}
+          label="Install"
+          delay={200}
+        />
 
-        <p className="font-mono text-[13px] text-text-muted leading-relaxed mt-4 mb-2">
-          Run in Claude Code. Opens an architecture map in your browser.
+        <p className="font-mono text-[13px] text-text-muted leading-relaxed mt-3 mb-8">
+          Run in Claude Code to add the skill.
         </p>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-1 mb-10">
+        {/* Usage command */}
+        <TerminalBlock
+          visible={visible}
+          lines={[USAGE_LINE]}
+          label="Then run"
+          delay={400}
+        />
+
+        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 mb-10">
           <span className="font-mono text-[11px] text-text-dim">
             Or say: &ldquo;review my architecture&rdquo;
           </span>
