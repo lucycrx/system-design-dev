@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Colors — bold institutional palette (LaB K-inspired) */
-  --color-bg: #FAFAF8;
+  /* Colors — cool blue-gray palette (VENUMENT-inspired) */
+  --color-bg: #FFFFFF;
   --color-surface: #FFFFFF;
-  --color-surface-hover: #F5F4F1;
-  --color-accent: #2A7A6B;
-  --color-accent-dim: #2A7A6B1A;
-  --color-accent-mid: #2A7A6B30;
+  --color-surface-hover: #F0F3F7;
+  --color-accent: #84AEE4;
+  --color-accent-dim: #84AEE41A;
+  --color-accent-mid: #84AEE430;
   --color-text: #1A1A1A;
-  --color-text-muted: #555555;
-  --color-text-dim: #6B6B6B;
-  --color-border: #E0DDD8;
+  --color-text-muted: #5A6670;
+  --color-text-dim: #8A94A0;
+  --color-border: #DCE2EA;
   --color-blue: #4A708E;
   --color-blue-dim: #4A708E1A;
   --color-pink: #8C3B3B;
