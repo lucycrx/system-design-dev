@@ -140,7 +140,7 @@ export function ProductHero() {
         </div>
 
         {/* Animated divider */}
-        <div className="mt-16 overflow-hidden">
+        <div className="mt-10 overflow-hidden">
           <div
             className="border-t border-border transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left"
             style={{

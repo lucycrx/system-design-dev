@@ -88,7 +88,7 @@ export function WorksWith() {
   return (
     <div
       ref={ref}
-      className="max-w-5xl mx-auto px-6 py-10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="max-w-5xl mx-auto px-6 pt-4 pb-10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(12px)",
