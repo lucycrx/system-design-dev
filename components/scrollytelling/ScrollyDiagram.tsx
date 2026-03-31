@@ -270,8 +270,8 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
         className="w-full h-full overflow-visible"
       >
         <defs>
-          <marker id="scrolly-arrow" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto">
-            <polygon points="0 0, 6 2.5, 0 5" className="fill-border" />
+          <marker id="scrolly-arrow" markerWidth="14" markerHeight="10" refX="14" refY="5" orient="auto">
+            <polygon points="0 0, 14 5, 0 10" className="fill-border" />
           </marker>
         </defs>
 
@@ -303,7 +303,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
               <path
                 d={d}
                 className="fill-none stroke-border transition-[d,opacity] duration-500 ease-linear"
-                strokeWidth="1"
+                strokeWidth="2"
                 markerEnd="url(#scrolly-arrow)"
                 style={{
                   opacity: visible ? 1 : 0,

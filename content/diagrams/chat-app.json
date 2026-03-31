@@ -81,14 +81,14 @@
         "id": "client-1",
         "type": "client",
         "label": "User A",
-        "position": { "x": 80, "y": 120 },
+        "position": { "x": 100, "y": 120 },
         "explanation": "A connected client with a persistent WebSocket connection to the server"
       },
       {
         "id": "server",
         "type": "server",
         "label": "Server",
-        "position": { "x": 340, "y": 120 },
+        "position": { "x": 350, "y": 120 },
         "explanation": "The server maintains open WebSocket connections with all active clients",
         "technology": "WebSocket"
       },
@@ -96,14 +96,14 @@
         "id": "client-2",
         "type": "client",
         "label": "User B",
-        "position": { "x": 580, "y": 30 },
+        "position": { "x": 560, "y": 40 },
         "explanation": "Another connected client receiving messages instantly via WebSocket"
       },
       {
         "id": "client-3",
         "type": "client",
         "label": "User C",
-        "position": { "x": 580, "y": 220 },
+        "position": { "x": 560, "y": 210 },
         "explanation": "A third client — the server pushes messages to all connected clients simultaneously",
         "isNew": true
       },
@@ -111,7 +111,7 @@
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 340, "y": 330 },
+        "position": { "x": 350, "y": 310 },
         "explanation": "Still stores all messages permanently — acts as the safety net when clients reconnect"
       }
     ],
