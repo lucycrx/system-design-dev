@@ -282,17 +282,22 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
         {/* Edges — bidirectional pairs get parallel offset lines (like the prototype) */}
         {allEdges.map(({ edge }) => {
           const visible = activeEdgeIds.has(edge.id);
-          const isDashed = edge.style === "dashed";
 
-          // Check if there's a reverse edge (bidirectional pair)
-          const hasReverse = allEdges.some(
-            ({ edge: other }) =>
+          // Use the ACTIVE diagram's version of this edge for label/style (not the merged one)
+          const activeEdge = activeDiagram?.edges.find((e) => e.id === edge.id);
+          const label = activeEdge?.label || "";
+          const isDashed = activeEdge?.style === "dashed" || (!activeEdge && edge.style === "dashed");
+
+          // Check if there's a reverse edge currently visible
+          const hasVisibleReverse = activeDiagram?.edges.some(
+            (other) =>
               other.id !== edge.id &&
               other.source === edge.target &&
               other.target === edge.source
-          );
+          ) ?? false;
+
           // Offset bidirectional edges: one left/up, one right/down
-          const perpOff = hasReverse
+          const perpOff = hasVisibleReverse
             ? (edge.source < edge.target ? -12 : 12)
             : 0;
 
@@ -308,7 +313,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
             const mx = (src.x + sw/2 + tgt.x + tw/2) / 2;
             const my = (src.y + NODE_H + tgt.y) / 2;
             // Push label away from the line (perpendicular, further than the line offset)
-            const labelOff = hasReverse ? (perpOff > 0 ? perpOff + 30 : perpOff - 30) : (isVert ? 30 : 0);
+            const labelOff = hasVisibleReverse ? (perpOff > 0 ? perpOff + 50 : perpOff - 50) : (isVert ? 40 : 0);
             labelX = mx + (isVert ? labelOff : 0);
             labelY = my + (isVert ? 0 : labelOff);
           }
@@ -325,7 +330,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
                   strokeDasharray: isDashed ? "5 4" : undefined,
                 }}
               />
-              {edge.label && (
+              {label && (
                 <text
                   className="font-mono uppercase fill-accent transition-[transform,opacity] duration-500 ease-linear"
                   style={{
@@ -336,7 +341,7 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
                   }}
                   textAnchor="middle"
                 >
-                  {edge.label}
+                  {label}
                 </text>
               )}
             </g>
