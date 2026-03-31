@@ -9,39 +9,61 @@ import { GlossaryTooltip } from "@/components/glossary/GlossaryTooltip";
 interface Props {
   block: TextBlockType;
   glossaryMap: Record<string, GlossaryTerm>;
+  selectedNodeId?: string | null;
 }
 
 /**
- * Splits text containing [[glossary:term-id|display text]] into
- * an array of strings and GlossaryTooltip elements.
+ * Splits text containing [[glossary:term-id|display text]] and
+ * [[node:node-id|display text]] into an array of strings and
+ * interactive elements.
  */
-function renderWithGlossary(
+function renderWithLinks(
   text: string,
-  glossaryMap: Record<string, GlossaryTerm>
+  glossaryMap: Record<string, GlossaryTerm>,
+  selectedNodeId?: string | null
 ): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
-  const regex = /\[\[glossary:([a-z0-9-]+)\|([^\]]+)\]\]/g;
+  const regex = /\[\[(glossary|node):([a-z0-9-]+)\|([^\]]+)\]\]/g;
   let lastIndex = 0;
   let match;
 
   while ((match = regex.exec(text)) !== null) {
-    // Add text before the match
     if (match.index > lastIndex) {
       parts.push(text.slice(lastIndex, match.index));
     }
-    const termId = match[1];
-    const displayText = match[2];
-    const term = glossaryMap[termId];
+    const linkType = match[1];
+    const id = match[2];
+    const displayText = match[3];
 
-    if (term) {
+    if (linkType === "glossary") {
+      const term = glossaryMap[id];
+      if (term) {
+        parts.push(
+          <GlossaryTooltip key={`${id}-${match.index}`} term={term}>
+            {displayText}
+          </GlossaryTooltip>
+        );
+      } else {
+        parts.push(
+          <span key={`${id}-${match.index}`} className="text-accent font-medium">
+            {displayText}
+          </span>
+        );
+      }
+    } else if (linkType === "node") {
+      const isActive = selectedNodeId === id;
       parts.push(
-        <GlossaryTooltip key={`${termId}-${match.index}`} term={term}>
-          {displayText}
-        </GlossaryTooltip>
-      );
-    } else {
-      parts.push(
-        <span key={`${termId}-${match.index}`} className="text-accent font-medium">
+        <span
+          key={`node-${id}-${match.index}`}
+          data-node-id={id}
+          className={`
+            font-semibold transition-colors duration-200
+            ${isActive
+              ? "text-accent bg-accent-dim px-1 -mx-1"
+              : "text-text"
+            }
+          `}
+        >
           {displayText}
         </span>
       );
@@ -49,7 +71,6 @@ function renderWithGlossary(
     lastIndex = match.index + match[0].length;
   }
 
-  // Add remaining text
   if (lastIndex < text.length) {
     parts.push(text.slice(lastIndex));
   }
@@ -58,31 +79,32 @@ function renderWithGlossary(
 }
 
 /**
- * Recursively walks React children, replacing glossary link syntax
- * in string children with GlossaryTooltip components.
+ * Recursively walks React children, replacing glossary and node link
+ * syntax in string children with interactive components.
  */
 function processChildren(
   children: React.ReactNode,
-  glossaryMap: Record<string, GlossaryTerm>
+  glossaryMap: Record<string, GlossaryTerm>,
+  selectedNodeId?: string | null
 ): React.ReactNode {
   return React.Children.map(children, (child) => {
     if (typeof child === "string") {
-      if (child.includes("[[glossary:")) {
-        return <>{renderWithGlossary(child, glossaryMap)}</>;
+      if (child.includes("[[glossary:") || child.includes("[[node:")) {
+        return <>{renderWithLinks(child, glossaryMap, selectedNodeId)}</>;
       }
       return child;
     }
     if (React.isValidElement<{ children?: React.ReactNode }>(child) && child.props.children) {
       return React.cloneElement(child, {
         ...child.props,
-        children: processChildren(child.props.children, glossaryMap),
+        children: processChildren(child.props.children, glossaryMap, selectedNodeId),
       });
     }
     return child;
   });
 }
 
-export function TextBlock({ block, glossaryMap }: Props) {
+export function TextBlock({ block, glossaryMap, selectedNodeId }: Props) {
   return (
     <div className="prose-custom">
       <ReactMarkdown
@@ -90,7 +112,7 @@ export function TextBlock({ block, glossaryMap }: Props) {
         components={{
           p: ({ children }) => (
             <p className="text-text/90 leading-relaxed mb-4 text-[15px]">
-              {processChildren(children, glossaryMap)}
+              {processChildren(children, glossaryMap, selectedNodeId)}
             </p>
           ),
           strong: ({ children }) => (
@@ -111,7 +133,7 @@ export function TextBlock({ block, glossaryMap }: Props) {
           ),
           li: ({ children }) => (
             <li className="leading-relaxed">
-              {processChildren(children, glossaryMap)}
+              {processChildren(children, glossaryMap, selectedNodeId)}
             </li>
           ),
           table: ({ children }) => (
