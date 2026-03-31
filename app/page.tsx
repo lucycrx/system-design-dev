@@ -2,6 +2,7 @@ import { getAllStories, getAllModules } from "@/lib/content";
 import { ProductHero } from "@/components/landing/ProductHero";
 import { WorksWith } from "@/components/landing/WorksWith";
 import { BeforeAfter } from "@/components/landing/BeforeAfter";
+import { ValueProps } from "@/components/landing/ValueProps";
 import { Personas } from "@/components/landing/Personas";
 import { InstallSection } from "@/components/landing/InstallSection";
 import { ExampleOutput } from "@/components/landing/ExampleOutput";
@@ -26,13 +27,14 @@ export default function HomePage() {
 
       <BeforeAfter />
       <ExampleOutput />
+      <ValueProps />
       <Personas />
       <InstallSection />
 
       {/* Go Deeper — demoted learning content */}
       <section className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
         <div className="flex items-baseline gap-5 mb-4">
-          <SectionNumber number="05" />
+          <SectionNumber number="06" />
           <h2 className="heading-editorial text-xl sm:text-2xl lg:text-[1.75rem] text-text">
             Want to Go Deeper?
           </h2>
