@@ -14,91 +14,108 @@ function parseUserScale(scale: string): number {
   return parseInt(num, 10) || 0;
 }
 
-/**
- * Compute chart paths for each stage.
- * Y-axis fixed at 0–maxUsers. All paths use M C C structure for smooth CSS d-interpolation.
- * Chart area: x 48–410, y 12 (top) – 102 (bottom), range = 90px.
- */
-function buildChartData(stages: Stage[]) {
-  const userCounts = stages.map((s) => parseUserScale(s.userScale));
-  const maxUsers = Math.max(...userCounts);
-  const toY = (users: number) => 102 - (users / maxUsers) * 90;
-
-  // Spread data points evenly across x axis
-  const xStart = 60;
-  const xEnd = 410;
-  const points = userCounts.map((u, i) => ({
-    x: stages.length <= 1 ? xStart : xStart + (i / (stages.length - 1)) * (xEnd - xStart),
-    y: toY(u),
-    users: u,
-    label: stages[i].userScale,
-  }));
-
-  // Build cumulative exponential paths for each stage.
-  // All paths normalized to M C C for smooth d-interpolation between stages.
-  // The curve stays flat near the baseline then shoots up — classic exponential.
-  return stages.map((_, stageIdx) => {
-    const pts = points.slice(0, stageIdx + 1);
-    const last = pts[pts.length - 1];
-
-    // Always use all data points to define control points for consistent M C C structure.
-    // p0 = origin, p1 = stage-2 point, p2 = stage-3 point (or collapsed duplicates)
-    const p0 = points[0];
-    const p1 = points.length > 1 ? points[1] : p0;
-    const p2 = points.length > 2 ? points[2] : p1;
-
-    let endP1: typeof p1;
-    let endP2: typeof p2;
-
-    if (stageIdx === 0) {
-      // Collapsed to a point at origin
-      endP1 = { ...p0, y: 102 };
-      endP2 = { ...p0, y: 102 };
-    } else if (stageIdx === 1) {
-      // Curve to p1, second segment collapsed at p1
-      endP1 = p1;
-      endP2 = p1;
-    } else {
-      // Full curve through p1 to p2
-      endP1 = p1;
-      endP2 = p2;
-    }
-
-    // First cubic: from start to endP1 (stays flat near baseline with exponential feel)
-    // Second cubic: from endP1 to endP2 (shoots up for hockey stick)
-    const line = `M${p0.x},102 C${p0.x + 40},102 ${endP1.x - 60},102 ${endP1.x},${endP1.y} C${endP1.x + 40},${endP1.y - (endP1.y - endP2.y) * 0.2} ${endP2.x - 50},${endP2.y + 8} ${endP2.x},${endP2.y}`;
-    const area = `${line} L${endP2.x},102 L${p0.x},102 Z`;
-
-    // Projection: dashed continuation to next stage's point
-    const hasProj = stageIdx < stages.length - 1;
-    const nextPt = hasProj ? points[stageIdx + 1] : null;
-    const proj = hasProj && nextPt
-      ? `M${last.x},${last.y} C${last.x + 40},${last.y - 10} ${nextPt.x - 40},${nextPt.y + 10} ${nextPt.x},${nextPt.y}`
-      : `M${last.x},${last.y} C${last.x},${last.y} ${last.x},${last.y} ${last.x},${last.y}`;
-
-    return {
-      line,
-      area,
-      areaOp: stageIdx === 0 ? 0 : 1,
-      proj,
-      projOp: hasProj ? 1 : 0,
-      dot: [last.x, stageIdx === 0 ? 102 : last.y] as [number, number],
-      label: last.label,
-      labelPos: [last.x + 12, (stageIdx === 0 ? 102 : last.y) - 4] as [number, number],
-    };
-  });
-}
-
 function formatMax(n: number): string {
   if (n >= 1000000) return `${(n / 1000000).toFixed(n % 1000000 === 0 ? 0 : 1)}M`;
   if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k`;
   return String(n);
 }
 
+/**
+ * Chart paths — hand-tuned exponential curves.
+ * Y-axis fixed at 0–max. All paths use M C C for smooth CSS d-interpolation.
+ * Chart area: x=60–410, y=12 (top) to y=102 (bottom), 90px range.
+ *
+ * The key insight: all 3 stages must have the SAME path command structure
+ * (M + C + C) so the browser can interpolate between them smoothly.
+ * Stages that don't extend to the end use collapsed/duplicate control points.
+ */
+interface ChartFrame {
+  line: string;
+  area: string;
+  areaOp: number;
+  proj: string;
+  projOp: number;
+  dot: [number, number];
+  labelPos: [number, number];
+  label: string;
+}
+
+function buildChartFrames(stages: Stage[]): ChartFrame[] {
+  const userCounts = stages.map((s) => parseUserScale(s.userScale));
+  const maxUsers = Math.max(...userCounts);
+  const toY = (users: number) => Math.round(102 - (users / maxUsers) * 90);
+
+  // Data points spread evenly on x-axis
+  const xs = stages.map((_, i) =>
+    stages.length <= 1 ? 60 : Math.round(60 + (i / (stages.length - 1)) * 350)
+  );
+  const ys = userCounts.map(toY);
+
+  // For 3 stages: xs=[60, 235, 410], ys=[102, ~93, 12] (for 2/100/1000)
+  // Build hand-tuned exponential paths per stage count
+
+  if (stages.length === 3) {
+    const [x0, x1, x2] = xs;
+    const [y0, y1, y2] = ys;
+
+    return [
+      // Stage 1: flat line at baseline, just a dot
+      {
+        line: `M${x0},102 C${x0 + 10},102 ${x0 + 25},102 ${x0 + 40},102 C${x0 + 40},102 ${x0 + 40},102 ${x0 + 40},102`,
+        area: `M${x0},102 C${x0 + 10},102 ${x0 + 25},102 ${x0 + 40},102 C${x0 + 40},102 ${x0 + 40},102 ${x0 + 40},102 L${x0 + 40},102 L${x0},102 Z`,
+        areaOp: 0,
+        proj: `M${x0 + 40},102 C${x0 + 40},102 ${x0 + 40},102 ${x0 + 40},102`,
+        projOp: 0,
+        dot: [x0 + 40, 102],
+        labelPos: [x0 + 52, 98],
+        label: stages[0].userScale,
+      },
+      // Stage 2: gentle rise to y1 — mostly flat, slight uptick (exponential is still low)
+      {
+        line: `M${x0},102 C${x0 + 40},102 ${x1 - 70},102 ${x1 - 15},${y1 + 2} C${x1 - 5},${y1 + 1} ${x1 - 2},${y1} ${x1},${y1}`,
+        area: `M${x0},102 C${x0 + 40},102 ${x1 - 70},102 ${x1 - 15},${y1 + 2} C${x1 - 5},${y1 + 1} ${x1 - 2},${y1} ${x1},${y1} L${x1},102 L${x0},102 Z`,
+        areaOp: 1,
+        proj: `M${x1},${y1} C${x1 + 30},${y1 - 14} ${x2 - 60},${y2 + 36} ${x2},${y2}`,
+        projOp: 1,
+        dot: [x1, y1],
+        labelPos: [x1 + 12, y1 - 6],
+        label: stages[1].userScale,
+      },
+      // Stage 3: full exponential hockey stick — flat then shoots up
+      {
+        line: `M${x0},102 C${x0 + 40},102 ${x1 - 70},102 ${x1 - 15},${y1 + 2} C${x1 + 25},${y1 - 3} ${x2 - 50},${y2 + 8} ${x2},${y2}`,
+        area: `M${x0},102 C${x0 + 40},102 ${x1 - 70},102 ${x1 - 15},${y1 + 2} C${x1 + 25},${y1 - 3} ${x2 - 50},${y2 + 8} ${x2},${y2} L${x2},102 L${x0},102 Z`,
+        areaOp: 1,
+        proj: `M${x2},${y2} C${x2},${y2} ${x2},${y2} ${x2},${y2}`,
+        projOp: 0,
+        dot: [x2, y2],
+        labelPos: [x2 - 62, y2 - 4],
+        label: stages[2].userScale,
+      },
+    ];
+  }
+
+  // Fallback for non-3-stage stories: simple linear dots
+  return stages.map((stage, i) => {
+    const x = xs[i];
+    const y = ys[i];
+    return {
+      line: `M60,102 C60,102 ${x},102 ${x},${y} C${x},${y} ${x},${y} ${x},${y}`,
+      area: `M60,102 C60,102 ${x},102 ${x},${y} C${x},${y} ${x},${y} ${x},${y} L${x},102 L60,102 Z`,
+      areaOp: i === 0 ? 0 : 1,
+      proj: `M${x},${y} C${x},${y} ${x},${y} ${x},${y}`,
+      projOp: 0,
+      dot: [x, y] as [number, number],
+      labelPos: [x + 12, y - 4] as [number, number],
+      label: stage.userScale,
+    };
+  });
+}
+
 export function GrowthChart({ stages, activeStageIndex }: Props) {
-  const chartData = useMemo(() => buildChartData(stages), [stages]);
+  const frames = useMemo(() => buildChartFrames(stages), [stages]);
   const maxUsers = Math.max(...stages.map((s) => parseUserScale(s.userScale)));
-  const c = chartData[activeStageIndex] || chartData[0];
+  const c = frames[activeStageIndex] || frames[0];
 
   return (
     <div className="h-[140px] py-3">

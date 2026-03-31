@@ -324,8 +324,8 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
             return (
               <text
                 key={`label-${edge.id}`}
-                className="font-mono text-[9px] tracking-wider uppercase fill-accent text-anchor-middle transition-transform duration-500 ease-linear"
-                style={{ transform: `translate(${mid.x}px, ${mid.y}px)` }}
+                className="font-mono uppercase fill-accent transition-transform duration-500 ease-linear"
+                style={{ fontSize: 18, letterSpacing: "0.1em", transform: `translate(${mid.x}px, ${mid.y}px)` }}
                 textAnchor="middle"
               >
                 {edge.label}
@@ -376,9 +376,9 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
               {/* Label */}
               <text
                 x={w / 2}
-                y={ICON_SIZE + 18}
-                className="font-mono font-medium tracking-widest uppercase fill-text-dim"
-                style={{ fontSize: 14 }}
+                y={ICON_SIZE + 22}
+                className="font-mono font-medium uppercase fill-text-dim"
+                style={{ fontSize: 22, letterSpacing: "0.12em" }}
                 textAnchor="middle"
               >
                 {node.label}
