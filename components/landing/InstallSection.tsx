@@ -24,7 +24,10 @@ const STEPS = [
   },
 ];
 
-const INSTALL_LINES = ["/install lucycrx/architecture-review"];
+const INSTALL_LINES = [
+  "/plugin marketplace add lucycrx/architecture-review",
+  "/plugin install architecture-review",
+];
 
 const USAGE_LINE = "/architecture-review";
 
@@ -159,7 +162,7 @@ export function InstallSection() {
         />
 
         <p className="font-mono text-[13px] text-text-muted leading-relaxed mt-3 mb-8">
-          Run in Claude Code to add the skill.
+          Run both commands in Claude Code to add the skill from GitHub.
         </p>
 
         {/* Usage command */}
