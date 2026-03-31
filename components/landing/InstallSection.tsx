@@ -140,7 +140,7 @@ export function InstallSection() {
       className="max-w-5xl mx-auto px-6 py-16 sm:py-24 scroll-mt-8"
     >
       <div className="flex items-baseline gap-5 mb-10">
-        <SectionNumber number="05" />
+        <SectionNumber number="04" />
         <h2 className="heading-editorial text-2xl sm:text-3xl lg:text-[2.25rem] text-text">
           Get Started
         </h2>
