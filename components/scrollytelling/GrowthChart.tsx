@@ -17,13 +17,11 @@ function parseUserScale(scale: string): number {
 /**
  * Compute chart paths for each stage.
  * Y-axis fixed at 0–maxUsers. All paths use M C C structure for smooth CSS d-interpolation.
- * Chart area: x 48–410, y 12 (top) – 102 (bottom).
+ * Chart area: x 48–410, y 12 (top) – 102 (bottom), range = 90px.
  */
 function buildChartData(stages: Stage[]) {
   const userCounts = stages.map((s) => parseUserScale(s.userScale));
   const maxUsers = Math.max(...userCounts);
-
-  // Map user count → y coordinate
   const toY = (users: number) => 102 - (users / maxUsers) * 90;
 
   // Spread data points evenly across x axis
@@ -36,38 +34,46 @@ function buildChartData(stages: Stage[]) {
     label: stages[i].userScale,
   }));
 
-  // Build cumulative paths for each stage (showing data up to that stage)
+  // Build cumulative exponential paths for each stage.
+  // All paths normalized to M C C for smooth d-interpolation between stages.
+  // The curve stays flat near the baseline then shoots up — classic exponential.
   return stages.map((_, stageIdx) => {
-    const active = points.slice(0, stageIdx + 1);
-    const last = active[active.length - 1];
+    const pts = points.slice(0, stageIdx + 1);
+    const last = pts[pts.length - 1];
 
-    // Build line path: M then C segments. Normalize to always have M + 2 cubic segments.
-    let line: string;
-    let area: string;
-    if (active.length === 1) {
-      // Single point: collapsed cubics
-      const p = active[0];
-      line = `M${p.x},102 C${p.x},102 ${p.x},102 ${p.x},${p.y} C${p.x},${p.y} ${p.x},${p.y} ${p.x},${p.y}`;
-      area = `${line} L${p.x},102 L${xStart},102 Z`;
-    } else if (active.length === 2) {
-      const [a, b] = active;
-      // First cubic goes to midpoint, second to endpoint
-      const mx = (a.x + b.x) / 2;
-      const my = (a.y + b.y) / 2;
-      line = `M${a.x},102 C${a.x},102 ${mx - 20},102 ${mx},${my} C${mx + 20},${my - (my - b.y) * 0.5} ${b.x - 30},${b.y + 2} ${b.x},${b.y}`;
-      area = `${line} L${b.x},102 L${a.x},102 Z`;
+    // Always use all data points to define control points for consistent M C C structure.
+    // p0 = origin, p1 = stage-2 point, p2 = stage-3 point (or collapsed duplicates)
+    const p0 = points[0];
+    const p1 = points.length > 1 ? points[1] : p0;
+    const p2 = points.length > 2 ? points[2] : p1;
+
+    let endP1: typeof p1;
+    let endP2: typeof p2;
+
+    if (stageIdx === 0) {
+      // Collapsed to a point at origin
+      endP1 = { ...p0, y: 102 };
+      endP2 = { ...p0, y: 102 };
+    } else if (stageIdx === 1) {
+      // Curve to p1, second segment collapsed at p1
+      endP1 = p1;
+      endP2 = p1;
     } else {
-      // 3+ points: first cubic to second point, second cubic to third
-      const [a, b, c] = active;
-      line = `M${a.x},102 C${a.x + 40},102 ${b.x - 60},102 ${b.x},${b.y} C${b.x + 40},${b.y - (b.y - c.y) * 0.3} ${c.x - 50},${c.y + 8} ${c.x},${c.y}`;
-      area = `${line} L${c.x},102 L${a.x},102 Z`;
+      // Full curve through p1 to p2
+      endP1 = p1;
+      endP2 = p2;
     }
 
-    // Projection: dashed continuation from last point to end (only if not last stage)
+    // First cubic: from start to endP1 (stays flat near baseline with exponential feel)
+    // Second cubic: from endP1 to endP2 (shoots up for hockey stick)
+    const line = `M${p0.x},102 C${p0.x + 40},102 ${endP1.x - 60},102 ${endP1.x},${endP1.y} C${endP1.x + 40},${endP1.y - (endP1.y - endP2.y) * 0.2} ${endP2.x - 50},${endP2.y + 8} ${endP2.x},${endP2.y}`;
+    const area = `${line} L${endP2.x},102 L${p0.x},102 Z`;
+
+    // Projection: dashed continuation to next stage's point
     const hasProj = stageIdx < stages.length - 1;
-    const nextPoint = hasProj ? points[stageIdx + 1] : null;
-    const proj = hasProj && nextPoint
-      ? `M${last.x},${last.y} C${last.x + 40},${last.y - 10} ${nextPoint.x - 40},${nextPoint.y + 10} ${nextPoint.x},${nextPoint.y}`
+    const nextPt = hasProj ? points[stageIdx + 1] : null;
+    const proj = hasProj && nextPt
+      ? `M${last.x},${last.y} C${last.x + 40},${last.y - 10} ${nextPt.x - 40},${nextPt.y + 10} ${nextPt.x},${nextPt.y}`
       : `M${last.x},${last.y} C${last.x},${last.y} ${last.x},${last.y} ${last.x},${last.y}`;
 
     return {
@@ -76,9 +82,9 @@ function buildChartData(stages: Stage[]) {
       areaOp: stageIdx === 0 ? 0 : 1,
       proj,
       projOp: hasProj ? 1 : 0,
-      dot: [last.x, last.y] as [number, number],
+      dot: [last.x, stageIdx === 0 ? 102 : last.y] as [number, number],
       label: last.label,
-      labelPos: [last.x + 12, last.y - 4] as [number, number],
+      labelPos: [last.x + 12, (stageIdx === 0 ? 102 : last.y) - 4] as [number, number],
     };
   });
 }

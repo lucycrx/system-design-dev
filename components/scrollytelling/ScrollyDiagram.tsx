@@ -61,15 +61,15 @@ const ICONS: Partial<Record<DiagramNodeType, React.ReactNode>> = {
 };
 
 // ── Constants ─────────────────────────────────────────────────────
-const ICON_SIZE = 30;
-const NODE_H = 46;
+const ICON_SIZE = 80;
+const NODE_H = 110;
 
 // Logical node widths per type (for edge routing)
 const NODE_W: Partial<Record<DiagramNodeType, number>> = {
-  server: 60,
-  database: 60,
+  server: 100,
+  database: 100,
 };
-const DEFAULT_W = 50;
+const DEFAULT_W = 90;
 
 function nodeW(type: DiagramNodeType) {
   return NODE_W[type] ?? DEFAULT_W;
@@ -376,8 +376,9 @@ export function ScrollyDiagram({ allDiagrams, activeDiagramId, stageIndex }: Pro
               {/* Label */}
               <text
                 x={w / 2}
-                y={ICON_SIZE + 12}
-                className="font-mono text-[9px] font-medium tracking-widest uppercase fill-text-dim"
+                y={ICON_SIZE + 18}
+                className="font-mono font-medium tracking-widest uppercase fill-text-dim"
+                style={{ fontSize: 14 }}
                 textAnchor="middle"
               >
                 {node.label}
