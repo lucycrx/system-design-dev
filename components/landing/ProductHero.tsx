@@ -15,7 +15,7 @@ function WordReveal({
   return (
     <span className="inline-block overflow-hidden">
       <span
-        className="inline-block transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="inline-block transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
           transform: visible ? "translateY(0)" : "translateY(110%)",
           opacity: visible ? 1 : 0,
@@ -42,13 +42,25 @@ export function ProductHero() {
 
   return (
     <header className="relative w-full overflow-hidden bg-bg">
-      <div className="relative max-w-5xl mx-auto px-6 pt-20 pb-16">
+      {/* Animated dot grid background */}
+      <div
+        className="absolute inset-0 pointer-events-none transition-opacity duration-[1500ms]"
+        style={{
+          backgroundImage: "radial-gradient(circle, var(--color-border) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+          opacity: phase >= 2 ? 0.5 : 0,
+          maskImage: "radial-gradient(ellipse 70% 60% at 70% 40%, black, transparent)",
+          WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 70% 40%, black, transparent)",
+        }}
+      />
+
+      <div className="relative max-w-5xl mx-auto px-6 pt-24 sm:pt-28 pb-16">
         {/* Top label */}
         <div
-          className="mb-12 transition-all duration-500"
+          className="mb-14 transition-all duration-500"
           style={{
             opacity: phase >= 1 ? 1 : 0,
-            transform: phase >= 1 ? "translateY(0)" : "translateY(8px)",
+            transform: phase >= 1 ? "translateY(0)" : "translateY(12px)",
           }}
         >
           <span className="label-mono text-text-muted">
@@ -59,19 +71,19 @@ export function ProductHero() {
         {/* Two-column: headline left, mini-diagram right */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-16 items-start">
           <div>
-            {/* Main title */}
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold text-text leading-[1.15] tracking-tight mb-10">
-              <span className="block">
+            {/* Main title — dramatic scale with weight contrast */}
+            <h1 className="heading-hero text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] text-text mb-12">
+              <span className="block font-light">
                 <WordReveal delay={150} visible={phase >= 1}>
                   Understand any codebase.
                 </WordReveal>
               </span>
               <span className="block">
                 <WordReveal delay={400} visible={phase >= 1}>
-                  <span className="relative text-accent">
+                  <span className="relative text-accent font-extrabold">
                     Build to scale.
                     <span
-                      className="absolute -bottom-1 left-0 h-[3px] bg-accent transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left w-full"
+                      className="absolute -bottom-1.5 left-0 h-[5px] bg-accent rounded-sm transition-transform duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] origin-left w-full"
                       style={{
                         transform: phase >= 2 ? "scaleX(1)" : "scaleX(0)",
                       }}
@@ -86,24 +98,24 @@ export function ProductHero() {
               className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 transition-all duration-700"
               style={{
                 opacity: phase >= 2 ? 1 : 0,
-                transform: phase >= 2 ? "translateY(0)" : "translateY(12px)",
+                transform: phase >= 2 ? "translateY(0)" : "translateY(16px)",
                 transitionDelay: "200ms",
               }}
             >
               <div>
-                <p className="font-mono text-[13px] text-text-muted leading-relaxed mb-5">
+                <p className="font-mono text-[13px] text-text-muted leading-relaxed mb-6">
                   Get an interactive architecture map with plain-English
                   explanations and risk analysis. No code reading required.
                 </p>
                 <a
                   href="#get-started"
-                  className="inline-block font-mono text-[12px] font-medium tracking-wide uppercase border border-text bg-text text-bg px-5 py-2.5 hover:bg-transparent hover:text-text transition-colors duration-200"
+                  className="inline-block font-mono text-[12px] font-medium tracking-wide uppercase bg-text text-bg px-6 py-3 hover:bg-accent hover:-translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-[0_8px_32px_var(--color-accent-glow)]"
                 >
                   Get Started
                 </a>
               </div>
 
-              <div className="border-t border-text/15 pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-8">
+              <div className="border-t border-text/15 pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:border-accent/20 sm:pl-8">
                 <div className="label-mono text-accent mb-2">
                   For PMs, founders, and vibecoders
                 </div>
@@ -119,7 +131,7 @@ export function ProductHero() {
             className="hidden lg:block transition-all duration-1000"
             style={{
               opacity: phase >= 2 ? 1 : 0,
-              transform: phase >= 2 ? "translateY(0)" : "translateY(16px)",
+              transform: phase >= 2 ? "translateY(0) scale(1)" : "translateY(20px) scale(0.98)",
               transitionDelay: "400ms",
             }}
           >
@@ -128,7 +140,7 @@ export function ProductHero() {
         </div>
 
         {/* Animated divider */}
-        <div className="mt-14 overflow-hidden">
+        <div className="mt-16 overflow-hidden">
           <div
             className="border-t border-border transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left"
             style={{

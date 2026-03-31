@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Landing Page — Bold + Colorize + Overdrive Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFBFC;
+    --surface: #FFFFFF;
+    --accent: #4A7FD4;
+    --accent-glow: rgba(74, 127, 212, 0.25);
+    --accent-dim: rgba(74, 127, 212, 0.08);
+    --accent-mid: rgba(74, 127, 212, 0.18);
+    --text: #111318;
+    --text-muted: #4A5568;
+    --text-dim: #8A94A0;
+    --border: #DCE2EA;
+    --green: #1D7A42;
+    --green-dim: rgba(29, 122, 66, 0.08);
+    --blue: #3A6B8E;
+    --blue-dim: rgba(58, 107, 142, 0.08);
+    --warm: #D4734A;
+    --warm-dim: rgba(212, 115, 74, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  .mono { font-family: 'DM Mono', monospace; }
+  .label-mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    padding: 100px 48px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  /* Animated dot grid background */
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: 0;
+    animation: grid-reveal 1.5s ease-out 0.3s forwards;
+    mask-image: radial-gradient(ellipse 70% 60% at 70% 40%, black, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 70% 40%, black, transparent);
+  }
+
+  @keyframes grid-reveal {
+    from { opacity: 0; }
+    to { opacity: 0.6; }
+  }
+
+  .hero-label {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+    margin-bottom: 40px;
+  }
+
+  .hero-title {
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    margin-bottom: 48px;
+  }
+
+  .hero-line-1 {
+    display: block;
+    font-weight: 300;
+    opacity: 0;
+    transform: translateY(60px);
+    animation: word-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+  }
+
+  .hero-line-2 {
+    display: block;
+    font-weight: 800;
+    color: var(--accent);
+    position: relative;
+    opacity: 0;
+    transform: translateY(60px);
+    animation: word-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
+  }
+
+  .hero-line-2::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: line-draw 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards;
+    border-radius: 3px;
+  }
+
+  @keyframes word-up {
+    from { opacity: 0; transform: translateY(60px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes line-draw {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-subtitle {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+    max-width: 480px;
+  }
+
+  .hero-subtitle p {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  /* CTA Button — bold, glowing */
+  .cta-btn {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: white;
+    background: var(--text);
+    padding: 14px 32px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 0 0 var(--accent-glow);
+  }
+
+  .cta-btn:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* ============ SECTION: VALUE PROPS ============ */
+  .section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 48px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  .section-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: var(--text);
+    opacity: 0.07;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .section-title {
+    font-weight: 700;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  /* Value props with colored left borders */
+  .value-prop {
+    padding: 32px 0 32px 24px;
+    border-top: 1px solid var(--border);
+    position: relative;
+    max-width: 640px;
+    transition: all 0.3s ease;
+  }
+
+  .value-prop:first-child { border-top: none; }
+
+  .value-prop::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 24px;
+    bottom: 24px;
+    width: 3px;
+    border-radius: 2px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .value-prop:hover::before {
+    top: 12px;
+    bottom: 12px;
+    width: 4px;
+  }
+
+  .value-prop.green::before { background: var(--green); }
+  .value-prop.accent::before { background: var(--accent); }
+  .value-prop.blue::before { background: var(--blue); }
+
+  .value-prop .label {
+    margin-bottom: 10px;
+  }
+
+  .value-prop h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .value-prop p {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ============ PERSONA CARDS ============ */
+  .personas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .persona-card {
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: default;
+  }
+
+  .persona-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+    border-color: transparent;
+  }
+
+  .persona-card .accent-bar {
+    height: 4px;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scaleX(0.25);
+    transform-origin: left;
+  }
+
+  .persona-card:hover .accent-bar {
+    transform: scaleX(1);
+  }
+
+  .persona-card .tint {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .persona-card:hover .tint {
+    opacity: 1;
+  }
+
+  .persona-card .content {
+    position: relative;
+    padding: 32px;
+  }
+
+  .persona-card .content .label {
+    margin-bottom: 16px;
+  }
+
+  .persona-card .content p {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ============ TERMINAL ============ */
+  .terminal {
+    background: #0F1117;
+    border: 1px solid #2A2D35;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(74, 127, 212, 0.08), 0 0 120px rgba(74, 127, 212, 0.04);
+  }
+
+  .terminal::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(74, 127, 212, 0.2), transparent 50%, rgba(29, 122, 66, 0.15));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .terminal-dots {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .terminal-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2A2D35;
+  }
+
+  .terminal-line {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.05rem;
+    color: #E8ECF0;
+    letter-spacing: 0.02em;
+  }
+
+  .terminal-line .prompt {
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  .terminal-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 18px;
+    background: var(--accent);
+    margin-left: 4px;
+    vertical-align: text-bottom;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ============ DIVIDER ============ */
+  .divider {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  .divider-line {
+    border-top: 1px solid var(--border);
+  }
+
+  /* ============ ANNOTATION ============ */
+  .annotation {
+    border-left: 1px solid rgba(74, 127, 212, 0.3);
+    padding-left: 20px;
+    margin-top: 32px;
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards;
+  }
+
+  .annotation .label { margin-bottom: 8px; }
+  .annotation p {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* Utils */
+  .text-accent { color: var(--accent); }
+  .text-green { color: var(--green); }
+  .text-blue { color: var(--blue); }
+  .text-warm { color: var(--warm); }
+  .text-dim { color: var(--text-dim); }
+  .text-muted { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-grid"></div>
+
+  <div class="hero-label">
+    <span class="label-mono text-muted">Architecture Review for Claude Code</span>
+  </div>
+
+  <h1 class="hero-title">
+    <span class="hero-line-1">Understand any codebase.</span>
+    <span class="hero-line-2">Build to scale.</span>
+  </h1>
+
+  <div class="hero-subtitle">
+    <p>Get an interactive architecture map with plain-English explanations and risk analysis. No code reading required.</p>
+    <a href="#" class="cta-btn">Get Started</a>
+
+    <div class="annotation">
+      <div class="label-mono text-accent label">For PMs, founders, and vibecoders</div>
+      <p>See what was built and what might break &mdash; in 5 minutes.</p>
+    </div>
+  </div>
+</header>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- VALUE PROPS -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <h2 class="section-title">One Command. Five Minutes.</h2>
+  </div>
+
+  <div class="value-prop green">
+    <div class="label-mono text-green label">Visual Map</div>
+    <h3>See every component, connection, and layer in your system.</h3>
+    <p>Components grouped by function, not file path. Frontend, API, database, cache, external services &mdash; all in one interactive diagram.</p>
+  </div>
+
+  <div class="value-prop accent">
+    <div class="label-mono text-accent label">Risk Analysis</div>
+    <h3>16 anti-patterns checked automatically.</h3>
+    <p>Each risk explained in plain English with a real-world analogy and a fix. Severity calibrated to your project's scale.</p>
+  </div>
+
+  <div class="value-prop blue">
+    <div class="label-mono text-blue label">Shareable Artifact</div>
+    <h3>One self-contained HTML file.</h3>
+    <p>Works offline. Drop it in Slack, pull it up in a meeting, send it to your CTO.</p>
+  </div>
+</section>
+
+<!-- PERSONAS -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-number">03</span>
+    <h2 class="section-title">Built for People Who Ship, Not Just Code.</h2>
+  </div>
+
+  <div class="personas-grid">
+    <div class="persona-card">
+      <div class="accent-bar" style="background: var(--accent);"></div>
+      <div class="tint" style="background: var(--accent-dim);"></div>
+      <div class="content">
+        <div class="label-mono text-accent label">PMs</div>
+        <p>Onboard to a new team without scheduling five 1:1s. Walk into sprint planning knowing the system.</p>
+      </div>
+    </div>
+    <div class="persona-card">
+      <div class="accent-bar" style="background: var(--blue);"></div>
+      <div class="tint" style="background: var(--blue-dim);"></div>
+      <div class="content">
+        <div class="label-mono text-blue label">Founders</div>
+        <p>Using AI to build your MVP? See what you've actually got before hiring engineers or pitching investors.</p>
+      </div>
+    </div>
+    <div class="persona-card">
+      <div class="accent-bar" style="background: var(--green);"></div>
+      <div class="tint" style="background: var(--green-dim);"></div>
+      <div class="content">
+        <div class="label-mono text-green label">Vibecoders</div>
+        <p>You shipped it and it works. Now understand what's underneath before it stops working.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-number">04</span>
+    <h2 class="section-title">Get Started</h2>
+  </div>
+
+  <div style="max-width: 560px;">
+    <div class="label-mono text-dim" style="margin-bottom: 8px;">Install</div>
+    <div class="terminal">
+      <div class="terminal-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="terminal-line">
+        <span class="prompt">$ </span>/install lucycrx/architecture-review<span class="terminal-cursor"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

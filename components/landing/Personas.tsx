@@ -40,22 +40,31 @@ function PersonaCard({
 
   return (
     <div
-      className="relative border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="relative border border-border overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(24px)",
-        transitionDelay: `${delay}ms`,
-        borderColor: hovered ? `color-mix(in srgb, ${persona.color} 30%, var(--color-border))` : undefined,
+        transform: visible
+          ? hovered
+            ? "translateY(-4px)"
+            : "translateY(0)"
+          : "translateY(32px)",
+        transitionDelay: visible ? (hovered ? "0ms" : `${delay}ms`) : `${delay}ms`,
+        borderColor: hovered
+          ? `color-mix(in srgb, ${persona.color} 35%, var(--color-border))`
+          : undefined,
+        boxShadow: hovered
+          ? "0 12px 40px rgba(0,0,0,0.06)"
+          : "none",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Color accent bar */}
       <div
-        className="h-[3px] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="h-[4px] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
           backgroundColor: persona.color,
-          transform: hovered ? "scaleX(1)" : "scaleX(0.3)",
+          transform: hovered ? "scaleX(1)" : "scaleX(0.25)",
           transformOrigin: "left",
         }}
       />
@@ -70,7 +79,10 @@ function PersonaCard({
       />
 
       <div className="relative p-6 sm:p-8">
-        <span className="label-mono mb-4 block" style={{ color: persona.color }}>
+        <span
+          className="label-mono mb-4 block"
+          style={{ color: persona.color }}
+        >
           {persona.label}
         </span>
         <p className="text-[0.9375rem] text-text-muted leading-relaxed">
@@ -105,7 +117,7 @@ export function Personas() {
     <section ref={ref} className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
       <div className="flex items-baseline gap-5 mb-10">
         <SectionNumber number="03" />
-        <h2 className="heading-editorial text-xl sm:text-2xl text-text max-w-lg">
+        <h2 className="heading-editorial text-xl sm:text-2xl lg:text-[1.75rem] text-text max-w-lg">
           Built for People Who Ship, Not Just Code.
         </h2>
       </div>

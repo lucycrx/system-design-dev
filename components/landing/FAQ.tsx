@@ -42,7 +42,7 @@ function FAQItem({
       className="border-t border-border transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(12px)",
+        transform: visible ? "translateY(0)" : "translateY(20px)",
         transitionDelay: `${delay}ms`,
       }}
     >
@@ -95,7 +95,7 @@ export function FAQ() {
     <section ref={ref} className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
       <div className="flex items-baseline gap-5 mb-6">
         <SectionNumber number="06" />
-        <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
+        <h2 className="heading-editorial text-2xl sm:text-3xl lg:text-[2.25rem] text-text">
           Questions
         </h2>
       </div>

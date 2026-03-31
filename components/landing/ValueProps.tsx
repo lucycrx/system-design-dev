@@ -27,6 +27,55 @@ const PROPS = [
   },
 ];
 
+function ValuePropItem({
+  prop,
+  visible,
+  delay,
+  isFirst,
+}: {
+  prop: (typeof PROPS)[0];
+  visible: boolean;
+  delay: number;
+  isFirst: boolean;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      className="relative py-8 pl-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(24px)",
+        transitionDelay: `${delay}ms`,
+        borderTop: isFirst ? undefined : "1px solid var(--color-border)",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Colored left accent bar */}
+      <div
+        className="absolute left-0 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] w-[3px] rounded-sm"
+        style={{
+          backgroundColor: prop.color,
+          top: hovered ? "16px" : "28px",
+          bottom: hovered ? "16px" : "28px",
+          width: hovered ? "4px" : "3px",
+        }}
+      />
+
+      <span className="label-mono mb-3 block" style={{ color: prop.color }}>
+        {prop.label}
+      </span>
+      <h3 className="text-lg font-bold text-text tracking-[-0.01em] mb-2">
+        {prop.title}
+      </h3>
+      <p className="text-[0.9375rem] text-text-muted leading-relaxed">
+        {prop.description}
+      </p>
+    </div>
+  );
+}
+
 export function ValueProps() {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLElement>(null);
@@ -51,36 +100,20 @@ export function ValueProps() {
     <section ref={ref} className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
       <div className="flex items-baseline gap-5 mb-10">
         <SectionNumber number="02" />
-        <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
+        <h2 className="heading-editorial text-2xl sm:text-3xl lg:text-[2.25rem] text-text">
           One Command. Five Minutes.
         </h2>
       </div>
 
       <div className="max-w-2xl space-y-0">
         {PROPS.map((prop, i) => (
-          <div
+          <ValuePropItem
             key={prop.label}
-            className="py-8 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(20px)",
-              transitionDelay: `${i * 120}ms`,
-              borderTop: i === 0 ? undefined : "1px solid var(--color-border)",
-            }}
-          >
-            <span
-              className="label-mono mb-3 block"
-              style={{ color: prop.color }}
-            >
-              {prop.label}
-            </span>
-            <h3 className="text-lg font-bold text-text tracking-[-0.01em] mb-2">
-              {prop.title}
-            </h3>
-            <p className="text-[0.9375rem] text-text-muted leading-relaxed">
-              {prop.description}
-            </p>
-          </div>
+            prop={prop}
+            visible={visible}
+            delay={i * 120}
+            isFirst={i === 0}
+          />
         ))}
       </div>
     </section>

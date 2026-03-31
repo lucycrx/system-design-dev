@@ -56,8 +56,8 @@ const FRAMEWORKS = [
 
 function FrameworkItem({ fw }: { fw: (typeof FRAMEWORKS)[0] }) {
   return (
-    <div className="flex items-center gap-2.5 text-text-muted flex-shrink-0 px-6">
-      <span className="opacity-60">{fw.icon}</span>
+    <div className="flex items-center gap-3 text-text-muted flex-shrink-0 px-8">
+      <span className="opacity-50">{fw.icon}</span>
       <span className="font-mono text-[13px] tracking-wide whitespace-nowrap">
         {fw.name}
       </span>

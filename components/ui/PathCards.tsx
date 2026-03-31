@@ -55,16 +55,19 @@ function PathCard({
       style={{
         opacity: visible ? 1 : 0,
         transform: visible
-          ? "translateY(0)"
+          ? hovered
+            ? "translateY(-4px)"
+            : "translateY(0)"
           : "translateY(32px)",
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
         transitionDuration: "700ms",
         borderColor: hovered ? accentColor + "50" : undefined,
+        boxShadow: hovered ? "0 12px 40px rgba(0,0,0,0.06)" : "none",
       }}
     >
       {/* Color accent bar at top */}
       <div
-        className="h-[3px] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="h-[4px] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
           backgroundColor: accentColor,
           transform: hovered ? "scaleX(1)" : "scaleX(0.3)",

@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Colors — cool blue-gray palette (VENUMENT-inspired) */
-  --color-bg: #FFFFFF;
+  /* Colors — bold blue palette with warm accents */
+  --color-bg: #FAFBFC;
   --color-surface: #FFFFFF;
-  --color-surface-hover: #F0F3F7;
-  --color-accent: #84AEE4;
-  --color-accent-dim: #84AEE41A;
-  --color-accent-mid: #84AEE430;
-  --color-text: #1A1A1A;
-  --color-text-muted: #5A6670;
+  --color-surface-hover: #EDF1F7;
+  --color-accent: #4A7FD4;
+  --color-accent-dim: #4A7FD414;
+  --color-accent-mid: #4A7FD430;
+  --color-accent-glow: rgba(74, 127, 212, 0.25);
+  --color-text: #111318;
+  --color-text-muted: #4A5568;
   --color-text-dim: #8A94A0;
   --color-border: #DCE2EA;
-  --color-blue: #4A708E;
-  --color-blue-dim: #4A708E1A;
+  --color-blue: #3A6B8E;
+  --color-blue-dim: #3A6B8E14;
   --color-pink: #8C3B3B;
   --color-pink-dim: #8C3B3B1A;
-  --color-green: #256B3B;
-  --color-green-dim: #256B3B1A;
+  --color-green: #1D7A42;
+  --color-green-dim: #1D7A4214;
   --color-orange: #C49A1D;
   --color-orange-dim: #C49A1D1A;
   --color-purple: #4E5E6E;
@@ -134,7 +135,17 @@ html {
     opacity: 0;
   }
   to {
-    opacity: 1;
+    opacity: 0.5;
+  }
+}
+
+/* Glow pulse for CTA */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--color-accent-glow);
+  }
+  50% {
+    box-shadow: 0 4px 24px var(--color-accent-glow);
   }
 }
 
@@ -163,7 +174,14 @@ html {
 .heading-editorial {
   font-weight: 700;
   line-height: 1.02;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+}
+
+/* Hero heading — dramatic scale */
+.heading-hero {
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
 }
 
 /* Mono label style — used for section labels, metadata, badges */

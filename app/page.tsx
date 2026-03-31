@@ -33,7 +33,7 @@ export default function HomePage() {
       <section className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
         <div className="flex items-baseline gap-5 mb-4">
           <SectionNumber number="05" />
-          <h2 className="heading-editorial text-xl sm:text-2xl text-text">
+          <h2 className="heading-editorial text-xl sm:text-2xl lg:text-[1.75rem] text-text">
             Want to Go Deeper?
           </h2>
         </div>
