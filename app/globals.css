@@ -1,32 +1,32 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Colors — bold blue palette with warm accents */
-  --color-bg: #FAFBFC;
-  --color-surface: #FFFFFF;
-  --color-surface-hover: #EDF1F7;
+  /* Colors — cornflower blue + maroon palette */
+  --color-bg: #F5F7FA;
+  --color-surface: #FAFBFD;
+  --color-surface-hover: #E8EDF3;
   --color-accent: #4A7FD4;
   --color-accent-dim: #4A7FD414;
   --color-accent-mid: #4A7FD430;
   --color-accent-glow: rgba(74, 127, 212, 0.25);
-  --color-text: #111318;
-  --color-text-muted: #4A5568;
-  --color-text-dim: #8A94A0;
-  --color-border: #DCE2EA;
-  --color-blue: #3A6B8E;
-  --color-blue-dim: #3A6B8E14;
-  --color-pink: #8C3B3B;
-  --color-pink-dim: #8C3B3B1A;
-  --color-green: #1D7A42;
-  --color-green-dim: #1D7A4214;
-  --color-orange: #C49A1D;
-  --color-orange-dim: #C49A1D1A;
-  --color-purple: #4E5E6E;
-  --color-purple-dim: #4E5E6E1A;
-  --color-sage: #5A7A5A;
-  --color-sage-dim: #5A7A5A1A;
-  --color-queue: #6B5B8A;
-  --color-queue-dim: #6B5B8A1A;
+  --color-text: #141820;
+  --color-text-muted: #4E5869;
+  --color-text-dim: #8892A2;
+  --color-border: #CDD5DE;
+  --color-blue: #6B2233;
+  --color-blue-dim: #6B223314;
+  --color-pink: #8B3A3A;
+  --color-pink-dim: #8B3A3A1A;
+  --color-green: #2D7A5A;
+  --color-green-dim: #2D7A5A14;
+  --color-orange: #A88A30;
+  --color-orange-dim: #A88A301A;
+  --color-purple: #505A6E;
+  --color-purple-dim: #505A6E1A;
+  --color-sage: #607A72;
+  --color-sage-dim: #607A721A;
+  --color-queue: #5E5E85;
+  --color-queue-dim: #5E5E851A;
 
   /* Fonts */
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;

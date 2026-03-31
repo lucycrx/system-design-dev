@@ -19,7 +19,7 @@ interface CategoryGroup {
 const DEMO_DATA: CategoryGroup[] = [
   {
     label: "API LAYER",
-    color: "hsl(215, 25%, 50%)",
+    color: "hsl(217, 55%, 56%)",
     components: [
       {
         id: "api-routes",
@@ -41,7 +41,7 @@ const DEMO_DATA: CategoryGroup[] = [
   },
   {
     label: "EXTERNAL SERVICES",
-    color: "hsl(8, 55%, 55%)",
+    color: "hsl(348, 52%, 28%)",
     components: [
       {
         id: "stripe",
@@ -57,7 +57,7 @@ const DEMO_DATA: CategoryGroup[] = [
   },
   {
     label: "STORAGE",
-    color: "hsl(145, 35%, 45%)",
+    color: "hsl(155, 45%, 33%)",
     components: [
       {
         id: "postgres",
@@ -114,9 +114,9 @@ function CompCard({
   onSelect: () => void;
 }) {
   const riskColors: Record<string, string> = {
-    critical: "hsl(4, 65%, 42%)",
-    high: "hsl(24, 75%, 45%)",
-    medium: "hsl(42, 75%, 42%)",
+    critical: "hsl(1, 42%, 39%)",
+    high: "hsl(38, 60%, 42%)",
+    medium: "hsl(42, 60%, 42%)",
   };
 
   return (
@@ -124,20 +124,20 @@ function CompCard({
       onClick={onSelect}
       className="w-full text-left border px-2.5 py-2 cursor-pointer transition-all duration-200 outline-none"
       style={{
-        borderColor: selected ? catColor : "hsl(40, 8%, 84%)",
+        borderColor: selected ? catColor : "hsl(213, 14%, 84%)",
         borderLeftWidth: selected ? 3 : 1,
         borderLeftColor: selected ? catColor : undefined,
         borderTopWidth: comp.risk ? 2 : 1,
         borderTopColor: comp.risk ? riskColors[comp.risk] : undefined,
         background: selected
           ? `color-mix(in oklch, ${catColor} 10%, white)`
-          : "hsl(48, 10%, 95%)",
+          : "hsl(216, 14%, 96%)",
       }}
     >
-      <div className="text-[13px] font-semibold text-[hsl(0,0%,15%)] leading-tight">
+      <div className="text-[13px] font-semibold text-[hsl(220,18%,10%)] leading-tight">
         {comp.label}
       </div>
-      <div className="text-[11px] text-[hsl(0,0%,45%)] mt-0.5">
+      <div className="text-[11px] text-[hsl(218,12%,36%)] mt-0.5">
         {comp.sublabel}
       </div>
       {comp.connections && (
@@ -169,7 +169,7 @@ function CategoryGroupCard({
   return (
     <div
       className="border relative bg-white p-2.5"
-      style={{ borderColor: "hsl(40, 8%, 84%)" }}
+      style={{ borderColor: "hsl(213, 14%, 84%)" }}
     >
       <span
         className="absolute -top-2 left-2.5 font-mono text-[10px] font-medium tracking-[0.14em] uppercase px-1.5 bg-white z-[1]"
@@ -202,7 +202,7 @@ function DetailTooltip({
   return (
     <div
       className="border bg-white p-3 animate-[fade-up_0.2s_ease-out]"
-      style={{ borderColor: "hsl(40, 8%, 84%)" }}
+      style={{ borderColor: "hsl(213, 14%, 84%)" }}
     >
       <div
         className="font-mono text-[10px] font-medium tracking-[0.14em] uppercase mb-1"
@@ -221,22 +221,22 @@ function DetailTooltip({
             style={{
               color:
                 comp.risk === "critical"
-                  ? "hsl(4, 65%, 42%)"
+                  ? "hsl(1, 42%, 39%)"
                   : comp.risk === "high"
-                    ? "hsl(24, 75%, 45%)"
-                    : "hsl(42, 75%, 42%)",
+                    ? "hsl(38, 60%, 42%)"
+                    : "hsl(42, 60%, 42%)",
               borderColor:
                 comp.risk === "critical"
-                  ? "hsl(4, 65%, 42%)"
+                  ? "hsl(1, 42%, 39%)"
                   : comp.risk === "high"
-                    ? "hsl(24, 75%, 45%)"
-                    : "hsl(42, 75%, 42%)",
+                    ? "hsl(38, 60%, 42%)"
+                    : "hsl(42, 60%, 42%)",
               backgroundColor:
                 comp.risk === "critical"
-                  ? "hsl(4, 65%, 95%)"
+                  ? "hsl(1, 42%, 95%)"
                   : comp.risk === "high"
-                    ? "hsl(24, 75%, 95%)"
-                    : "hsl(42, 75%, 94%)",
+                    ? "hsl(38, 60%, 95%)"
+                    : "hsl(42, 60%, 94%)",
             }}
           >
             {comp.risk}
@@ -262,8 +262,8 @@ export function MiniDiagram({ className = "" }: { className?: string }) {
       <div
         className="border p-3 sm:p-4"
         style={{
-          background: "hsl(220, 14%, 96%)",
-          borderColor: "hsl(220, 10%, 85%)",
+          background: "hsl(216, 14%, 96%)",
+          borderColor: "hsl(213, 14%, 84%)",
         }}
       >
         {/* Diagram header */}
@@ -272,10 +272,10 @@ export function MiniDiagram({ className = "" }: { className?: string }) {
             Architecture Map
           </span>
           <div className="flex gap-1.5">
-            <span className="font-mono text-[10px] font-medium tracking-[0.14em] uppercase px-1.5 py-0.5 border" style={{ color: "hsl(24, 75%, 45%)", borderColor: "hsl(24, 75%, 45%)", background: "hsl(24, 75%, 95%)" }}>
+            <span className="font-mono text-[10px] font-medium tracking-[0.14em] uppercase px-1.5 py-0.5 border" style={{ color: "hsl(38, 60%, 42%)", borderColor: "hsl(38, 60%, 42%)", background: "hsl(38, 60%, 95%)" }}>
               1 HIGH
             </span>
-            <span className="font-mono text-[10px] font-medium tracking-[0.14em] uppercase px-1.5 py-0.5 border" style={{ color: "hsl(42, 75%, 42%)", borderColor: "hsl(42, 75%, 42%)", background: "hsl(42, 75%, 94%)" }}>
+            <span className="font-mono text-[10px] font-medium tracking-[0.14em] uppercase px-1.5 py-0.5 border" style={{ color: "hsl(42, 60%, 42%)", borderColor: "hsl(42, 60%, 42%)", background: "hsl(42, 60%, 94%)" }}>
               1 MEDIUM
             </span>
           </div>
