@@ -116,7 +116,7 @@ export function Personas() {
   return (
     <section ref={ref} className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
       <div className="flex items-baseline gap-5 mb-10">
-        <SectionNumber number="04" />
+        <SectionNumber number="03" />
         <h2 className="heading-editorial text-xl sm:text-2xl lg:text-[1.75rem] text-text max-w-lg">
           Built for People Who Ship, Not Just Code.
         </h2>
