@@ -5,11 +5,11 @@ import type { CalloutBlock as CalloutBlockType } from "@/types/story";
 
 const CALLOUT_STYLES = {
   insight: {
-    label: "Key Insight",
-    borderColor: "border-l-accent",
-    bgColor: "bg-accent-dim",
-    labelColor: "text-accent",
-    topBorderColor: "border-t-accent/30",
+    label: "",
+    borderColor: "border-l-text-dim/40",
+    bgColor: "",
+    labelColor: "",
+    topBorderColor: "border-t-transparent",
   },
   analogy: {
     label: "Real-World Analogy",
@@ -43,13 +43,15 @@ export function CalloutBlock({ block }: Props) {
 
   return (
     <div
-      className={`${style.bgColor} ${style.borderColor} ${style.topBorderColor} border-l-4 border-t p-7`}
+      className={`${style.bgColor} ${style.borderColor} ${style.topBorderColor} border-l-4 border-t ${style.label ? "p-7" : "py-2 pl-6 pr-4"}`}
     >
-      <div
-        className={`label-mono ${style.labelColor} mb-3`}
-      >
-        {style.label}
-      </div>
+      {style.label && (
+        <div
+          className={`label-mono ${style.labelColor} mb-3`}
+        >
+          {style.label}
+        </div>
+      )}
       <div className="text-[15px] text-text/85 leading-[1.7]">
         <ReactMarkdown
           components={{
