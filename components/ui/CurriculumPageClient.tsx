@@ -13,90 +13,15 @@ const COLOR_MAP: Record<string, { color: string; bg: string }> = {
   purple: { color: "var(--color-purple)", bg: "var(--color-purple-dim)" },
 };
 
-function HeroPattern({ visible }: { visible: boolean }) {
-  // Structured curriculum grid — represents organized learning
+function HeroRule({ visible }: { visible: boolean }) {
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <svg
-        className="absolute top-0 right-0 w-full h-full transition-opacity"
-        style={{
-          opacity: visible ? 1 : 0,
-          transitionDuration: "1200ms",
-          transitionDelay: "300ms",
-        }}
-        preserveAspectRatio="xMaxYMid slice"
-        viewBox="0 0 800 300"
-        fill="none"
-      >
-        {/* Background grid */}
-        {[520, 580, 640, 700, 760].map((x) => (
-          <line key={`v-${x}`} x1={x} y1="0" x2={x} y2="300" stroke="var(--color-border)" strokeWidth="0.5" opacity="0.3" />
-        ))}
-        {[50, 100, 150, 200, 250].map((y) => (
-          <line key={`h-${y}`} x1="480" y1={y} x2="800" y2={y} stroke="var(--color-border)" strokeWidth="0.5" opacity="0.3" />
-        ))}
-
-        {/* Stacked module blocks — representing curriculum structure */}
-        {[
-          { x: 560, y: 50, w: 80, h: 40, color: "var(--color-accent)" },
-          { x: 560, y: 100, w: 120, h: 40, color: "var(--color-blue)" },
-          { x: 560, y: 150, w: 100, h: 40, color: "var(--color-green)" },
-          { x: 560, y: 200, w: 140, h: 40, color: "var(--color-orange)" },
-        ].map((block, i) => (
-          <g key={i}>
-            <rect
-              x={block.x}
-              y={block.y}
-              width={block.w}
-              height={block.h}
-              fill={block.color}
-              opacity="0.06"
-              stroke={block.color}
-              strokeWidth="1"
-              strokeOpacity="0.15"
-            />
-            {/* Inner "lesson" lines */}
-            {[0.3, 0.5, 0.7].map((frac, j) => (
-              <line
-                key={j}
-                x1={block.x + 8}
-                y1={block.y + block.h * frac}
-                x2={block.x + block.w * 0.6}
-                y2={block.y + block.h * frac}
-                stroke={block.color}
-                strokeWidth="1"
-                opacity="0.2"
-              />
-            ))}
-          </g>
-        ))}
-
-        {/* Connecting line through modules */}
-        <path
-          d="M545,70 L545,220"
-          stroke="var(--color-text)"
-          strokeWidth="1"
-          strokeDasharray="2 6"
-          opacity="0.15"
-        />
-        {/* Progress nodes */}
-        {[70, 120, 170, 220].map((y, i) => (
-          <g key={i}>
-            <circle cx={545} cy={y} r={4} fill="none" stroke="var(--color-text)" strokeWidth="1" opacity="0.2" />
-            <circle cx={545} cy={y} r={2} fill="var(--color-text)" opacity="0.3" />
-          </g>
-        ))}
-      </svg>
-
-      {/* Fade gradient */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to right, var(--color-bg) 30%, color-mix(in srgb, var(--color-bg) 70%, transparent) 55%, transparent 75%, transparent 92%, var(--color-bg) 100%)",
-        }}
-      />
-    </div>
+    <div
+      className="border-t border-border transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left"
+      style={{
+        transform: visible ? "scaleX(1)" : "scaleX(0)",
+        transitionDelay: "200ms",
+      }}
+    />
   );
 }
 
@@ -165,7 +90,7 @@ function ModuleCard({
         }}
       />
 
-      <div className="relative p-7 pl-8">
+      <div className="relative p-5 sm:p-6 pl-6 sm:pl-7">
         <div className="flex items-start gap-5">
           {/* Module number */}
           <div
@@ -264,65 +189,42 @@ export function CurriculumPageClient({ modules }: { modules: CurriculumModule[] 
   return (
     <>
       {/* Hero */}
-      <header className="relative w-full overflow-hidden bg-bg">
-        <HeroPattern visible={phase >= 1} />
-
-        <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-12">
-          <div
-            className="mb-6 transition-all duration-500"
-            style={{
-              opacity: phase >= 1 ? 1 : 0,
-              transform: phase >= 1 ? "translateY(0)" : "translateY(8px)",
-            }}
-          >
-            <span className="label-mono text-blue">Structured Path</span>
-          </div>
-
-          <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text leading-[1.02] tracking-tight mb-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{
-              opacity: phase >= 1 ? 1 : 0,
-              transform: phase >= 1 ? "translateY(0)" : "translateY(20px)",
-              transitionDelay: "100ms",
-            }}
-          >
+      <header className="max-w-5xl mx-auto px-6 pt-10 pb-6">
+        <div
+          className="flex items-baseline gap-4 flex-wrap transition-all duration-500"
+          style={{
+            opacity: phase >= 1 ? 1 : 0,
+            transform: phase >= 1 ? "translateY(0)" : "translateY(8px)",
+          }}
+        >
+          <h1 className="text-2xl sm:text-3xl font-bold text-text tracking-tight">
             Curriculum
           </h1>
+          <span className="label-mono text-text-dim">
+            {modules.length} {modules.length === 1 ? "module" : "modules"}
+            <span className="mx-2 text-border">/</span>
+            {totalLessons} lessons
+          </span>
+        </div>
 
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-16 transition-all duration-700"
-            style={{
-              opacity: phase >= 2 ? 1 : 0,
-              transform: phase >= 2 ? "translateY(0)" : "translateY(12px)",
-              transitionDelay: "100ms",
-            }}
-          >
-            <p className="font-mono text-[13px] text-text-muted leading-relaxed max-w-md">
-              Lessons organized by topic, from fundamentals to advanced patterns.
-              Start at the beginning or jump to what you need.
-            </p>
-            <div className="flex items-center gap-6 label-mono text-text-dim">
-              <span>{modules.length} {modules.length === 1 ? "module" : "modules"}</span>
-              <span className="w-px h-3 bg-border" />
-              <span>{totalLessons} lessons</span>
-            </div>
-          </div>
+        <p
+          className="mt-2 text-sm text-text-muted leading-relaxed max-w-lg transition-all duration-500"
+          style={{
+            opacity: phase >= 2 ? 1 : 0,
+            transitionDelay: "100ms",
+          }}
+        >
+          Lessons organized by topic, from fundamentals to advanced patterns.
+          Start at the beginning or jump to what you need.
+        </p>
 
-          {/* Animated divider */}
-          <div className="mt-10 overflow-hidden">
-            <div
-              className="border-t border-border transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left"
-              style={{
-                transform: phase >= 2 ? "scaleX(1)" : "scaleX(0)",
-                transitionDelay: "300ms",
-              }}
-            />
-          </div>
+        <div className="mt-5 overflow-hidden">
+          <HeroRule visible={phase >= 2} />
         </div>
       </header>
 
       {/* Module cards */}
-      <main className="max-w-5xl mx-auto px-6 pb-24 pt-4">
+      <main className="max-w-5xl mx-auto px-6 pb-16 pt-2">
         <div className="space-y-4">
           {modules.map((mod, i) => (
             <ModuleCard key={mod.id} mod={mod} index={i} />
