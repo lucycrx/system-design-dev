@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import type { Block, Diagram, DiagramBlock as DiagramBlockType, GlossaryTerm } from "@/types/story";
+import type { Block, Diagram, DiagramBlock as DiagramBlockType, GlossaryTerm, Stage } from "@/types/story";
 import { InteractiveDiagramLoader } from "@/components/diagrams/InteractiveDiagramLoader";
 import { TextBlock } from "@/components/blocks/TextBlock";
 import { CalloutBlock } from "@/components/blocks/CalloutBlock";
 import { CheckpointBlock } from "@/components/blocks/CheckpointBlock";
 import { ChallengeBlock } from "@/components/blocks/ChallengeBlock";
 import { RevealBlock } from "@/components/blocks/RevealBlock";
+import { FlipCounter } from "./FlipCounter";
+import { GrowthChart } from "./GrowthChart";
+import { ScrollyDiagram } from "./ScrollyDiagram";
 
 interface Props {
   blocks: Block[];
@@ -17,6 +20,156 @@ interface Props {
   layout?: "inline" | "scrollytelling";
 }
 
+/** Cross-stage scrollytelling: all stages share one sticky panel */
+interface CrossStageProps {
+  stages: Stage[];
+  allDiagrams: Record<string, Diagram>;
+  glossaryMap: Record<string, GlossaryTerm>;
+  stickyTop?: number;
+}
+
+export function CrossStageScrollytelling({
+  stages,
+  allDiagrams,
+  glossaryMap,
+  stickyTop = 96,
+}: CrossStageProps) {
+  const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const [activeDiagramId, setActiveDiagramId] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const stageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  // Set initial diagram
+  useEffect(() => {
+    const firstDiag = stages[0]?.blocks.find(
+      (b): b is DiagramBlockType => b.type === "diagram"
+    );
+    if (firstDiag) setActiveDiagramId(firstDiag.diagramId);
+  }, [stages]);
+
+  // IntersectionObserver to track which stage section is in view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.getAttribute("data-scrolly-stage"));
+            if (!isNaN(idx)) {
+              setActiveStageIndex(idx);
+              // Find the diagram for this stage
+              const diagBlock = stages[idx]?.blocks.find(
+                (b): b is DiagramBlockType => b.type === "diagram"
+              );
+              if (diagBlock) setActiveDiagramId(diagBlock.diagramId);
+            }
+          }
+        }
+      },
+      {
+        rootMargin: "-35% 0px -35% 0px",
+        threshold: 0.1,
+      }
+    );
+
+    stageRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [stages]);
+
+  const registerRef = useCallback((idx: number, el: HTMLDivElement | null) => {
+    if (el) stageRefs.current.set(idx, el);
+    else stageRefs.current.delete(idx);
+  }, []);
+
+  // Parse stage number and user scale for flip counter
+  const activeStage = stages[activeStageIndex];
+  const stageNum = String(activeStageIndex + 1);
+  const userScale = activeStage?.userScale || "";
+
+  return (
+    <div className="flex flex-col lg:flex-row lg:gap-12">
+      {/* Left panel — scrollable narrative (all stages) */}
+      <div className="lg:w-[60%] space-y-0">
+        {stages.map((stage, stageIdx) => (
+          <div
+            key={stage.id}
+            ref={(el) => registerRef(stageIdx, el)}
+            data-scrolly-stage={stageIdx}
+            className="py-8 first:pt-0"
+          >
+            {stageIdx > 0 && <div className="border-t border-border mb-8" />}
+            <div className="space-y-6">
+              {stage.blocks.map((block, blockIdx) => {
+                if (block.type === "diagram") {
+                  // Diagram trigger marker (desktop: hidden, mobile: show inline)
+                  const diagramBlock = block as DiagramBlockType;
+                  const diagram = allDiagrams[diagramBlock.diagramId];
+                  return (
+                    <div key={blockIdx}>
+                      {/* Mobile inline fallback */}
+                      <div className="lg:hidden bg-surface border border-border p-6">
+                        {diagram ? (
+                          <InteractiveDiagramLoader
+                            diagram={diagram}
+                            highlightNodes={diagramBlock.highlightNodes}
+                            animateFlow={diagramBlock.animateFlow}
+                          />
+                        ) : (
+                          <div className="h-48 flex items-center justify-center">
+                            <p className="text-sm text-text-dim">Diagram: {diagramBlock.diagramId}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={blockIdx}>
+                    {renderBlock(block, glossaryMap, selectedNodeId)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Right panel — sticky diagram (desktop only) */}
+      <div className="hidden lg:block lg:w-[40%]">
+        <div className="sticky flex flex-col" style={{ top: stickyTop, height: `calc(100vh - ${stickyTop + 48}px)` }}>
+          {/* Stage header with flip counter */}
+          <div className="flex items-center gap-2 pb-3">
+            <span className="label-mono text-text-dim">Stage</span>
+            <FlipCounter value={stageNum} />
+            <span className="label-mono text-text-dim" style={{ marginLeft: -2 }}>:</span>
+            <FlipCounter value={userScale.replace(/\s*users?\s*/i, "").trim()} />
+            <span className="label-mono text-text-dim">Users</span>
+          </div>
+
+          {/* Growth chart */}
+          <GrowthChart stages={stages} activeStageIndex={activeStageIndex} />
+
+          {/* Divider */}
+          <div className="h-px bg-border" />
+
+          {/* Architecture header */}
+          <div className="flex items-center gap-2 pt-3 pb-1">
+            <span className="label-mono text-text-dim">System Architecture</span>
+          </div>
+
+          {/* Diagram */}
+          <ScrollyDiagram
+            allDiagrams={allDiagrams}
+            activeDiagramId={activeDiagramId}
+            stageIndex={activeStageIndex}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Original per-stage layout (unchanged) */
 export function ScrollytellingLayout({ blocks, diagrams, glossaryMap, stickyTop = 96, layout = "scrollytelling" }: Props) {
   const [activeDiagramId, setActiveDiagramId] = useState<string | null>(null);
   const [activeHighlightNodes, setActiveHighlightNodes] = useState<string[]>([]);

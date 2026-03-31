@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import type { Story, Diagram, GlossaryTerm } from "@/types/story";
 import { StoryHero } from "./StoryHero";
 import { StageTabs } from "./StageTabs";
-import { ScrollytellingLayout } from "@/components/scrollytelling/ScrollytellingLayout";
+import { ScrollytellingLayout, CrossStageScrollytelling } from "@/components/scrollytelling/ScrollytellingLayout";
 import { BlockRenderer } from "@/components/blocks/BlockRenderer";
 
 interface Props {
@@ -122,76 +122,89 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
 
       {/* All stages rendered vertically */}
       <div className="max-w-6xl mx-auto px-6">
-        {story.stages.map((stage, i) => {
-          const hasDiagrams = stage.blocks.some((b) => b.type === "diagram");
-          return (
-            <section
-              key={stage.id}
-              ref={(el) => registerStageRef(i, el)}
-              data-stage-index={i}
-              className="py-12 first:pt-8"
-            >
-              {/* Stage divider (not on first stage) */}
-              {i > 0 && (
-                <div className="border-t border-border mb-12" />
-              )}
-
-              {/* Stage header + narrative callouts */}
-              <div className="max-w-3xl mb-10">
-                <div className="mb-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="label-mono px-2.5 py-1 bg-accent-dim text-accent border border-accent/20">
-                      {stage.userScale}
-                    </span>
-                  </div>
-                  <h2 className="heading-editorial text-3xl text-text mb-3">{stage.title}</h2>
-                  <p className="text-text-muted leading-relaxed">
-                    {stage.narrative.setup}
-                  </p>
-                </div>
-
-                {/* Problem callout */}
-                {stage.narrative.problem && (
-                  <div className="bg-pink-dim border-l-[3px] border-l-pink p-5 mb-5">
-                    <div className="label-mono text-pink mb-2">
-                      The Problem
-                    </div>
-                    <p className="text-[14px] text-text/80 leading-relaxed">
-                      {stage.narrative.problem}
-                    </p>
-                  </div>
+        {story.layout === "scrollytelling" ? (
+          /* Cross-stage scrollytelling: single sticky panel morphs between all stages */
+          <section className="py-8">
+            <CrossStageScrollytelling
+              stages={story.stages}
+              allDiagrams={allDiagrams}
+              glossaryMap={glossaryMap}
+              stickyTop={STICKY_HEADER_HEIGHT}
+            />
+          </section>
+        ) : (
+          /* Default per-stage rendering */
+          story.stages.map((stage, i) => {
+            const hasDiagrams = stage.blocks.some((b) => b.type === "diagram");
+            return (
+              <section
+                key={stage.id}
+                ref={(el) => registerStageRef(i, el)}
+                data-stage-index={i}
+                className="py-12 first:pt-8"
+              >
+                {/* Stage divider (not on first stage) */}
+                {i > 0 && (
+                  <div className="border-t border-border mb-12" />
                 )}
 
-                {/* Resolution teaser */}
-                {stage.narrative.resolution && (
-                  <div className="bg-green-dim border-l-[3px] border-l-green p-5">
-                    <div className="label-mono text-green mb-2">
-                      The Solution
+                {/* Stage header + narrative callouts */}
+                <div className="max-w-3xl mb-10">
+                  <div className="mb-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="label-mono px-2.5 py-1 bg-accent-dim text-accent border border-accent/20">
+                        {stage.userScale}
+                      </span>
                     </div>
-                    <p className="text-[14px] text-text/80 leading-relaxed">
-                      {stage.narrative.resolution}
+                    <h2 className="heading-editorial text-3xl text-text mb-3">{stage.title}</h2>
+                    <p className="text-text-muted leading-relaxed">
+                      {stage.narrative.setup}
                     </p>
                   </div>
-                )}
-              </div>
 
-              {/* Content blocks */}
-              {hasDiagrams ? (
-                <ScrollytellingLayout
-                  blocks={stage.blocks}
-                  diagrams={allStageDiagrams[i]}
-                  glossaryMap={glossaryMap}
-                  stickyTop={STICKY_HEADER_HEIGHT}
-                  layout={story.layout || "inline"}
-                />
-              ) : (
-                <div className="max-w-3xl">
-                  <BlockRenderer blocks={stage.blocks} glossaryMap={glossaryMap} />
+                  {/* Problem callout */}
+                  {stage.narrative.problem && (
+                    <div className="bg-pink-dim border-l-[3px] border-l-pink p-5 mb-5">
+                      <div className="label-mono text-pink mb-2">
+                        The Problem
+                      </div>
+                      <p className="text-[14px] text-text/80 leading-relaxed">
+                        {stage.narrative.problem}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Resolution teaser */}
+                  {stage.narrative.resolution && (
+                    <div className="bg-green-dim border-l-[3px] border-l-green p-5">
+                      <div className="label-mono text-green mb-2">
+                        The Solution
+                      </div>
+                      <p className="text-[14px] text-text/80 leading-relaxed">
+                        {stage.narrative.resolution}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </section>
-          );
-        })}
+
+                {/* Content blocks */}
+                {hasDiagrams ? (
+                  <ScrollytellingLayout
+                    blocks={stage.blocks}
+                    diagrams={allStageDiagrams[i]}
+                    glossaryMap={glossaryMap}
+                    stickyTop={STICKY_HEADER_HEIGHT}
+                    layout={story.layout || "inline"}
+                  />
+                ) : (
+                  <div className="max-w-3xl">
+                    <BlockRenderer blocks={stage.blocks} glossaryMap={glossaryMap} />
+                  </div>
+                )}
+              </section>
+            );
+          })
+        )}
       </div>
     </div>
   );
