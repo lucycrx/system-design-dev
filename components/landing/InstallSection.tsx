@@ -26,7 +26,7 @@ const STEPS = [
 
 const INSTALL_LINES = [
   "/plugin marketplace add lucycrx/architecture-review",
-  "/plugin install architecture-review",
+  "/plugin install architecture-review@lucycrx-architecture-review",
 ];
 
 const USAGE_LINE = "/architecture-review";
