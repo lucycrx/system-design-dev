@@ -13,7 +13,7 @@ const FEATURES = [
       "Scans your entire codebase in under 5 minutes. No config, no setup, no code reading required.",
   },
   {
-    label: "16 ANTI-PATTERNS",
+    label: "15 ANTI-PATTERNS",
     color: "var(--color-green)",
     title: "Risks flagged before they hit production.",
     description:
