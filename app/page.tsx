@@ -58,16 +58,33 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="max-w-5xl mx-auto px-6 py-8 border-t border-border flex items-center justify-between">
-        <span className="label-mono text-text-dim">system-design-school</span>
-        <a
-          href="https://github.com"
-          className="label-mono text-text-dim hover:text-text transition-colors duration-200"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          GitHub
-        </a>
+      <footer className="max-w-5xl mx-auto px-6 pt-8 pb-12 border-t border-border">
+        <div className="flex items-center justify-between">
+          <span className="label-mono text-text-dim">system-design-school</span>
+          <div className="flex items-center gap-6">
+            <a
+              href="https://github.com/lucycrx/architecture-review"
+              className="relative label-mono text-text-dim hover:text-text transition-colors duration-200 group"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub
+              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-current transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-full" />
+            </a>
+            <a
+              href="https://github.com/lucycrx/architecture-review/issues"
+              className="relative label-mono text-text-dim hover:text-text transition-colors duration-200 group"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Feedback
+              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-current transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-full" />
+            </a>
+          </div>
+        </div>
+        <p className="font-mono text-[11px] text-text-dim/50 mt-4">
+          &copy; 2026 System Design School. Built with Claude Code.
+        </p>
       </footer>
     </div>
   );

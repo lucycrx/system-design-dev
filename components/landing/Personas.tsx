@@ -40,7 +40,7 @@ function PersonaCard({
 
   return (
     <div
-      className="relative border border-border overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="relative border border-border overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible
@@ -61,7 +61,7 @@ function PersonaCard({
     >
       {/* Color accent bar */}
       <div
-        className="h-[4px] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="h-[4px] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{
           backgroundColor: persona.color,
           transform: hovered ? "scaleX(1)" : "scaleX(0.25)",

@@ -36,35 +36,78 @@ function FAQItem({
   delay: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   return (
     <div
-      className="border-t border-border transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="relative border-t border-border transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
         transitionDelay: `${delay}ms`,
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
+      {/* Hover/open background expansion */}
+      <div
+        className="absolute inset-0 bg-surface rounded-sm transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] origin-left"
+        style={{
+          transform: hovered || open ? "scaleX(1)" : "scaleX(0)",
+          zIndex: -1,
+        }}
+      />
+
+      {/* Left accent bar */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-sm bg-accent transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{
+          opacity: open ? 1 : 0,
+          transform: open ? "scaleY(1)" : "scaleY(0.3)",
+          transformOrigin: "top",
+        }}
+      />
+
       <button
         onClick={() => setOpen(!open)}
-        className="w-full text-left py-5 flex items-start justify-between gap-4 cursor-pointer group"
+        className="w-full text-left py-5 flex items-start justify-between gap-4 cursor-pointer group transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ paddingLeft: hovered || open ? "12px" : "0px" }}
       >
-        <span className="text-[0.9375rem] font-semibold text-text group-hover:text-accent transition-colors duration-200">
+        <span
+          className="text-[0.9375rem] font-semibold transition-colors duration-200"
+          style={{ color: open ? "var(--color-accent)" : hovered ? "var(--color-accent)" : "var(--color-text)" }}
+        >
           {item.q}
         </span>
-        <span className="font-mono text-text-dim text-sm flex-shrink-0 mt-0.5 transition-transform duration-300" style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}>
+        <span
+          className="font-mono text-text-dim text-sm flex-shrink-0 mt-0.5 transition-all duration-300"
+          style={{
+            transform: open ? "rotate(45deg)" : "rotate(0deg)",
+            color: open ? "var(--color-accent)" : undefined,
+          }}
+        >
           +
         </span>
       </button>
       <div
-        className="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="overflow-hidden">
-          <p className="text-[0.875rem] text-text-muted leading-relaxed pb-5 max-w-xl">
-            {item.a}
-          </p>
+          <div
+            className="transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{
+              opacity: open ? 1 : 0,
+              transform: open ? "translateY(0)" : "translateY(-8px)",
+            }}
+          >
+            <p
+              className="text-[0.875rem] text-text-muted leading-relaxed pb-5 max-w-xl"
+              style={{ paddingLeft: "12px" }}
+            >
+              {item.a}
+            </p>
+          </div>
         </div>
       </div>
     </div>

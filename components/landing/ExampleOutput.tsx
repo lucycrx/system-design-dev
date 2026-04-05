@@ -6,6 +6,8 @@ import { SectionNumber } from "./SectionNumber";
 
 export function ExampleOutput() {
   const [visible, setVisible] = useState(false);
+  const [inputHovered, setInputHovered] = useState(false);
+  const [outputHovered, setOutputHovered] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export function ExampleOutput() {
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 sm:gap-6 items-start">
         {/* Before — GitHub repo */}
         <div
-          className="transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(32px)",
@@ -51,8 +53,25 @@ export function ExampleOutput() {
             href="https://github.com/facebookresearch/Hyperagents"
             target="_blank"
             rel="noopener noreferrer"
-            className="block bg-[#0F1117] border border-[#2A2D35] p-5 hover:border-accent/40 transition-colors group"
+            className="block relative bg-[#0F1117] border border-[#2A2D35] p-5 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group overflow-hidden"
+            style={{
+              borderColor: inputHovered ? "var(--color-accent)" : "#2A2D35",
+              transform: inputHovered ? "translateY(-2px)" : "translateY(0)",
+              boxShadow: inputHovered
+                ? "0 12px 40px rgba(0,0,0,0.15)"
+                : "none",
+            }}
+            onMouseEnter={() => setInputHovered(true)}
+            onMouseLeave={() => setInputHovered(false)}
           >
+            {/* Top accent bar */}
+            <div
+              className="absolute top-0 left-0 right-0 h-[2px] bg-text-dim transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] origin-left"
+              style={{
+                transform: inputHovered ? "scaleX(1)" : "scaleX(0)",
+              }}
+            />
+
             <div className="flex items-center gap-2 mb-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +86,16 @@ export function ExampleOutput() {
               <span className="font-mono text-[12px] text-[#6B7280] group-hover:text-accent/70 transition-colors">
                 facebookresearch/Hyperagents
               </span>
-              <span className="font-mono text-[11px] text-[#6B7280] ml-auto">&nearr;</span>
+              <span
+                className="font-mono text-[11px] text-[#6B7280] ml-auto transition-all duration-300"
+                style={{
+                  transform: inputHovered
+                    ? "translate(3px, -3px)"
+                    : "translate(0, 0)",
+                }}
+              >
+                &nearr;
+              </span>
             </div>
             <pre className="font-mono text-[11px] sm:text-[12px] text-[#6B7280] leading-relaxed whitespace-pre overflow-x-auto">{`hyperagents/
   agents/
@@ -84,7 +112,7 @@ export function ExampleOutput() {
 
         {/* Arrow */}
         <div
-          className="hidden md:flex items-center justify-center self-center transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="hidden md:flex items-center justify-center self-center transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateX(0)" : "translateX(-8px)",
@@ -98,7 +126,7 @@ export function ExampleOutput() {
 
         {/* After — interactive preview */}
         <div
-          className="transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(32px)",
@@ -108,8 +136,27 @@ export function ExampleOutput() {
           <p className="label-mono text-accent mb-3">Output</p>
           <Link
             href="/demo"
-            className="block relative border border-border hover:border-accent/40 transition-colors overflow-hidden group"
+            className="block relative border overflow-hidden group transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{
+              borderColor: outputHovered
+                ? `color-mix(in srgb, var(--color-accent) 50%, var(--color-border))`
+                : "var(--color-border)",
+              transform: outputHovered ? "translateY(-2px)" : "translateY(0)",
+              boxShadow: outputHovered
+                ? "0 12px 40px rgba(74, 127, 212, 0.1)"
+                : "none",
+            }}
+            onMouseEnter={() => setOutputHovered(true)}
+            onMouseLeave={() => setOutputHovered(false)}
           >
+            {/* Top accent bar */}
+            <div
+              className="absolute top-0 left-0 right-0 h-[2px] z-10 bg-accent transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] origin-left"
+              style={{
+                transform: outputHovered ? "scaleX(1)" : "scaleX(0)",
+              }}
+            />
+
             {/* Live iframe preview — non-interactive */}
             <div className="h-[280px] sm:h-[320px] overflow-hidden pointer-events-none">
               <iframe
