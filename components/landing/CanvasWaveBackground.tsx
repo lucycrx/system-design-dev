@@ -37,13 +37,16 @@ export function CanvasWaveBackground() {
 
     function onMouseMove(e: MouseEvent) {
       const rect = canvas!.getBoundingClientRect();
-      targetX = e.clientX - rect.left;
-      targetY = e.clientY - rect.top;
-    }
-
-    function onMouseLeave() {
-      targetX = W / 2;
-      targetY = H / 2;
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      // Only track if cursor is within canvas bounds
+      if (x >= 0 && x <= W && y >= 0 && y <= H) {
+        targetX = x;
+        targetY = y;
+      } else {
+        targetX = W / 2;
+        targetY = H / 2;
+      }
     }
 
     function drawLines() {
@@ -120,22 +123,16 @@ export function CanvasWaveBackground() {
 
     resize();
 
-    const parent = canvas.parentElement;
-    if (parent) {
-      parent.addEventListener("mousemove", onMouseMove);
-      parent.addEventListener("mouseleave", onMouseLeave);
-    }
+    // Listen on document so mouse tracking works even when content overlays the canvas
+    document.addEventListener("mousemove", onMouseMove);
     window.addEventListener("resize", resize);
 
     drawLines();
 
     return () => {
       cancelAnimationFrame(animFrame);
+      document.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", resize);
-      if (parent) {
-        parent.removeEventListener("mousemove", onMouseMove);
-        parent.removeEventListener("mouseleave", onMouseLeave);
-      }
     };
   }, []);
 
