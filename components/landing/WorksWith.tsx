@@ -23,10 +23,10 @@ const ANTI_PATTERNS = [
 function AntiPatternItem({ name }: { name: string }) {
   return (
     <div className="flex items-center gap-6 flex-shrink-0 px-6">
-      <span className="font-mono text-[12px] tracking-[0.12em] uppercase whitespace-nowrap text-white/50">
+      <span className="font-mono text-[12px] tracking-[0.12em] uppercase whitespace-nowrap text-text-muted">
         {name}
       </span>
-      <span className="text-white/20 text-[10px]">&#10022;</span>
+      <span className="text-border text-[10px]">&#10022;</span>
     </div>
   );
 }
@@ -54,19 +54,19 @@ export function WorksWith() {
   return (
     <div
       ref={ref}
-      className="bg-text transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(12px)",
       }}
     >
-      <p className="label-mono text-white/30 text-center pt-4 pb-1">
+      <p className="label-mono text-text-dim text-center pt-4 pb-1">
         15 anti-patterns checked
       </p>
       <div className="relative overflow-hidden py-3">
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-text to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-text to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-bg to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-bg to-transparent z-10 pointer-events-none" />
 
         {/* Scrolling track — duplicated for seamless loop */}
         <div
