@@ -25,11 +25,10 @@ export function FooterCTA() {
   return (
     <div
       ref={ref}
-      className="bg-text px-6 py-20 sm:py-28 flex flex-col sm:flex-row items-center justify-between gap-10 max-w-5xl mx-auto"
-      style={{ borderRadius: "2px" }}
+      className="px-6 py-20 sm:py-28 flex flex-col sm:flex-row items-center justify-between gap-10 max-w-5xl mx-auto"
     >
       <h2
-        className="heading-hero text-3xl sm:text-4xl lg:text-5xl text-bg max-w-lg transition-all duration-700"
+        className="heading-hero text-3xl sm:text-4xl lg:text-5xl text-white max-w-lg transition-all duration-700"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(24px)",
@@ -37,7 +36,7 @@ export function FooterCTA() {
         }}
       >
         Ready to{" "}
-        <span className="text-stroke-accent" style={{ WebkitTextStroke: "1.5px rgba(255,255,255,0.4)" }}>
+        <span style={{ WebkitTextStroke: "1.5px rgba(255,255,255,0.5)", color: "transparent" }}>
           understand
         </span>{" "}
         your codebase?
