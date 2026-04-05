@@ -12,7 +12,6 @@ export function CanvasWaveBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Check reduced motion preference
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -25,6 +24,7 @@ export function CanvasWaveBackground() {
     let currentY = 0;
     let t = 0;
     let animFrame: number;
+    let isVisible = true;
 
     function resize() {
       W = canvas!.width = canvas!.offsetWidth;
@@ -36,10 +36,10 @@ export function CanvasWaveBackground() {
     }
 
     function onMouseMove(e: MouseEvent) {
+      if (!isVisible) return;
       const rect = canvas!.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      // Only track if cursor is within canvas bounds
       if (x >= 0 && x <= W && y >= 0 && y <= H) {
         targetX = x;
         targetY = y;
@@ -50,6 +50,8 @@ export function CanvasWaveBackground() {
     }
 
     function drawLines() {
+      if (!isVisible) return;
+
       ctx!.clearRect(0, 0, W, H);
       ctx!.fillStyle = "#ffffff";
       ctx!.fillRect(0, 0, W, H);
@@ -64,7 +66,6 @@ export function CanvasWaveBackground() {
         const baseY = spacing * (i + 1);
         const normalizedI = i / (numLines - 1);
 
-        // Cornflower blue gradient: lighter to deeper
         const r = Math.round(74 + normalizedI * (40 - 74));
         const g = Math.round(127 + normalizedI * (90 - 127));
         const b = Math.round(212 + normalizedI * (180 - 212));
@@ -81,15 +82,14 @@ export function CanvasWaveBackground() {
           const x = (s / steps) * W;
 
           const wave1 =
-            Math.sin(((x / W) * Math.PI * 2.5 + t * 0.4 + i * 0.18)) * 18;
+            Math.sin((x / W) * Math.PI * 2.5 + t * 0.4 + i * 0.18) * 18;
           const wave2 =
-            Math.sin(((x / W) * Math.PI * 4.5 - t * 0.25 + i * 0.09)) * 8;
+            Math.sin((x / W) * Math.PI * 4.5 - t * 0.25 + i * 0.09) * 8;
           const wave3 =
-            Math.sin(((x / W) * Math.PI * 1.2 + t * 0.15 + i * 0.3)) * 14;
+            Math.sin((x / W) * Math.PI * 1.2 + t * 0.15 + i * 0.3) * 14;
 
           let y = baseY + wave1 + wave2 + wave3;
 
-          // Magnetic cursor distortion
           const dx = x - currentX;
           const dy = y - currentY;
           const dist = Math.sqrt(dx * dx + dy * dy);
@@ -121,18 +121,28 @@ export function CanvasWaveBackground() {
       animFrame = requestAnimationFrame(drawLines);
     }
 
-    resize();
+    // Pause animation when canvas is off-screen
+    const visObserver = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          animFrame = requestAnimationFrame(drawLines);
+        }
+      },
+      { threshold: 0 }
+    );
 
-    // Listen on document so mouse tracking works even when content overlays the canvas
+    resize();
     document.addEventListener("mousemove", onMouseMove);
     window.addEventListener("resize", resize);
-
+    visObserver.observe(canvas);
     drawLines();
 
     return () => {
       cancelAnimationFrame(animFrame);
       document.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", resize);
+      visObserver.disconnect();
     };
   }, []);
 
@@ -140,6 +150,8 @@ export function CanvasWaveBackground() {
     <>
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label="Decorative animated wave background"
         className="absolute inset-0 w-full h-full"
         style={{ zIndex: 0 }}
       />

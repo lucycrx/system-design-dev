@@ -43,7 +43,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="font-mono text-[11px] text-[#555] hover:text-[#999] transition-colors"
+      className="font-mono text-[11px] text-terminal-muted hover:text-terminal-text transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
       aria-label="Copy to clipboard"
     >
       {copied ? "copied" : "copy"}
@@ -78,7 +78,7 @@ function TerminalBlock({
         <CopyButton text={lines.join("\n")} />
       </div>
       <div
-        className="relative bg-[#0F1117] border border-[#2A2D35] p-5 sm:p-6 overflow-hidden"
+        className="relative bg-terminal-bg border border-terminal-border p-5 sm:p-6 overflow-hidden"
         style={{
           boxShadow:
             "0 0 60px rgba(74, 127, 212, 0.06), 0 0 120px rgba(74, 127, 212, 0.03)",
@@ -95,11 +95,11 @@ function TerminalBlock({
 
         <div className="relative">
           <div className="flex items-center gap-2 mb-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#2A2D35]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#2A2D35]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#2A2D35]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-terminal-border" />
+            <span className="w-2.5 h-2.5 rounded-full bg-terminal-border" />
+            <span className="w-2.5 h-2.5 rounded-full bg-terminal-border" />
           </div>
-          <div className="font-mono text-base sm:text-lg text-[#E8ECF0] tracking-wide space-y-1">
+          <div className="font-mono text-base sm:text-lg text-terminal-text tracking-wide space-y-1">
             {lines.map((line, i) => (
               <div key={i}>
                 <span className="text-accent/50">$ </span>
@@ -137,6 +137,7 @@ export function InstallSection() {
     <section
       ref={ref}
       id="get-started"
+      aria-label="Installation"
       className="max-w-5xl mx-auto px-6 py-16 sm:py-24 scroll-mt-8"
     >
       <div className="flex items-baseline gap-5 mb-10">

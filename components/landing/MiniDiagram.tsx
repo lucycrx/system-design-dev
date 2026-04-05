@@ -122,7 +122,9 @@ function CompCard({
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left border px-2.5 py-2 cursor-pointer transition-all duration-200 outline-none"
+      aria-label={`Select ${comp.label} component`}
+      aria-pressed={selected}
+      className="w-full text-left border px-2.5 py-2 cursor-pointer transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
       style={{
         borderColor: selected ? catColor : "hsl(213, 14%, 84%)",
         borderLeftWidth: selected ? 3 : 1,

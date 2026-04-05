@@ -6,12 +6,19 @@
   --color-surface: #F7F9FC;
   --color-surface-hover: #E3E9F1;
   --color-accent: #4A7FD4;
+  --color-accent-dark: #335FA8;
   --color-accent-dim: #4A7FD414;
   --color-accent-mid: #4A7FD430;
   --color-accent-glow: rgba(74, 127, 212, 0.25);
+
+  /* Terminal / code block colors */
+  --color-terminal-bg: #0F1117;
+  --color-terminal-border: #2A2D35;
+  --color-terminal-text: #E8ECF0;
+  --color-terminal-muted: #555555;
   --color-text: #141820;
   --color-text-muted: #4E5869;
-  --color-text-dim: #8892A2;
+  --color-text-dim: #6B7580;
   --color-border: #CDD5DE;
   --color-blue: #6B2233;
   --color-blue-dim: #6B223314;
@@ -183,10 +190,19 @@ html {
   }
 }
 
-/* Page load fade-in */
-@keyframes bodyReveal {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* Page load fade-in — respects reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bodyReveal {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
+/* Reduced motion: disable marquee and other continuous animations */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none !important;
+  }
 }
 
 /* Stroke text utility */

@@ -70,8 +70,9 @@ function FAQItem({
 
       <button
         onClick={() => setOpen(!open)}
-        className="w-full text-left py-5 flex items-start justify-between gap-4 cursor-pointer group transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-        style={{ paddingLeft: hovered || open ? "12px" : "0px" }}
+        aria-expanded={open}
+        className="w-full text-left py-5 flex items-start justify-between gap-4 cursor-pointer group transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ transform: hovered || open ? "translateX(12px)" : "translateX(0)" }}
       >
         <span
           className="text-[0.9375rem] font-semibold transition-colors duration-200"
@@ -103,7 +104,7 @@ function FAQItem({
           >
             <p
               className="text-[0.875rem] text-text-muted leading-relaxed pb-5 max-w-xl"
-              style={{ paddingLeft: "12px" }}
+              style={{ transform: "translateX(12px)" }}
             >
               {item.a}
             </p>
@@ -135,7 +136,7 @@ export function FAQ() {
   }, []);
 
   return (
-    <section ref={ref} className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
+    <section ref={ref} aria-label="Frequently asked questions" className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
       <div className="flex items-baseline gap-5 mb-6">
         <SectionNumber number="06" />
         <h2 className="heading-editorial text-2xl sm:text-3xl lg:text-[2.25rem] text-text">

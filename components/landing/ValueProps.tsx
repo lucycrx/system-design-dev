@@ -52,10 +52,11 @@ function FeatureItem({
       className="relative py-6 pl-6 pr-10 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(24px)",
+        transform: visible
+          ? hovered ? "translateX(6px)" : "translateX(0)"
+          : "translateY(24px)",
         transitionDelay: `${delay}ms`,
         borderTop: isFirst ? undefined : "1px solid var(--color-border)",
-        paddingLeft: hovered ? "18px" : undefined,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -127,7 +128,7 @@ export function ValueProps() {
   }, []);
 
   return (
-    <section ref={ref} className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
+    <section ref={ref} aria-label="How it works" className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
       <div className="flex items-baseline gap-5 mb-10">
         <SectionNumber number="01" />
         <h2 className="heading-editorial text-2xl sm:text-3xl lg:text-[2.25rem] text-text">

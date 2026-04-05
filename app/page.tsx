@@ -53,7 +53,7 @@ export default function HomePage() {
       <FAQ />
 
       {/* Footer CTA + Footer — full-width blue background */}
-      <div className="bg-accent">
+      <div className="bg-accent-dark">
         <FooterCTA />
 
         <footer className="max-w-5xl mx-auto px-6 pt-8 pb-12 border-t border-white/15">
