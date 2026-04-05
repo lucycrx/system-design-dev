@@ -2,38 +2,45 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SectionNumber } from "./SectionNumber";
+import { MiniDiagram } from "./MiniDiagram";
 
-const PROPS = [
+const FEATURES = [
   {
-    label: "VISUAL MAP",
-    color: "var(--color-green)",
-    title: "See every component, connection, and layer in your system.",
-    description:
-      "Components grouped by function, not file path. Frontend, API, database, cache, external services \u2014 all in one interactive diagram.",
-  },
-  {
-    label: "RISK ANALYSIS",
+    label: "ONE COMMAND",
     color: "var(--color-accent)",
-    title: "16 anti-patterns checked automatically.",
+    title: "Run /architecture-review and walk away.",
     description:
-      "Each risk explained in plain English with a real-world analogy and a fix. Severity calibrated to your project\u2019s scale.",
+      "Scans your entire codebase in under 5 minutes. No config, no setup, no code reading required.",
   },
   {
-    label: "SHAREABLE ARTIFACT",
-    color: "var(--color-blue)",
-    title: "One self-contained HTML file.",
+    label: "16 ANTI-PATTERNS",
+    color: "var(--color-green)",
+    title: "Risks flagged before they hit production.",
     description:
-      "Works offline. Drop it in Slack, pull it up in a meeting, send it to your CTO.",
+      "Each risk explained in plain English with a real-world analogy and a severity rating calibrated to your project\u2019s scale.",
+  },
+  {
+    label: "1 INTERACTIVE HTML",
+    color: "var(--color-blue)",
+    title: "A shareable map you can click through.",
+    description:
+      "Components grouped by layer. Click any node to see connections, risks, and plain-English explanations. Works offline.",
   },
 ];
 
-function ValuePropItem({
-  prop,
+const PROMPTS = [
+  "Click a component to see its connections",
+  "Risk badges show severity at a glance",
+  "Detail panel explains what each part does",
+];
+
+function FeatureItem({
+  feature,
   visible,
   delay,
   isFirst,
 }: {
-  prop: (typeof PROPS)[0];
+  feature: (typeof FEATURES)[0];
   visible: boolean;
   delay: number;
   isFirst: boolean;
@@ -42,7 +49,7 @@ function ValuePropItem({
 
   return (
     <div
-      className="relative py-8 pl-6 pr-10 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+      className="relative py-6 pl-6 pr-10 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(24px)",
@@ -66,23 +73,23 @@ function ValuePropItem({
       <div
         className="absolute left-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] w-[3px] rounded-sm"
         style={{
-          backgroundColor: prop.color,
-          top: hovered ? "16px" : "28px",
-          bottom: hovered ? "16px" : "28px",
+          backgroundColor: feature.color,
+          top: hovered ? "12px" : "20px",
+          bottom: hovered ? "12px" : "20px",
           width: hovered ? "4px" : "3px",
         }}
       />
 
-      <span className="label-mono mb-3 block" style={{ color: prop.color }}>
-        {prop.label}
+      <span className="label-mono mb-2 block" style={{ color: feature.color }}>
+        {feature.label}
       </span>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-text tracking-[-0.01em] mb-2">
-            {prop.title}
+          <h3 className="text-base font-bold text-text tracking-[-0.01em] mb-1">
+            {feature.title}
           </h3>
-          <p className="text-[0.9375rem] text-text-muted leading-relaxed">
-            {prop.description}
+          <p className="text-[0.875rem] text-text-muted leading-relaxed">
+            {feature.description}
           </p>
         </div>
         <span
@@ -113,7 +120,7 @@ export function ValueProps() {
           observer.disconnect();
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.1 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -128,16 +135,51 @@ export function ValueProps() {
         </h2>
       </div>
 
-      <div className="max-w-2xl space-y-0">
-        {PROPS.map((prop, i) => (
-          <ValuePropItem
-            key={prop.label}
-            prop={prop}
-            visible={visible}
-            delay={i * 120}
-            isFirst={i === 0}
-          />
-        ))}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-16 items-start">
+        {/* Left: feature list */}
+        <div className="space-y-0">
+          {FEATURES.map((feature, i) => (
+            <FeatureItem
+              key={feature.label}
+              feature={feature}
+              visible={visible}
+              delay={i * 120}
+              isFirst={i === 0}
+            />
+          ))}
+        </div>
+
+        {/* Right: interactive diagram + prompts */}
+        <div
+          className="transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(20px)",
+            transitionDelay: "300ms",
+          }}
+        >
+          <MiniDiagram />
+
+          {/* Interaction prompts */}
+          <div className="mt-4 flex flex-col gap-2">
+            {PROMPTS.map((prompt, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? "translateY(0)" : "translateY(8px)",
+                  transitionDelay: `${500 + i * 100}ms`,
+                }}
+              >
+                <span className="w-1 h-1 rounded-full bg-accent flex-shrink-0" />
+                <span className="font-mono text-[11px] text-text-dim">
+                  {prompt}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MiniDiagram } from "./MiniDiagram";
 import { CanvasWaveBackground } from "./CanvasWaveBackground";
 
 function WordReveal({
@@ -65,74 +64,57 @@ export function ProductHero() {
           </span>
         </div>
 
-        {/* Two-column: headline left, mini-diagram right */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-16 items-start">
+        {/* Main title — dramatic scale with weight contrast */}
+        <h1 className="heading-hero text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] text-text mb-8 max-w-3xl">
+          <span className="block font-light">
+            <WordReveal delay={150} visible={phase >= 1}>
+              <span className="text-stroke-accent">Understand</span> any codebase.
+            </WordReveal>
+          </span>
+          <span className="block">
+            <WordReveal delay={400} visible={phase >= 1}>
+              <span className="relative text-accent font-extrabold">
+                Build to scale.
+                <span
+                  className="absolute -bottom-1.5 left-0 h-[5px] bg-accent rounded-sm transition-transform duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] origin-left w-full"
+                  style={{
+                    transform: phase >= 2 ? "scaleX(1)" : "scaleX(0)",
+                  }}
+                />
+              </span>
+            </WordReveal>
+          </span>
+        </h1>
+
+        {/* Subtitle + annotation */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 max-w-2xl transition-all duration-700"
+          style={{
+            opacity: phase >= 2 ? 1 : 0,
+            transform: phase >= 2 ? "translateY(0)" : "translateY(16px)",
+            transitionDelay: "200ms",
+          }}
+        >
           <div>
-            {/* Main title — dramatic scale with weight contrast */}
-            <h1 className="heading-hero text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] text-text mb-8">
-              <span className="block font-light">
-                <WordReveal delay={150} visible={phase >= 1}>
-                  <span className="text-stroke-accent">Understand</span> any codebase.
-                </WordReveal>
-              </span>
-              <span className="block">
-                <WordReveal delay={400} visible={phase >= 1}>
-                  <span className="relative text-accent font-extrabold">
-                    Build to scale.
-                    <span
-                      className="absolute -bottom-1.5 left-0 h-[5px] bg-accent rounded-sm transition-transform duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] origin-left w-full"
-                      style={{
-                        transform: phase >= 2 ? "scaleX(1)" : "scaleX(0)",
-                      }}
-                    />
-                  </span>
-                </WordReveal>
-              </span>
-            </h1>
-
-            {/* Two-column bottom: subtitle left, annotation right */}
-            <div
-              className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 transition-all duration-700"
-              style={{
-                opacity: phase >= 2 ? 1 : 0,
-                transform: phase >= 2 ? "translateY(0)" : "translateY(16px)",
-                transitionDelay: "200ms",
-              }}
+            <p className="font-mono text-[13px] text-text-muted leading-relaxed mb-6">
+              Get an interactive architecture map with plain-English
+              explanations and risk analysis. No code reading required.
+            </p>
+            <a
+              href="#get-started"
+              className="inline-block font-mono text-[12px] font-medium tracking-wide uppercase bg-text text-bg px-6 py-3 hover:bg-accent hover:-translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-[0_8px_32px_var(--color-accent-glow)]"
             >
-              <div>
-                <p className="font-mono text-[13px] text-text-muted leading-relaxed mb-6">
-                  Get an interactive architecture map with plain-English
-                  explanations and risk analysis. No code reading required.
-                </p>
-                <a
-                  href="#get-started"
-                  className="inline-block font-mono text-[12px] font-medium tracking-wide uppercase bg-text text-bg px-6 py-3 hover:bg-accent hover:-translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-[0_8px_32px_var(--color-accent-glow)]"
-                >
-                  Get Started
-                </a>
-              </div>
-
-              <div className="border-t border-text/15 pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:border-accent/20 sm:pl-8">
-                <div className="label-mono text-accent mb-2">
-                  For PMs, founders, and vibecoders
-                </div>
-                <div className="font-mono text-[12px] text-text-dim leading-relaxed">
-                  See what was built and what might break &mdash; in 5 minutes.
-                </div>
-              </div>
-            </div>
+              Get Started
+            </a>
           </div>
 
-          {/* Mini diagram — right side, hidden on mobile */}
-          <div
-            className="hidden lg:block transition-all duration-1000"
-            style={{
-              opacity: phase >= 2 ? 1 : 0,
-              transform: phase >= 2 ? "translateY(0) scale(1)" : "translateY(20px) scale(0.98)",
-              transitionDelay: "400ms",
-            }}
-          >
-            <MiniDiagram />
+          <div className="border-t border-text/15 pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:border-accent/20 sm:pl-8">
+            <div className="label-mono text-accent mb-2">
+              For PMs, founders, and vibecoders
+            </div>
+            <div className="font-mono text-[12px] text-text-dim leading-relaxed">
+              See what was built and what might break &mdash; in 5 minutes.
+            </div>
           </div>
         </div>
 
