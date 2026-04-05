@@ -51,7 +51,7 @@ export function ProductHero() {
         <CanvasWaveBackground />
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-6 pt-14 sm:pt-16 pb-8">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 pt-14 sm:pt-16 pb-8">
         {/* Top label */}
         <div
           className="mb-8 transition-all duration-500"
