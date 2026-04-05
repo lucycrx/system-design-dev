@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { StickyTabsWrapper } from "@/components/ui/StickyTabsWrapper";
+import { ScrollProgressBar } from "@/components/ui/ScrollProgressBar";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -28,7 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${dmSans.variable} ${dmMono.variable}`}>
-      <body className="min-h-screen bg-bg text-text font-sans antialiased">
+      <body
+        className="min-h-screen bg-bg text-text font-sans antialiased"
+        style={{ animation: "bodyReveal 0.4s ease forwards" }}
+      >
+        <ScrollProgressBar />
         <StickyTabsWrapper />
         {children}
       </body>

@@ -19,7 +19,7 @@ export function StickyTabs() {
   }
 
   return (
-    <div className="sticky top-0 z-40 bg-accent border-b border-accent">
+    <div className="sticky top-0 z-40 bg-accent/85 backdrop-blur-[12px] border-b border-accent">
       <div className="max-w-6xl mx-auto px-6">
         <nav className="flex gap-8">
           {TABS.map((tab) => (

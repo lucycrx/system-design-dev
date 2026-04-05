@@ -6,6 +6,8 @@ import { Personas } from "@/components/landing/Personas";
 import { InstallSection } from "@/components/landing/InstallSection";
 import { ExampleOutput } from "@/components/landing/ExampleOutput";
 import { FAQ } from "@/components/landing/FAQ";
+import { InfoBar } from "@/components/landing/InfoBar";
+import { FooterCTA } from "@/components/landing/FooterCTA";
 import { PathCards } from "@/components/ui/PathCards";
 import { SectionNumber } from "@/components/landing/SectionNumber";
 
@@ -18,6 +20,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-bg">
       <ProductHero />
       <WorksWith />
+      <InfoBar />
 
       {/* Divider */}
       <div className="max-w-5xl mx-auto px-6">
@@ -50,6 +53,11 @@ export default function HomePage() {
       </section>
 
       <FAQ />
+
+      {/* Footer CTA */}
+      <div className="px-6 pb-0">
+        <FooterCTA />
+      </div>
 
       {/* Footer */}
       <footer className="max-w-5xl mx-auto px-6 py-8 border-t border-border flex items-center justify-between">

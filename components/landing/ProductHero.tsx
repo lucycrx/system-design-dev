@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MiniDiagram } from "./MiniDiagram";
+import { CanvasWaveBackground } from "./CanvasWaveBackground";
 
 function WordReveal({
   children,
@@ -42,17 +43,13 @@ export function ProductHero() {
 
   return (
     <header className="relative w-full overflow-hidden bg-bg">
-      {/* Animated dot grid background */}
+      {/* Canvas wave background */}
       <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-[1500ms]"
-        style={{
-          backgroundImage: "radial-gradient(circle, var(--color-border) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-          opacity: phase >= 2 ? 0.5 : 0,
-          maskImage: "radial-gradient(ellipse 70% 60% at 70% 40%, black, transparent)",
-          WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 70% 40%, black, transparent)",
-        }}
-      />
+        className="absolute inset-0 transition-opacity duration-[1500ms]"
+        style={{ opacity: phase >= 2 ? 1 : 0 }}
+      >
+        <CanvasWaveBackground />
+      </div>
 
       <div className="relative max-w-5xl mx-auto px-6 pt-14 sm:pt-16 pb-8">
         {/* Top label */}
@@ -75,7 +72,7 @@ export function ProductHero() {
             <h1 className="heading-hero text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] text-text mb-8">
               <span className="block font-light">
                 <WordReveal delay={150} visible={phase >= 1}>
-                  Understand any codebase.
+                  <span className="text-stroke-accent">Understand</span> any codebase.
                 </WordReveal>
               </span>
               <span className="block">

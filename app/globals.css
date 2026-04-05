@@ -28,6 +28,9 @@
   --color-queue: #5E5E85;
   --color-queue-dim: #5E5E851A;
 
+  /* Easing */
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
   /* Fonts */
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
   --font-mono: var(--font-dm-mono), "DM Mono", monospace;
@@ -178,6 +181,18 @@ html {
   50% {
     opacity: 0.8;
   }
+}
+
+/* Page load fade-in */
+@keyframes bodyReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Stroke text utility */
+.text-stroke-accent {
+  -webkit-text-stroke: 1.5px var(--color-accent);
+  color: transparent;
 }
 
 /* Editorial heading style — used on major page titles */

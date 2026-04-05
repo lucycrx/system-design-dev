@@ -42,19 +42,29 @@ function ValuePropItem({
 
   return (
     <div
-      className="relative py-8 pl-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="relative py-8 pl-6 pr-10 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(24px)",
         transitionDelay: `${delay}ms`,
         borderTop: isFirst ? undefined : "1px solid var(--color-border)",
+        paddingLeft: hovered ? "18px" : undefined,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* Hover background expansion */}
+      <div
+        className="absolute inset-0 bg-surface rounded-sm transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] origin-left"
+        style={{
+          transform: hovered ? "scaleX(1)" : "scaleX(0)",
+          zIndex: -1,
+        }}
+      />
+
       {/* Colored left accent bar */}
       <div
-        className="absolute left-0 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] w-[3px] rounded-sm"
+        className="absolute left-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] w-[3px] rounded-sm"
         style={{
           backgroundColor: prop.color,
           top: hovered ? "16px" : "28px",
@@ -66,12 +76,25 @@ function ValuePropItem({
       <span className="label-mono mb-3 block" style={{ color: prop.color }}>
         {prop.label}
       </span>
-      <h3 className="text-lg font-bold text-text tracking-[-0.01em] mb-2">
-        {prop.title}
-      </h3>
-      <p className="text-[0.9375rem] text-text-muted leading-relaxed">
-        {prop.description}
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-bold text-text tracking-[-0.01em] mb-2">
+            {prop.title}
+          </h3>
+          <p className="text-[0.9375rem] text-text-muted leading-relaxed">
+            {prop.description}
+          </p>
+        </div>
+        <span
+          className="text-text-dim text-lg mt-1 transition-all duration-300 flex-shrink-0"
+          style={{
+            transform: hovered ? "translate(4px, -4px)" : "translate(0, 0)",
+            color: hovered ? "var(--color-text)" : undefined,
+          }}
+        >
+          &#8599;
+        </span>
+      </div>
     </div>
   );
 }
