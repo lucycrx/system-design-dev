@@ -54,7 +54,7 @@ export function WorksWith() {
   return (
     <div
       ref={ref}
-      className="transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="max-w-5xl mx-auto px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(12px)",
@@ -65,8 +65,8 @@ export function WorksWith() {
       </p>
       <div className="relative overflow-hidden py-3">
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-bg to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-bg to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-32 bg-gradient-to-r from-bg to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-32 bg-gradient-to-l from-bg to-transparent z-10 pointer-events-none" />
 
         {/* Scrolling track — duplicated for seamless loop */}
         <div
