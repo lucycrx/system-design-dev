@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview: Voronoi Cells</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; background: #fff; }
+  .hero { position: relative; width: 100%; height: 600px; overflow: hidden; background: #fff; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .edge-fade {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      radial-gradient(ellipse at 100% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      linear-gradient(to bottom, rgba(255,255,255,0) 60%, rgba(255,255,255,0.95) 100%);
+  }
+  .content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 56px 24px 32px; }
+  .label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 32px; }
+  h1 { font-family: system-ui, -apple-system, sans-serif; font-size: 3.5rem; line-height: 1.1; color: #1a1a2e; margin-bottom: 32px; max-width: 700px; }
+  h1 .light { font-weight: 300; }
+  h1 .accent { font-weight: 800; color: #4a7fd4; }
+  .subtitle { font-size: 13px; color: #666; line-height: 1.7; max-width: 400px; }
+  .tag { display: inline-block; margin-top: 24px; padding: 4px 12px; background: #f0f4ff; border: 1px solid #d0dcf0; border-radius: 4px; font-size: 11px; color: #4a7fd4; letter-spacing: 0.05em; }
+
+  .tuner-panel { position:fixed; bottom:20px; right:20px; z-index:100; background:rgba(20,20,30,0.85); backdrop-filter:blur(12px); border-radius:10px; border:1px solid rgba(255,255,255,0.1); padding:16px; min-width:240px; font-family:'SF Mono','Fira Code',monospace; font-size:11px; color:rgba(255,255,255,0.8); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .tuner-panel.collapsed .tuner-body { display:none; }
+  .tuner-title { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer; display:flex; justify-content:space-between; }
+  .tuner-panel.collapsed .tuner-title { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+  .tuner-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .tuner-row:last-child { margin-bottom:0; }
+  .tuner-label { flex:1; }
+  .tuner-value { width:36px; text-align:right; color:rgba(255,255,255,0.5); margin-left:8px; }
+  .tuner-row input[type="range"] { width:100px; margin-left:10px; accent-color:#4a7fd4; height:4px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <canvas id="c"></canvas>
+  <div class="edge-fade"></div>
+  <div class="content">
+    <div class="label">Architecture Review for Claude Code</div>
+    <h1><span class="light">Understand any codebase.</span><br><span class="accent">Build to scale.</span></h1>
+    <p class="subtitle">Get an interactive architecture map with plain-English explanations and risk analysis. No code reading required.</p>
+    <div class="tag">Concept 8: Voronoi Cells</div>
+  </div>
+</div>
+
+<div class="tuner-panel" id="tunerPanel">
+  <div class="tuner-title" id="tunerTitle">
+    <span>Voronoi Tuner</span>
+    <span id="tunerToggle">--</span>
+  </div>
+  <div class="tuner-body">
+    <div class="tuner-row">
+      <span class="tuner-label">Points</span>
+      <input type="range" id="tPointCount" min="20" max="120" value="60" step="1">
+      <span class="tuner-value" id="vPointCount">60</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Sample Res</span>
+      <input type="range" id="tSampleRes" min="2" max="10" value="4" step="1">
+      <span class="tuner-value" id="vSampleRes">4</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Mouse Rad</span>
+      <input type="range" id="tMouseRadius" min="100" max="400" value="220" step="5">
+      <span class="tuner-value" id="vMouseRadius">220</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Repulsion</span>
+      <input type="range" id="tRepulsion" min="10" max="80" value="35" step="1">
+      <span class="tuner-value" id="vRepulsion">35</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Orbit Spd</span>
+      <input type="range" id="tOrbitSpeed" min="0.1" max="1.5" value="0.3" step="0.05">
+      <span class="tuner-value" id="vOrbitSpeed">0.30</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Edge Opac</span>
+      <input type="range" id="tEdgeOpacity" min="0.2" max="3.0" value="1.0" step="0.1">
+      <span class="tuner-value" id="vEdgeOpacity">1.0</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Hue Shift</span>
+      <input type="range" id="tHueShift" min="0" max="360" value="0" step="1">
+      <span class="tuner-value" id="vHueShift">0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, mouseX, mouseY, curX, curY, t = 0;
+
+// Tunable parameters
+const params = {
+  pointCount: 60,
+  sampleRes: 4,
+  mouseRadius: 220,
+  repulsion: 35,
+  orbitSpeed: 0.3,
+  edgeOpacity: 1.0,
+  hueShift: 0
+};
+
+// --- Tuner panel logic ---
+const tunerPanel = document.getElementById('tunerPanel');
+const tunerTitle = document.getElementById('tunerTitle');
+const tunerToggle = document.getElementById('tunerToggle');
+
+tunerTitle.addEventListener('click', () => {
+  tunerPanel.classList.toggle('collapsed');
+  tunerToggle.textContent = tunerPanel.classList.contains('collapsed') ? '++' : '--';
+});
+
+function bindSlider(id, valueId, paramKey, formatter) {
+  const slider = document.getElementById(id);
+  const display = document.getElementById(valueId);
+  slider.addEventListener('input', () => {
+    const val = parseFloat(slider.value);
+    params[paramKey] = val;
+    display.textContent = formatter ? formatter(val) : val;
+    if (paramKey === 'pointCount') rebuildPoints();
+  });
+}
+
+bindSlider('tPointCount', 'vPointCount', 'pointCount');
+bindSlider('tSampleRes', 'vSampleRes', 'sampleRes');
+bindSlider('tMouseRadius', 'vMouseRadius', 'mouseRadius');
+bindSlider('tRepulsion', 'vRepulsion', 'repulsion');
+bindSlider('tOrbitSpeed', 'vOrbitSpeed', 'orbitSpeed', v => v.toFixed(2));
+bindSlider('tEdgeOpacity', 'vEdgeOpacity', 'edgeOpacity', v => v.toFixed(1));
+bindSlider('tHueShift', 'vHueShift', 'hueShift');
+
+// --- Hue shift ---
+function hueShift(r, g, b, degrees) {
+  const rad = degrees * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  return [
+    Math.round(Math.max(0, Math.min(255, r*(0.213+0.787*cos-0.213*sin) + g*(0.715-0.715*cos-0.715*sin) + b*(0.072-0.072*cos+0.928*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos+0.143*sin) + g*(0.715+0.285*cos+0.140*sin) + b*(0.072-0.072*cos-0.283*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos-0.787*sin) + g*(0.715-0.715*cos+0.715*sin) + b*(0.072+0.928*cos+0.072*sin))))
+  ];
+}
+
+// Base color: #4a7fd4 = rgb(74, 127, 212)
+function getColor(alpha) {
+  if (params.hueShift === 0) {
+    return `rgba(74,127,212,${alpha})`;
+  }
+  const [r, g, b] = hueShift(74, 127, 212, params.hueShift);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// --- Voronoi ---
+class VoronoiPoint {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.baseX = Math.random() * (W || 1200);
+    this.baseY = Math.random() * (H || 600);
+    this.x = this.baseX;
+    this.y = this.baseY;
+    this.vx = (Math.random() - 0.5) * 0.3;
+    this.vy = (Math.random() - 0.5) * 0.3;
+    this.orbitRadius = 15 + Math.random() * 25;
+    this.orbitSpeedFactor = 1.0 + (Math.random() - 0.5) * 0.8; // per-point variation
+    this.orbitOffset = Math.random() * Math.PI * 2;
+  }
+}
+
+let points = [];
+
+function initPoints() {
+  points = [];
+  for (let i = 0; i < params.pointCount; i++) {
+    points.push(new VoronoiPoint());
+  }
+}
+
+function rebuildPoints() {
+  const count = params.pointCount;
+  if (points.length < count) {
+    while (points.length < count) points.push(new VoronoiPoint());
+  } else if (points.length > count) {
+    points.length = count;
+  }
+}
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+  mouseX = W / 2; mouseY = H / 2;
+  curX = W / 2; curY = H / 2;
+}
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = e.clientX - r.left;
+  mouseY = e.clientY - r.top;
+});
+canvas.addEventListener('mouseleave', () => { mouseX = W / 2; mouseY = H / 2; });
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  curX += (mouseX - curX) * 0.05;
+  curY += (mouseY - curY) * 0.05;
+
+  const MOUSE_RADIUS = params.mouseRadius;
+  const REPULSION = params.repulsion;
+  const ORBIT_SPEED = params.orbitSpeed;
+  const EDGE_OPACITY = params.edgeOpacity;
+
+  // Update point positions
+  for (const p of points) {
+    p.baseX += p.vx;
+    p.baseY += p.vy;
+
+    if (p.baseX < -50 || p.baseX > W + 50) p.vx *= -1;
+    if (p.baseY < -50 || p.baseY > H + 50) p.vy *= -1;
+
+    p.x = p.baseX + Math.cos(t * ORBIT_SPEED * p.orbitSpeedFactor + p.orbitOffset) * p.orbitRadius;
+    p.y = p.baseY + Math.sin(t * ORBIT_SPEED * p.orbitSpeedFactor + p.orbitOffset) * p.orbitRadius;
+
+    const dx = p.x - curX;
+    const dy = p.y - curY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < MOUSE_RADIUS && dist > 1) {
+      const force = (1 - dist / MOUSE_RADIUS);
+      const eased = force * force * REPULSION;
+      p.x += (dx / dist) * eased;
+      p.y += (dy / dist) * eased;
+    }
+  }
+
+  // Draw Voronoi edges
+  const SAMPLE = params.sampleRes;
+  const sampledW = Math.ceil(W / SAMPLE);
+  const sampledH = Math.ceil(H / SAMPLE);
+  const grid = new Int16Array(sampledW * sampledH);
+
+  for (let sy = 0; sy < sampledH; sy++) {
+    for (let sx = 0; sx < sampledW; sx++) {
+      const px = sx * SAMPLE;
+      const py = sy * SAMPLE;
+      let minDist = Infinity;
+      let nearest = 0;
+      for (let i = 0; i < points.length; i++) {
+        const dx = px - points[i].x;
+        const dy = py - points[i].y;
+        const d = dx * dx + dy * dy;
+        if (d < minDist) { minDist = d; nearest = i; }
+      }
+      grid[sy * sampledW + sx] = nearest;
+    }
+  }
+
+  for (let sy = 0; sy < sampledH - 1; sy++) {
+    for (let sx = 0; sx < sampledW - 1; sx++) {
+      const idx = sy * sampledW + sx;
+      const current = grid[idx];
+      const right = grid[idx + 1];
+      const below = grid[idx + sampledW];
+
+      if (current !== right || current !== below) {
+        const px = sx * SAMPLE;
+        const py = sy * SAMPLE;
+
+        const dx = px - curX;
+        const dy = py - curY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const mouseProx = dist < MOUSE_RADIUS ? (1 - dist / MOUSE_RADIUS) : 0;
+
+        const alpha = (0.08 + mouseProx * 0.3) * EDGE_OPACITY;
+        ctx.fillStyle = getColor(Math.min(alpha, 1));
+        ctx.fillRect(px, py, SAMPLE, SAMPLE);
+      }
+    }
+  }
+
+  // Draw point centers
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i];
+    const dx = p.x - curX;
+    const dy = p.y - curY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const mouseProx = dist < MOUSE_RADIUS ? (1 - dist / MOUSE_RADIUS) : 0;
+
+    const radius = 1.5 + mouseProx * 2.5;
+    const alpha = (0.15 + mouseProx * 0.5) * EDGE_OPACITY;
+
+    ctx.beginPath();
+    ctx.fillStyle = getColor(Math.min(alpha, 1));
+    ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  t += 0.016;
+  requestAnimationFrame(draw);
+}
+
+resize();
+initPoints();
+window.addEventListener('resize', () => { resize(); initPoints(); });
+draw();
+</script>
+</body>
+</html>
