@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview: Layered Waves</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'SF Mono', 'Fira Code', monospace; background: #fff; }
+  .hero { position: relative; width: 100%; height: 600px; overflow: hidden; background: #fff; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .edge-fade {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      radial-gradient(ellipse at 100% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      linear-gradient(to bottom, rgba(255,255,255,0) 60%, rgba(255,255,255,0.95) 100%);
+  }
+  .content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 56px 24px 32px; }
+  .label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 32px; }
+  h1 { font-family: system-ui, -apple-system, sans-serif; font-size: 3.5rem; line-height: 1.1; color: #1a1a2e; margin-bottom: 32px; max-width: 700px; }
+  h1 .light { font-weight: 300; }
+  h1 .accent { font-weight: 800; color: #4a7fd4; }
+  .subtitle { font-size: 13px; color: #666; line-height: 1.7; max-width: 400px; }
+  .tag { display: inline-block; margin-top: 24px; padding: 4px 12px; background: #f0f4ff; border: 1px solid #d0dcf0; border-radius: 4px; font-size: 11px; color: #4a7fd4; letter-spacing: 0.05em; }
+
+  .tuner-panel { position:fixed; bottom:20px; right:20px; z-index:100; background:rgba(20,20,30,0.85); backdrop-filter:blur(12px); border-radius:10px; border:1px solid rgba(255,255,255,0.1); padding:16px; min-width:240px; font-family:'SF Mono','Fira Code',monospace; font-size:11px; color:rgba(255,255,255,0.8); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .tuner-panel.collapsed .tuner-body { display:none; }
+  .tuner-panel.collapsed .tuner-title { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+  .tuner-title { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer; display:flex; justify-content:space-between; user-select:none; }
+  .tuner-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .tuner-row:last-child { margin-bottom:0; }
+  .tuner-label { flex:1; }
+  .tuner-value { width:36px; text-align:right; color:rgba(255,255,255,0.5); margin-left:8px; }
+  .tuner-row input[type="range"] { width:100px; margin-left:10px; accent-color:#4a7fd4; height:4px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <canvas id="c"></canvas>
+  <div class="edge-fade"></div>
+  <div class="content">
+    <div class="label">Architecture Review for Claude Code</div>
+    <h1><span class="light">Understand any codebase.</span><br><span class="accent">Build to scale.</span></h1>
+    <p class="subtitle">Stacked sine wave layers with independent speeds. Mouse bends waves and creates a ripple wake that spreads outward.</p>
+    <div class="tag">Extracted 2: Layered Waves</div>
+  </div>
+</div>
+
+<div class="tuner-panel" id="tunerPanel">
+  <div class="tuner-title" id="tunerTitle">
+    <span>Wave Tuner</span>
+    <span id="tunerToggle">--</span>
+  </div>
+  <div class="tuner-body" id="tunerBody">
+    <div class="tuner-row">
+      <span class="tuner-label">Wave Count</span>
+      <input type="range" id="tWaveCount" min="3" max="20" value="9" step="1">
+      <span class="tuner-value" id="vWaveCount">9</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Mouse Radius</span>
+      <input type="range" id="tMouseRadius" min="80" max="500" value="250" step="1">
+      <span class="tuner-value" id="vMouseRadius">250</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Magnet Str</span>
+      <input type="range" id="tMagnetStr" min="0.1" max="1.0" value="0.5" step="0.05">
+      <span class="tuner-value" id="vMagnetStr">0.50</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Amplitude</span>
+      <input type="range" id="tAmplitude" min="10" max="80" value="25" step="1">
+      <span class="tuner-value" id="vAmplitude">25</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Anim Speed</span>
+      <input type="range" id="tSpeed" min="1" max="20" value="8" step="1">
+      <span class="tuner-value" id="vSpeed">8</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Fill Opacity</span>
+      <input type="range" id="tFillOpacity" min="0.2" max="3.0" value="1.0" step="0.1">
+      <span class="tuner-value" id="vFillOpacity">1.0</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Hue Shift</span>
+      <input type="range" id="tHueShift" min="0" max="360" value="0" step="1">
+      <span class="tuner-value" id="vHueShift">0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, t = 0;
+let mouseX, mouseY, curX, curY;
+
+// Tuner state
+const tuner = {
+  waveCount: 9,
+  mouseRadius: 250,
+  magnetStr: 0.5,
+  amplitude: 25,
+  speed: 8,
+  fillOpacity: 1.0,
+  hueShift: 0
+};
+
+// Tuner panel collapse toggle
+const tunerPanel = document.getElementById('tunerPanel');
+const tunerTitle = document.getElementById('tunerTitle');
+const tunerToggle = document.getElementById('tunerToggle');
+
+tunerTitle.addEventListener('click', () => {
+  tunerPanel.classList.toggle('collapsed');
+  tunerToggle.textContent = tunerPanel.classList.contains('collapsed') ? '++' : '--';
+});
+
+// Wire up sliders
+function wireSlider(id, valueId, key, formatter) {
+  const slider = document.getElementById(id);
+  const display = document.getElementById(valueId);
+  slider.addEventListener('input', () => {
+    tuner[key] = parseFloat(slider.value);
+    display.textContent = formatter ? formatter(tuner[key]) : tuner[key];
+  });
+}
+
+wireSlider('tWaveCount', 'vWaveCount', 'waveCount');
+wireSlider('tMouseRadius', 'vMouseRadius', 'mouseRadius');
+wireSlider('tMagnetStr', 'vMagnetStr', 'magnetStr', v => v.toFixed(2));
+wireSlider('tAmplitude', 'vAmplitude', 'amplitude');
+wireSlider('tSpeed', 'vSpeed', 'speed');
+wireSlider('tFillOpacity', 'vFillOpacity', 'fillOpacity', v => v.toFixed(1));
+wireSlider('tHueShift', 'vHueShift', 'hueShift');
+
+// Hue shift matrix transform
+function hueShift(r, g, b, degrees) {
+  const rad = degrees * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  return [
+    Math.round(Math.max(0, Math.min(255, r*(0.213+0.787*cos-0.213*sin) + g*(0.715-0.715*cos-0.715*sin) + b*(0.072-0.072*cos+0.928*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos+0.143*sin) + g*(0.715+0.285*cos+0.140*sin) + b*(0.072-0.072*cos-0.283*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos-0.787*sin) + g*(0.715-0.715*cos+0.715*sin) + b*(0.072+0.928*cos+0.072*sin))))
+  ];
+}
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+  mouseX = W / 2; mouseY = H / 2;
+  curX = W / 2; curY = H / 2;
+}
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = e.clientX - r.left;
+  mouseY = e.clientY - r.top;
+});
+canvas.addEventListener('mouseleave', () => { mouseX = W / 2; mouseY = H / 2; });
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  curX += (mouseX - curX) * 0.05;
+  curY += (mouseY - curY) * 0.05;
+  t += tuner.speed / 1000;
+
+  const numWaves = Math.round(tuner.waveCount);
+
+  for (let i = 0; i < numWaves; i++) {
+    const norm = i / (numWaves - 1);
+
+    // Each wave has its own vertical center spread across the canvas
+    const baseY = H * 0.25 + norm * H * 0.5;
+
+    let r = Math.round(74 + norm * (40 - 74));
+    let g = Math.round(127 + norm * (90 - 127));
+    let b = Math.round(212 + norm * (180 - 212));
+
+    if (tuner.hueShift !== 0) {
+      [r, g, b] = hueShift(r, g, b, tuner.hueShift);
+    }
+
+    const alpha = 0.12 + norm * 0.15;
+
+    // Fill between wave top and bottom for ribbon feel
+    ctx.beginPath();
+
+    const steps = 200;
+
+    for (let s = 0; s <= steps; s++) {
+      const x = (s / steps) * W;
+      const xNorm = s / steps;
+
+      // Layered sine
+      let y = baseY
+        + Math.sin(xNorm * Math.PI * 2.5 + t * (0.3 + i * 0.05) + i * 0.6) * (tuner.amplitude + i * 8)
+        + Math.sin(xNorm * Math.PI * 5 - t * 0.2 + i * 0.3) * (8 + i * 3)
+        + Math.sin(xNorm * Math.PI * 1.2 + t * 0.15 + i * 1.0) * 12;
+
+      // Mouse magnet -- pull wave toward cursor
+      const dx = x - curX;
+      const dy = y - curY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < tuner.mouseRadius) {
+        const force = 1 - dist / tuner.mouseRadius;
+        const eased = force * force * force;
+        y += (curY - y) * eased * tuner.magnetStr;
+      }
+
+      if (s === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+
+    ctx.strokeStyle = `rgba(${r},${g},${b},${alpha + 0.05})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Soft fill below the wave
+    ctx.lineTo(W, H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.fillStyle = `rgba(${r},${g},${b},${alpha * 0.2 * tuner.fillOpacity})`;
+    ctx.fill();
+  }
+
+  // Mouse glow
+  const glowR = tuner.hueShift !== 0 ? hueShift(74, 127, 212, tuner.hueShift) : [74, 127, 212];
+  const grad = ctx.createRadialGradient(curX, curY, 0, curX, curY, 100);
+  grad.addColorStop(0, `rgba(${glowR[0]},${glowR[1]},${glowR[2]},0.06)`);
+  grad.addColorStop(1, `rgba(${glowR[0]},${glowR[1]},${glowR[2]},0)`);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(curX, curY, 100, 0, Math.PI * 2);
+  ctx.fill();
+
+  requestAnimationFrame(draw);
+}
+
+resize();
+window.addEventListener('resize', resize);
+draw();
+</script>
+</body>
+</html>
