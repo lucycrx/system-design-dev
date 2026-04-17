@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview: Constellation Particles</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; background: #fff; }
+
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .edge-fade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      radial-gradient(ellipse at 100% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      linear-gradient(to bottom, rgba(255,255,255,0) 60%, rgba(255,255,255,0.95) 100%);
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 56px 24px 32px;
+  }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 3.5rem;
+    line-height: 1.1;
+    color: #1a1a2e;
+    margin-bottom: 32px;
+    max-width: 700px;
+  }
+
+  h1 .light { font-weight: 300; }
+  h1 .accent { font-weight: 800; color: #4a7fd4; }
+
+  .subtitle {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.7;
+    max-width: 400px;
+  }
+
+  .tag {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 4px 12px;
+    background: #f0f4ff;
+    border: 1px solid #d0dcf0;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #4a7fd4;
+    letter-spacing: 0.05em;
+  }
+
+  /* Tuner panel */
+  .tuner-panel { position:fixed; bottom:20px; right:20px; z-index:100; background:rgba(20,20,30,0.85); backdrop-filter:blur(12px); border-radius:10px; border:1px solid rgba(255,255,255,0.1); padding:16px; min-width:240px; font-family:'SF Mono','Fira Code',monospace; font-size:11px; color:rgba(255,255,255,0.8); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .tuner-panel.collapsed .tuner-body { display:none; }
+  .tuner-panel.collapsed { padding:0; min-width:auto; }
+  .tuner-toggle { display:none; }
+  .tuner-panel.collapsed + .tuner-toggle { display:block; position:fixed; bottom:20px; right:20px; z-index:101; background:rgba(20,20,30,0.85); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); padding:6px 14px; border-radius:6px; font-family:inherit; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; }
+  .tuner-title { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer; display:flex; justify-content:space-between; }
+  .tuner-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .tuner-row:last-child { margin-bottom:0; }
+  .tuner-label { flex:1; }
+  .tuner-value { width:36px; text-align:right; color:rgba(255,255,255,0.5); margin-left:8px; }
+  .tuner-row input[type="range"] { width:100px; margin-left:10px; accent-color:#4a7fd4; height:4px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <canvas id="particleCanvas"></canvas>
+  <div class="edge-fade"></div>
+
+  <div class="content">
+    <div class="label">Architecture Review for Claude Code</div>
+    <h1>
+      <span class="light">Understand any codebase.</span><br>
+      <span class="accent">Build to scale.</span>
+    </h1>
+    <p class="subtitle">
+      Get an interactive architecture map with plain-English explanations and risk analysis. No code reading required.
+    </p>
+    <div class="tag">Concept 2: Constellation Particles</div>
+  </div>
+</div>
+
+<div class="tuner-panel" id="tunerPanel">
+  <div class="tuner-title" onclick="toggleTuner()">
+    <span>Tuner</span>
+    <span id="tunerArrow">&#x25BC;</span>
+  </div>
+  <div class="tuner-body">
+    <div class="tuner-row">
+      <span class="tuner-label">Particles</span>
+      <input type="range" id="tParticleCount" min="40" max="250" value="120" step="1">
+      <span class="tuner-value" id="vParticleCount">120</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Conn Dist</span>
+      <input type="range" id="tConnDist" min="40" max="250" value="120" step="1">
+      <span class="tuner-value" id="vConnDist">120</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Mouse Rad</span>
+      <input type="range" id="tMouseRadius" min="80" max="400" value="200" step="1">
+      <span class="tuner-value" id="vMouseRadius">200</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Drift Spd</span>
+      <input type="range" id="tDriftSpeed" min="0.1" max="1.0" value="0.4" step="0.01">
+      <span class="tuner-value" id="vDriftSpeed">0.4</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Line Opac</span>
+      <input type="range" id="tLineOpacity" min="0.2" max="3.0" value="1.0" step="0.05">
+      <span class="tuner-value" id="vLineOpacity">1.0</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Size Mult</span>
+      <input type="range" id="tParticleSize" min="0.3" max="3.0" value="1.0" step="0.05">
+      <span class="tuner-value" id="vParticleSize">1.0</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Hue Shift</span>
+      <input type="range" id="tHueShift" min="0" max="360" value="0" step="1">
+      <span class="tuner-value" id="vHueShift">0</span>
+    </div>
+  </div>
+</div>
+<button class="tuner-toggle" id="tunerToggleBtn" onclick="toggleTuner()">Tuner</button>
+
+<script>
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+let mouseX, mouseY;
+let currentMX, currentMY;
+
+// Tunable parameters
+const cfg = {
+  particleCount: 120,
+  connectionDist: 120,
+  mouseRadius: 200,
+  driftSpeed: 0.4,
+  lineOpacity: 1.0,
+  particleSize: 1.0,
+  hueShift: 0,
+};
+
+function hueShift(r, g, b, degrees) {
+  const rad = degrees * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  return [
+    Math.round(Math.max(0, Math.min(255, r*(0.213+0.787*cos-0.213*sin) + g*(0.715-0.715*cos-0.715*sin) + b*(0.072-0.072*cos+0.928*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos+0.143*sin) + g*(0.715+0.285*cos+0.140*sin) + b*(0.072-0.072*cos-0.283*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos-0.787*sin) + g*(0.715-0.715*cos+0.715*sin) + b*(0.072+0.928*cos+0.072*sin))))
+  ];
+}
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.x = Math.random() * (W || 1200);
+    this.y = Math.random() * (H || 600);
+    this.baseVx = (Math.random() - 0.5) * cfg.driftSpeed;
+    this.baseVy = (Math.random() - 0.5) * cfg.driftSpeed;
+    this.vx = this.baseVx;
+    this.vy = this.baseVy;
+    this.baseRadius = 1.5 + Math.random() * 2;
+    this.radius = this.baseRadius;
+    const t = Math.random();
+    this.baseR = Math.round(74 + t * (100 - 74));
+    this.baseG = Math.round(127 + t * (160 - 127));
+    this.baseB = Math.round(212 + t * (230 - 212));
+    this.r = this.baseR;
+    this.g = this.baseG;
+    this.b = this.baseB;
+    this.alpha = 0.15 + Math.random() * 0.35;
+    this.pulseSpeed = 0.02 + Math.random() * 0.02;
+    this.pulseOffset = Math.random() * Math.PI * 2;
+  }
+
+  applyHue(degrees) {
+    if (degrees === 0) {
+      this.r = this.baseR;
+      this.g = this.baseG;
+      this.b = this.baseB;
+    } else {
+      const [r, g, b] = hueShift(this.baseR, this.baseG, this.baseB, degrees);
+      this.r = r;
+      this.g = g;
+      this.b = b;
+    }
+  }
+
+  applyDrift(speed) {
+    const dirX = Math.sign(this.baseVx) || 1;
+    const dirY = Math.sign(this.baseVy) || 1;
+    this.baseVx = dirX * (Math.random() * 0.5) * speed;
+    this.baseVy = dirY * (Math.random() * 0.5) * speed;
+  }
+}
+
+let particles = [];
+
+function buildParticles(count) {
+  particles = [];
+  for (let i = 0; i < count; i++) {
+    const p = new Particle();
+    p.applyHue(cfg.hueShift);
+    p.radius = p.baseRadius * cfg.particleSize;
+    particles.push(p);
+  }
+}
+
+buildParticles(cfg.particleCount);
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+  mouseX = W / 2;
+  mouseY = H / 2;
+  currentMX = W / 2;
+  currentMY = H / 2;
+}
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = e.clientX - r.left;
+  mouseY = e.clientY - r.top;
+});
+
+canvas.addEventListener('mouseleave', () => {
+  mouseX = W / 2;
+  mouseY = H / 2;
+});
+
+let t = 0;
+
+// Base connection line color
+const baseLineR = 74, baseLineG = 127, baseLineB = 212;
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  currentMX += (mouseX - currentMX) * 0.05;
+  currentMY += (mouseY - currentMY) * 0.05;
+
+  const connDist = cfg.connectionDist;
+  const mouseRad = cfg.mouseRadius;
+  const lineOpacMult = cfg.lineOpacity;
+  const sizeMult = cfg.particleSize;
+
+  // Compute shifted line color
+  let lineR = baseLineR, lineG = baseLineG, lineB = baseLineB;
+  if (cfg.hueShift !== 0) {
+    [lineR, lineG, lineB] = hueShift(baseLineR, baseLineG, baseLineB, cfg.hueShift);
+  }
+
+  // Update particles
+  for (const p of particles) {
+    const dx = currentMX - p.x;
+    const dy = currentMY - p.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < mouseRad && dist > 1) {
+      const force = (1 - dist / mouseRad) * 0.015;
+      p.vx += dx * force;
+      p.vy += dy * force;
+    }
+
+    p.vx += (p.baseVx - p.vx) * 0.02;
+    p.vy += (p.baseVy - p.vy) * 0.02;
+
+    p.x += p.vx;
+    p.y += p.vy;
+
+    if (p.x < -20) p.x = W + 20;
+    if (p.x > W + 20) p.x = -20;
+    if (p.y < -20) p.y = H + 20;
+    if (p.y > H + 20) p.y = -20;
+  }
+
+  // Draw connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const a = particles[i];
+      const b = particles[j];
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < connDist) {
+        const opacity = (1 - dist / connDist) * 0.15 * lineOpacMult;
+
+        const midX = (a.x + b.x) / 2;
+        const midY = (a.y + b.y) / 2;
+        const mouseDist = Math.sqrt((midX - currentMX) ** 2 + (midY - currentMY) ** 2);
+        const mouseBoost = mouseDist < mouseRad ? (1 - mouseDist / mouseRad) * 0.25 * lineOpacMult : 0;
+
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${lineR},${lineG},${lineB},${opacity + mouseBoost})`;
+        ctx.lineWidth = 0.6;
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw particles
+  for (const p of particles) {
+    const pulse = Math.sin(t * p.pulseSpeed * 60 + p.pulseOffset) * 0.3 + 0.7;
+    const mouseDist = Math.sqrt((p.x - currentMX) ** 2 + (p.y - currentMY) ** 2);
+    const mouseGlow = mouseDist < mouseRad ? (1 - mouseDist / mouseRad) : 0;
+
+    const drawRadius = p.baseRadius * sizeMult * (1 + mouseGlow * 1.5);
+    const drawAlpha = p.alpha * pulse + mouseGlow * 0.4;
+
+    if (mouseGlow > 0.2) {
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${mouseGlow * 0.1})`;
+      ctx.arc(p.x, p.y, drawRadius * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${drawAlpha})`;
+    ctx.arc(p.x, p.y, drawRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  t += 0.008;
+  requestAnimationFrame(draw);
+}
+
+resize();
+window.addEventListener('resize', resize);
+draw();
+
+// --- Tuner panel logic ---
+
+function toggleTuner() {
+  const panel = document.getElementById('tunerPanel');
+  const arrow = document.getElementById('tunerArrow');
+  panel.classList.toggle('collapsed');
+  if (panel.classList.contains('collapsed')) {
+    arrow.innerHTML = '&#x25B6;';
+  } else {
+    arrow.innerHTML = '&#x25BC;';
+  }
+}
+
+function bindSlider(inputId, valueId, cfgKey, opts) {
+  const input = document.getElementById(inputId);
+  const display = document.getElementById(valueId);
+
+  input.addEventListener('input', () => {
+    const val = parseFloat(input.value);
+    cfg[cfgKey] = val;
+
+    // Format display value
+    if (opts && opts.decimals !== undefined) {
+      display.textContent = val.toFixed(opts.decimals);
+    } else {
+      display.textContent = val;
+    }
+
+    // Callbacks
+    if (opts && opts.onChange) opts.onChange(val);
+  });
+}
+
+bindSlider('tParticleCount', 'vParticleCount', 'particleCount', {
+  onChange: (val) => buildParticles(Math.round(val))
+});
+
+bindSlider('tConnDist', 'vConnDist', 'connectionDist');
+
+bindSlider('tMouseRadius', 'vMouseRadius', 'mouseRadius');
+
+bindSlider('tDriftSpeed', 'vDriftSpeed', 'driftSpeed', {
+  decimals: 2,
+  onChange: (val) => {
+    for (const p of particles) {
+      p.applyDrift(val);
+    }
+  }
+});
+
+bindSlider('tLineOpacity', 'vLineOpacity', 'lineOpacity', { decimals: 1 });
+
+bindSlider('tParticleSize', 'vParticleSize', 'particleSize', { decimals: 1 });
+
+bindSlider('tHueShift', 'vHueShift', 'hueShift', {
+  onChange: (val) => {
+    for (const p of particles) {
+      p.applyHue(val);
+    }
+  }
+});
+</script>
+
+</body>
+</html>
