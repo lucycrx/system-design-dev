@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview: Ripple Rings</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; background: #fff; }
+  .hero { position: relative; width: 100%; height: 600px; overflow: hidden; background: #fff; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .edge-fade {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      radial-gradient(ellipse at 100% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      linear-gradient(to bottom, rgba(255,255,255,0) 60%, rgba(255,255,255,0.95) 100%);
+  }
+  .content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 56px 24px 32px; }
+  .label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 32px; }
+  h1 { font-family: system-ui, -apple-system, sans-serif; font-size: 3.5rem; line-height: 1.1; color: #1a1a2e; margin-bottom: 32px; max-width: 700px; }
+  h1 .light { font-weight: 300; }
+  h1 .accent { font-weight: 800; color: #4a7fd4; }
+  .subtitle { font-size: 13px; color: #666; line-height: 1.7; max-width: 400px; }
+  .tag { display: inline-block; margin-top: 24px; padding: 4px 12px; background: #f0f4ff; border: 1px solid #d0dcf0; border-radius: 4px; font-size: 11px; color: #4a7fd4; letter-spacing: 0.05em; }
+
+  .tuner-panel { position:fixed; bottom:20px; right:20px; z-index:100; background:rgba(20,20,30,0.85); backdrop-filter:blur(12px); border-radius:10px; border:1px solid rgba(255,255,255,0.1); padding:16px; min-width:240px; font-family:'SF Mono','Fira Code',monospace; font-size:11px; color:rgba(255,255,255,0.8); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .tuner-panel.collapsed .tuner-body { display:none; }
+  .tuner-panel.collapsed { min-width: auto; }
+  .tuner-title { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer; display:flex; justify-content:space-between; user-select:none; }
+  .tuner-panel.collapsed .tuner-title { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+  .tuner-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .tuner-row:last-child { margin-bottom:0; }
+  .tuner-label { flex:1; }
+  .tuner-value { width:36px; text-align:right; color:rgba(255,255,255,0.5); margin-left:8px; }
+  .tuner-row input[type="range"] { width:100px; margin-left:10px; accent-color:#4a7fd4; height:4px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <canvas id="c"></canvas>
+  <div class="edge-fade"></div>
+  <div class="content">
+    <div class="label">Architecture Review for Claude Code</div>
+    <h1><span class="light">Understand any codebase.</span><br><span class="accent">Build to scale.</span></h1>
+    <p class="subtitle">Get an interactive architecture map with plain-English explanations and risk analysis. No code reading required.</p>
+    <div class="tag">Concept 5: Ripple Rings</div>
+  </div>
+</div>
+
+<div class="tuner-panel" id="tunerPanel">
+  <div class="tuner-title" id="tunerTitle">
+    <span>Ripple Tuner</span>
+    <span id="tunerToggle">--</span>
+  </div>
+  <div class="tuner-body">
+    <div class="tuner-row">
+      <span class="tuner-label">Spawn Rate</span>
+      <input type="range" id="tSpawnRate" min="200" max="2000" value="600" step="50">
+      <span class="tuner-value" id="vSpawnRate">600</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Max Size</span>
+      <input type="range" id="tMaxSize" min="100" max="600" value="325" step="10">
+      <span class="tuner-value" id="vMaxSize">325</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Speed</span>
+      <input type="range" id="tSpeed" min="40" max="300" value="120" step="5">
+      <span class="tuner-value" id="vSpeed">120</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Rings</span>
+      <input type="range" id="tRings" min="1" max="8" value="4" step="1">
+      <span class="tuner-value" id="vRings">4</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Ambient Src</span>
+      <input type="range" id="tAmbient" min="0" max="10" value="5" step="1">
+      <span class="tuner-value" id="vAmbient">5</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Opacity</span>
+      <input type="range" id="tOpacity" min="0.2" max="3.0" value="1.0" step="0.1">
+      <span class="tuner-value" id="vOpacity">1.0</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Hue Shift</span>
+      <input type="range" id="tHue" min="0" max="360" value="0" step="1">
+      <span class="tuner-value" id="vHue">0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, mouseX, mouseY, curX, curY, t = 0;
+
+const ripples = [];
+const MAX_RIPPLES = 12;
+let lastSpawn = 0;
+
+// Tuner state
+const tuner = {
+  spawnRate: 600,
+  maxSize: 325,
+  speed: 120,
+  rings: 4,
+  ambientCount: 5,
+  opacity: 1.0,
+  hue: 0,
+};
+
+// Tuner panel collapse
+const tunerPanel = document.getElementById('tunerPanel');
+const tunerTitle = document.getElementById('tunerTitle');
+const tunerToggle = document.getElementById('tunerToggle');
+tunerTitle.addEventListener('click', () => {
+  tunerPanel.classList.toggle('collapsed');
+  tunerToggle.textContent = tunerPanel.classList.contains('collapsed') ? '++' : '--';
+});
+
+// Wire up sliders
+function wireSlider(id, valueId, key, isFloat) {
+  const slider = document.getElementById(id);
+  const display = document.getElementById(valueId);
+  slider.addEventListener('input', () => {
+    const val = isFloat ? parseFloat(slider.value) : parseInt(slider.value);
+    tuner[key] = val;
+    display.textContent = isFloat ? val.toFixed(1) : val;
+    if (key === 'ambientCount') reinitAmbient();
+  });
+}
+
+wireSlider('tSpawnRate', 'vSpawnRate', 'spawnRate', false);
+wireSlider('tMaxSize', 'vMaxSize', 'maxSize', false);
+wireSlider('tSpeed', 'vSpeed', 'speed', false);
+wireSlider('tRings', 'vRings', 'rings', false);
+wireSlider('tAmbient', 'vAmbient', 'ambientCount', false);
+wireSlider('tOpacity', 'vOpacity', 'opacity', true);
+wireSlider('tHue', 'vHue', 'hue', false);
+
+// Hue shift function
+function hueShift(r, g, b, degrees) {
+  const rad = degrees * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  return [
+    Math.round(Math.max(0, Math.min(255, r*(0.213+0.787*cos-0.213*sin) + g*(0.715-0.715*cos-0.715*sin) + b*(0.072-0.072*cos+0.928*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos+0.143*sin) + g*(0.715+0.285*cos+0.140*sin) + b*(0.072-0.072*cos-0.283*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos-0.787*sin) + g*(0.715-0.715*cos+0.715*sin) + b*(0.072+0.928*cos+0.072*sin))))
+  ];
+}
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+  mouseX = W / 2; mouseY = H / 2;
+  curX = W / 2; curY = H / 2;
+}
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = e.clientX - r.left;
+  mouseY = e.clientY - r.top;
+});
+canvas.addEventListener('mouseleave', () => { mouseX = W / 2; mouseY = H / 2; });
+
+// Ambient ripple sources
+const ambientSources = [];
+function initAmbient() {
+  ambientSources.length = 0;
+  for (let i = 0; i < tuner.ambientCount; i++) {
+    ambientSources.push({
+      x: W * (0.15 + Math.random() * 0.7),
+      y: H * (0.15 + Math.random() * 0.7),
+      interval: 2000 + Math.random() * 3000,
+      lastSpawn: -9999,
+    });
+  }
+}
+
+function reinitAmbient() {
+  const currentCount = ambientSources.length;
+  const target = tuner.ambientCount;
+  if (target > currentCount) {
+    for (let i = currentCount; i < target; i++) {
+      ambientSources.push({
+        x: W * (0.15 + Math.random() * 0.7),
+        y: H * (0.15 + Math.random() * 0.7),
+        interval: 2000 + Math.random() * 3000,
+        lastSpawn: -9999,
+      });
+    }
+  } else if (target < currentCount) {
+    ambientSources.length = target;
+  }
+}
+
+function spawnRipple(x, y) {
+  if (ripples.length >= MAX_RIPPLES * 3) ripples.shift();
+  const spread = tuner.maxSize * 0.2;
+  const base = tuner.maxSize - spread;
+  ripples.push({ x, y, radius: 0, birth: t, maxRadius: base + Math.random() * spread * 2 });
+}
+
+function draw(now) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  curX += (mouseX - curX) * 0.06;
+  curY += (mouseY - curY) * 0.06;
+
+  // Spawn ripple from mouse periodically
+  if (now - lastSpawn > tuner.spawnRate) {
+    spawnRipple(curX, curY);
+    lastSpawn = now;
+  }
+
+  // Ambient ripples
+  for (const src of ambientSources) {
+    if (now - src.lastSpawn > src.interval) {
+      spawnRipple(src.x, src.y);
+      src.lastSpawn = now;
+    }
+  }
+
+  // Background concentric rings
+  const bgCenterX = W * 0.5;
+  const bgCenterY = H * 0.45;
+  const [bgR, bgG, bgB] = hueShift(74, 127, 212, tuner.hue);
+  for (let r = 30; r < Math.max(W, H); r += 28) {
+    ctx.beginPath();
+    ctx.arc(bgCenterX, bgCenterY, r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(${bgR},${bgG},${bgB},0.04)`;
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
+
+  // Draw ripples
+  const ringCount = tuner.rings;
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    const rip = ripples[i];
+    const age = (t - rip.birth);
+    rip.radius = age * tuner.speed;
+
+    if (rip.radius > rip.maxRadius) {
+      ripples.splice(i, 1);
+      continue;
+    }
+
+    const life = rip.radius / rip.maxRadius;
+    const fadeIn = Math.min(life * 5, 1);
+    const fadeOut = 1 - life;
+    const alpha = fadeIn * fadeOut * 0.3 * tuner.opacity;
+
+    for (let ring = 0; ring < ringCount; ring++) {
+      const ringRadius = rip.radius - ring * 12;
+      if (ringRadius < 0) continue;
+
+      const ringAlpha = alpha * (1 - ring * (0.75 / ringCount));
+      const norm = ringCount > 1 ? ring / (ringCount - 1) : 0;
+      let r = Math.round(74 + norm * (100 - 74));
+      let g = Math.round(127 + norm * (170 - 127));
+      let b = Math.round(212 + norm * (235 - 212));
+
+      if (tuner.hue !== 0) {
+        [r, g, b] = hueShift(r, g, b, tuner.hue);
+      }
+
+      ctx.beginPath();
+      ctx.arc(rip.x, rip.y, ringRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${r},${g},${b},${ringAlpha})`;
+      ctx.lineWidth = 1.2 - ring * (0.8 / ringCount);
+      ctx.stroke();
+    }
+  }
+
+  // Mouse glow
+  const [glR, glG, glB] = hueShift(74, 127, 212, tuner.hue);
+  const gradient = ctx.createRadialGradient(curX, curY, 0, curX, curY, 80);
+  gradient.addColorStop(0, `rgba(${glR},${glG},${glB},0.06)`);
+  gradient.addColorStop(1, `rgba(${glR},${glG},${glB},0)`);
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(curX, curY, 80, 0, Math.PI * 2);
+  ctx.fill();
+
+  t += 0.016;
+  requestAnimationFrame(draw);
+}
+
+resize();
+initAmbient();
+window.addEventListener('resize', () => { resize(); initAmbient(); });
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
