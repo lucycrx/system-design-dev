@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview: Topographic Contours</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; background: #fff; }
+
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .edge-fade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      radial-gradient(ellipse at 100% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      linear-gradient(to bottom, rgba(255,255,255,0) 60%, rgba(255,255,255,0.95) 100%);
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 56px 24px 32px;
+  }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 3.5rem;
+    line-height: 1.1;
+    color: #1a1a2e;
+    margin-bottom: 32px;
+    max-width: 700px;
+  }
+
+  h1 .light { font-weight: 300; }
+  h1 .accent { font-weight: 800; color: #4a7fd4; }
+
+  .subtitle {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.7;
+    max-width: 400px;
+  }
+
+  .tag {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 4px 12px;
+    background: #f0f4ff;
+    border: 1px solid #d0dcf0;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #4a7fd4;
+    letter-spacing: 0.05em;
+  }
+
+  .tuner-panel { position:fixed; bottom:20px; right:20px; z-index:100; background:rgba(20,20,30,0.85); backdrop-filter:blur(12px); border-radius:10px; border:1px solid rgba(255,255,255,0.1); padding:16px; min-width:240px; font-family:'SF Mono','Fira Code',monospace; font-size:11px; color:rgba(255,255,255,0.8); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .tuner-panel.collapsed .tuner-body { display:none; }
+  .tuner-title { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer; display:flex; justify-content:space-between; }
+  .tuner-panel.collapsed .tuner-title { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+  .tuner-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .tuner-row:last-child { margin-bottom:0; }
+  .tuner-label { flex:1; }
+  .tuner-value { width:36px; text-align:right; color:rgba(255,255,255,0.5); margin-left:8px; }
+  .tuner-row input[type="range"] { width:100px; margin-left:10px; accent-color:#4a7fd4; height:4px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <canvas id="topoCanvas"></canvas>
+  <div class="edge-fade"></div>
+
+  <div class="content">
+    <div class="label">Architecture Review for Claude Code</div>
+    <h1>
+      <span class="light">Understand any codebase.</span><br>
+      <span class="accent">Build to scale.</span>
+    </h1>
+    <p class="subtitle">
+      Get an interactive architecture map with plain-English explanations and risk analysis. No code reading required.
+    </p>
+    <div class="tag">Concept 3: Topographic Contours</div>
+  </div>
+</div>
+
+<div class="tuner-panel" id="tunerPanel">
+  <div class="tuner-title" id="tunerTitle">
+    <span>Tuner</span>
+    <span id="tunerToggle">--</span>
+  </div>
+  <div class="tuner-body">
+    <div class="tuner-row">
+      <span class="tuner-label">Cell Size</span>
+      <input type="range" id="tuneCellSize" min="4" max="20" value="8" step="1">
+      <span class="tuner-value" id="valCellSize">8</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Contour Levels</span>
+      <input type="range" id="tuneLevels" min="4" max="30" value="16" step="1">
+      <span class="tuner-value" id="valLevels">16</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Mouse Radius</span>
+      <input type="range" id="tuneRadius" min="80" max="400" value="200" step="10">
+      <span class="tuner-value" id="valRadius">200</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Hill Strength</span>
+      <input type="range" id="tuneStrength" min="0.2" max="2.0" value="0.8" step="0.05">
+      <span class="tuner-value" id="valStrength">0.80</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Anim Speed</span>
+      <input type="range" id="tuneSpeed" min="1" max="20" value="8" step="1">
+      <span class="tuner-value" id="valSpeed">8</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Line Width</span>
+      <input type="range" id="tuneLineWidth" min="0.3" max="2.5" value="1.0" step="0.1">
+      <span class="tuner-value" id="valLineWidth">1.0</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Hue Shift</span>
+      <input type="range" id="tuneHue" min="0" max="360" value="0" step="1">
+      <span class="tuner-value" id="valHue">0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('topoCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+let mouseX, mouseY;
+let currentMX, currentMY;
+let t = 0;
+
+// Tuner parameters
+const params = {
+  cellSize: 8,
+  levels: 16,
+  mouseRadius: 200,
+  hillStrength: 0.8,
+  speed: 8,
+  lineWidth: 1.0,
+  hueShiftDeg: 0,
+};
+
+// Tuner panel collapse
+const tunerPanel = document.getElementById('tunerPanel');
+const tunerTitle = document.getElementById('tunerTitle');
+const tunerToggle = document.getElementById('tunerToggle');
+
+tunerTitle.addEventListener('click', () => {
+  tunerPanel.classList.toggle('collapsed');
+  tunerToggle.textContent = tunerPanel.classList.contains('collapsed') ? '++' : '--';
+});
+
+// Wire up sliders
+function wireSlider(id, valId, paramKey, isFloat) {
+  const slider = document.getElementById(id);
+  const valEl = document.getElementById(valId);
+  slider.addEventListener('input', () => {
+    const v = isFloat ? parseFloat(slider.value) : parseInt(slider.value, 10);
+    params[paramKey] = v;
+    valEl.textContent = isFloat ? v.toFixed(isFloat === 2 ? 2 : 1) : v;
+  });
+}
+
+wireSlider('tuneCellSize', 'valCellSize', 'cellSize', false);
+wireSlider('tuneLevels', 'valLevels', 'levels', false);
+wireSlider('tuneRadius', 'valRadius', 'mouseRadius', false);
+wireSlider('tuneStrength', 'valStrength', 'hillStrength', 2);
+wireSlider('tuneSpeed', 'valSpeed', 'speed', false);
+wireSlider('tuneLineWidth', 'valLineWidth', 'lineWidth', 1);
+wireSlider('tuneHue', 'valHue', 'hueShiftDeg', false);
+
+// Hue shift helper
+function hueShift(r, g, b, degrees) {
+  const rad = degrees * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  return [
+    Math.round(Math.max(0, Math.min(255, r*(0.213+0.787*cos-0.213*sin) + g*(0.715-0.715*cos-0.715*sin) + b*(0.072-0.072*cos+0.928*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos+0.143*sin) + g*(0.715+0.285*cos+0.140*sin) + b*(0.072-0.072*cos-0.283*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos-0.787*sin) + g*(0.715-0.715*cos+0.715*sin) + b*(0.072+0.928*cos+0.072*sin))))
+  ];
+}
+
+// Simple 2D noise using sine combinations
+function noise(x, y, seed) {
+  return (
+    Math.sin(x * 1.2 + y * 0.7 + seed * 0.5) * 0.3 +
+    Math.sin(x * 0.5 - y * 1.3 + seed * 0.3) * 0.3 +
+    Math.sin(x * 2.1 + y * 1.8 - seed * 0.7) * 0.15 +
+    Math.sin(x * 0.3 + y * 2.5 + seed * 0.9) * 0.25
+  );
+}
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+  mouseX = W / 2;
+  mouseY = H / 2;
+  currentMX = W / 2;
+  currentMY = H / 2;
+}
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = e.clientX - r.left;
+  mouseY = e.clientY - r.top;
+});
+
+canvas.addEventListener('mouseleave', () => {
+  mouseX = W / 2;
+  mouseY = H / 2;
+});
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  currentMX += (mouseX - currentMX) * 0.04;
+  currentMY += (mouseY - currentMY) * 0.04;
+
+  const CELL = params.cellSize;
+  const cols = Math.ceil(W / CELL) + 1;
+  const rows = Math.ceil(H / CELL) + 1;
+
+  // Compute height field
+  const field = [];
+  for (let r = 0; r < rows; r++) {
+    field[r] = [];
+    for (let c = 0; c < cols; c++) {
+      const x = c * CELL;
+      const y = r * CELL;
+
+      // Base terrain
+      let h = noise(x * 0.006, y * 0.008, t * 0.4);
+      h += noise(x * 0.012, y * 0.015, t * 0.2) * 0.5;
+
+      // Mouse creates a "hill"
+      const dx = x - currentMX;
+      const dy = y - currentMY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < params.mouseRadius) {
+        const force = 1 - dist / params.mouseRadius;
+        h += force * force * params.hillStrength;
+      }
+
+      field[r][c] = h;
+    }
+  }
+
+  // Draw contour lines at different levels
+  const NUM_LEVELS = params.levels;
+  for (let level = 0; level < NUM_LEVELS; level++) {
+    const threshold = -0.8 + (level / NUM_LEVELS) * 2.2;
+    const norm = level / (NUM_LEVELS - 1);
+
+    let red = Math.round(74 + norm * (40 - 74));
+    let green = Math.round(127 + norm * (90 - 127));
+    let blue = Math.round(212 + norm * (180 - 212));
+
+    if (params.hueShiftDeg !== 0) {
+      [red, green, blue] = hueShift(red, green, blue, params.hueShiftDeg);
+    }
+
+    const alpha = 0.1 + norm * 0.3;
+
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(${red},${green},${blue},${alpha})`;
+    ctx.lineWidth = params.lineWidth + norm * 0.4;
+
+    // Simple marching squares for contour extraction
+    for (let r = 0; r < rows - 1; r++) {
+      for (let c = 0; c < cols - 1; c++) {
+        const tl = field[r][c] >= threshold ? 1 : 0;
+        const tr = field[r][c + 1] >= threshold ? 1 : 0;
+        const br = field[r + 1][c + 1] >= threshold ? 1 : 0;
+        const bl = field[r + 1][c] >= threshold ? 1 : 0;
+
+        const config = tl * 8 + tr * 4 + br * 2 + bl;
+        if (config === 0 || config === 15) continue;
+
+        const x = c * CELL;
+        const y = r * CELL;
+
+        // Interpolation helper
+        function lerp(v1, v2) {
+          if (Math.abs(v2 - v1) < 0.0001) return 0.5;
+          return (threshold - v1) / (v2 - v1);
+        }
+
+        const top = lerp(field[r][c], field[r][c + 1]);
+        const right = lerp(field[r][c + 1], field[r + 1][c + 1]);
+        const bottom = lerp(field[r + 1][c], field[r + 1][c + 1]);
+        const left = lerp(field[r][c], field[r + 1][c]);
+
+        const edges = {
+          top: [x + top * CELL, y],
+          right: [x + CELL, y + right * CELL],
+          bottom: [x + bottom * CELL, y + CELL],
+          left: [x, y + left * CELL],
+        };
+
+        const segments = [];
+
+        switch (config) {
+          case 1: case 14: segments.push([edges.left, edges.bottom]); break;
+          case 2: case 13: segments.push([edges.bottom, edges.right]); break;
+          case 3: case 12: segments.push([edges.left, edges.right]); break;
+          case 4: case 11: segments.push([edges.top, edges.right]); break;
+          case 5:
+            segments.push([edges.top, edges.left]);
+            segments.push([edges.bottom, edges.right]);
+            break;
+          case 6: case 9: segments.push([edges.top, edges.bottom]); break;
+          case 7: case 8: segments.push([edges.top, edges.left]); break;
+          case 10:
+            segments.push([edges.top, edges.right]);
+            segments.push([edges.left, edges.bottom]);
+            break;
+        }
+
+        for (const seg of segments) {
+          ctx.moveTo(seg[0][0], seg[0][1]);
+          ctx.lineTo(seg[1][0], seg[1][1]);
+        }
+      }
+    }
+
+    ctx.stroke();
+  }
+
+  t += params.speed / 1000;
+  requestAnimationFrame(draw);
+}
+
+resize();
+window.addEventListener('resize', resize);
+draw();
+</script>
+
+</body>
+</html>
