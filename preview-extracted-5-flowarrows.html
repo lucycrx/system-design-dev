@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview: Flow Arrows</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'SF Mono', 'Fira Code', monospace; background: #fff; }
+  .hero { position: relative; width: 100%; height: 600px; overflow: hidden; background: #fff; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .edge-fade {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      radial-gradient(ellipse at 100% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      linear-gradient(to bottom, rgba(255,255,255,0) 60%, rgba(255,255,255,0.95) 100%);
+  }
+  .content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 56px 24px 32px; }
+  .label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 32px; }
+  h1 { font-family: system-ui, -apple-system, sans-serif; font-size: 3.5rem; line-height: 1.1; color: #1a1a2e; margin-bottom: 32px; max-width: 700px; }
+  h1 .light { font-weight: 300; }
+  h1 .accent { font-weight: 800; color: #4a7fd4; }
+  .subtitle { font-size: 13px; color: #666; line-height: 1.7; max-width: 400px; }
+  .tag { display: inline-block; margin-top: 24px; padding: 4px 12px; background: #f0f4ff; border: 1px solid #d0dcf0; border-radius: 4px; font-size: 11px; color: #4a7fd4; letter-spacing: 0.05em; }
+
+  .tuner-panel { position:fixed; bottom:20px; right:20px; z-index:100; background:rgba(20,20,30,0.85); backdrop-filter:blur(12px); border-radius:10px; border:1px solid rgba(255,255,255,0.1); padding:16px; min-width:240px; font-family:'SF Mono','Fira Code',monospace; font-size:11px; color:rgba(255,255,255,0.8); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .tuner-panel.collapsed .tuner-body { display:none; }
+  .tuner-panel.collapsed .tuner-title { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+  .tuner-title { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer; display:flex; justify-content:space-between; user-select:none; }
+  .tuner-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .tuner-row:last-child { margin-bottom:0; }
+  .tuner-label { flex:1; }
+  .tuner-value { width:36px; text-align:right; color:rgba(255,255,255,0.5); margin-left:8px; }
+  .tuner-row input[type="range"] { width:100px; margin-left:10px; accent-color:#4a7fd4; height:4px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <canvas id="c"></canvas>
+  <div class="edge-fade"></div>
+  <div class="content">
+    <div class="label">Architecture Review for Claude Code</div>
+    <h1><span class="light">Understand any codebase.</span><br><span class="accent">Build to scale.</span></h1>
+    <p class="subtitle">Directional line segments driven by a vector field. Mouse warps the field, bending arrows inward. Arrows lengthen and glow near the cursor.</p>
+    <div class="tag">Extracted 5: Flow Arrows</div>
+  </div>
+</div>
+
+<div class="tuner-panel" id="tunerPanel">
+  <div class="tuner-title" id="tunerTitle">
+    <span>Tuner</span>
+    <span id="tunerToggle">--</span>
+  </div>
+  <div class="tuner-body" id="tunerBody">
+    <div class="tuner-row">
+      <span class="tuner-label">Grid Spacing</span>
+      <input type="range" id="tGridSpacing" min="10" max="50" value="24">
+      <span class="tuner-value" id="vGridSpacing">24</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Arrow Length</span>
+      <input type="range" id="tArrowLength" min="4" max="25" value="10">
+      <span class="tuner-value" id="vArrowLength">10</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Mouse Radius</span>
+      <input type="range" id="tMouseRadius" min="80" max="400" value="220">
+      <span class="tuner-value" id="vMouseRadius">220</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Bend Strength</span>
+      <input type="range" id="tBendStrength" min="0.1" max="1.0" value="0.7" step="0.05">
+      <span class="tuner-value" id="vBendStrength">0.70</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Anim Speed</span>
+      <input type="range" id="tAnimSpeed" min="1" max="20" value="8">
+      <span class="tuner-value" id="vAnimSpeed">8</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Base Opacity</span>
+      <input type="range" id="tBaseOpacity" min="0.02" max="0.3" value="0.08" step="0.01">
+      <span class="tuner-value" id="vBaseOpacity">0.08</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Hue Shift</span>
+      <input type="range" id="tHueShift" min="0" max="360" value="0">
+      <span class="tuner-value" id="vHueShift">0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, t = 0;
+let mouseX, mouseY, curX, curY;
+
+// Tunable parameters
+const params = {
+  gridSpacing: 24,
+  arrowLength: 10,
+  mouseRadius: 220,
+  bendStrength: 0.7,
+  animSpeed: 8,
+  baseOpacity: 0.08,
+  hueShift: 0
+};
+
+// Tuner panel collapse toggle
+const tunerPanel = document.getElementById('tunerPanel');
+const tunerTitle = document.getElementById('tunerTitle');
+const tunerToggle = document.getElementById('tunerToggle');
+
+tunerTitle.addEventListener('click', () => {
+  tunerPanel.classList.toggle('collapsed');
+  tunerToggle.textContent = tunerPanel.classList.contains('collapsed') ? '++' : '--';
+});
+
+// Wire up sliders
+function wireSlider(sliderId, valueId, paramKey, formatter) {
+  const slider = document.getElementById(sliderId);
+  const display = document.getElementById(valueId);
+  slider.addEventListener('input', () => {
+    const val = parseFloat(slider.value);
+    params[paramKey] = val;
+    display.textContent = formatter ? formatter(val) : val;
+  });
+}
+
+wireSlider('tGridSpacing', 'vGridSpacing', 'gridSpacing');
+wireSlider('tArrowLength', 'vArrowLength', 'arrowLength');
+wireSlider('tMouseRadius', 'vMouseRadius', 'mouseRadius');
+wireSlider('tBendStrength', 'vBendStrength', 'bendStrength', v => v.toFixed(2));
+wireSlider('tAnimSpeed', 'vAnimSpeed', 'animSpeed');
+wireSlider('tBaseOpacity', 'vBaseOpacity', 'baseOpacity', v => v.toFixed(2));
+wireSlider('tHueShift', 'vHueShift', 'hueShift');
+
+// Hue shift function
+function hueShiftColor(r, g, b, degrees) {
+  const rad = degrees * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  return [
+    Math.round(Math.max(0, Math.min(255, r*(0.213+0.787*cos-0.213*sin) + g*(0.715-0.715*cos-0.715*sin) + b*(0.072-0.072*cos+0.928*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos+0.143*sin) + g*(0.715+0.285*cos+0.140*sin) + b*(0.072-0.072*cos-0.283*sin)))),
+    Math.round(Math.max(0, Math.min(255, r*(0.213-0.213*cos-0.787*sin) + g*(0.715-0.715*cos+0.715*sin) + b*(0.072+0.928*cos+0.072*sin))))
+  ];
+}
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+  mouseX = W / 2; mouseY = H / 2;
+  curX = W / 2; curY = H / 2;
+}
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = e.clientX - r.left;
+  mouseY = e.clientY - r.top;
+});
+canvas.addEventListener('mouseleave', () => { mouseX = W / 2; mouseY = H / 2; });
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  curX += (mouseX - curX) * 0.05;
+  curY += (mouseY - curY) * 0.05;
+  t += params.animSpeed / 1000;
+
+  const SPACING = params.gridSpacing;
+  const BASE_LEN = params.arrowLength;
+  const MOUSE_RADIUS = params.mouseRadius;
+
+  for (let x = SPACING / 2; x < W; x += SPACING) {
+    for (let y = SPACING / 2; y < H; y += SPACING) {
+      // Base field angle from layered sine
+      let angle = Math.sin(x * 0.008 + t * 3) * Math.cos(y * 0.008 + t * 1.5) * Math.PI
+        + Math.sin((x + y) * 0.004 + t * 2) * 0.5;
+
+      // Mouse influence
+      const dx = curX - x;
+      const dy = curY - y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      let mouseProx = 0;
+      let len = BASE_LEN;
+      let alpha = params.baseOpacity;
+
+      if (dist < MOUSE_RADIUS) {
+        mouseProx = 1 - dist / MOUSE_RADIUS;
+        const eased = mouseProx * mouseProx;
+
+        // Bend toward mouse
+        const mouseAngle = Math.atan2(dy, dx);
+        angle += (mouseAngle - angle) * eased * params.bendStrength;
+
+        len += eased * 8;
+        alpha += eased * 0.3;
+      }
+
+      const endX = x + Math.cos(angle) * len;
+      const endY = y + Math.sin(angle) * len;
+
+      // Color gradient based on position + mouse proximity
+      const normY = y / H;
+      let r = Math.round(74 + normY * (40 - 74) + mouseProx * 30);
+      let g = Math.round(127 + normY * (90 - 127) + mouseProx * 10);
+      let b = Math.round(212 + normY * (180 - 212) - mouseProx * 20);
+
+      // Apply hue shift
+      if (params.hueShift !== 0) {
+        [r, g, b] = hueShiftColor(r, g, b, params.hueShift);
+      }
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(endX, endY);
+      ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+      ctx.lineWidth = 0.7 + mouseProx * 0.8;
+      ctx.stroke();
+
+      // Arrowhead dot at end
+      const dotRadius = 0.8 + mouseProx * 2;
+      const dotAlpha = alpha * (0.6 + mouseProx * 0.8);
+
+      ctx.beginPath();
+      ctx.arc(endX, endY, dotRadius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},${dotAlpha})`;
+      ctx.fill();
+
+      // Small origin dot for visual anchor
+      if (mouseProx > 0.4) {
+        ctx.beginPath();
+        ctx.arc(x, y, 0.8, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r},${g},${b},${mouseProx * 0.2})`;
+        ctx.fill();
+      }
+    }
+  }
+
+  // Mouse glow
+  let glowR = 74, glowG = 127, glowB = 212;
+  if (params.hueShift !== 0) {
+    [glowR, glowG, glowB] = hueShiftColor(glowR, glowG, glowB, params.hueShift);
+  }
+  const grad = ctx.createRadialGradient(curX, curY, 0, curX, curY, 80);
+  grad.addColorStop(0, `rgba(${glowR},${glowG},${glowB},0.05)`);
+  grad.addColorStop(1, `rgba(${glowR},${glowG},${glowB},0)`);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(curX, curY, 80, 0, Math.PI * 2);
+  ctx.fill();
+
+  requestAnimationFrame(draw);
+}
+
+resize();
+window.addEventListener('resize', resize);
+draw();
+</script>
+</body>
+</html>
