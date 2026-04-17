@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview: Interactive Mesh Grid</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; background: #fff; }
+
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .edge-fade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      radial-gradient(ellipse at 100% 100%, rgba(255,255,255,0.8) 0%, transparent 35%),
+      linear-gradient(to bottom, rgba(255,255,255,0) 60%, rgba(255,255,255,0.95) 100%);
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 56px 24px 32px;
+  }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 3.5rem;
+    line-height: 1.1;
+    color: #1a1a2e;
+    margin-bottom: 32px;
+    max-width: 700px;
+  }
+
+  h1 .light { font-weight: 300; }
+  h1 .accent { font-weight: 800; color: #4a7fd4; }
+
+  .subtitle {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.7;
+    max-width: 400px;
+  }
+
+  .tag {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 4px 12px;
+    background: #f0f4ff;
+    border: 1px solid #d0dcf0;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #4a7fd4;
+    letter-spacing: 0.05em;
+  }
+
+  /* Tuner panel */
+  .tuner-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    background: rgba(20, 20, 30, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 16px;
+    min-width: 240px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+  }
+  .tuner-panel.collapsed { padding: 0; min-width: auto; }
+  .tuner-panel.collapsed .tuner-body { display: none; }
+  .tuner-toggle {
+    background: rgba(20,20,30,0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 101;
+  }
+  .tuner-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .tuner-row:last-child { margin-bottom: 0; }
+  .tuner-label { flex: 1; }
+  .tuner-value { width: 36px; text-align: right; color: rgba(255,255,255,0.5); margin-left: 8px; }
+  .tuner-row input[type="range"] {
+    width: 100px;
+    margin-left: 10px;
+    accent-color: #4a7fd4;
+    height: 4px;
+  }
+  .tuner-title {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <canvas id="meshCanvas"></canvas>
+  <div class="edge-fade"></div>
+
+  <div class="content">
+    <div class="label">Architecture Review for Claude Code</div>
+    <h1>
+      <span class="light">Understand any codebase.</span><br>
+      <span class="accent">Build to scale.</span>
+    </h1>
+    <p class="subtitle">
+      Get an interactive architecture map with plain-English explanations and risk analysis. No code reading required.
+    </p>
+    <div class="tag">Concept 1: Interactive Mesh Grid</div>
+  </div>
+</div>
+
+<!-- Tuner toggle button (visible when panel is collapsed) -->
+<button class="tuner-toggle" id="tunerToggle" style="display:none;">Tuners</button>
+
+<!-- Tuner panel -->
+<div class="tuner-panel" id="tunerPanel">
+  <div class="tuner-title" id="tunerTitle">
+    <span>Tuners</span>
+    <span style="font-size:9px; opacity:0.5;">collapse</span>
+  </div>
+  <div class="tuner-body">
+    <div class="tuner-row">
+      <span class="tuner-label">Grid Density</span>
+      <input type="range" id="tCols" min="10" max="60" value="32" step="1">
+      <span class="tuner-value" id="vCols">32</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Mouse Radius</span>
+      <input type="range" id="tRadius" min="50" max="400" value="180" step="5">
+      <span class="tuner-value" id="vRadius">180</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Push Strength</span>
+      <input type="range" id="tPush" min="10" max="100" value="45" step="1">
+      <span class="tuner-value" id="vPush">45</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Anim Speed</span>
+      <input type="range" id="tSpeed" min="1" max="20" value="8" step="1">
+      <span class="tuner-value" id="vSpeed">8</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Line Opacity</span>
+      <input type="range" id="tOpacity" min="0.2" max="2.0" value="1.0" step="0.05">
+      <span class="tuner-value" id="vOpacity">1.0</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Line Width</span>
+      <input type="range" id="tWidth" min="0.3" max="2.0" value="0.7" step="0.05">
+      <span class="tuner-value" id="vWidth">0.7</span>
+    </div>
+    <div class="tuner-row">
+      <span class="tuner-label">Hue Shift</span>
+      <input type="range" id="tHue" min="0" max="360" value="0" step="1">
+      <span class="tuner-value" id="vHue">0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('meshCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+let mouseX, mouseY;
+let currentMX, currentMY;
+let t = 0;
+
+// Tunable parameters
+let COLS = 32;
+let ROWS = 24;
+let INFLUENCE_RADIUS = 180;
+let pushStrength = 45;
+let animSpeed = 8;
+let lineOpacity = 1.0;
+let lineWidth = 0.7;
+let hueShiftDeg = 0;
+
+// Hue shift helper
+function hueShift(r, g, b, degrees) {
+  const rad = degrees * Math.PI / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const nr = r * (0.213 + 0.787 * cos - 0.213 * sin) + g * (0.715 - 0.715 * cos - 0.715 * sin) + b * (0.072 - 0.072 * cos + 0.928 * sin);
+  const ng = r * (0.213 - 0.213 * cos + 0.143 * sin) + g * (0.715 + 0.285 * cos + 0.140 * sin) + b * (0.072 - 0.072 * cos - 0.283 * sin);
+  const nb = r * (0.213 - 0.213 * cos - 0.787 * sin) + g * (0.715 - 0.715 * cos + 0.715 * sin) + b * (0.072 + 0.928 * cos + 0.072 * sin);
+  return [Math.round(Math.max(0, Math.min(255, nr))), Math.round(Math.max(0, Math.min(255, ng))), Math.round(Math.max(0, Math.min(255, nb)))];
+}
+
+// Tuner panel logic
+const tunerPanel = document.getElementById('tunerPanel');
+const tunerToggle = document.getElementById('tunerToggle');
+const tunerTitle = document.getElementById('tunerTitle');
+
+tunerTitle.addEventListener('click', () => {
+  tunerPanel.classList.add('collapsed');
+  tunerToggle.style.display = 'block';
+});
+
+tunerToggle.addEventListener('click', () => {
+  tunerPanel.classList.remove('collapsed');
+  tunerToggle.style.display = 'none';
+});
+
+// Wire up sliders
+function wireSlider(id, valueId, setter, formatter) {
+  const slider = document.getElementById(id);
+  const display = document.getElementById(valueId);
+  slider.addEventListener('input', () => {
+    const val = parseFloat(slider.value);
+    setter(val);
+    display.textContent = formatter ? formatter(val) : val;
+  });
+}
+
+wireSlider('tCols', 'vCols', v => {
+  COLS = Math.round(v);
+  ROWS = Math.round(COLS * 0.75);
+});
+wireSlider('tRadius', 'vRadius', v => { INFLUENCE_RADIUS = v; });
+wireSlider('tPush', 'vPush', v => { pushStrength = v; });
+wireSlider('tSpeed', 'vSpeed', v => { animSpeed = v; });
+wireSlider('tOpacity', 'vOpacity', v => { lineOpacity = v; }, v => v.toFixed(1));
+wireSlider('tWidth', 'vWidth', v => { lineWidth = v; }, v => v.toFixed(1));
+wireSlider('tHue', 'vHue', v => { hueShiftDeg = v; });
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+  mouseX = W / 2;
+  mouseY = H / 2;
+  currentMX = W / 2;
+  currentMY = H / 2;
+}
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = e.clientX - r.left;
+  mouseY = e.clientY - r.top;
+});
+
+canvas.addEventListener('mouseleave', () => {
+  mouseX = W / 2;
+  mouseY = H / 2;
+});
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  currentMX += (mouseX - currentMX) * 0.06;
+  currentMY += (mouseY - currentMY) * 0.06;
+
+  const cellW = W / (COLS - 1);
+  const cellH = H / (ROWS - 1);
+
+  // Compute displaced grid points
+  const points = [];
+  for (let r = 0; r < ROWS; r++) {
+    points[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      let x = c * cellW;
+      let y = r * cellH;
+
+      // Organic drift
+      const drift1 = Math.sin(x * 0.005 + t * 0.3 + r * 0.2) * 6;
+      const drift2 = Math.cos(y * 0.007 + t * 0.2 + c * 0.15) * 5;
+      x += drift1;
+      y += drift2;
+
+      // Mouse displacement
+      const dx = x - currentMX;
+      const dy = y - currentMY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < INFLUENCE_RADIUS) {
+        const force = 1 - dist / INFLUENCE_RADIUS;
+        const eased = force * force * force;
+        x += (dx / (dist + 1)) * eased * pushStrength;
+        y += (dy / (dist + 1)) * eased * pushStrength;
+      }
+
+      points[r][c] = { x, y };
+    }
+  }
+
+  // Draw horizontal lines
+  for (let r = 0; r < ROWS; r++) {
+    const norm = r / (ROWS - 1);
+    let red = Math.round(74 + norm * (40 - 74));
+    let green = Math.round(127 + norm * (90 - 127));
+    let blue = Math.round(212 + norm * (180 - 212));
+    if (hueShiftDeg !== 0) {
+      [red, green, blue] = hueShift(red, green, blue, hueShiftDeg);
+    }
+    const alpha = (0.08 + norm * 0.18) * lineOpacity;
+
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(${red},${green},${blue},${Math.min(1, alpha)})`;
+    ctx.lineWidth = lineWidth;
+
+    for (let c = 0; c < COLS; c++) {
+      const p = points[r][c];
+      if (c === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+  }
+
+  // Draw vertical lines
+  for (let c = 0; c < COLS; c++) {
+    const norm = c / (COLS - 1);
+    let red = Math.round(74 + norm * (50 - 74));
+    let green = Math.round(127 + norm * (100 - 127));
+    let blue = Math.round(212 + norm * (190 - 212));
+    if (hueShiftDeg !== 0) {
+      [red, green, blue] = hueShift(red, green, blue, hueShiftDeg);
+    }
+    const alpha = (0.06 + norm * 0.12) * lineOpacity;
+
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(${red},${green},${blue},${Math.min(1, alpha)})`;
+    ctx.lineWidth = lineWidth;
+
+    for (let r = 0; r < ROWS; r++) {
+      const p = points[r][c];
+      if (r === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+  }
+
+  // Draw subtle dots at intersections near mouse
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const p = points[r][c];
+      const dx = p.x - currentMX;
+      const dy = p.y - currentMY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < INFLUENCE_RADIUS * 1.2) {
+        const proximity = 1 - dist / (INFLUENCE_RADIUS * 1.2);
+        let dotR = 74, dotG = 127, dotB = 212;
+        if (hueShiftDeg !== 0) {
+          [dotR, dotG, dotB] = hueShift(dotR, dotG, dotB, hueShiftDeg);
+        }
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${dotR},${dotG},${dotB},${proximity * 0.5})`;
+        ctx.arc(p.x, p.y, 1.5 + proximity * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  t += animSpeed / 1000;
+  requestAnimationFrame(draw);
+}
+
+resize();
+window.addEventListener('resize', resize);
+draw();
+</script>
+
+</body>
+</html>
