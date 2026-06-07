@@ -2,18 +2,28 @@ import type { CSSProperties, ReactNode } from "react";
 
 /**
  * Static, filled-Bauhaus concept icons — one distinct flat SVG per concept.
- * Ink mass uses `currentColor` (driven by `color`); a single accent element
- * uses `accent`. No animation: 40 of these render for free. In the grid,
- * ConceptCard transitions `color` ink->primary on hover for the reveal feel.
+ * 100% solid fills (no strokes): arrows are bar+triangle, loops are annulus
+ * rings with a paper notch, dividers are paper-filled bars. Ink mass uses
+ * `currentColor` (driven by `color`); a single accent element uses `accent`.
+ * No animation — 40 of these render for free. ConceptCard transitions `color`
+ * ink->primary on hover for the reveal.
  */
 
 interface Props {
   id: string;
-  /** Ink mass color (via currentColor). Defaults to ink. */
   color?: string;
-  /** Single accent element color. Defaults to currentColor (monochrome). */
   accent?: string;
   className?: string;
+}
+
+const PAPER = "#F4F1EA";
+
+// Filled ring (annulus) via evenodd fill — solid, no stroke.
+function ring(cx: number, cy: number, R: number, r: number): string {
+  return (
+    `M${cx - R} ${cy} a${R} ${R} 0 1 0 ${2 * R} 0 a${R} ${R} 0 1 0 ${-2 * R} 0 Z ` +
+    `M${cx - r} ${cy} a${r} ${r} 0 1 1 ${2 * r} 0 a${r} ${r} 0 1 1 ${-2 * r} 0 Z`
+  );
 }
 
 function icon(id: string, a: string): ReactNode {
@@ -35,7 +45,7 @@ function icon(id: string, a: string): ReactNode {
           <rect x="32" y="46" width="36" height="14" fill={ink} />
           <rect x="32" y="64" width="36" height="14" fill={ink} />
           <circle cx="40" cy="53" r="2.4" fill={a} />
-          <circle cx="40" cy="71" r="2.4" fill="#F4F1EA" />
+          <circle cx="40" cy="71" r="2.4" fill={PAPER} />
         </>
       );
     case "database":
@@ -71,13 +81,9 @@ function icon(id: string, a: string): ReactNode {
       return (
         <>
           <rect x="30" y="34" width="40" height="32" fill={ink} />
-          <g stroke={ink} strokeWidth="3">
-            <line x1="38" y1="34" x2="38" y2="26" />
-            <line x1="50" y1="34" x2="50" y2="26" />
-            <line x1="62" y1="34" x2="62" y2="26" />
-            <line x1="38" y1="74" x2="38" y2="66" />
-            <line x1="50" y1="74" x2="50" y2="66" />
-            <line x1="62" y1="74" x2="62" y2="66" />
+          <g fill={ink}>
+            <rect x="36" y="27" width="4" height="8" /><rect x="48" y="27" width="4" height="8" /><rect x="60" y="27" width="4" height="8" />
+            <rect x="36" y="65" width="4" height="8" /><rect x="48" y="65" width="4" height="8" /><rect x="60" y="65" width="4" height="8" />
           </g>
           <path d="M52 40 L44 52 H51 L48 60 L58 46 H51 Z" fill={a} />
         </>
@@ -94,24 +100,19 @@ function icon(id: string, a: string): ReactNode {
     case "cdn":
       return (
         <>
-          <g stroke={ink} strokeWidth="2.5">
-            <line x1="50" y1="50" x2="50" y2="24" /><line x1="50" y1="50" x2="73" y2="37" />
-            <line x1="50" y1="50" x2="73" y2="63" /><line x1="50" y1="50" x2="50" y2="76" />
-            <line x1="50" y1="50" x2="27" y2="63" /><line x1="50" y1="50" x2="27" y2="37" />
-          </g>
-          <circle cx="50" cy="50" r="9" fill={ink} />
+          <circle cx="50" cy="50" r="11" fill={ink} />
           <g fill={a}>
-            <rect x="44" y="18" width="12" height="12" /><rect x="69" y="31" width="11" height="11" />
-            <rect x="69" y="58" width="11" height="11" /><rect x="44" y="70" width="12" height="12" />
-            <rect x="20" y="58" width="11" height="11" /><rect x="20" y="31" width="11" height="11" />
+            <rect x="44" y="16" width="12" height="12" /><rect x="70" y="30" width="12" height="12" />
+            <rect x="70" y="58" width="12" height="12" /><rect x="44" y="72" width="12" height="12" />
+            <rect x="18" y="58" width="12" height="12" /><rect x="18" y="30" width="12" height="12" />
           </g>
         </>
       );
     case "load-balancer":
       return (
         <>
-          <path d="M22 50 L70 28 M22 50 L70 50 M22 50 L70 72" stroke={ink} strokeWidth="2.5" fill="none" />
           <rect x="14" y="42" width="16" height="16" fill={a} />
+          <polygon points="34,50 58,32 58,68" fill={ink} />
           <g fill={ink}>
             <rect x="70" y="22" width="16" height="12" /><rect x="70" y="44" width="16" height="12" /><rect x="70" y="66" width="16" height="12" />
           </g>
@@ -131,7 +132,7 @@ function icon(id: string, a: string): ReactNode {
         <>
           <rect x="38" y="44" width="24" height="34" fill={ink} />
           <rect x="38" y="30" width="24" height="12" fill={a} />
-          <path d="M50 14 L60 28 H40 Z" fill={a} />
+          <polygon points="50,14 60,28 40,28" fill={a} />
         </>
       );
     case "rate-limiting":
@@ -183,8 +184,8 @@ function icon(id: string, a: string): ReactNode {
         <>
           <circle cx="28" cy="50" r="12" fill={ink} />
           <circle cx="72" cy="50" r="12" fill={ink} />
-          <path d="M40 50 H60" stroke={a} strokeWidth="4" strokeDasharray="5 4" />
-          <path d="M55 45 L60 50 L55 55" fill="none" stroke={a} strokeWidth="4" />
+          <g fill={a}><rect x="40" y="48" width="6" height="4" /><rect x="49" y="48" width="6" height="4" /></g>
+          <polygon points="58,45 64,50 58,55" fill={a} />
         </>
       );
     case "strong-consistency":
@@ -200,8 +201,10 @@ function icon(id: string, a: string): ReactNode {
         <>
           <circle cx="50" cy="50" r="27" fill={ink} />
           <path d="M50 50 L50 23 A27 27 0 0 1 73 63 Z" fill={a} />
-          <g stroke="#F4F1EA" strokeWidth="3">
-            <line x1="50" y1="50" x2="50" y2="23" /><line x1="50" y1="50" x2="73" y2="63" /><line x1="50" y1="50" x2="27" y2="63" />
+          <g fill={PAPER}>
+            <rect x="48.5" y="23" width="3" height="27" />
+            <rect x="48.5" y="23" width="3" height="27" transform="rotate(120 50 50)" />
+            <rect x="48.5" y="23" width="3" height="27" transform="rotate(240 50 50)" />
           </g>
         </>
       );
@@ -215,9 +218,11 @@ function icon(id: string, a: string): ReactNode {
     case "race-condition":
       return (
         <>
-          <path d="M14 50 H40 M33 44 L40 50 L33 56" stroke={ink} strokeWidth="3.5" fill="none" />
-          <path d="M86 50 H60 M67 44 L60 50 L67 56" stroke={ink} strokeWidth="3.5" fill="none" />
-          <rect x="44" y="44" width="12" height="12" fill={a} />
+          <g fill={ink}>
+            <rect x="14" y="48" width="22" height="4" /><polygon points="36,45 42,50 36,55" />
+            <rect x="64" y="48" width="22" height="4" /><polygon points="64,45 58,50 64,55" />
+          </g>
+          <rect x="45" y="45" width="10" height="10" fill={a} />
         </>
       );
 
@@ -226,7 +231,10 @@ function icon(id: string, a: string): ReactNode {
       return (
         <>
           <rect x="20" y="34" width="28" height="28" fill={ink} />
-          <g stroke="#F4F1EA" strokeWidth="3"><line x1="26" y1="40" x2="42" y2="56" /><line x1="42" y1="40" x2="26" y2="56" /></g>
+          <g fill={PAPER}>
+            <rect x="32" y="36" width="4" height="24" transform="rotate(45 34 48)" />
+            <rect x="32" y="36" width="4" height="24" transform="rotate(-45 34 48)" />
+          </g>
           <rect x="56" y="40" width="26" height="28" fill={a} />
         </>
       );
@@ -240,8 +248,8 @@ function icon(id: string, a: string): ReactNode {
     case "health-check":
       return (
         <>
-          <rect x="22" y="28" width="56" height="44" fill="none" stroke={ink} strokeWidth="3" />
-          <path d="M28 50 H40 L46 36 L54 64 L60 50 H72" fill="none" stroke={a} strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
+          <rect x="24" y="24" width="52" height="52" fill={ink} />
+          <polygon points="35,50 45,60 65,38 70,43 45,70 30,55" fill={a} />
         </>
       );
     case "monitoring":
@@ -266,17 +274,17 @@ function icon(id: string, a: string): ReactNode {
         <>
           <circle cx="24" cy="58" r="6" fill={ink} />
           <circle cx="76" cy="58" r="6" fill={ink} />
-          <line x1="24" y1="58" x2="40" y2="58" stroke={ink} strokeWidth="3.5" />
-          <line x1="60" y1="58" x2="76" y2="58" stroke={ink} strokeWidth="3.5" />
-          <line x1="40" y1="58" x2="64" y2="30" stroke={a} strokeWidth="3.5" />
+          <g fill={ink}><rect x="24" y="56" width="16" height="4" /><rect x="60" y="56" width="16" height="4" /></g>
+          <polygon points="38,62 60,32 64,35 42,65" fill={a} />
         </>
       );
     case "disaster-recovery":
       return (
         <>
-          <rect x="34" y="38" width="32" height="32" fill={ink} />
-          <path d="M30 38 A22 22 0 1 1 32 58" fill="none" stroke={a} strokeWidth="3.5" />
-          <path d="M24 50 L30 38 L37 47" fill="none" stroke={a} strokeWidth="3.5" strokeLinejoin="round" />
+          <path d={ring(50, 50, 28, 21)} fillRule="evenodd" fill={a} />
+          <rect x="50" y="18" width="16" height="16" fill={PAPER} />
+          <polygon points="50,16 50,36 66,26" fill={a} />
+          <rect x="40" y="42" width="20" height="16" fill={ink} />
         </>
       );
     case "timeout":
@@ -290,9 +298,10 @@ function icon(id: string, a: string): ReactNode {
     case "retry":
       return (
         <>
-          <path d="M72 50 A22 22 0 1 1 64 33" fill="none" stroke={ink} strokeWidth="4" />
-          <path d="M54 28 L66 31 L62 43" fill="none" stroke={a} strokeWidth="4" strokeLinejoin="round" strokeLinecap="round" />
-          <circle cx="50" cy="50" r="6" fill={a} />
+          <path d={ring(50, 50, 26, 19)} fillRule="evenodd" fill={a} />
+          <rect x="50" y="18" width="14" height="14" fill={PAPER} />
+          <polygon points="50,16 50,34 64,25" fill={a} />
+          <circle cx="50" cy="50" r="6" fill={ink} />
         </>
       );
 
@@ -300,9 +309,10 @@ function icon(id: string, a: string): ReactNode {
     case "polling":
       return (
         <>
-          <circle cx="50" cy="52" r="22" fill="none" stroke={ink} strokeWidth="4" />
-          <path d="M50 52 V38 M50 52 H62" stroke={ink} strokeWidth="4" strokeLinecap="round" />
-          <path d="M70 30 L74 42 L62 40" fill={a} />
+          <path d={ring(50, 50, 26, 19)} fillRule="evenodd" fill={ink} />
+          <rect x="50" y="18" width="14" height="14" fill={PAPER} />
+          <polygon points="50,16 50,34 64,25" fill={ink} />
+          <circle cx="50" cy="50" r="6" fill={a} />
         </>
       );
     case "websockets":
@@ -310,41 +320,42 @@ function icon(id: string, a: string): ReactNode {
         <>
           <circle cx="22" cy="50" r="10" fill={ink} />
           <circle cx="78" cy="50" r="10" fill={ink} />
-          <rect x="34" y="46" width="32" height="8" fill={a} />
-          <path d="M40 38 L32 50 L40 62 M60 38 L68 50 L60 62" fill="none" stroke={a} strokeWidth="3.5" />
+          <rect x="36" y="48" width="28" height="4" fill={a} />
+          <polygon points="40,42 32,50 40,58" fill={a} />
+          <polygon points="60,42 68,50 60,58" fill={a} />
         </>
       );
     case "real-time":
       return (
         <>
           <circle cx="50" cy="50" r="7" fill={ink} />
-          <circle cx="50" cy="50" r="17" fill="none" stroke={a} strokeWidth="3.5" />
-          <circle cx="50" cy="50" r="27" fill="none" stroke={a} strokeWidth="3.5" opacity="0.5" />
+          <path d={ring(50, 50, 17, 13)} fillRule="evenodd" fill={a} />
+          <path d={ring(50, 50, 27, 23)} fillRule="evenodd" fill={a} opacity="0.45" />
         </>
       );
     case "async":
       return (
         <>
-          <path d="M20 38 H64 M57 32 L64 38 L57 44" stroke={ink} strokeWidth="3.5" fill="none" />
-          <path d="M36 62 H80 M43 56 L36 62 L43 68" stroke={a} strokeWidth="3.5" fill="none" />
+          <g fill={ink}><rect x="20" y="36" width="36" height="4" /><polygon points="56,33 64,38 56,43" /></g>
+          <g fill={a}><rect x="36" y="60" width="36" height="4" /><polygon points="36,57 28,62 36,67" /></g>
         </>
       );
     case "message-queue":
       return (
         <>
           <g fill={ink}><rect x="16" y="40" width="16" height="20" /><rect x="36" y="40" width="16" height="20" /><rect x="56" y="40" width="16" height="20" /></g>
-          <path d="M76 50 L88 50 M83 45 L88 50 L83 55" fill="none" stroke={a} strokeWidth="3.5" />
+          <g fill={a}><rect x="76" y="48" width="10" height="4" /><polygon points="84,45 92,50 84,55" /></g>
         </>
       );
     case "event-driven":
       return (
         <>
-          <rect x="40" y="40" width="20" height="20" fill={ink} />
-          <g stroke={a} strokeWidth="3.5" fill="none">
-            <path d="M50 36 V20 M45 26 L50 20 L55 26" />
-            <path d="M64 50 H80 M74 45 L80 50 L74 55" />
-            <path d="M50 64 V80 M45 74 L50 80 L55 74" />
-            <path d="M36 50 H20 M26 45 L20 50 L26 55" />
+          <rect x="42" y="42" width="16" height="16" fill={ink} />
+          <g fill={a}>
+            <rect x="48" y="22" width="4" height="12" /><polygon points="50,14 44,24 56,24" />
+            <rect x="66" y="48" width="12" height="4" /><polygon points="86,50 76,44 76,56" />
+            <rect x="48" y="66" width="4" height="12" /><polygon points="50,86 44,76 56,76" />
+            <rect x="22" y="48" width="12" height="4" /><polygon points="14,50 24,44 24,56" />
           </g>
         </>
       );
@@ -370,14 +381,13 @@ function icon(id: string, a: string): ReactNode {
       return (
         <>
           <g fill={ink}><rect x="14" y="28" width="16" height="9" /><rect x="14" y="46" width="16" height="9" /><rect x="14" y="64" width="16" height="9" /></g>
-          <path d="M30 32 L48 50 M30 50 L48 50 M30 68 L48 50" stroke={ink} strokeWidth="2.5" fill="none" />
+          <polygon points="34,32 48,46 48,54 34,68" fill={ink} />
           <rect x="48" y="28" width="9" height="44" fill={a} />
-          <path d="M57 50 L72 50 M67 45 L72 50 L67 55" stroke={ink} strokeWidth="2.5" fill="none" />
+          <g fill={ink}><rect x="60" y="48" width="14" height="4" /><polygon points="80,50 72,45 72,55" /></g>
         </>
       );
 
     default:
-      // Fallback: a simple filled square with an accent dot.
       return (
         <>
           <rect x="28" y="28" width="44" height="44" fill={ink} />
