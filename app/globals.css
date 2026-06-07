@@ -205,6 +205,96 @@ html {
   }
 }
 
+/* ---- Concept visual motifs (math-curve-loaders aesthetic) ---- */
+/* All motion is transform/opacity/stroke based so 40 instances stay cheap.
+   Animation runs only while .concept-visual[data-playing="true"]; offscreen
+   cards are paused by the grid's IntersectionObserver. */
+
+.concept-visual [data-anim] {
+  animation-play-state: paused;
+}
+.concept-visual[data-playing="true"] [data-anim] {
+  animation-play-state: running;
+}
+
+@keyframes cv-slideX {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-40px); }
+}
+@keyframes cv-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes cv-spin-rev {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+@keyframes cv-ring {
+  0%   { transform: scale(0.3); opacity: 0; }
+  20%  { opacity: 0.9; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes cv-rise {
+  0%, 100% { transform: scaleY(0.25); }
+  50%      { transform: scaleY(1); }
+}
+@keyframes cv-dash {
+  to { stroke-dashoffset: -32; }
+}
+@keyframes cv-dash-in {
+  to { stroke-dashoffset: 32; }
+}
+@keyframes cv-trace {
+  0%   { stroke-dashoffset: 160; }
+  70%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes cv-handoff {
+  0%, 45%  { opacity: 1; }
+  55%, 100% { opacity: 0.18; }
+}
+@keyframes cv-handoff-rev {
+  0%, 45%  { opacity: 0.18; }
+  55%, 100% { opacity: 1; }
+}
+@keyframes cv-gate {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(7px); }
+}
+@keyframes cv-gate-rev {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-7px); }
+}
+@keyframes cv-split {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(11px); }
+}
+@keyframes cv-split-rev {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-11px); }
+}
+@keyframes cv-blink {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 1; }
+}
+@keyframes cv-travel {
+  0%   { offset-distance: 0%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+@keyframes cv-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* Reduced motion: freeze every motif on its first frame */
+@media (prefers-reduced-motion: reduce) {
+  .concept-visual [data-anim] {
+    animation: none !important;
+  }
+}
+
 /* Stroke text utility */
 .text-stroke-accent {
   -webkit-text-stroke: 1.5px var(--color-accent);

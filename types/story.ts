@@ -89,7 +89,29 @@ export interface Story {
   layout?: "inline" | "scrollytelling";
 }
 
-// ---- Glossary ----
+// ---- Glossary / Concepts ----
+
+export type ConceptCategory =
+  | "foundations"
+  | "performance"
+  | "data"
+  | "reliability"
+  | "realtime"
+  | "architecture";
+
+export type ConceptVisualKey =
+  | "waves"
+  | "distribute"
+  | "pulse"
+  | "orbit"
+  | "flow"
+  | "grow"
+  | "mirror"
+  | "grid"
+  | "converge"
+  | "gate"
+  | "split"
+  | "curve";
 
 export interface GlossaryTerm {
   id: string;
@@ -101,6 +123,10 @@ export interface GlossaryTerm {
     storyId: string;
     stageId: string;
   };
+  /** Populated by the content loader from lib/conceptMeta.ts */
+  category: ConceptCategory;
+  /** Populated by the content loader from lib/conceptMeta.ts */
+  visual: ConceptVisualKey;
 }
 
 // ---- Curriculum ----

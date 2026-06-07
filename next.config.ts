@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
         destination: "/stories/:storySlug?stage=:stageId",
         permanent: true,
       },
+      {
+        source: "/glossary",
+        destination: "/concepts",
+        permanent: true,
+      },
+      {
+        source: "/glossary/:termId",
+        destination: "/concepts/:termId",
+        permanent: true,
+      },
     ];
   },
 };

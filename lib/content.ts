@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import type { Story, GlossaryTerm, CurriculumModule, Diagram, Block } from "@/types/story";
+import { CONCEPT_META, DEFAULT_CONCEPT_META } from "./conceptMeta";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
 
@@ -22,7 +23,13 @@ export function getAllStories(): Story[] {
 export function getGlossaryTerms(): GlossaryTerm[] {
   const filePath = path.join(CONTENT_DIR, "glossary", "terms.json");
   if (!fs.existsSync(filePath)) return [];
-  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  const raw: Omit<GlossaryTerm, "category" | "visual">[] = JSON.parse(
+    fs.readFileSync(filePath, "utf-8")
+  );
+  return raw.map((t) => ({
+    ...t,
+    ...(CONCEPT_META[t.id] ?? DEFAULT_CONCEPT_META),
+  }));
 }
 
 export function getGlossaryTerm(id: string): GlossaryTerm | undefined {

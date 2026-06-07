@@ -17,9 +17,9 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Architecture Review \u2014 Any Codebase, Understood",
+  title: "System Design School \u2014 Learn How Apps Scale",
   description:
-    "A Claude Code skill that scans any codebase and generates an interactive architecture map with plain-English explanations and risk analysis. For PMs, founders, and vibecoders.",
+    "Learn system design one concept at a time. Caching, load balancing, sharding, queues, and more \u2014 each explained in plain English with real-world analogies and interactive Build Stories.",
 };
 
 export default function RootLayout({
