@@ -3,10 +3,11 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Bauhaus difference cursor: a 32px paper-colored circle that lags behind the
- * pointer (lerp), scales 2.5x over interactive elements, and inverts against
- * color blocks via mix-blend-mode: difference. The native cursor is hidden
- * only on fine-pointer (desktop) devices; touch/coarse pointers keep theirs.
+ * Custom cursor: a two-tone ring (ink stroke sandwiched by paper halos) plus a
+ * center dot, so it stays visible on ANY background — the ink reads on light
+ * surfaces, the paper halos read on dark/colored ones. Lags behind the pointer
+ * (lerp) and grows over interactive elements. The native cursor is hidden only
+ * on fine-pointer (desktop) devices; touch/coarse pointers keep theirs.
  */
 export function DifferenceCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
@@ -43,7 +44,7 @@ export function DifferenceCursor() {
         dot!.style.opacity = "1";
       }
       const overInteractive = !!(e.target as Element | null)?.closest?.(interactiveSel);
-      scale = overInteractive ? 2.5 : 1;
+      scale = overInteractive ? 2 : 1;
     }
 
     function onLeave() {
@@ -84,17 +85,33 @@ export function DifferenceCursor() {
         position: "fixed",
         top: 0,
         left: 0,
-        width: 32,
-        height: 32,
+        width: 26,
+        height: 26,
         borderRadius: "9999px",
-        backgroundColor: "#F4F1EA",
-        mixBlendMode: "difference",
+        border: "2px solid #1A1A1A",
+        // Paper halos on both edges of the ink ring keep it legible on any bg
+        boxShadow:
+          "0 0 0 1.25px rgba(244,241,234,0.95), inset 0 0 0 1.25px rgba(244,241,234,0.95)",
         pointerEvents: "none",
         zIndex: 9999,
         opacity: 0,
         willChange: "transform",
         transition: "opacity 200ms ease",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
-    />
+    >
+      {/* Center dot — also two-tone for precision on any background */}
+      <span
+        style={{
+          width: 4,
+          height: 4,
+          borderRadius: "9999px",
+          backgroundColor: "#1A1A1A",
+          boxShadow: "0 0 0 1px rgba(244,241,234,0.95)",
+        }}
+      />
+    </div>
   );
 }
