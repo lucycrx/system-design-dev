@@ -1,19 +1,22 @@
 import type { DiagramNodeType } from "@/types/story";
 
+// Bauhaus: diagrams read as ink line-art. Node types are distinguished by
+// their icon + label, not by color; the only primary accents are the
+// highlight ring on new/active nodes (handled in SystemNode).
 export const typeColors: Record<DiagramNodeType, string> = {
-  client: "var(--color-blue)",
-  server: "var(--color-purple)",
-  database: "var(--color-green)",
-  cache: "var(--color-orange)",
-  queue: "var(--color-queue)",
-  "load-balancer": "var(--color-blue)",
-  cdn: "var(--color-blue)",
-  "api-gateway": "var(--color-purple)",
-  auth: "var(--color-pink)",
-  "external-service": "var(--color-accent)",
-  "background-job": "var(--color-queue)",
-  storage: "var(--color-sage)",
-  agent: "var(--color-purple)",
+  client: "var(--color-text)",
+  server: "var(--color-text)",
+  database: "var(--color-text)",
+  cache: "var(--color-text)",
+  queue: "var(--color-text)",
+  "load-balancer": "var(--color-text)",
+  cdn: "var(--color-text)",
+  "api-gateway": "var(--color-text)",
+  auth: "var(--color-text)",
+  "external-service": "var(--color-text)",
+  "background-job": "var(--color-text)",
+  storage: "var(--color-text)",
+  agent: "var(--color-text)",
 };
 
 export const typeLabels: Record<DiagramNodeType, string> = {

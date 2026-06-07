@@ -3,20 +3,23 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { CurriculumModule } from "@/types/story";
+import { Shape, type ShapeType } from "./Shape";
 
-const COLOR_MAP: Record<string, { color: string; bg: string }> = {
-  accent: { color: "var(--color-accent)", bg: "var(--color-accent-dim)" },
-  blue: { color: "var(--color-blue)", bg: "var(--color-blue-dim)" },
-  green: { color: "var(--color-green)", bg: "var(--color-green-dim)" },
-  orange: { color: "var(--color-orange)", bg: "var(--color-orange-dim)" },
-  pink: { color: "var(--color-pink)", bg: "var(--color-pink-dim)" },
-  purple: { color: "var(--color-purple)", bg: "var(--color-purple-dim)" },
-};
+// Bauhaus: modules are ink-dominant; each carries a rotating primary + shape
+// marker (R/B/Y) cycled by module number rather than six different colors.
+const MARKERS: { color: string; shape: ShapeType }[] = [
+  { color: "#1D4E89", shape: "circle" },
+  { color: "#D62828", shape: "square" },
+  { color: "#F4C430", shape: "triangle" },
+  { color: "#1D4E89", shape: "half-circle" },
+  { color: "#D62828", shape: "quarter-arc" },
+  { color: "#F4C430", shape: "circle" },
+];
 
 function HeroRule({ visible }: { visible: boolean }) {
   return (
     <div
-      className="border-t border-border transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left"
+      className="border-t border-text/10 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left"
       style={{
         transform: visible ? "scaleX(1)" : "scaleX(0)",
         transitionDelay: "200ms",
@@ -35,7 +38,7 @@ function ModuleCard({
   const [visible, setVisible] = useState(false);
   const [hovered, setHovered] = useState(false);
   const ref = useRef<HTMLAnchorElement>(null);
-  const colors = COLOR_MAP[mod.color] || COLOR_MAP.accent;
+  const marker = MARKERS[(mod.moduleNumber - 1) % MARKERS.length];
 
   useEffect(() => {
     const el = ref.current;
@@ -59,66 +62,54 @@ function ModuleCard({
       href={`/curriculum/${mod.slug}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group relative block overflow-hidden border border-border bg-surface transition-all"
+      className="group relative block overflow-hidden border bg-bg transition-all"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible
-          ? "translateY(0) scale(1)"
-          : "translateY(28px) scale(0.98)",
+          ? hovered
+            ? "translateY(-3px)"
+            : "translateY(0)"
+          : "translateY(28px)",
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
         transitionDuration: "700ms",
-        borderColor: hovered ? colors.color + "40" : undefined,
+        borderColor: hovered ? marker.color : "rgba(26,26,26,0.10)",
       }}
     >
-      {/* Left accent bar */}
+      {/* Left accent bar — ink, grows on hover */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-[3px] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="absolute left-0 top-0 bottom-0 w-[3px] bg-text transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
-          backgroundColor: colors.color,
-          opacity: hovered ? 1 : 0.3,
           transform: hovered ? "scaleY(1)" : "scaleY(0.4)",
           transformOrigin: "top",
         }}
       />
 
-      {/* Hover tint */}
-      <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-        style={{
-          backgroundColor: colors.bg,
-          opacity: hovered ? 1 : 0,
-        }}
-      />
-
       <div className="relative p-5 sm:p-6 pl-6 sm:pl-7">
         <div className="flex items-start gap-5">
-          {/* Module number */}
-          <div
-            className="flex-shrink-0 w-11 h-11 flex items-center justify-center text-lg font-bold font-mono text-bg transition-transform duration-300"
-            style={{
-              backgroundColor: colors.color,
-              transform: hovered ? "scale(1.08)" : "scale(1)",
-            }}
-          >
-            {mod.moduleNumber}
+          {/* Module number — ink box with a primary shape marker */}
+          <div className="flex-shrink-0 flex flex-col items-center gap-2">
+            <div
+              className="w-11 h-11 flex items-center justify-center text-lg font-bold font-mono text-bg bg-text transition-transform duration-300"
+              style={{ transform: hovered ? "scale(1.06)" : "scale(1)" }}
+            >
+              {mod.moduleNumber}
+            </div>
+            <Shape type={marker.shape} color={marker.color} size={12} />
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2.5 mb-1.5">
-              <span
-                className="label-mono font-medium"
-                style={{ color: colors.color }}
-              >
+              <span className="label-mono text-text-muted">
                 Module {mod.moduleNumber}
               </span>
-              <span className="label-mono text-text-dim">
+              <span className="label-mono text-text-muted">
                 {mod.lessons.length} lessons
               </span>
             </div>
 
             <h2
-              className="text-xl font-bold leading-snug tracking-[-0.01em] mb-1.5 transition-colors duration-200"
-              style={{ color: hovered ? colors.color : "var(--color-text)" }}
+              className="subhead text-xl leading-snug mb-1.5 transition-colors duration-200"
+              style={{ color: hovered ? marker.color : "var(--color-text)" }}
             >
               {mod.title}
             </h2>
@@ -127,27 +118,19 @@ function ModuleCard({
             </p>
 
             {/* Lesson list */}
-            <div className="mt-4 pt-4 border-t border-border/50">
+            <div className="mt-4 pt-4 border-t border-text/10">
               <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
                 {mod.lessons.map((lesson, j) => (
                   <li
                     key={lesson.id}
-                    className="flex items-baseline gap-2 label-mono text-text-muted transition-colors duration-200"
+                    className="flex items-baseline gap-2 label-mono text-text-muted"
                   >
-                    <span
-                      className="flex-shrink-0 text-[10px] font-mono tabular-nums w-4 text-right transition-colors duration-200"
-                      style={{
-                        color: hovered ? colors.color : "var(--color-text-dim)",
-                        opacity: hovered ? 0.7 : 0.5,
-                      }}
-                    >
+                    <span className="flex-shrink-0 text-[10px] font-mono tabular-nums w-4 text-right text-text-muted opacity-60">
                       {String(j + 1).padStart(2, "0")}
                     </span>
                     <span
                       className="transition-colors duration-200"
-                      style={{
-                        color: hovered ? "var(--color-text)" : undefined,
-                      }}
+                      style={{ color: hovered ? "var(--color-text)" : undefined }}
                     >
                       {lesson.topicLabel || lesson.title}
                     </span>
@@ -159,9 +142,9 @@ function ModuleCard({
 
           {/* Arrow */}
           <span
-            className="text-lg font-mono mt-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="text-lg font-mono mt-3 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{
-              color: hovered ? colors.color : "var(--color-text-dim)",
+              color: hovered ? marker.color : "var(--color-text-muted)",
               transform: hovered ? "translateX(4px)" : "translateX(0)",
             }}
           >
@@ -189,26 +172,34 @@ export function CurriculumPageClient({ modules }: { modules: CurriculumModule[] 
   return (
     <>
       {/* Hero */}
-      <header className="max-w-5xl mx-auto px-6 pt-10 pb-6">
+      <header className="relative max-w-5xl mx-auto px-6 pt-12 pb-6 overflow-hidden">
+        <Shape
+          type="triangle"
+          color="#F4C430"
+          size={240}
+          className="pointer-events-none absolute"
+          style={{ top: "-30px", right: "-50px", opacity: 0.85 }}
+        />
         <div
-          className="flex items-baseline gap-4 flex-wrap transition-all duration-500"
+          className="relative flex items-center gap-4 flex-wrap transition-all duration-500"
           style={{
             opacity: phase >= 1 ? 1 : 0,
             transform: phase >= 1 ? "translateY(0)" : "translateY(8px)",
           }}
         >
-          <h1 className="text-2xl sm:text-3xl font-bold text-text tracking-tight">
+          <Shape type="square" color="#1D4E89" size={16} />
+          <h1 className="heading-hero text-4xl sm:text-5xl text-text">
             Curriculum
           </h1>
-          <span className="label-mono text-text-dim">
+          <span className="label-mono text-text-muted">
             {modules.length} {modules.length === 1 ? "module" : "modules"}
-            <span className="mx-2 text-border">/</span>
+            <span className="mx-2 text-text/30">/</span>
             {totalLessons} lessons
           </span>
         </div>
 
         <p
-          className="mt-2 text-sm text-text-muted leading-relaxed max-w-lg transition-all duration-500"
+          className="relative mt-3 subhead text-text-muted leading-relaxed max-w-lg transition-all duration-500"
           style={{
             opacity: phase >= 2 ? 1 : 0,
             transitionDelay: "100ms",
@@ -218,7 +209,7 @@ export function CurriculumPageClient({ modules }: { modules: CurriculumModule[] 
           Start at the beginning or jump to what you need.
         </p>
 
-        <div className="mt-5 overflow-hidden">
+        <div className="relative mt-5 overflow-hidden">
           <HeroRule visible={phase >= 2} />
         </div>
       </header>
