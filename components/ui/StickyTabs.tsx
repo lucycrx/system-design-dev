@@ -10,7 +10,7 @@ const TABS = [
   { href: "/curriculum", label: "Curriculum", matchPrefix: true },
 ] as const;
 
-const PAPER = "#F4F1EA";
+const INK = "var(--color-text)";
 
 export function StickyTabs() {
   const pathname = usePathname();
@@ -23,17 +23,16 @@ export function StickyTabs() {
   }
 
   return (
-    /* Fixed header — mix-blend-difference reads over paper and color blocks */
-    <header
-      className="fixed inset-x-0 top-0 z-50"
-      style={{ mixBlendMode: "difference" }}
-    >
+    /* Fixed header — frosted paper surface so nav items stay legible and
+       unobstructed over any content (hero, marquee, shapes) that scrolls
+       beneath it. Ink text on a translucent paper bar. */
+    <header className="fixed inset-x-0 top-0 z-50 bg-bg/80 backdrop-blur-[8px] border-b border-text/10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between gap-3">
         <Link
           href="/"
           data-cursor
           className="font-display font-bold text-2xl lowercase shrink-0"
-          style={{ color: PAPER, letterSpacing: "-0.06em" }}
+          style={{ color: INK, letterSpacing: "-0.06em" }}
         >
           sd
         </Link>
@@ -47,13 +46,13 @@ export function StickyTabs() {
               href={tab.href}
               data-cursor
               className="relative label-mono py-1 whitespace-nowrap"
-              style={{ color: PAPER, opacity: isActive(tab) ? 1 : 0.6 }}
+              style={{ color: INK, opacity: isActive(tab) ? 1 : 0.55 }}
             >
               {tab.label}
               {isActive(tab) && (
                 <span
                   className="absolute -bottom-0.5 left-0 right-0 h-[2px]"
-                  style={{ backgroundColor: PAPER }}
+                  style={{ backgroundColor: INK }}
                 />
               )}
             </Link>
