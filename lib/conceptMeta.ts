@@ -1,27 +1,46 @@
 import type { ConceptCategory, ConceptVisualKey } from "@/types/story";
 
+export type CategoryShape =
+  | "circle"
+  | "square"
+  | "triangle"
+  | "half-circle"
+  | "quarter-arc";
+
+const RED = "#D62828";
+const BLUE = "#1D4E89";
+const YELLOW = "#F4C430";
+
 /**
- * Display metadata for each concept category. Drives the filter chips on
- * /concepts and the category tag on each card. Colors reference the semantic
- * tokens defined in app/globals.css.
+ * Display metadata for each concept category. Under the Bauhaus system, color
+ * is sparse: each category gets one flat primary AND a geometric shape marker
+ * (honoring the Itten correspondence square→red, circle→blue, triangle→yellow
+ * where it reads cleanly). Cards are ink by default and reveal the primary on
+ * hover; the shape carries the identity the rest of the time.
  */
 export const CONCEPT_CATEGORIES: {
   id: ConceptCategory;
   label: string;
   color: string;
+  shape: CategoryShape;
 }[] = [
-  { id: "foundations", label: "Foundations", color: "var(--color-accent)" },
-  { id: "performance", label: "Performance & Scale", color: "var(--color-green)" },
-  { id: "data", label: "Data & Consistency", color: "var(--color-purple)" },
-  { id: "reliability", label: "Reliability", color: "var(--color-orange)" },
-  { id: "realtime", label: "Real-time & Async", color: "var(--color-queue)" },
-  { id: "architecture", label: "Architecture", color: "var(--color-blue)" },
+  { id: "foundations", label: "Foundations", color: BLUE, shape: "circle" },
+  { id: "performance", label: "Performance & Scale", color: RED, shape: "square" },
+  { id: "data", label: "Data & Consistency", color: YELLOW, shape: "triangle" },
+  { id: "reliability", label: "Reliability", color: BLUE, shape: "half-circle" },
+  { id: "realtime", label: "Real-time & Async", color: RED, shape: "quarter-arc" },
+  { id: "architecture", label: "Architecture", color: YELLOW, shape: "circle" },
 ];
 
-export const CATEGORY_BY_ID: Record<ConceptCategory, { label: string; color: string }> =
-  Object.fromEntries(
-    CONCEPT_CATEGORIES.map((c) => [c.id, { label: c.label, color: c.color }])
-  ) as Record<ConceptCategory, { label: string; color: string }>;
+export const CATEGORY_BY_ID: Record<
+  ConceptCategory,
+  { label: string; color: string; shape: CategoryShape }
+> = Object.fromEntries(
+  CONCEPT_CATEGORIES.map((c) => [
+    c.id,
+    { label: c.label, color: c.color, shape: c.shape },
+  ])
+) as Record<ConceptCategory, { label: string; color: string; shape: CategoryShape }>;
 
 /**
  * Maps each glossary term id to its category (grouping) and visual motif

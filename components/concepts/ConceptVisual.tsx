@@ -14,6 +14,8 @@ interface Props {
   color?: string;
   playing?: boolean;
   className?: string;
+  /** Smoothly transition the ink color (used for ink->primary hover reveal). */
+  transition?: boolean;
 }
 
 const VB = "0 0 120 80";
@@ -378,7 +380,13 @@ function Motif({ visual }: { visual: ConceptVisualKey }) {
   }
 }
 
-export function ConceptVisual({ visual, color, playing = true, className }: Props) {
+export function ConceptVisual({
+  visual,
+  color,
+  playing = true,
+  className,
+  transition,
+}: Props) {
   return (
     <svg
       viewBox={VB}
@@ -387,7 +395,15 @@ export function ConceptVisual({ visual, color, playing = true, className }: Prop
       role="presentation"
       aria-hidden="true"
       preserveAspectRatio="xMidYMid meet"
-      style={{ color: color ?? "var(--color-accent)", display: "block", width: "100%", height: "100%" }}
+      style={{
+        color: color ?? "var(--color-text)",
+        display: "block",
+        width: "100%",
+        height: "100%",
+        transition: transition
+          ? "color 500ms cubic-bezier(0.16,1,0.3,1)"
+          : undefined,
+      }}
     >
       <Motif visual={visual} />
     </svg>
