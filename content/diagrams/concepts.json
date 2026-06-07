@@ -128,5 +128,198 @@
       { "id": "e-router-b", "source": "router", "target": "shard-b", "label": "I–P", "style": "solid", "animated": true },
       { "id": "e-router-c", "source": "router", "target": "shard-c", "label": "Q–Z", "style": "solid", "animated": true }
     ]
+  },
+  "cdn-edges": {
+    "id": "cdn-edges",
+    "title": "Content served from the edge",
+    "description": "Users hit a nearby edge server; only a miss reaches the origin",
+    "nodes": [
+      { "id": "user-eu", "type": "client", "label": "User (Europe)", "position": { "x": 0, "y": 0 }, "explanation": "A visitor far from your origin server. Without a CDN, every byte would travel across the world." },
+      { "id": "user-us", "type": "client", "label": "User (US)", "position": { "x": 0, "y": 260 }, "explanation": "A visitor near a different edge location, served by their own nearby copy." },
+      { "id": "edge", "type": "cdn", "label": "CDN Edge", "position": { "x": 300, "y": 130 }, "explanation": "An edge server caching copies of your static assets close to users. Answers most requests itself.", "technology": "Cloudflare / Fastly" },
+      { "id": "origin", "type": "server", "label": "Origin Server", "position": { "x": 600, "y": 130 }, "explanation": "Your real server. The CDN only contacts it on a cache miss, then caches the result at the edge." }
+    ],
+    "edges": [
+      { "id": "e-eu-edge", "source": "user-eu", "target": "edge", "style": "solid", "animated": true },
+      { "id": "e-us-edge", "source": "user-us", "target": "edge", "style": "solid", "animated": true },
+      { "id": "e-edge-origin", "source": "edge", "target": "origin", "label": "on miss", "style": "dashed" }
+    ]
+  },
+  "read-replica-set": {
+    "id": "read-replica-set",
+    "title": "One primary, many replicas",
+    "description": "Writes go to the primary; reads spread across replicas",
+    "nodes": [
+      { "id": "app", "type": "server", "label": "App Server", "position": { "x": 0, "y": 130 }, "explanation": "Sends writes to the primary and load-balances reads across the replicas." },
+      { "id": "primary", "type": "database", "label": "Primary", "position": { "x": 300, "y": 130 }, "explanation": "The single source of truth. All writes (inserts/updates/deletes) go here." },
+      { "id": "replica-1", "type": "database", "label": "Replica 1", "position": { "x": 600, "y": 0 }, "explanation": "A read-only copy kept in sync with the primary. Serves read queries to take load off it." },
+      { "id": "replica-2", "type": "database", "label": "Replica 2", "position": { "x": 600, "y": 260 }, "explanation": "Another read replica. Add more to scale reads — but each lags the primary slightly." }
+    ],
+    "edges": [
+      { "id": "e-app-primary", "source": "app", "target": "primary", "label": "writes", "style": "solid", "animated": true },
+      { "id": "e-app-r1", "source": "app", "target": "replica-1", "label": "reads", "style": "solid" },
+      { "id": "e-app-r2", "source": "app", "target": "replica-2", "label": "reads", "style": "solid" },
+      { "id": "e-primary-r1", "source": "primary", "target": "replica-1", "label": "replication", "style": "dashed", "animated": true },
+      { "id": "e-primary-r2", "source": "primary", "target": "replica-2", "label": "replication", "style": "dashed", "animated": true }
+    ]
+  },
+  "message-queue-flow": {
+    "id": "message-queue-flow",
+    "title": "Producer, queue, consumers",
+    "description": "Work is buffered in a queue and processed in the background",
+    "nodes": [
+      { "id": "producer", "type": "server", "label": "Producer", "position": { "x": 0, "y": 130 }, "explanation": "The web server. Instead of doing slow work itself, it drops a message on the queue and responds immediately." },
+      { "id": "queue", "type": "queue", "label": "Queue", "position": { "x": 300, "y": 130 }, "explanation": "Holds pending jobs until a worker is free. Absorbs spikes and survives worker crashes.", "technology": "RabbitMQ / SQS / Kafka" },
+      { "id": "worker-1", "type": "background-job", "label": "Worker 1", "position": { "x": 600, "y": 0 }, "explanation": "Pulls jobs off the queue and processes them at its own pace." },
+      { "id": "worker-2", "type": "background-job", "label": "Worker 2", "position": { "x": 600, "y": 260 }, "explanation": "Another consumer. Add workers to drain the queue faster when it backs up." }
+    ],
+    "edges": [
+      { "id": "e-prod-queue", "source": "producer", "target": "queue", "label": "enqueue", "style": "solid", "animated": true },
+      { "id": "e-queue-w1", "source": "queue", "target": "worker-1", "label": "consume", "style": "solid", "animated": true },
+      { "id": "e-queue-w2", "source": "queue", "target": "worker-2", "label": "consume", "style": "solid", "animated": true }
+    ]
+  },
+  "api-gateway-fanout": {
+    "id": "api-gateway-fanout",
+    "title": "One front door to many services",
+    "description": "The gateway authenticates and routes each request to the right service",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Client", "position": { "x": 0, "y": 160 }, "explanation": "Talks to a single endpoint — the gateway — instead of knowing about every backend service." },
+      { "id": "gateway", "type": "api-gateway", "label": "API Gateway", "position": { "x": 280, "y": 160 }, "explanation": "Handles auth, rate limiting, and routing in one place, then forwards each request to the service that owns it.", "technology": "Kong / AWS API Gateway" },
+      { "id": "svc-users", "type": "server", "label": "Users Service", "position": { "x": 580, "y": 0 }, "explanation": "Owns user accounts and profiles." },
+      { "id": "svc-orders", "type": "server", "label": "Orders Service", "position": { "x": 580, "y": 160 }, "explanation": "Owns orders and checkout." },
+      { "id": "svc-search", "type": "server", "label": "Search Service", "position": { "x": 580, "y": 320 }, "explanation": "Owns product search." }
+    ],
+    "edges": [
+      { "id": "e-client-gw", "source": "client", "target": "gateway", "style": "solid", "animated": true },
+      { "id": "e-gw-users", "source": "gateway", "target": "svc-users", "label": "/users", "style": "solid", "animated": true },
+      { "id": "e-gw-orders", "source": "gateway", "target": "svc-orders", "label": "/orders", "style": "solid", "animated": true },
+      { "id": "e-gw-search", "source": "gateway", "target": "svc-search", "label": "/search", "style": "solid", "animated": true }
+    ]
+  },
+  "microservices-split": {
+    "id": "microservices-split",
+    "title": "Independent services, independent data",
+    "description": "Each service deploys and scales on its own, with its own database",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Client", "position": { "x": 0, "y": 200 }, "explanation": "Reaches the system through the gateway." },
+      { "id": "gateway", "type": "api-gateway", "label": "API Gateway", "position": { "x": 240, "y": 200 }, "explanation": "Routes requests to the right service." },
+      { "id": "svc-users", "type": "server", "label": "Users Service", "position": { "x": 520, "y": 30 }, "explanation": "A small, independently deployable service." },
+      { "id": "svc-orders", "type": "server", "label": "Orders Service", "position": { "x": 520, "y": 200 }, "explanation": "Owns its own logic and can scale separately from the others." },
+      { "id": "svc-billing", "type": "server", "label": "Billing Service", "position": { "x": 520, "y": 370 }, "explanation": "Owned by a different team, deployed on its own schedule." },
+      { "id": "db-users", "type": "database", "label": "Users DB", "position": { "x": 820, "y": 30 }, "explanation": "Each service keeps its own data — no shared database to couple them." },
+      { "id": "db-orders", "type": "database", "label": "Orders DB", "position": { "x": 820, "y": 200 }, "explanation": "Private to the Orders service." },
+      { "id": "db-billing", "type": "database", "label": "Billing DB", "position": { "x": 820, "y": 370 }, "explanation": "Private to the Billing service." }
+    ],
+    "edges": [
+      { "id": "e-client-gw", "source": "client", "target": "gateway", "style": "solid", "animated": true },
+      { "id": "e-gw-users", "source": "gateway", "target": "svc-users", "style": "solid", "animated": true },
+      { "id": "e-gw-orders", "source": "gateway", "target": "svc-orders", "style": "solid", "animated": true },
+      { "id": "e-gw-billing", "source": "gateway", "target": "svc-billing", "style": "solid", "animated": true },
+      { "id": "e-users-db", "source": "svc-users", "target": "db-users", "style": "solid" },
+      { "id": "e-orders-db", "source": "svc-orders", "target": "db-orders", "style": "solid" },
+      { "id": "e-billing-db", "source": "svc-billing", "target": "db-billing", "style": "solid" }
+    ]
+  },
+  "monolith-single": {
+    "id": "monolith-single",
+    "title": "One deployable unit",
+    "description": "All features live in a single application backed by one database",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Client", "position": { "x": 0, "y": 130 }, "explanation": "Talks to one application." },
+      { "id": "app", "type": "server", "label": "Application", "position": { "x": 300, "y": 130 }, "explanation": "Users, orders, billing, and search all live in one codebase, deployed as a single unit. Simple to build and reason about." },
+      { "id": "db", "type": "database", "label": "Database", "position": { "x": 600, "y": 130 }, "explanation": "One shared database for the whole application." }
+    ],
+    "edges": [
+      { "id": "e-client-app", "source": "client", "target": "app", "style": "solid", "animated": true },
+      { "id": "e-app-db", "source": "app", "target": "db", "style": "solid", "animated": true }
+    ]
+  },
+  "event-bus": {
+    "id": "event-bus",
+    "title": "Publish once, react many times",
+    "description": "A publisher emits an event; interested subscribers react independently",
+    "nodes": [
+      { "id": "publisher", "type": "server", "label": "Orders Service", "position": { "x": 0, "y": 160 }, "explanation": "When an order is placed it publishes an `OrderPlaced` event — it doesn't know or care who listens." },
+      { "id": "bus", "type": "queue", "label": "Event Bus", "position": { "x": 300, "y": 160 }, "explanation": "Carries events from publishers to every interested subscriber.", "technology": "Kafka / SNS" },
+      { "id": "sub-email", "type": "background-job", "label": "Email Service", "position": { "x": 600, "y": 0 }, "explanation": "Reacts to OrderPlaced by sending a confirmation email." },
+      { "id": "sub-inventory", "type": "background-job", "label": "Inventory Service", "position": { "x": 600, "y": 160 }, "explanation": "Reacts by decrementing stock." },
+      { "id": "sub-analytics", "type": "background-job", "label": "Analytics Service", "position": { "x": 600, "y": 320 }, "explanation": "Reacts by recording the sale. Add new reactions without touching the publisher." }
+    ],
+    "edges": [
+      { "id": "e-pub-bus", "source": "publisher", "target": "bus", "label": "OrderPlaced", "style": "solid", "animated": true },
+      { "id": "e-bus-email", "source": "bus", "target": "sub-email", "style": "solid", "animated": true },
+      { "id": "e-bus-inv", "source": "bus", "target": "sub-inventory", "style": "solid", "animated": true },
+      { "id": "e-bus-analytics", "source": "bus", "target": "sub-analytics", "style": "solid", "animated": true }
+    ]
+  },
+  "circuit-breaker-flow": {
+    "id": "circuit-breaker-flow",
+    "title": "A breaker in front of a shaky dependency",
+    "description": "When failures pile up the breaker trips open and fails fast",
+    "nodes": [
+      { "id": "service", "type": "server", "label": "Your Service", "position": { "x": 0, "y": 130 }, "explanation": "Calls a dependency through a circuit breaker instead of calling it directly." },
+      { "id": "breaker", "type": "api-gateway", "label": "Circuit Breaker", "position": { "x": 300, "y": 130 }, "explanation": "Watches the call's success rate. While the dependency is healthy it's *closed* and lets calls through; after too many failures it trips *open* and rejects calls instantly." },
+      { "id": "dependency", "type": "external-service", "label": "Payment API", "position": { "x": 600, "y": 130 }, "explanation": "A slow or failing third-party dependency. The breaker keeps its trouble from dragging down your service." }
+    ],
+    "edges": [
+      { "id": "e-svc-breaker", "source": "service", "target": "breaker", "style": "solid", "animated": true },
+      { "id": "e-breaker-dep", "source": "breaker", "target": "dependency", "label": "trips open on failure", "style": "dashed" }
+    ]
+  },
+  "failover-active-standby": {
+    "id": "failover-active-standby",
+    "title": "Active with a standby ready",
+    "description": "If the primary fails, traffic switches to the standby",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Client", "position": { "x": 0, "y": 130 }, "explanation": "Reaches whichever server is currently active." },
+      { "id": "primary", "type": "server", "label": "Primary (active)", "position": { "x": 320, "y": 0 }, "explanation": "Handles all traffic today. A health check watches it constantly." },
+      { "id": "standby", "type": "server", "label": "Standby", "position": { "x": 320, "y": 260 }, "explanation": "An idle copy kept in sync, ready to take over the moment the primary fails." }
+    ],
+    "edges": [
+      { "id": "e-client-primary", "source": "client", "target": "primary", "label": "normal", "style": "solid", "animated": true },
+      { "id": "e-client-standby", "source": "client", "target": "standby", "label": "on failure", "style": "dashed" },
+      { "id": "e-primary-standby", "source": "primary", "target": "standby", "label": "keep in sync", "style": "dashed", "animated": true }
+    ]
+  },
+  "rate-limit-gate": {
+    "id": "rate-limit-gate",
+    "title": "A gate that caps request rate",
+    "description": "Requests within the limit pass; excess gets rejected",
+    "nodes": [
+      { "id": "clients", "type": "client", "label": "Clients", "position": { "x": 0, "y": 130 }, "explanation": "Many callers — some well-behaved, some hammering your API." },
+      { "id": "limiter", "type": "api-gateway", "label": "Rate Limiter", "position": { "x": 300, "y": 130 }, "explanation": "Counts requests per client over a time window. Within the limit, it forwards; over it, it replies `429 Too Many Requests`." },
+      { "id": "server", "type": "server", "label": "App Server", "position": { "x": 600, "y": 130 }, "explanation": "Protected from overload — it only sees traffic the limiter let through." }
+    ],
+    "edges": [
+      { "id": "e-clients-limiter", "source": "clients", "target": "limiter", "style": "solid", "animated": true },
+      { "id": "e-limiter-server", "source": "limiter", "target": "server", "label": "within limit", "style": "solid", "animated": true }
+    ]
+  },
+  "websocket-connection": {
+    "id": "websocket-connection",
+    "title": "One persistent, two-way connection",
+    "description": "After a handshake, both sides can push messages anytime",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Client", "position": { "x": 0, "y": 130 }, "explanation": "Opens a WebSocket once, then keeps it open. No need to re-ask for updates." },
+      { "id": "server", "type": "server", "label": "Server", "position": { "x": 360, "y": 130 }, "explanation": "Holds the connection open and pushes data to the client the instant something happens.", "technology": "WebSocket" }
+    ],
+    "edges": [
+      { "id": "e-c-s", "source": "client", "target": "server", "label": "client → server", "style": "solid", "animated": true },
+      { "id": "e-s-c", "source": "server", "target": "client", "label": "server → client (push)", "style": "solid", "animated": true }
+    ]
+  },
+  "polling-loop": {
+    "id": "polling-loop",
+    "title": "Ask again, and again",
+    "description": "The client repeatedly asks the server whether anything is new",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Client", "position": { "x": 0, "y": 130 }, "explanation": "Has no way to be notified, so it asks on a timer — every few seconds — whether there's anything new." },
+      { "id": "server", "type": "server", "label": "Server", "position": { "x": 360, "y": 130 }, "explanation": "Answers each request. Most of the time the answer is 'nothing new', so much of the traffic is wasted." }
+    ],
+    "edges": [
+      { "id": "e-c-s", "source": "client", "target": "server", "label": "GET /updates (every 5s)", "style": "solid", "animated": true },
+      { "id": "e-s-c", "source": "server", "target": "client", "label": "usually 'nothing new'", "style": "dashed" }
+    ]
   }
 }
