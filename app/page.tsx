@@ -31,7 +31,7 @@ function Headline() {
   ];
   let i = 0;
   return (
-    <h1 className="heading-hero text-text" style={{ fontSize: "clamp(3rem, 12vw, 11rem)" }}>
+    <h1 className="heading-hero text-text" style={{ fontSize: "clamp(3rem, 9.5vw, 8.5rem)" }}>
       {words.map((w, wi) => (
         <span key={wi} className="inline-block whitespace-nowrap mr-[0.22em]">
           {[...w.text].map((ch, ci) => (
@@ -61,21 +61,25 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-bg">
+      {/* Hero + marquee fill exactly the first screen: nav (body pt-16) +
+          this wrapper = 100svh. flex-col keeps the marquee flush at the fold
+          regardless of its height. */}
+      <div className="flex flex-col min-h-[calc(100svh-4rem)]">
       {/* Hero — asymmetric, flat drifting shapes behind the type */}
-      <section className="relative overflow-hidden" style={{ minHeight: "80vh" }}>
+      <section className="relative overflow-hidden flex-1 flex items-center">
         {/* Oversized background shapes (parallax drift, bleeding off edges) */}
         <ShapeDrift speed={0.18} className="pointer-events-none absolute inset-0">
           <Shape
             type="circle"
             color={BLUE}
-            size={520}
-            style={{ position: "absolute", top: "8%", right: "-160px", opacity: 0.9 }}
+            size={560}
+            style={{ position: "absolute", top: "-12%", right: "-120px", opacity: 0.9 }}
           />
           <Shape
             type="square"
             color={RED}
-            size={90}
-            style={{ position: "absolute", top: "26%", left: "6%" }}
+            size={96}
+            style={{ position: "absolute", top: "30%", left: "5%" }}
           />
         </ShapeDrift>
         <ShapeDrift speed={0.32} className="pointer-events-none absolute inset-0">
@@ -83,18 +87,18 @@ export default function HomePage() {
             type="triangle"
             color={YELLOW}
             size={120}
-            style={{ position: "absolute", bottom: "12%", right: "18%" }}
+            style={{ position: "absolute", bottom: "8%", right: "13%" }}
           />
         </ShapeDrift>
 
-        <div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
-          <p className="label-mono text-text-muted mb-8">System Design School</p>
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-8">
+          <p className="label-mono text-text-muted mb-5">System Design School</p>
           <Headline />
-          <p className="subhead text-xl sm:text-2xl text-text-muted leading-snug max-w-xl mt-10">
+          <p className="subhead text-lg sm:text-xl text-text-muted leading-snug max-w-xl mt-6">
             The ideas behind every system that handles millions of users —
             caching, load balancing, sharding, queues — in plain English.
           </p>
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap gap-3">
             <Link
               href="/concepts"
               data-cursor
@@ -129,6 +133,7 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      </div>
 
       {/* Intro statement — triangle lead-in */}
       <section className="max-w-3xl mx-auto px-6 py-20 sm:py-28">
