@@ -2,26 +2,27 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { Shape, type ShapeType } from "./Shape";
 
 function PathCard({
   href,
   label,
-  labelColor,
   title,
   description,
   meta,
   accentColor,
-  accentBg,
+  shape,
+  offsetClass,
   delay,
 }: {
   href: string;
   label: string;
-  labelColor: string;
   title: string;
   description: string;
   meta: string;
   accentColor: string;
-  accentBg: string;
+  shape: ShapeType;
+  offsetClass: string;
   delay: number;
 }) {
   const [visible, setVisible] = useState(false);
@@ -31,7 +32,6 @@ function PathCard({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -46,71 +46,51 @@ function PathCard({
   }, [delay]);
 
   return (
-    <Link
-      ref={ref}
-      href={href}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="group relative block overflow-hidden border border-border transition-all duration-300"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible
-          ? hovered
-            ? "translateY(-4px)"
-            : "translateY(0)"
-          : "translateY(32px)",
-        transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-        transitionDuration: "700ms",
-        borderColor: hovered ? accentColor + "50" : undefined,
-        boxShadow: hovered ? "0 12px 40px rgba(0,0,0,0.06)" : "none",
-      }}
-    >
-      {/* Color accent bar at top */}
+    <div className={`relative ${offsetClass}`}>
+      {/* Flat primary "Bauhaus shadow" offset block */}
       <div
-        className="h-[4px] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="absolute inset-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
           backgroundColor: accentColor,
-          transform: hovered ? "scaleX(1)" : "scaleX(0.3)",
-          transformOrigin: "left",
+          transform: hovered ? "translate(12px, 12px)" : "translate(8px, 8px)",
         }}
       />
-
-      {/* Background tint on hover */}
-      <div
-        className="absolute inset-0 transition-opacity duration-300 pointer-events-none"
+      <Link
+        ref={ref}
+        href={href}
+        data-cursor
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="group relative block border bg-bg p-8 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
-          backgroundColor: accentBg,
-          opacity: hovered ? 1 : 0,
+          opacity: visible ? 1 : 0,
+          transform: visible
+            ? hovered
+              ? "translate(-4px, -4px)"
+              : "translate(0, 0)"
+            : "translateY(28px)",
+          borderColor: hovered ? accentColor : "rgba(26,26,26,0.10)",
         }}
-      />
-
-      <div className="relative p-8">
-        <span className="label-mono mb-5 block" style={{ color: accentColor }}>
-          {label}
-        </span>
-        <h2
-          className="text-xl font-bold text-text tracking-[-0.01em] mb-3 transition-colors duration-200"
-          style={{ color: hovered ? accentColor : undefined }}
-        >
-          {title}
-        </h2>
+      >
+        <div className="flex items-center justify-between mb-6">
+          <Shape type={shape} color={accentColor} size={20} />
+          <span className="label-mono text-text-muted">{label}</span>
+        </div>
+        <h2 className="subhead text-2xl text-text mb-3">{title}</h2>
         <p className="text-[0.9375rem] text-text-muted leading-relaxed mb-8">
           {description}
         </p>
-        <div className="flex items-center justify-between pt-5 border-t border-border/60">
-          <span className="label-mono text-text-dim">{meta}</span>
+        <div className="flex items-center justify-between pt-5 border-t border-text/10">
+          <span className="label-mono text-text-muted">{meta}</span>
           <span
-            className="text-text-dim text-lg font-mono transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{
-              color: hovered ? accentColor : undefined,
-              transform: hovered ? "translateX(6px)" : "translateX(0)",
-            }}
+            className="text-text text-lg font-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5"
+            style={{ color: hovered ? accentColor : undefined }}
           >
             &rarr;
           </span>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
@@ -126,38 +106,38 @@ export function PathCards({
   lessonCount: number;
 }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-6 sm:gap-8 sm:grid-cols-3 items-start">
       <PathCard
         href="/concepts"
         label="Reference"
-        labelColor="var(--color-accent)"
         title="Concepts"
         description="The building blocks behind every app that scales — each in plain English, with a real-world analogy and an animated visual."
         meta={`${conceptCount} concepts`}
-        accentColor="var(--color-accent)"
-        accentBg="var(--color-accent-dim)"
+        accentColor="#1D4E89"
+        shape="circle"
+        offsetClass=""
         delay={0}
       />
       <PathCard
         href="/stories"
         label="Narrative"
-        labelColor="var(--color-green)"
         title="Build Stories"
         description="Follow a product from first deploy to production crisis. System design concepts arrive when the story demands them."
         meta={`${storyCount} ${storyCount === 1 ? "story" : "stories"}`}
-        accentColor="var(--color-green)"
-        accentBg="var(--color-green-dim)"
+        accentColor="#D62828"
+        shape="square"
+        offsetClass="sm:mt-12"
         delay={120}
       />
       <PathCard
         href="/curriculum"
         label="Structured"
-        labelColor="var(--color-blue)"
         title="Curriculum"
         description="Lessons organized by topic, from fundamentals to advanced patterns. Start at the beginning or jump to what you need."
         meta={`${moduleCount} ${moduleCount === 1 ? "module" : "modules"} · ${lessonCount} lessons`}
-        accentColor="var(--color-blue)"
-        accentBg="var(--color-blue-dim)"
+        accentColor="#F4C430"
+        shape="triangle"
+        offsetClass="sm:mt-24"
         delay={240}
       />
     </div>

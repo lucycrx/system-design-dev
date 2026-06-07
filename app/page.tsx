@@ -1,10 +1,14 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import type { GlossaryTerm } from "@/types/story";
 import { getAllStories, getAllModules, getGlossaryTerms } from "@/lib/content";
-import { CanvasWaveBackground } from "@/components/landing/CanvasWaveBackground";
 import { ConceptCard } from "@/components/concepts/ConceptCard";
 import { PathCards } from "@/components/ui/PathCards";
-import { SectionNumber } from "@/components/landing/SectionNumber";
+import { Shape, ShapeDrift } from "@/components/ui/Shape";
+
+const RED = "#D62828";
+const BLUE = "#1D4E89";
+const YELLOW = "#F4C430";
 
 // A visually-varied slice spanning all six categories, shown on the homepage.
 const FEATURED_IDS = [
@@ -15,6 +19,31 @@ const FEATURED_IDS = [
   "message-queue",
   "microservices",
 ];
+
+// Headline split into words; one word carries a primary accent. Each letter
+// slides up with a staggered delay via the global .reveal-up utility.
+function Headline() {
+  const words: { text: string; color?: string }[] = [
+    { text: "Learn" },
+    { text: "how" },
+    { text: "apps" },
+    { text: "scale.", color: RED },
+  ];
+  let i = 0;
+  return (
+    <h1 className="heading-hero text-text" style={{ fontSize: "clamp(3rem, 12vw, 11rem)" }}>
+      {words.map((w, wi) => (
+        <span key={wi} className="inline-block whitespace-nowrap mr-[0.22em]">
+          {[...w.text].map((ch, ci) => (
+            <span key={ci} className="reveal-up">
+              <span style={{ "--i": i++, color: w.color } as CSSProperties}>{ch}</span>
+            </span>
+          ))}
+        </span>
+      ))}
+    </h1>
+  );
+}
 
 export default function HomePage() {
   const stories = getAllStories();
@@ -27,33 +56,56 @@ export default function HomePage() {
     (t): t is GlossaryTerm => Boolean(t)
   );
 
+  // Marquee strip — repeated so the linear scroll loops seamlessly.
+  const marqueeItems = terms.slice(0, 16).map((t) => t.term);
+
   return (
     <div className="min-h-screen bg-bg">
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
-        <div className="absolute inset-0">
-          <CanvasWaveBackground />
-        </div>
-        <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-28 sm:pt-32 sm:pb-36">
-          <p className="label-mono text-accent mb-5">System Design School</p>
-          <h1 className="heading-hero text-4xl sm:text-6xl lg:text-7xl text-text max-w-3xl">
-            Learn how apps scale, one concept at a time.
-          </h1>
-          <p className="mt-6 text-lg text-text-muted leading-relaxed max-w-xl">
-            Caching, load balancing, sharding, queues — the ideas behind every
-            system that handles millions of users, explained in plain English
-            with real-world analogies.
+      {/* Hero — asymmetric, flat drifting shapes behind the type */}
+      <section className="relative overflow-hidden" style={{ minHeight: "80vh" }}>
+        {/* Oversized background shapes (parallax drift, bleeding off edges) */}
+        <ShapeDrift speed={0.18} className="pointer-events-none absolute inset-0">
+          <Shape
+            type="circle"
+            color={BLUE}
+            size={520}
+            style={{ position: "absolute", top: "8%", right: "-160px", opacity: 0.9 }}
+          />
+          <Shape
+            type="square"
+            color={RED}
+            size={90}
+            style={{ position: "absolute", top: "26%", left: "6%" }}
+          />
+        </ShapeDrift>
+        <ShapeDrift speed={0.32} className="pointer-events-none absolute inset-0">
+          <Shape
+            type="triangle"
+            color={YELLOW}
+            size={120}
+            style={{ position: "absolute", bottom: "12%", right: "18%" }}
+          />
+        </ShapeDrift>
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
+          <p className="label-mono text-text-muted mb-8">System Design School</p>
+          <Headline />
+          <p className="subhead text-xl sm:text-2xl text-text-muted leading-snug max-w-xl mt-10">
+            The ideas behind every system that handles millions of users —
+            caching, load balancing, sharding, queues — in plain English.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-10 flex flex-wrap gap-3">
             <Link
               href="/concepts"
-              className="bg-accent hover:bg-accent-dark text-white px-6 py-3 label-mono transition-colors"
+              data-cursor
+              className="bg-text text-bg px-7 py-3.5 label-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5"
             >
               Browse Concepts
             </Link>
             <Link
               href="/stories"
-              className="border border-border hover:border-accent bg-bg/80 text-text px-6 py-3 label-mono transition-colors"
+              data-cursor
+              className="border border-text/20 hover:border-text text-text px-7 py-3.5 label-mono transition-colors duration-500"
             >
               Build Stories
             </Link>
@@ -61,21 +113,50 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Marquee chromatic break — full-bleed red block */}
+      <section
+        className="marquee-pause overflow-hidden border-y border-text/10 py-5"
+        style={{ backgroundColor: RED }}
+      >
+        <div className="marquee-track flex w-max items-center gap-8 whitespace-nowrap">
+          {[...marqueeItems, ...marqueeItems].map((label, i) => (
+            <span key={i} className="flex items-center gap-8">
+              <span className="label-mono text-[#F4F1EA]" style={{ fontSize: "0.875rem" }}>
+                {label}
+              </span>
+              <Shape type="circle" color="#F4F1EA" size={6} />
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* Intro statement — triangle lead-in */}
+      <section className="max-w-3xl mx-auto px-6 py-20 sm:py-28">
+        <Shape type="triangle" color={YELLOW} size={28} className="mb-6" />
+        <p className="heading-editorial text-2xl sm:text-3xl lg:text-[2.5rem] text-text leading-[1.05]">
+          Most explanations of system design assume you already know the
+          jargon. This one doesn&apos;t. Every idea starts from a real problem,
+          a plain-English analogy, and a picture of what&apos;s actually{" "}
+          <span style={{ color: BLUE }}>happening</span>.
+        </p>
+      </section>
+
       {/* Featured concepts */}
-      <section className="max-w-6xl mx-auto px-6 py-16 sm:py-24">
-        <div className="flex items-baseline justify-between gap-4 mb-8 flex-wrap">
-          <div className="flex items-baseline gap-5">
-            <SectionNumber number="01" />
+      <section className="max-w-6xl mx-auto px-6 pb-20 sm:pb-28">
+        <div className="flex items-baseline justify-between gap-4 mb-10 flex-wrap">
+          <div className="flex items-center gap-4">
+            <Shape type="square" color={RED} size={18} />
             <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
               Start with the concepts
             </h2>
           </div>
           <Link
             href="/concepts"
-            className="group label-mono text-text-dim hover:text-accent transition-colors inline-flex items-center gap-1.5"
+            data-cursor
+            className="group label-mono text-text-muted hover:text-text transition-colors inline-flex items-center gap-1.5"
           >
             All {terms.length} concepts
-            <span className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1">
+            <span className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
               &rarr;
             </span>
           </Link>
@@ -89,14 +170,14 @@ export default function HomePage() {
       </section>
 
       {/* Three ways to learn */}
-      <section className="max-w-6xl mx-auto px-6 py-16 sm:py-24 border-t border-border">
-        <div className="flex items-baseline gap-5 mb-4">
-          <SectionNumber number="02" />
+      <section className="max-w-6xl mx-auto px-6 py-20 sm:py-28 border-t border-text/10">
+        <div className="flex items-center gap-4 mb-3">
+          <Shape type="circle" color={BLUE} size={18} />
           <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
             Three ways to learn
           </h2>
         </div>
-        <p className="font-mono text-[13px] text-text-muted leading-relaxed mb-10 max-w-lg">
+        <p className="subhead text-text-muted leading-relaxed mb-12 max-w-lg">
           Look up an idea, watch a product grow into it, or work through a
           structured path — whatever fits how you learn.
         </p>
@@ -109,47 +190,67 @@ export default function HomePage() {
         />
       </section>
 
-      {/* Footer CTA + footer — full-width blue background */}
-      <footer className="bg-accent-dark">
-        <div className="max-w-5xl mx-auto px-6 py-16 sm:py-20">
-          <h2 className="heading-editorial text-2xl sm:text-3xl text-white max-w-lg">
-            Ready to dig in?
+      {/* Footer — ink block with primary shape accents */}
+      <footer className="relative overflow-hidden" style={{ backgroundColor: "#1A1A1A" }}>
+        <Shape
+          type="circle"
+          color={YELLOW}
+          size={140}
+          className="pointer-events-none absolute"
+          style={{ top: "-40px", right: "8%", opacity: 0.9 }}
+        />
+        <Shape
+          type="triangle"
+          color={RED}
+          size={90}
+          className="pointer-events-none absolute"
+          style={{ bottom: "30px", left: "-20px", opacity: 0.9 }}
+        />
+
+        <div className="relative max-w-6xl mx-auto px-6 py-20 sm:py-24">
+          <h2 className="heading-hero text-4xl sm:text-6xl max-w-2xl" style={{ color: "#F4F1EA" }}>
+            Ready to dig <span style={{ color: YELLOW }}>in?</span>
           </h2>
-          <p className="text-white/70 mt-3 max-w-md text-[15px] leading-relaxed">
+          <p className="subhead mt-5 max-w-md text-[15px] leading-relaxed" style={{ color: "rgba(244,241,234,0.7)" }}>
             Start with the concepts, then watch them come together as a real
             product scales from two users to millions.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/concepts"
-              className="bg-white text-accent-dark hover:bg-white/90 px-6 py-3 label-mono transition-colors"
+              data-cursor
+              className="px-7 py-3.5 label-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5"
+              style={{ backgroundColor: "#F4F1EA", color: "#1A1A1A" }}
             >
               Browse Concepts
             </Link>
             <Link
               href="/curriculum"
-              className="border border-white/30 hover:border-white text-white px-6 py-3 label-mono transition-colors"
+              data-cursor
+              className="px-7 py-3.5 label-mono border transition-colors duration-500"
+              style={{ borderColor: "rgba(244,241,234,0.3)", color: "#F4F1EA" }}
             >
               Curriculum
             </Link>
           </div>
-        </div>
 
-        <div className="max-w-5xl mx-auto px-6 pt-8 pb-12 border-t border-white/15">
-          <div className="flex items-center justify-between">
-            <span className="label-mono text-white/70">system-design-school</span>
+          <div className="mt-20 pt-8 flex items-center justify-between border-t" style={{ borderColor: "rgba(244,241,234,0.12)" }}>
+            <span className="label-mono" style={{ color: "rgba(244,241,234,0.7)" }}>
+              system-design-school
+            </span>
             <a
               href="https://github.com/lucycrx/system-design-dev"
-              className="relative label-mono text-white/60 hover:text-white transition-colors duration-200 group"
               target="_blank"
               rel="noopener noreferrer"
+              data-cursor
+              className="label-mono transition-colors duration-300"
+              style={{ color: "rgba(244,241,234,0.6)" }}
             >
               GitHub
-              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-current transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-full" />
             </a>
           </div>
-          <p className="font-mono text-[11px] text-white/30 mt-4">
-            &copy; 2026 System Design School. Built with Claude Code.
+          <p className="label-mono mt-4" style={{ color: "rgba(244,241,234,0.3)", fontSize: "0.75rem" }}>
+            &copy; 2026 System Design School
           </p>
         </div>
       </footer>
