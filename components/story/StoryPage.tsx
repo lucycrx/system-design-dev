@@ -7,6 +7,7 @@ import { StoryHero } from "./StoryHero";
 import { StageTabs } from "./StageTabs";
 import { ScrollytellingLayout, CrossStageScrollytelling } from "@/components/scrollytelling/ScrollytellingLayout";
 import { BlockRenderer } from "@/components/blocks/BlockRenderer";
+import { Shape } from "@/components/ui/Shape";
 
 interface Props {
   story: Story;
@@ -152,7 +153,8 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
                 <div className="max-w-3xl mb-10">
                   <div className="mb-6">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="label-mono px-2.5 py-1 bg-accent-dim text-accent border border-accent/20">
+                      <span className="label-mono inline-flex items-center gap-2 px-2.5 py-1 bg-surface border border-text/10 text-text">
+                        <Shape type="square" color="#1A1A1A" size={9} />
                         {stage.userScale}
                       </span>
                     </div>
@@ -162,11 +164,12 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
                     </p>
                   </div>
 
-                  {/* Problem callout */}
+                  {/* Problem callout — ink field, red triangle marker */}
                   {stage.narrative.problem && (
-                    <div className="bg-pink-dim border-l-[3px] border-l-pink p-5 mb-5">
-                      <div className="label-mono text-pink mb-2">
-                        The Problem
+                    <div className="bg-surface border-l-2 border-l-text p-5 mb-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Shape type="triangle" color="#D62828" size={11} />
+                        <span className="label-mono text-text">The Problem</span>
                       </div>
                       <p className="text-[14px] text-text/80 leading-relaxed">
                         {stage.narrative.problem}
@@ -174,11 +177,12 @@ export function StoryPage({ story, allDiagrams, glossaryMap }: Props) {
                     </div>
                   )}
 
-                  {/* Resolution teaser */}
+                  {/* Resolution teaser — ink field, blue circle marker */}
                   {stage.narrative.resolution && (
-                    <div className="bg-green-dim border-l-[3px] border-l-green p-5">
-                      <div className="label-mono text-green mb-2">
-                        The Solution
+                    <div className="bg-surface border-l-2 border-l-text p-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Shape type="circle" color="#1D4E89" size={11} />
+                        <span className="label-mono text-text">The Solution</span>
                       </div>
                       <p className="text-[14px] text-text/80 leading-relaxed">
                         {stage.narrative.resolution}
