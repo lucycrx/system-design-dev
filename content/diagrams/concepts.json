@@ -321,5 +321,78 @@
       { "id": "e-c-s", "source": "client", "target": "server", "label": "GET /updates (every 5s)", "style": "solid", "animated": true },
       { "id": "e-s-c", "source": "server", "target": "client", "label": "usually 'nothing new'", "style": "dashed" }
     ]
+  },
+  "dns-resolution": {
+    "id": "dns-resolution",
+    "title": "Name to address, then connect",
+    "description": "The browser asks DNS for an IP, then talks to the server directly",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Browser", "position": { "x": 0, "y": 140 }, "explanation": "Knows the domain name but not where it lives. It must look up an IP address first." },
+      { "id": "resolver", "type": "external-service", "label": "DNS Resolver", "position": { "x": 320, "y": 0 }, "explanation": "Translates the human-readable domain into an IP address, caching the answer for a while (TTL).", "technology": "Route 53 / Cloudflare" },
+      { "id": "server", "type": "server", "label": "Web Server (93.184.x.x)", "position": { "x": 620, "y": 180 }, "explanation": "The actual server at the resolved IP. The browser connects here once it has the address." }
+    ],
+    "edges": [
+      { "id": "e-c-r", "source": "client", "target": "resolver", "label": "where is site.com?", "style": "solid", "animated": true },
+      { "id": "e-r-c", "source": "resolver", "target": "client", "label": "93.184.x.x", "style": "dashed" },
+      { "id": "e-c-s", "source": "client", "target": "server", "label": "connect to IP", "style": "solid", "animated": true }
+    ]
+  },
+  "reverse-proxy-front": {
+    "id": "reverse-proxy-front",
+    "title": "A proxy in front of the servers",
+    "description": "Clients only ever talk to the proxy; it terminates SSL, caches, and forwards",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Client", "position": { "x": 0, "y": 130 }, "explanation": "Talks only to the proxy and never sees the backend servers directly." },
+      { "id": "proxy", "type": "load-balancer", "label": "Reverse Proxy", "position": { "x": 280, "y": 130 }, "explanation": "Sits in front of the servers: terminates SSL, serves cached/static content, compresses responses, and forwards the rest. Hides and protects the backend.", "technology": "NGINX / Varnish" },
+      { "id": "server-1", "type": "server", "label": "App Server 1", "position": { "x": 560, "y": 30 }, "explanation": "A backend the client never addresses directly." },
+      { "id": "server-2", "type": "server", "label": "App Server 2", "position": { "x": 560, "y": 230 }, "explanation": "Another hidden backend. The proxy can also balance load across them." }
+    ],
+    "edges": [
+      { "id": "e-c-p", "source": "client", "target": "proxy", "label": "HTTPS", "style": "solid", "animated": true },
+      { "id": "e-p-s1", "source": "proxy", "target": "server-1", "style": "solid", "animated": true },
+      { "id": "e-p-s2", "source": "proxy", "target": "server-2", "style": "solid", "animated": true }
+    ]
+  },
+  "http-req-res": {
+    "id": "http-req-res",
+    "title": "Request, then response",
+    "description": "The client sends a request with a method; the server replies with a status",
+    "nodes": [
+      { "id": "client", "type": "client", "label": "Client", "position": { "x": 40, "y": 130 }, "explanation": "Sends an HTTP request naming a method (GET/POST/…) and a path." },
+      { "id": "server", "type": "server", "label": "Server", "position": { "x": 420, "y": 130 }, "explanation": "Processes the request and returns a status code (200, 404, 500…) plus a body. Each request stands alone — HTTP is stateless." }
+    ],
+    "edges": [
+      { "id": "e-req", "source": "client", "target": "server", "label": "GET /orders", "style": "solid", "animated": true },
+      { "id": "e-res", "source": "server", "target": "client", "label": "200 OK + JSON", "style": "solid", "animated": true }
+    ]
+  },
+  "rpc-call": {
+    "id": "rpc-call",
+    "title": "Call a remote function like a local one",
+    "description": "Service A invokes a procedure on Service B and waits for the result",
+    "nodes": [
+      { "id": "svc-a", "type": "server", "label": "Service A", "position": { "x": 40, "y": 130 }, "explanation": "Calls `getUser(42)` as if it were a local function — the RPC framework handles packing the call and sending it over the network." },
+      { "id": "svc-b", "type": "server", "label": "Service B", "position": { "x": 440, "y": 130 }, "explanation": "Runs the actual procedure and returns the result. To Service A it feels like an ordinary function call.", "technology": "gRPC / Thrift" }
+    ],
+    "edges": [
+      { "id": "e-call", "source": "svc-a", "target": "svc-b", "label": "getUser(42)", "style": "solid", "animated": true },
+      { "id": "e-return", "source": "svc-b", "target": "svc-a", "label": "User object", "style": "dashed" }
+    ]
+  },
+  "federation-split": {
+    "id": "federation-split",
+    "title": "Split the database by function",
+    "description": "One database per feature area, instead of everything in one",
+    "nodes": [
+      { "id": "app", "type": "server", "label": "App Server", "position": { "x": 0, "y": 160 }, "explanation": "Routes each query to the database that owns that feature area." },
+      { "id": "db-users", "type": "database", "label": "Users DB", "position": { "x": 320, "y": 0 }, "explanation": "Owns everything about users — its own server, its own load." },
+      { "id": "db-products", "type": "database", "label": "Products DB", "position": { "x": 320, "y": 160 }, "explanation": "Owns the catalog. Splitting by function means each DB sees less traffic." },
+      { "id": "db-orders", "type": "database", "label": "Orders DB", "position": { "x": 320, "y": 320 }, "explanation": "Owns orders. Unlike sharding (same data split by rows), federation splits by feature." }
+    ],
+    "edges": [
+      { "id": "e-app-users", "source": "app", "target": "db-users", "label": "user queries", "style": "solid", "animated": true },
+      { "id": "e-app-products", "source": "app", "target": "db-products", "label": "catalog queries", "style": "solid", "animated": true },
+      { "id": "e-app-orders", "source": "app", "target": "db-orders", "label": "order queries", "style": "solid", "animated": true }
+    ]
   }
 }

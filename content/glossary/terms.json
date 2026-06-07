@@ -240,7 +240,8 @@
     "relatedConcepts": [
       "relational-database",
       "persistence",
-      "sql"
+      "sql-vs-nosql",
+      "nosql"
     ],
     "firstAppearance": {
       "storyId": "chat-app",
@@ -353,8 +354,9 @@
     "analogy": "Like a well-organized spreadsheet where each sheet represents a type of data (users, messages, chat rooms), and you can link rows across sheets. 'Show me all messages sent by user #42 in the general chat room' — a relational database handles that naturally.",
     "relatedConcepts": [
       "database",
-      "sql",
-      "persistence"
+      "sql-vs-nosql",
+      "persistence",
+      "acid"
     ],
     "firstAppearance": {
       "storyId": "chat-app",
@@ -472,7 +474,7 @@
     "analogy": "The difference between writing on a whiteboard (non-persistent — erased at end of day) and writing in a notebook (persistent — stays there until you choose to erase it).",
     "relatedConcepts": [
       "database",
-      "memory"
+      "in-memory-store"
     ],
     "firstAppearance": {
       "storyId": "chat-app",
@@ -1192,7 +1194,8 @@
     "relatedConcepts": [
       "cache",
       "server",
-      "horizontal-scaling"
+      "horizontal-scaling",
+      "dns"
     ],
     "firstAppearance": {
       "storyId": "online-store",
@@ -1316,7 +1319,8 @@
       "server",
       "horizontal-scaling",
       "health-check",
-      "redundancy"
+      "redundancy",
+      "reverse-proxy"
     ],
     "firstAppearance": {
       "storyId": "online-store",
@@ -1437,7 +1441,8 @@
       "vertical-scaling",
       "load-balancer",
       "server",
-      "sharding"
+      "sharding",
+      "performance-vs-scalability"
     ],
     "firstAppearance": {
       "storyId": "online-store",
@@ -1913,7 +1918,8 @@
       "database",
       "horizontal-scaling",
       "eventual-consistency",
-      "consistency"
+      "consistency",
+      "replication"
     ],
     "firstAppearance": {
       "storyId": "online-store",
@@ -2038,7 +2044,8 @@
       "eventual-consistency",
       "strong-consistency",
       "cache",
-      "read-replica"
+      "read-replica",
+      "cap-theorem"
     ],
     "firstAppearance": {
       "storyId": "online-store",
@@ -2153,7 +2160,8 @@
       "consistency",
       "strong-consistency",
       "read-replica",
-      "cache"
+      "cache",
+      "cap-theorem"
     ],
     "firstAppearance": {
       "storyId": "online-store",
@@ -2276,7 +2284,8 @@
     "relatedConcepts": [
       "consistency",
       "eventual-consistency",
-      "database"
+      "database",
+      "cap-theorem"
     ],
     "firstAppearance": {
       "storyId": "online-store",
@@ -3599,7 +3608,9 @@
       "monolith",
       "api-gateway",
       "message-queue",
-      "event-driven"
+      "event-driven",
+      "rpc",
+      "rest"
     ],
     "firstAppearance": {
       "storyId": "ride-sharing",
@@ -4652,6 +4663,2113 @@
           "text": "Lock the entire task table on every edit so only one save can proceed at a time.",
           "correct": false,
           "explanation": "That's heavy pessimistic locking at the wrong granularity — it serializes all edits and hurts throughput, overkill when collisions are rare. A per-row version check is far lighter."
+        }
+      ]
+    }
+  },
+  {
+    "id": "api",
+    "term": "API (Application Programming Interface)",
+    "shortDefinition": "The contract that describes how one piece of software talks to another: which requests it accepts, what they return, and the rules for asking. It's the menu of operations a system exposes.",
+    "analogy": "Like a restaurant menu. You don't walk into the kitchen and cook — you pick from a defined list of dishes, and the kitchen handles the rest. The menu hides all the complexity behind a clean set of choices.",
+    "relatedConcepts": [
+      "rest",
+      "http",
+      "client-server",
+      "api-gateway"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "An API is a **contract**. It defines a set of operations one program offers to others — what each operation is called, what inputs it expects, and what it returns. The caller (a [[glossary:client-server|client]]) never sees the code or data behind the wall; it only sends a request that matches the contract and reads the response that comes back. Everything on the other side — the database, the business logic, the servers — stays hidden."
+          },
+          {
+            "type": "text",
+            "content": "Most APIs you'll meet are **web APIs**, exposed over the network so other systems can call them. A single call has a few parts:\n\n- **Endpoint** — the address of the operation, such as `/users/42/orders`.\n- **Request** — the inputs: which operation, plus any data and parameters.\n- **Response** — the result, usually structured data like JSON, plus a status saying whether it worked.\n\nThe app calling the API and the app providing it can be written in totally different languages on totally different machines — the contract is all they need to agree on."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "\"API\" is a broad word. A library you import has an API (its functions). An operating system has an API. But in system design, \"API\" almost always means a **web API** — operations one service exposes to others over the network."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "APIs are what let software be built out of parts. Because the contract hides the implementation, the team behind an API can rewrite their database, change languages, or rebuild their servers — and as long as the contract holds, every caller keeps working. This separation is what makes large systems buildable by separate teams."
+          },
+          {
+            "type": "text",
+            "content": "They're also the backbone of the modern web economy. A payments API lets any app charge a card without becoming a bank. A maps API lets any app show a map without surveying the planet. Every integration — \"sign in with Google,\" a weather widget, a shipping estimate — is one program calling another's API. The API *is* the product for many companies."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "An API is a promise, and promises are hard to take back. Once other people depend on your contract, **changing it can break them**. Remove a field, rename an endpoint, or tighten a rule, and every caller relying on the old shape stops working. This is why public APIs are **versioned** (`/v1/`, `/v2/`) — you ship changes as a new version so existing callers keep using the old one until they migrate."
+          },
+          {
+            "type": "text",
+            "content": "Other ongoing costs:\n\n- **Documentation** — an undocumented API is nearly useless; callers can't guess the contract.\n- **Validation & errors** — you must handle every bad, missing, or malicious input gracefully.\n- **Security & abuse** — an open door invites traffic you didn't plan for, which is why APIs lean on [[glossary:rate-limiting|rate limiting]] and authentication."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "The classic mistake is making a **breaking change** to a live API without versioning — renaming a field, changing a type, or dropping an endpoint. Callers you can't see (and can't ask to update) silently break. Treat a published contract as load-bearing: add to it freely, but never quietly change what's already there."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "An API is the *contract*; the things below it are how that contract travels. Most web APIs ride on [[glossary:http|HTTP]], and the most common style for designing them is [[glossary:rest|REST]] — resources addressed by URL and acted on with HTTP verbs. When you need speed and tight integration between your own services, an API can instead be exposed as [[glossary:rpc|RPC]] (calling a remote function), and many systems mix both."
+          },
+          {
+            "type": "text",
+            "content": "At scale, you rarely expose your services' APIs directly. An [[glossary:api-gateway|API gateway]] sits in front as a single front door — routing each call to the right service, enforcing authentication, and applying [[glossary:rate-limiting|rate limiting]]. Inside a [[glossary:microservices|microservices]] system, services talk to each other entirely through their APIs, which is exactly what lets each one be owned and deployed independently."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Most APIs today are **REST over HTTP**, returning JSON, and documented with the **OpenAPI** (Swagger) specification so callers get auto-generated docs and client code. **GraphQL** is a popular alternative that lets the caller ask for exactly the fields it needs in one request. For internal service-to-service traffic, **gRPC** (an RPC framework) is common because it's fast and strongly typed. Whatever the style, real APIs ship with versioning, authentication (API keys or OAuth tokens), rate limits, and clear error formats — the contract is only as good as how reliably it's enforced and documented."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your team built a service that other companies now call to fetch shipping rates. A product manager wants to rename a confusing field in the JSON response from `cost` to `total_price` to make it clearer.",
+      "question": "What's the safest way to ship this change?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Add `total_price` as a new field alongside `cost`, or release the change under a new API version, so existing callers keep working.",
+          "correct": true,
+          "explanation": "Other companies depend on the current contract. Renaming a field is a breaking change; adding the new field (or versioning) lets old callers keep reading `cost` while new ones adopt `total_price`."
+        },
+        {
+          "id": "b",
+          "text": "Just rename the field — clearer names are always better.",
+          "correct": false,
+          "explanation": "Clarity matters, but an API is a published contract. Renaming a field silently breaks every external caller that reads `cost`, and you can't force them to update on your schedule."
+        },
+        {
+          "id": "c",
+          "text": "Put a load balancer in front of the service before renaming.",
+          "correct": false,
+          "explanation": "A load balancer spreads traffic across servers. It does nothing about the contract changing shape — callers expecting `cost` still break."
+        },
+        {
+          "id": "d",
+          "text": "Add a cache so the old responses are still served from memory.",
+          "correct": false,
+          "explanation": "A cache serves stale copies temporarily, but once those expire callers get the new shape and break. Caching delays the breakage rather than preventing it."
+        }
+      ]
+    }
+  },
+  {
+    "id": "http",
+    "term": "HTTP (HyperText Transfer Protocol)",
+    "shortDefinition": "The request/response protocol of the web. A client sends a request with a method (GET, POST...) and the server returns a response with a status code. Each request stands on its own.",
+    "analogy": "Like mailing a postcard with a clear instruction and a return address. You write 'send me page X,' drop it in the box, and a reply card comes back with the answer — or a code saying 'not found.' Each card is self-contained.",
+    "relatedConcepts": [
+      "rest",
+      "tcp-udp",
+      "client-server",
+      "api"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "HTTP is the language browsers and servers use to talk. The pattern is dead simple: a [[glossary:client-server|client]] sends a **request**, the server sends back a **response**, and that's one complete exchange. Every web page, image, API call, and form submission is built from this back-and-forth."
+          },
+          {
+            "type": "text",
+            "content": "An HTTP request carries a **method** that says what you want done:\n\n- **GET** — read something (fetch a page, list orders). Safe; it shouldn't change anything.\n- **POST** — create something or trigger an action (submit a form, place an order).\n- **PUT** — replace a resource with the data you send.\n- **DELETE** — remove a resource.\n\nThe response comes back with a **status code** summarizing the outcome:\n\n- **2xx** — success (`200 OK`, `201 Created`).\n- **3xx** — redirect (`301 Moved Permanently`).\n- **4xx** — *you* made a mistake (`404 Not Found`, `400 Bad Request`, `401 Unauthorized`).\n- **5xx** — *the server* failed (`500 Internal Server Error`, `503 Service Unavailable`).\n\nBoth requests and responses also carry **headers** (metadata like content type and caching rules) and an optional **body** (the actual data)."
+          },
+          {
+            "type": "callout",
+            "style": "tip",
+            "content": "A quick way to read a status code: the first digit tells the whole story. 2 = it worked, 3 = look elsewhere, 4 = the caller messed up, 5 = the server messed up."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "HTTP is **stateless**: the server treats every request as brand new and remembers nothing about previous ones on its own. Each request must carry everything the server needs to handle it — who you are, what you want, any data. This sounds like a limitation, but it's the secret to web scale."
+          },
+          {
+            "type": "text",
+            "content": "Because no request depends on a server remembering the last one, **any server can handle any request**. That means you can put a [[glossary:load-balancer|load balancer]] in front of a pool of identical servers and freely add, remove, or restart them. Statelessness is what makes [[glossary:horizontal-scaling|horizontal scaling]] of web servers straightforward — there's no per-user memory stuck on one machine."
+          },
+          {
+            "type": "reveal",
+            "label": "If HTTP is stateless, how does login work?",
+            "content": "The state lives *off* the server. After you log in, the server hands your browser a **cookie** (or a token), and your browser attaches it to every future request. The server reads that token to know who you are — but the identity travels with each request rather than being held in one server's memory. The protocol stays stateless; the *application* layers state on top."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Statelessness has a cost: every request re-sends context (cookies, tokens, headers), which is repetitive overhead. And the classic request/response shape is **client-initiated** — the server can't push to the client out of the blue. For data that changes on the server's schedule (a chat message arriving, a price ticking), plain HTTP forces awkward [[glossary:polling|polling]] or pushes you toward [[glossary:websockets|WebSockets]]."
+          },
+          {
+            "type": "text",
+            "content": "Newer versions chip away at the overhead. **HTTP/1.1** opened one request at a time per connection (causing head-of-line blocking); **HTTP/2** multiplexes many requests over one connection; **HTTP/3** runs over UDP (QUIC) to avoid TCP's blocking entirely. The semantics — methods, status codes — stay the same across versions."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Don't use **GET** for actions that change data, and don't blindly **retry** non-idempotent requests. A retried POST can place a second order; a GET that secretly deletes something can be triggered by a crawler or a prefetch. Match the method to the effect: GET reads, POST/PUT/DELETE write."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "HTTP doesn't move bytes itself — it rides on top of [[glossary:tcp-udp|TCP]], which provides the reliable, ordered connection underneath (HTTP/3 is the exception, riding on UDP). On top of HTTP, [[glossary:rest|REST]] is a *style* for designing [[glossary:api|APIs]]: it leans directly on HTTP's methods and status codes to act on resources. So the stack reads bottom-up: TCP carries the bytes, HTTP gives them request/response meaning, REST organizes them into an API."
+          },
+          {
+            "type": "text",
+            "content": "When you can't wait for the client to ask, you reach past HTTP's request/response model — [[glossary:polling|polling]] repeatedly asks over HTTP, while [[glossary:websockets|WebSockets]] upgrade an HTTP connection into a two-way channel so the server can push. HTTP is also where caching lives: `Cache-Control` headers tell a [[glossary:cache|cache]] or [[glossary:cdn|CDN]] how long a response may be reused."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "http-req-res",
+            "caption": "Each exchange is one request and one response — and HTTP keeps no memory between them."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Virtually everything you do on the web is HTTP, and in practice it's **HTTPS** — HTTP wrapped in TLS encryption so nobody can read or tamper with the traffic. Browsers, mobile apps, and servers all speak it; tools like `curl` and Postman let you fire requests by hand. Modern sites run on **HTTP/2** or **HTTP/3** for speed, and APIs use HTTP status codes and headers as their vocabulary — a `429 Too Many Requests` from a rate limiter, a `Cache-Control` header steering a CDN, a `401` telling the client to re-authenticate."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "A developer builds a 'mark as read' button. Clicking it sends an HTTP GET request to `/messages/42/read`, which flips the message to read in the database. Soon, messages are mysteriously marked read before anyone clicks.",
+      "question": "What's the most likely cause and fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "GET is being used for an action that changes data. Browsers, crawlers, and prefetchers fire GETs freely, so use POST (or PUT) for the state change instead.",
+          "correct": true,
+          "explanation": "GET is meant to be a safe read with no side effects. Link prefetching and crawlers issue GETs on their own, triggering the write. Moving the change to POST/PUT matches the method to its effect."
+        },
+        {
+          "id": "b",
+          "text": "The server is stateful and remembering old clicks; make it stateless.",
+          "correct": false,
+          "explanation": "HTTP is already stateless and the symptom isn't about remembered sessions — it's that a safe-looking GET is performing a write that automated agents trigger."
+        },
+        {
+          "id": "c",
+          "text": "The status codes are wrong; return 200 instead of 404.",
+          "correct": false,
+          "explanation": "Status codes describe the outcome of a request; they don't control which clients fire the request. The problem is the method choice, not the response code."
+        },
+        {
+          "id": "d",
+          "text": "Switch from HTTP/1.1 to HTTP/2 so requests don't get duplicated.",
+          "correct": false,
+          "explanation": "HTTP versions change how connections multiplex, not whether GETs cause side effects. The duplicate triggers come from using GET for a write, regardless of version."
+        }
+      ]
+    }
+  },
+  {
+    "id": "rest",
+    "term": "REST (Representational State Transfer)",
+    "shortDefinition": "An architectural style for HTTP APIs: model everything as resources addressed by URLs, act on them with HTTP verbs, keep the server stateless, and exchange plain data like JSON.",
+    "analogy": "Like a well-organized filing system where every folder has a fixed address. To read a file you go to its drawer; to add one you drop it in; to remove it you take it out. The actions are standard, only the address changes.",
+    "relatedConcepts": [
+      "http",
+      "api",
+      "rpc",
+      "client-server"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "REST is a set of conventions for designing [[glossary:api|APIs]] on top of [[glossary:http|HTTP]]. Its core idea: everything is a **resource** — a user, an order, a photo — and each resource has a stable **URL** that names it. You then act on resources with HTTP's existing verbs rather than inventing custom action names."
+          },
+          {
+            "type": "text",
+            "content": "The verbs map cleanly onto operations on a collection and its items:\n\n- `GET /orders` — list orders.\n- `GET /orders/42` — read one order.\n- `POST /orders` — create a new order.\n- `PUT /orders/42` — replace order 42.\n- `DELETE /orders/42` — delete it.\n\nNotice the URL names the *thing* (`/orders/42`) and the verb names the *action*. The server responds with a **representation** of the resource — usually JSON — plus an HTTP status code. Two principles hold it together: the API is **stateless** (each request carries its own context), and it's **uniform** (the same handful of verbs work across every resource, so once you know one endpoint you can guess the rest)."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "The tell of a RESTful URL: it's made of **nouns**, not verbs. `POST /orders` instead of `/createOrder`, `DELETE /orders/42` instead of `/deleteOrder?id=42`. The HTTP method supplies the verb; the URL supplies the noun."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "REST won the web because it's **predictable and uses what's already there**. There's nothing to install — every browser, proxy, and HTTP library already speaks the methods and status codes REST relies on. A developer who has used one REST API can pick up another in minutes because the conventions are the same."
+          },
+          {
+            "type": "text",
+            "content": "Statelessness gives REST the same scaling superpower as HTTP: since no request depends on a server remembering the last one, requests can be spread across a pool of identical servers behind a [[glossary:load-balancer|load balancer]]. And because REST leans on HTTP, it inherits HTTP **caching** for free — a `GET` response can be cached by a browser, a [[glossary:cache|cache]], or a [[glossary:cdn|CDN]], which slashes load on the server."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "REST's resource model is a natural fit for CRUD (create/read/update/delete), but it can feel awkward for things that aren't really resources — \"send this email,\" \"recalculate this report.\" Teams end up bending the model (`POST /emails`) or breaking it. REST also tends toward **over- and under-fetching**: an endpoint returns a fixed shape, so you often get more fields than you need, or have to make several calls to assemble one screen."
+          },
+          {
+            "type": "text",
+            "content": "Other friction points:\n\n- **Chatty for nested data** — building one view may need `/users/42`, then `/users/42/orders`, then each order's items.\n- **No strict contract by default** — unlike typed RPC, a plain REST response shape is just convention unless you add a spec like OpenAPI.\n- **Looser performance** — text JSON over HTTP/1.1 is heavier than a compact binary protocol."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Putting verbs in URLs (`/getUser`, `/updateOrder`, `/deleteThing`) isn't REST — it's [[glossary:rpc|RPC]] wearing REST's clothes. That's a fine choice, but call it what it is. Mixing the two styles inconsistently across one API is what confuses the people who have to use it."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "REST is a *style*, not a technology — it sits directly on [[glossary:http|HTTP]] and reuses its verbs and status codes rather than defining anything new. Its main rival is [[glossary:rpc|RPC]]: REST organizes an API around **resources and standard verbs**, while RPC organizes it around **named function calls**. Neither is universally better — REST shines for public, resource-shaped APIs; RPC shines for fast, tightly-coupled internal calls."
+          },
+          {
+            "type": "text",
+            "content": "A REST API is the public face of a service in a [[glossary:client-server|client-server]] system, and at scale it usually sits behind an [[glossary:api-gateway|API gateway]] that handles auth, routing, and [[glossary:rate-limiting|rate limiting]]. Because REST relies on stateless requests, it scales the same way HTTP does: identical servers behind a [[glossary:load-balancer|load balancer]], with [[glossary:cache|caching]] in front for `GET`s."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "REST is the default style for public web APIs — Stripe, GitHub, Twilio, and most SaaS products expose REST endpoints returning JSON, documented with **OpenAPI/Swagger**. When REST's fixed response shapes get clumsy, teams reach for **GraphQL** (let the client request exactly the fields it needs) or **gRPC** (typed, binary, fast — better for internal service-to-service calls). In practice, a single company often uses all three: REST for the public API, GraphQL for its own rich frontends, and gRPC between backend microservices."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "You're designing a public API for a to-do app. A teammate proposes these endpoints: `POST /createTask`, `POST /getTask`, `POST /updateTask`, `POST /deleteTask` — all using POST.",
+      "question": "How should you redesign this to follow REST conventions?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Model tasks as a resource and use HTTP verbs: `POST /tasks`, `GET /tasks/{id}`, `PUT /tasks/{id}`, `DELETE /tasks/{id}`.",
+          "correct": true,
+          "explanation": "REST names resources with noun URLs and uses HTTP methods as the verbs. This makes the API predictable, lets GETs be cached, and uses HTTP's status codes naturally."
+        },
+        {
+          "id": "b",
+          "text": "Keep the verb-named endpoints but switch them all to GET so they can be cached.",
+          "correct": false,
+          "explanation": "GET is for safe reads only. Using GET for create/update/delete is dangerous — and verb-in-URL endpoints are RPC-style, not REST. Caching a write would be a serious bug."
+        },
+        {
+          "id": "c",
+          "text": "Put the action in a query string: `/tasks?action=create`, `/tasks?action=delete`.",
+          "correct": false,
+          "explanation": "That just hides the verb in the query string instead of the path. REST expresses the action through the HTTP method, not a custom parameter."
+        },
+        {
+          "id": "d",
+          "text": "Use gRPC instead, since named calls like `createTask` map directly to functions.",
+          "correct": false,
+          "explanation": "gRPC (an RPC framework) does map well to named calls, but the question asks for a public REST API. gRPC is a different style better suited to internal service-to-service traffic."
+        }
+      ]
+    }
+  },
+  {
+    "id": "dns",
+    "term": "DNS (Domain Name System)",
+    "shortDefinition": "The internet's address book. It translates human-friendly domain names like example.com into the numeric IP addresses machines actually use to reach each other.",
+    "analogy": "Like the contacts app on your phone. You tap 'Mom' instead of memorizing her number — the app looks up the digits behind the scenes. DNS does the same for the web: you type a name, it finds the number.",
+    "relatedConcepts": [
+      "cache",
+      "client-server",
+      "load-balancer",
+      "cdn"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Computers reach each other by **IP address** — a number like `93.184.216.34` — not by name. DNS is the system that translates the names humans type (`example.com`) into those numbers. Without it, you'd have to memorize an IP for every site you visit."
+          },
+          {
+            "type": "text",
+            "content": "A lookup (called **resolution**) is a relay race through a hierarchy. When you visit `shop.example.com` and the answer isn't already cached:\n\n1. Your computer asks a **resolver** (usually run by your ISP or a service like `8.8.8.8`).\n2. The resolver asks a **root server**, which points it toward the servers for `.com`.\n3. The **.com (TLD) servers** point it toward the **authoritative server** for `example.com`.\n4. The authoritative server returns the actual IP for `shop.example.com`.\n\nThe resolver hands the IP back to your computer, which can finally open a connection to the [[glossary:client-server|server]]. All of this typically finishes in milliseconds — and most of the time it's even faster because the answer is cached."
+          },
+          {
+            "type": "reveal",
+            "label": "The common record types",
+            "content": "DNS stores different kinds of records:\n- **A** — maps a name to an IPv4 address (the workhorse).\n- **AAAA** — maps a name to an IPv6 address.\n- **CNAME** — an alias pointing one name at another name.\n- **MX** — where to deliver email for the domain.\n- **TXT** — free-form text, often used to prove domain ownership.\nFor system design, the key one is the **A record** (and CNAME), which is how a name becomes a reachable IP."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "DNS is the **first step of nearly every internet interaction**. Before any page loads or API call fires, the name has to become an IP. That makes DNS quietly load-bearing: if it's slow, everything feels slow; if it's down, it doesn't matter that your servers are healthy — nobody can find them."
+          },
+          {
+            "type": "text",
+            "content": "DNS is also a powerful **traffic-steering tool**. Because you control what IP a name resolves to, you can change where users go without touching the user at all: point the name at a new server during a migration, return different IPs to balance load, or hand each user the address of a nearby [[glossary:cdn|CDN]] edge. A lot of global routing is really just clever DNS answers."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "DNS answers are **cached aggressively** — by your browser, your OS, your resolver, and everything in between — and each record carries a **TTL (time-to-live)** saying how long a cached copy may be trusted. Caching is what makes DNS fast, but it's also DNS's biggest gotcha: when you change a record, the old value keeps being served everywhere until the TTLs expire. This is **propagation delay**, and it can last minutes to hours depending on the TTL you set."
+          },
+          {
+            "type": "text",
+            "content": "So TTL is a trade-off. A **short TTL** lets changes take effect quickly (handy before a planned migration) but means more lookups and a touch more latency. A **long TTL** is faster and lighter but makes you slow to react. And because DNS is foundational, it's a prime **failure and attack point** — a DNS outage or hijack takes everything down with it."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "The classic incident: you switch a domain to a new server, but users keep hitting the old one for hours because the record's TTL was set high. Lower the TTL *before* a planned change so the cutover propagates fast — then raise it back afterward."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "DNS is the front door to the [[glossary:client-server|client-server]] model: it's what turns a name into the server's address so the client can connect at all. Its speed comes entirely from [[glossary:cache|caching]] — DNS is a textbook example of a TTL-governed cache, layered from your browser down to your resolver, and it accepts the same [[glossary:eventual-consistency|eventual consistency]] trade-off: after a change, the world converges on the new value once TTLs expire."
+          },
+          {
+            "type": "text",
+            "content": "DNS also overlaps with load balancing. **DNS-based load balancing** hands different users different IPs to spread them across servers or data centers, and a [[glossary:cdn|CDN]] relies on DNS to route each user to a nearby edge. It complements a network [[glossary:load-balancer|load balancer]]: DNS gets you to roughly the right place, and the load balancer distributes across the servers there."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "dns-resolution",
+            "caption": "The browser resolves a name to an IP, then connects to the server directly."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Managed DNS providers like **Route 53 (AWS)**, **Cloudflare**, and **Google Cloud DNS** run the authoritative servers for most domains and add features like health-checked failover and geo-routing. Public resolvers like **`8.8.8.8` (Google)** and **`1.1.1.1` (Cloudflare)** do the lookups for end users. Day to day, you'll set **A** and **CNAME** records to point a domain at your servers or CDN, tune **TTLs** around planned changes, and add **TXT** records to verify ownership for services like email or TLS certificates."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "You're migrating your site to a new server with a new IP. You update the domain's A record at 9am, but hours later many users are still landing on the old server, which you've already shut down.",
+      "question": "What most likely caused this, and what should you do next time?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The DNS record's TTL was high, so resolvers kept serving the old IP from cache. Lower the TTL well before a planned migration so changes propagate quickly.",
+          "correct": true,
+          "explanation": "DNS answers are cached for the length of their TTL. A high TTL means the old IP lingers in caches everywhere until it expires. Dropping the TTL ahead of the cutover makes the change propagate fast."
+        },
+        {
+          "id": "b",
+          "text": "The new server needs a load balancer in front of it before DNS will route to it.",
+          "correct": false,
+          "explanation": "A load balancer distributes traffic among servers; it has nothing to do with cached DNS records still pointing at the old IP. The issue is propagation, not balancing."
+        },
+        {
+          "id": "c",
+          "text": "The CNAME record overrode the A record; delete the CNAME.",
+          "correct": false,
+          "explanation": "There's no indication a conflicting CNAME exists. The symptom — old IP served for hours — is the signature of TTL caching, not a record-type conflict."
+        },
+        {
+          "id": "d",
+          "text": "The old server's cache is still serving pages; clear its cache.",
+          "correct": false,
+          "explanation": "Users reaching the old server at all is a DNS resolution problem. An application cache on a server you've shut down can't be what's routing users to it."
+        }
+      ]
+    }
+  },
+  {
+    "id": "rpc",
+    "term": "RPC (Remote Procedure Call)",
+    "shortDefinition": "A style of API where you call a function on another machine as if it were a local function — the network round trip is hidden behind a normal-looking method call.",
+    "analogy": "Like dialing an extension at a company and saying 'run report 7 for me.' You don't think about the building, the desk, or how they do it — you just ask for the action by name and get the result back, as if they were next to you.",
+    "relatedConcepts": [
+      "rest",
+      "api",
+      "microservices",
+      "http"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "RPC makes a call across the network *look like* a normal function call. Instead of thinking in terms of resources and URLs, you call a named operation — `getUser(42)` or `chargeCard(order)` — and the framework handles the fact that the actual code runs on a different machine. The remoteness is deliberately hidden."
+          },
+          {
+            "type": "text",
+            "content": "Under the hood, a few steps happen automatically every time you make the call:\n\n1. The arguments are **serialized** (packed into bytes) by a local stub.\n2. The bytes are sent over the network to the remote server.\n3. The server **deserializes** them, runs the real function, and packs up the result.\n4. The result travels back and is handed to your code as the return value.\n\nModern RPC frameworks generate this plumbing from a shared **interface definition** — a file that declares every operation, its inputs, and its outputs. Both sides generate code from that one file, so the client and server agree on the contract by construction."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "The mental shift: [[glossary:rest|REST]] asks \"what *resource* do I want, and which verb acts on it?\" RPC asks \"what *action* do I want to invoke?\" REST is noun-first; RPC is verb-first."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "RPC is the natural fit for **service-to-service** communication inside your own system. When one of your services calls another dozens of times to render a page, you want those calls to be fast, compact, and strongly typed — and you control both ends, so you don't need REST's universal-web friendliness. RPC gives you exactly that: a tight, function-like contract between services you own."
+          },
+          {
+            "type": "text",
+            "content": "Frameworks like **gRPC** make it fast: they send a **compact binary** format (Protocol Buffers) instead of bulky text JSON, run over **HTTP/2** for multiplexing, and support **streaming** in both directions. For internal traffic at scale — the chatter between [[glossary:microservices|microservices]] — that efficiency adds up to real savings in latency and bandwidth."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "RPC's great strength — hiding the network — is also its great danger. A local function call is fast and never fails; a remote one is slow and *can* fail in ways a local call never does: timeouts, partial failures, the server being down. Code that treats a remote call like a local one ignores [[glossary:latency-vs-throughput|latency]], [[glossary:retry|retries]], and [[glossary:timeout|timeouts]] — and falls over the first time the network misbehaves."
+          },
+          {
+            "type": "text",
+            "content": "RPC also creates **tighter coupling**. Because client and server share a generated interface, changing that contract means coordinating both sides — you can't evolve them as independently as a loosely-typed REST API. And RPC is **less web-friendly**: a binary protocol over HTTP/2 isn't something a browser, a generic HTTP cache, or `curl` can casually inspect, so it's a poor fit for a public API meant for the open internet."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "The classic RPC trap is treating a remote call like a local one. The network is slow and unreliable in ways memory isn't — always wrap remote calls with [[glossary:timeout|timeouts]], [[glossary:retry|retries]] (only for idempotent operations), and a [[glossary:circuit-breaker|circuit breaker]] so one slow service doesn't drag down the callers waiting on it."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "RPC and [[glossary:rest|REST]] are the two dominant ways to shape an [[glossary:api|API]], and they trade off cleanly: REST is resource-oriented, web-friendly, and loosely coupled (great for *public* APIs); RPC is action-oriented, fast, and tightly coupled (great for *internal* service-to-service calls). Many systems use both — REST at the edge, RPC inside. gRPC, the most common RPC framework, even rides on [[glossary:http|HTTP]]/2 underneath, so it shares plumbing with the web stack."
+          },
+          {
+            "type": "text",
+            "content": "RPC is the connective tissue of a [[glossary:microservices|microservices]] architecture: services call each other's operations directly and constantly. That's why microservices lean so hard on resilience patterns — every RPC is a network hop that can fail, so [[glossary:circuit-breaker|circuit breakers]], [[glossary:retry|retries]], and [[glossary:timeout|timeouts]] become essential rather than optional. For calls that don't need an immediate answer, teams often swap synchronous RPC for an asynchronous [[glossary:message-queue|message queue]] to decouple the services entirely."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "rpc-call",
+            "caption": "A remote call is packed up, sent, and run on another service as if it were local."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**gRPC** (Google) is the modern default for internal RPC — Protocol Buffers for the contract, HTTP/2 for transport, code generation for many languages, plus streaming. **Apache Thrift** (originally Facebook) plays a similar role. Older systems used **SOAP** or **XML-RPC**. In a typical setup, browsers and partners hit a public **REST** API, and behind the [[glossary:api-gateway|gateway]] the microservices talk to each other over **gRPC** for speed — the public edge stays web-friendly while the internal mesh stays fast and typed."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "You have two backend microservices you own — an order service and an inventory service — that call each other thousands of times per second to render checkout. Latency between them matters a lot, and you control both codebases.",
+      "question": "Which communication style fits best?",
+      "options": [
+        {
+          "id": "a",
+          "text": "gRPC (RPC): a compact binary, strongly-typed call over HTTP/2, ideal for fast internal service-to-service traffic where you own both ends.",
+          "correct": true,
+          "explanation": "This is RPC's sweet spot — high-volume internal calls between services you control. The binary format and HTTP/2 transport cut latency and bandwidth versus text JSON, and the shared contract keeps both sides in sync."
+        },
+        {
+          "id": "b",
+          "text": "A public REST API with JSON, because REST is the web standard.",
+          "correct": false,
+          "explanation": "REST shines for public, web-facing APIs, but for thousands of internal calls per second its text JSON and per-request overhead are heavier than a binary RPC. Web-friendliness isn't needed when you own both ends."
+        },
+        {
+          "id": "c",
+          "text": "A message queue between the two services.",
+          "correct": false,
+          "explanation": "A queue decouples services for asynchronous work, but checkout needs an immediate answer (do we have stock?). Putting a queue in a synchronous request path adds latency rather than removing it."
+        },
+        {
+          "id": "d",
+          "text": "Long-polling over HTTP from one service to the other.",
+          "correct": false,
+          "explanation": "Polling is for clients waiting on events that arrive unpredictably. Here one service needs a direct, immediate reply to a call — a synchronous RPC, not polling."
+        }
+      ]
+    }
+  },
+  {
+    "id": "tcp-udp",
+    "term": "TCP vs UDP",
+    "shortDefinition": "The two main transport protocols. TCP is reliable, ordered, and connection-based — it guarantees delivery. UDP is fast and connectionless — it fires packets off and doesn't look back.",
+    "analogy": "TCP is a registered letter with delivery confirmation: tracked, in order, re-sent if lost. UDP is shouting across a noisy room: fast and effortless, but if a word gets lost you just keep going rather than repeat it.",
+    "relatedConcepts": [
+      "http",
+      "real-time",
+      "latency-vs-throughput",
+      "client-server"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Both TCP and UDP move data between two machines, but they make opposite promises. **TCP (Transmission Control Protocol)** is **connection-oriented and reliable**: before sending anything, the two sides perform a **three-way handshake** to establish a connection. Once connected, TCP numbers every chunk, waits for acknowledgments, **re-sends anything lost**, and **delivers everything in order**. The receiver gets a clean, complete stream exactly as it was sent."
+          },
+          {
+            "type": "text",
+            "content": "**UDP (User Datagram Protocol)** is **connectionless and best-effort**: it just fires off independent packets (datagrams) with no handshake, no acknowledgments, and no retries. Packets can arrive out of order, be duplicated, or vanish entirely — UDP won't notice or care. In exchange, it has almost no overhead and no waiting.\n\nThe trade is right there in the design:\n\n- **TCP** — reliable, ordered, connection-based. Slower to start (handshake) and can stall to re-send lost data.\n- **UDP** — fast, connectionless, lossy. No setup, no waiting, but no guarantees."
+          },
+          {
+            "type": "reveal",
+            "label": "What the TCP handshake actually does",
+            "content": "The **three-way handshake** is three messages: the client says **SYN** (\"let's talk\"), the server replies **SYN-ACK** (\"sure, and I'm ready too\"), and the client sends **ACK** (\"great, go\"). Only then does data flow. It costs one network round trip *before* any real data moves — which is why connection setup adds latency, and why protocols that pool or reuse connections feel snappier."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The choice comes down to a single question: **what hurts more — losing data, or waiting for it?** For most things, losing data is unacceptable. A web page with missing bytes is broken; a database write that arrives scrambled is corruption; an email with dropped characters is gibberish. These all need TCP's guarantee that everything arrives, intact and in order."
+          },
+          {
+            "type": "text",
+            "content": "But for **live media and gaming**, *waiting* is the enemy. In a video call, a packet that's late is worthless — by the time TCP re-sends a lost frame, that moment of the conversation is already gone, and the delay just makes things worse. Better to drop the lost bit, show a tiny glitch, and stay in sync with real time. That's UDP's domain: video, voice ([[glossary:real-time|VoIP]]), live streaming, and fast-paced games all prefer fresh-but-lossy over complete-but-late."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "TCP's reliability isn't free. The handshake adds a round trip before any data flows, and its insistence on **in-order delivery** can cause **head-of-line blocking** — if one packet is lost, everything behind it waits for the re-send, even data that already arrived. Under packet loss, a TCP connection can stall noticeably. That's exactly the behavior you do *not* want in a live call."
+          },
+          {
+            "type": "text",
+            "content": "UDP's speed comes with the opposite burden: it gives you **nothing** but raw packet delivery. If your application actually needs some reliability or ordering, you have to build it yourself on top of UDP. This is why UDP isn't \"better\" — it's a lower-level tool that pushes the hard decisions up to you."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Don't reach for UDP just because it's \"faster.\" Faster only helps if your app can tolerate loss and out-of-order packets. For anything where correctness matters — web requests, payments, database writes — UDP's missing guarantees turn into your bugs. Use TCP unless you have a clear real-time reason not to."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "TCP and UDP are the layer everything else rides on. [[glossary:http|HTTP]] (1.1 and 2) runs on **TCP** — which is why the web is reliable and ordered by default. Databases, email, and file transfers all sit on TCP for the same reason. So when you make a [[glossary:rest|REST]] call or an [[glossary:api|API]] request, TCP is quietly carrying the bytes underneath."
+          },
+          {
+            "type": "text",
+            "content": "UDP underpins the [[glossary:real-time|real-time]] world — VoIP, video conferencing, live streams, and online games — where freshness beats completeness. Interestingly, **HTTP/3** breaks the old rule by running on UDP (via a protocol called QUIC) and rebuilding reliability on top, specifically to dodge TCP's head-of-line blocking. The whole choice is a concrete instance of the [[glossary:latency-vs-throughput|latency]] trade-off: TCP optimizes for correctness, UDP for immediacy."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "You rarely write raw TCP or UDP yourself — you choose protocols built on them. **TCP** carries HTTP/HTTPS, database connections, SSH, and email (SMTP). **UDP** carries DNS lookups (small, fast, retry if needed), VoIP and video (WebRTC), live game traffic, and HTTP/3's QUIC. A useful rule of thumb: if a late packet is still useful, use TCP; if a late packet is worthless, use UDP. Most of the time you'll be on TCP without thinking about it — UDP is the deliberate exception for real-time workloads."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "You're building the audio transport for a live voice-chat feature. During calls, the network occasionally drops a few packets. You're deciding between TCP and UDP for the audio stream.",
+      "question": "Which transport fits, and why?",
+      "options": [
+        {
+          "id": "a",
+          "text": "UDP — for live audio, a re-sent packet would arrive too late to be useful, so it's better to drop it and stay in sync with real time.",
+          "correct": true,
+          "explanation": "In a live call, freshness beats completeness. By the time TCP re-sent a lost packet, that moment of speech is already past. UDP's fire-and-forget keeps the audio in sync with real time, accepting a tiny glitch over a growing delay."
+        },
+        {
+          "id": "b",
+          "text": "TCP — you should never lose any audio data, so its reliability is essential.",
+          "correct": false,
+          "explanation": "TCP guarantees delivery, but for live audio that guarantee backfires: re-sending and in-order waiting add latency and head-of-line blocking, making the call lag. Late audio is worse than a brief glitch."
+        },
+        {
+          "id": "c",
+          "text": "TCP — the handshake ensures the connection is reliable enough for real-time media.",
+          "correct": false,
+          "explanation": "The handshake establishes a reliable, ordered stream — exactly the overhead that hurts real-time media. Reliability and ordering cause delay, which is the enemy in a live call."
+        },
+        {
+          "id": "d",
+          "text": "Neither — use WebSockets so the server can push audio.",
+          "correct": false,
+          "explanation": "WebSockets run over TCP and solve a different problem (two-way push for a web app). They inherit TCP's re-send-and-wait behavior, which is wrong for loss-tolerant, latency-sensitive live audio."
+        }
+      ]
+    }
+  },
+  {
+    "id": "reverse-proxy",
+    "term": "Reverse Proxy",
+    "shortDefinition": "A server that sits in front of your backend servers and handles incoming requests on their behalf — terminating SSL, caching, compressing, routing, and hiding the internals from the outside world.",
+    "analogy": "Like a hotel front desk. Guests never wander into the kitchen or housekeeping — they talk to the desk, which routes each request to the right department and shields the inner workings. The desk speaks for the whole building.",
+    "relatedConcepts": [
+      "load-balancer",
+      "api-gateway",
+      "cache",
+      "server"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A reverse proxy is a server that stands **in front of** your backend [[glossary:server|servers]] and receives client requests on their behalf. To the outside world, the reverse proxy *is* the application — clients only ever talk to it. It then forwards each request to the appropriate backend, gets the response, and passes it back. The real servers stay hidden behind it."
+          },
+          {
+            "type": "text",
+            "content": "Because it's the single point every request passes through, a reverse proxy is the natural place to handle cross-cutting concerns once, instead of in every backend:\n\n- **SSL/TLS termination** — decrypt HTTPS here so backends can speak plain HTTP internally.\n- **Caching** — serve repeated responses straight from the proxy without bothering the backend.\n- **Compression** — gzip/Brotli responses before sending them out.\n- **Request routing** — send `/api` to one service and `/images` to another based on the path or host.\n- **Hiding internals** — clients never learn the addresses, count, or structure of your backend servers.\n\nThe word *reverse* is the key: a normal (forward) proxy sits in front of **clients** and hides *who is asking*; a reverse proxy sits in front of **servers** and hides *who is answering*."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "Forward proxy = on the client's side, hides the client (think a corporate web filter or a VPN). Reverse proxy = on the server's side, hides the servers. Same machinery, opposite direction — and opposite thing being hidden."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A reverse proxy gives you **one place to do things once**. Without it, every backend service would need its own SSL certificates, its own caching, its own compression, its own access rules — duplicated and easy to get inconsistent. Centralizing those concerns at the proxy keeps the backends simple: they can speak plain HTTP and focus purely on business logic."
+          },
+          {
+            "type": "text",
+            "content": "It's also a **security and flexibility boundary**. Since clients never see your real servers, you can add, remove, move, or rename backends without anyone outside noticing — the proxy's address stays the same. It shrinks your attack surface (only the proxy is exposed) and gives you a chokepoint to enforce TLS, block bad traffic, and shape requests before they ever reach your application."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Putting one server in front of everything makes it a **single point of failure** and a potential **bottleneck** — if the proxy goes down, your whole application is unreachable, even though the backends are fine. In production you run the proxy itself with [[glossary:redundancy|redundancy]] (multiple instances) so it can't take everything down with it."
+          },
+          {
+            "type": "text",
+            "content": "It also adds an **extra network hop** (a little latency) and one more system to configure and monitor. And because so much funnels through it, a misconfiguration here is high-blast-radius: a bad routing rule or an expired certificate at the proxy breaks *every* service behind it at once, not just one."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Don't confuse a reverse proxy with a [[glossary:load-balancer|load balancer]]. A load balancer's *job* is spreading traffic across many identical servers. A reverse proxy's job is being the front door — SSL, caching, routing, hiding internals — and it can sit in front of a *single* backend. They overlap (most load balancers are reverse proxies), but \"reverse proxy\" is the broader role; \"load balancing\" is one feature it may or may not perform."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Reverse proxy, [[glossary:load-balancer|load balancer]], and [[glossary:api-gateway|API gateway]] are overlapping roles, not three unrelated boxes. A **reverse proxy** is the general front-door concept. A **load balancer** is a reverse proxy whose focus is distributing traffic across servers for [[glossary:horizontal-scaling|horizontal scaling]]. An **API gateway** is a reverse proxy specialized for APIs, layering on auth, [[glossary:rate-limiting|rate limiting]], and per-route policy. The same piece of software (like Nginx) can play any of these roles depending on how you configure it."
+          },
+          {
+            "type": "text",
+            "content": "A reverse proxy is also a place [[glossary:cache|caching]] lives — it can cache responses just like a [[glossary:cdn|CDN]] does, but inside your own infrastructure rather than at the global edge. And by terminating TLS and hiding which [[glossary:server|server]] actually answered, it's the piece that lets a [[glossary:client-server|client-server]] system present many backends as one clean address."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "reverse-proxy-front",
+            "caption": "Clients only talk to the proxy; it terminates SSL, caches, and forwards to hidden backends."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**Nginx**, **HAProxy**, **Envoy**, and **Traefik** are the workhorse reverse proxies, and cloud load balancers (AWS **ALB/ELB**, GCP's load balancer) are reverse proxies under the hood. A common setup: a CDN at the global edge, then a reverse proxy / load balancer at your data center that terminates TLS, routes by path, caches what it can, and spreads the rest across a pool of app servers. Nginx in particular is famous for wearing several hats at once — reverse proxy, load balancer, cache, and static file server — all from one config."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your team runs several backend services. You want one public HTTPS endpoint that decrypts TLS once, routes `/api` and `/images` to different services, caches some responses, and keeps the backends' addresses hidden from clients. You only have one instance of each backend.",
+      "question": "What component are you describing?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A reverse proxy — it sits in front of the backends to terminate SSL, route by path, cache, and hide internals, even with a single instance of each service.",
+          "correct": true,
+          "explanation": "Every requirement here — TLS termination, path-based routing, caching, hiding backend addresses, one front door — is the core job of a reverse proxy. It doesn't require multiple identical servers to be useful."
+        },
+        {
+          "id": "b",
+          "text": "A load balancer — its job is to do all of this.",
+          "correct": false,
+          "explanation": "A load balancer's defining purpose is spreading traffic across many identical servers. Here each service has a single instance and the needs are routing, TLS, caching, and hiding internals — that's the reverse-proxy role (a load balancer is one specialized kind of it)."
+        },
+        {
+          "id": "c",
+          "text": "A forward proxy — it sits in front and proxies the traffic.",
+          "correct": false,
+          "explanation": "A forward proxy sits in front of clients and hides who's asking (like a corporate filter). You need something in front of your servers that hides who's answering — that's a reverse proxy."
+        },
+        {
+          "id": "d",
+          "text": "A CDN — it caches and sits in front of your origin.",
+          "correct": false,
+          "explanation": "A CDN caches content at global edge locations close to users. The requirement is an in-house front door doing TLS, routing, and internal caching — a reverse proxy. A CDN could sit further out in front of it, but it isn't what's described."
+        }
+      ]
+    }
+  },
+  {
+    "id": "nosql",
+    "term": "NoSQL Database",
+    "shortDefinition": "A family of non-relational databases with flexible, dynamic schemas, built to scale horizontally across many machines. They trade strict structure and joins for speed and scale.",
+    "analogy": "If a relational database is a filing cabinet where every folder must use the same printed form, a NoSQL store is a box of index cards: each card can hold whatever fields it needs, and you can keep adding boxes on more shelves as you grow.",
+    "relatedConcepts": [
+      "sql-vs-nosql",
+      "relational-database",
+      "base",
+      "sharding"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "\"NoSQL\" is an umbrella term for databases that **don't** use the rigid table-and-row model of a [[glossary:relational-database|relational database]]. Instead of forcing every record into the same set of columns defined up front, a NoSQL store lets each record carry its own shape. The schema is **flexible** — you can add a new field to one record without altering a table definition or migrating millions of existing rows."
+          },
+          {
+            "type": "text",
+            "content": "Most NoSQL systems are designed from day one to **scale horizontally** — to spread data across many cheap servers rather than buying one ever-bigger machine. They partition data by a key and hand each partition to a different node, so adding capacity is mostly a matter of adding nodes. The catch is that they usually drop expensive cross-record operations like multi-table joins, leaning instead on simple, fast lookups by key."
+          },
+          {
+            "type": "reveal",
+            "label": "The four families of NoSQL",
+            "content": "NoSQL isn't one thing — it's four broad shapes, each suited to a different access pattern:\n\n- **Key-value** — a giant dictionary: give it a key, get back a blob. Dead simple and extremely fast. (Redis, DynamoDB.)\n- **Document** — stores self-contained JSON-like documents, each with nested fields. Great when one record holds everything you need. (MongoDB, Couchbase.)\n- **Wide-column** — rows that can each have billions of sparse columns, grouped into families. Built for huge write volumes. (Cassandra, HBase.)\n- **Graph** — stores nodes and the edges between them, so relationship-heavy queries (\"friends of friends\") are first-class. (Neo4j.)"
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "NoSQL exists because the relational model can become a bottleneck at extreme scale. When you have billions of records, an ever-changing schema, or write traffic that no single machine can absorb, the discipline that makes relational databases so reliable — fixed schemas, joins, strict transactions — starts to get in the way."
+          },
+          {
+            "type": "text",
+            "content": "By relaxing those constraints, NoSQL buys two things product teams care about: **scale** (spread the data and the load across a cluster) and **agility** (ship a new field today without a schema migration). For data that is naturally hierarchical, semi-structured, or simply enormous — user sessions, event logs, product catalogs, social graphs — it's often a better fit than squeezing everything into tables."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "NoSQL didn't replace relational databases — it added options. The right question is never \"SQL or NoSQL?\" in the abstract, but \"which model fits *this* data and *these* access patterns?\""
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The freedom NoSQL gives you comes out of the same budget that makes relational databases dependable:\n\n- **No joins** — you can't ask the database to stitch related records together, so you either denormalize (store copies) or join in your application code.\n- **Weaker guarantees** — many NoSQL stores favor [[glossary:base|BASE]] over [[glossary:acid|ACID]], so a read right after a write may return stale data.\n- **The schema lives in your code** — \"schemaless\" really means the structure moves from the database into your application, where it's easier to get inconsistent."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "\"Flexible schema\" is not \"no schema.\" If two parts of your app write the same field with different names or shapes, the database happily accepts both — and you discover the mess only when a query returns garbage. Discipline that a relational schema enforced for you is now your job."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "NoSQL is best understood as the counterpart to the [[glossary:relational-database|relational database]] — the [[glossary:sql-vs-nosql|SQL vs NoSQL]] decision is exactly the choice between them. Its appetite for scale comes from being built around [[glossary:sharding|sharding]] and [[glossary:horizontal-scaling|horizontal scaling]] from the start, and that distribution is why it leans on [[glossary:base|BASE]] guarantees and [[glossary:eventual-consistency|eventual consistency]] rather than the strict [[glossary:acid|ACID]] transactions relational systems provide."
+          },
+          {
+            "type": "text",
+            "content": "Because joins are off the table, NoSQL designs lean heavily on [[glossary:denormalization|denormalization]] — storing data pre-shaped for the queries you'll run, even if that means keeping redundant copies."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Pick the family to match the access pattern. **Redis** and **DynamoDB** dominate key-value use (caches, sessions, shopping carts). **MongoDB** is the default document store for app data that's naturally nested. **Cassandra** powers write-heavy time-series and event data at companies like Netflix. **Neo4j** handles graph problems like recommendations and fraud rings. In real systems NoSQL rarely stands alone — teams routinely run a relational database for transactional core data *and* a NoSQL store for the parts that need scale or flexibility, a pattern called polyglot persistence."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your team is building an analytics pipeline that ingests millions of clickstream events per minute. Events have varying fields depending on the page, you almost never join across events, and you mostly read recent events back by user and time.",
+      "question": "Which storage choice fits best?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A NoSQL store (e.g. wide-column) partitioned by user and time.",
+          "correct": true,
+          "explanation": "Huge write volume, varying per-event fields, no joins, and key-based reads is the textbook NoSQL case. A wide-column store scales writes horizontally and matches the by-user, by-time access pattern."
+        },
+        {
+          "id": "b",
+          "text": "A single relational database with a wide, fixed events table.",
+          "correct": false,
+          "explanation": "A fixed schema fights the varying fields, and one relational server will struggle to absorb millions of writes per minute — the exact pressure NoSQL is built to relieve."
+        },
+        {
+          "id": "c",
+          "text": "A graph database modeling each event as a node.",
+          "correct": false,
+          "explanation": "Graph databases shine on relationship-heavy traversals. Clickstream events are barely related to each other, so a graph buys complexity with no payoff."
+        },
+        {
+          "id": "d",
+          "text": "Keep everything in an in-memory cache only.",
+          "correct": false,
+          "explanation": "A cache isn't durable storage and can't hold an ever-growing history of events. It complements a database but can't be the system of record here."
+        }
+      ]
+    }
+  },
+  {
+    "id": "sql-vs-nosql",
+    "term": "SQL vs NoSQL",
+    "shortDefinition": "The core decision between a structured, relational database with strong guarantees and a flexible, non-relational one built for scale. Neither is better — they fit different problems.",
+    "analogy": "Like choosing between a tailored suit and athletic wear. The suit (SQL) is precisely structured and looks right for formal occasions; the activewear (NoSQL) stretches to fit and moves fast. You don't ask which is 'better' — you ask what you're about to do.",
+    "relatedConcepts": [
+      "nosql",
+      "relational-database",
+      "acid",
+      "base"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The choice comes down to a few axes. A [[glossary:relational-database|relational (SQL) database]] stores data in tables with a fixed schema, links tables with **joins**, and wraps changes in [[glossary:acid|ACID]] transactions so the data is always internally consistent. A [[glossary:nosql|NoSQL database]] uses a flexible schema, avoids joins, scales out across many machines, and typically offers the relaxed [[glossary:base|BASE]] guarantees instead."
+          },
+          {
+            "type": "text",
+            "content": "A useful way to decide is to ask four questions about your data:\n\n- **Is the structure stable and relational?** Many entities that reference each other (orders, customers, line items) favor SQL.\n- **Do you need strict correctness?** Money, inventory, bookings — anything where a wrong answer is unacceptable — favors ACID, so SQL.\n- **Will the schema change often or vary per record?** Flexible, evolving data favors NoSQL.\n- **Do you need to scale beyond one machine for writes or data size?** Massive scale with simple lookups favors NoSQL."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "This is one of the first and most consequential decisions in a system's design. Get it right and the database disappears into the background. Get it wrong and you fight the tool forever — either bolting consistency logic onto a NoSQL store by hand, or straining a relational database past the scale it was built for."
+          },
+          {
+            "type": "callout",
+            "style": "tip",
+            "content": "A practical default: **start with a relational database**. It handles a surprising amount of scale, gives you transactions and joins for free, and most apps never outgrow it. Reach for NoSQL when you have a concrete reason — a specific scale, shape, or access pattern that SQL handles poorly."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Each choice is a bundle of strengths and costs:\n\n- **SQL** gives you joins, strong consistency, and a schema that catches bad data — at the cost of harder horizontal scaling and rigid migrations.\n- **NoSQL** gives you easy horizontal scale and schema freedom — at the cost of no joins, weaker consistency, and structure responsibility shifting into your code.\n\nThe trade is real in both directions; you're choosing which set of problems you'd rather have."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Beware the lazy answer \"it depends\" used to dodge the decision. \"It depends\" is only useful when you immediately say *on what*: on the consistency requirement, the data shape, the scale, the query patterns. A decision that names its trade-offs is an argument; \"it depends\" alone is an excuse."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "This decision sits squarely between [[glossary:relational-database|relational databases]] on one side and [[glossary:nosql|NoSQL]] on the other, and it almost always turns into the [[glossary:acid|ACID]] versus [[glossary:base|BASE]] question — do you need guaranteed correctness, or availability and scale? It's not all-or-nothing: large systems often run both, using a relational store for transactional core data and a NoSQL store for high-scale, flexible data."
+          },
+          {
+            "type": "text",
+            "content": "It also connects to scaling strategy. If you choose SQL and later need more capacity, you reach for [[glossary:read-replica|read replicas]] and eventually [[glossary:sharding|sharding]]; NoSQL bakes that horizontal scaling in from the start."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**PostgreSQL** and **MySQL** are the go-to relational choices and cover the vast majority of applications. On the NoSQL side, teams pick by shape: **MongoDB** for flexible documents, **DynamoDB** or **Redis** for key-value at scale, **Cassandra** for write-heavy data. Modern systems increasingly blur the line — PostgreSQL has rich JSON support, and many NoSQL stores have added transactions — so the boundary is softer than it once was. The durable advice stands: choose by your data and access patterns, not by hype."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "You're building a payments service. Every transaction moves real money between accounts, balances must never be wrong even briefly, and the data model (accounts, ledgers, transfers) is stable and highly relational. Volume is moderate.",
+      "question": "Which database should you start with?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A relational (SQL) database with ACID transactions.",
+          "correct": true,
+          "explanation": "Money demands correctness, the model is relational, and the volume is moderate. ACID transactions guarantee balances stay consistent — exactly what SQL is built for, and there's no scale pressure pushing you off it."
+        },
+        {
+          "id": "b",
+          "text": "A NoSQL document store, for future flexibility.",
+          "correct": false,
+          "explanation": "Flexibility isn't the need here — correctness is. Relaxing to BASE guarantees risks a balance being briefly wrong, which is unacceptable for money."
+        },
+        {
+          "id": "c",
+          "text": "A key-value store, because lookups are fast.",
+          "correct": false,
+          "explanation": "Fast lookups don't help when you need multi-account transactions and a relational ledger. Key-value stores lack the joins and ACID guarantees this domain requires."
+        },
+        {
+          "id": "d",
+          "text": "It depends — there's no way to choose without more information.",
+          "correct": false,
+          "explanation": "The scenario already names the deciding factors: strict correctness, a relational model, and moderate scale. They all point one way — \"it depends\" here is dodging a decision the facts have already made."
+        }
+      ]
+    }
+  },
+  {
+    "id": "acid",
+    "term": "ACID",
+    "shortDefinition": "The four transaction guarantees — Atomicity, Consistency, Isolation, Durability — that relational databases provide so a group of changes either all happen correctly or not at all.",
+    "analogy": "Like a bank teller handling a transfer: they won't take money from one account without putting it in the other, won't let a second customer see a half-finished transfer, and once they stamp the receipt it's permanent — even if the lights go out a second later.",
+    "relatedConcepts": [
+      "base",
+      "relational-database",
+      "consistency",
+      "race-condition"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "ACID describes the promises a database makes about a **transaction** — a group of operations treated as a single unit. The classic example is a **bank transfer**: subtract $100 from Alice and add $100 to Bob. Those two steps must behave as one. ACID is the acronym for the four guarantees that make that safe."
+          },
+          {
+            "type": "text",
+            "content": "- **Atomicity** — all or nothing. If the deposit to Bob fails, the withdrawal from Alice is rolled back too. The transaction never leaves things half-done.\n- **Consistency** — the database moves from one valid state to another, never breaking its rules (constraints, foreign keys). Money is neither created nor destroyed; the totals still add up.\n- **Isolation** — concurrent transactions don't trip over each other. While the transfer is mid-flight, no one else sees the $100 missing from both accounts or counted twice.\n- **Durability** — once the database says \"committed,\" the change survives crashes, power loss, and restarts. It's written to permanent storage, not just memory."
+          },
+          {
+            "type": "reveal",
+            "label": "What isolation actually prevents",
+            "content": "Without isolation, two transactions running at once can corrupt each other through **race conditions** — a *dirty read* (seeing another transaction's uncommitted change), a *lost update* (two writes clobbering each other), or a *phantom read* (rows appearing mid-transaction). Databases offer **isolation levels** that trade strictness for speed; the strongest, *serializable*, makes concurrent transactions behave as if they ran one at a time."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "ACID is what lets you trust a database with things that *must* be right: money, inventory, seat reservations, order state. Without atomicity, a crash mid-transfer could leave money vanished. Without isolation, two people could book the last seat at the same time. ACID turns a pile of risky individual operations into a single safe one."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "The deepest value of ACID is that it lets you **reason about your data simply**. You can pretend, correctly, that your transaction is the only thing happening and that it either fully succeeded or never ran — even though thousands run at once underneath."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "These guarantees aren't free. Enforcing atomicity and isolation requires coordination — locks, write-ahead logs, careful ordering — which costs performance and, crucially, becomes **hard to maintain across many machines**. Coordinating a transaction across servers (a distributed transaction) is slow and fragile, which is exactly why systems built for massive horizontal scale often loosen ACID."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Don't assume \"my database is ACID\" means every operation is safe. ACID applies to operations *inside a single transaction* — if you split related changes across separate transactions, or across services, or read-then-write without wrapping it in one transaction, you can still hit a [[glossary:race-condition|race condition]]. The guarantee is only as strong as your transaction boundaries."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "ACID is the headline feature of a [[glossary:relational-database|relational database]] and the direct opposite of [[glossary:base|BASE]], the relaxed model many [[glossary:nosql|NoSQL]] stores adopt to scale. The whole [[glossary:sql-vs-nosql|SQL vs NoSQL]] decision often boils down to: do you need ACID's strict correctness, or can you trade it for scale and availability?"
+          },
+          {
+            "type": "text",
+            "content": "The \"C\" and \"I\" in ACID are really about [[glossary:consistency|consistency]] and protection from [[glossary:race-condition|race conditions]] — the same concerns that show up the moment you have concurrent users or distributed data."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**PostgreSQL**, **MySQL** (with InnoDB), **SQL Server**, and **Oracle** are fully ACID. In code you wrap related changes in `BEGIN ... COMMIT`, and the database handles the guarantees. Choosing an isolation level is the everyday tuning knob: most apps run at *read committed* for speed and step up to *serializable* only where correctness under concurrency is critical. The lesson that bites teams is the same everywhere — ACID protects what's inside a transaction, so draw your transaction boundaries around every set of changes that must succeed or fail together."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "A bank transfer subtracts $100 from account A and adds $100 to account B in one transaction. Just after the subtraction is written but before the addition, the database server loses power.",
+      "question": "Which ACID property ensures account A is not left $100 short?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Atomicity — the transaction is all-or-nothing, so on restart the incomplete transfer is rolled back.",
+          "correct": true,
+          "explanation": "Atomicity guarantees the whole transaction commits or none of it does. Since it never committed, the partial withdrawal is undone and A's balance is restored."
+        },
+        {
+          "id": "b",
+          "text": "Durability — it guarantees committed data survives crashes.",
+          "correct": false,
+          "explanation": "Durability is real but applies to *committed* transactions. This transaction never committed, so durability isn't what saves A — atomicity rolling back the partial change is."
+        },
+        {
+          "id": "c",
+          "text": "Isolation — it keeps other transactions from interfering.",
+          "correct": false,
+          "explanation": "Isolation governs how concurrent transactions see each other. The problem here is a crash mid-transaction, not interference from another transaction."
+        },
+        {
+          "id": "d",
+          "text": "Consistency — it ensures totals always add up.",
+          "correct": false,
+          "explanation": "Consistency keeps the database within its rules, but the mechanism that actually undoes the half-finished transfer after a crash is atomicity's all-or-nothing rollback."
+        }
+      ]
+    }
+  },
+  {
+    "id": "base",
+    "term": "BASE",
+    "shortDefinition": "The relaxed alternative to ACID — Basically Available, Soft state, Eventual consistency — that many NoSQL systems adopt to buy availability and scale by giving up immediate consistency.",
+    "analogy": "Like a chain of coffee shops updating today's special on a shared menu board. Each location stays open and serving (available), the boards briefly disagree (soft state), but within a few minutes every shop shows the same special (eventual consistency).",
+    "relatedConcepts": [
+      "acid",
+      "eventual-consistency",
+      "nosql",
+      "availability-nines"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "BASE is the design philosophy on the opposite end of the spectrum from [[glossary:acid|ACID]]. Where ACID insists data is always correct and in agreement, BASE accepts temporary disagreement in exchange for staying up and scaling out. The acronym spells out the bargain:"
+          },
+          {
+            "type": "text",
+            "content": "- **Basically Available** — the system answers every request, even during failures or partitions. It might serve slightly stale data rather than refuse, but it stays up.\n- **Soft state** — the data can change over time even without new input, because copies on different nodes are still syncing up. There's no single, instantly-true value across the cluster.\n- **Eventual consistency** — if writes stop, all copies will *converge* to the same value, given enough time. Reads might lag, but they catch up."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "BASE is what makes internet-scale systems possible. When your data lives on hundreds of servers across the globe, demanding that every copy agree on every write *before* anyone can read (strict ACID) would make the system slow and brittle — one slow node could block everyone. BASE flips the priority: keep serving, accept brief staleness, and let the copies catch up."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "For most consumer features, eventual is plenty. If your like count or follower number is a few seconds out of date, nobody is harmed. BASE is the recognition that **not all data needs to be right *this instant*** — and that demanding it everywhere is expensive."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The cost of BASE is squarely on the application developer. Because reads can be stale and copies can briefly disagree, your code has to tolerate that: handle a value that's a little behind, resolve conflicting writes, and avoid logic that assumes a read reflects the very latest write."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Eventual consistency is a trap for anything that must be exact *right now*. \"Read-your-own-writes\" surprises users — someone posts a comment, refreshes, and it's gone because their read hit a copy that hasn't caught up. Never put money, inventory counts, or unique-constraint checks on a purely eventually-consistent path."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "BASE is the deliberate counterpart to [[glossary:acid|ACID]], and the [[glossary:sql-vs-nosql|SQL vs NoSQL]] choice is largely a choice between the two. Its third letter *is* [[glossary:eventual-consistency|eventual consistency]] — BASE is essentially eventual consistency promoted into a whole design stance. This stance is why [[glossary:nosql|NoSQL]] stores can scale so freely across machines."
+          },
+          {
+            "type": "text",
+            "content": "BASE also reflects a hard truth about distributed systems: when the network splits, you can keep serving (availability) or stay strictly correct (consistency), but not both. BASE chooses availability — which is why high [[glossary:availability-nines|availability]] is one of its main payoffs."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**Cassandra** and **DynamoDB** are classic BASE systems — tunable, but eventually consistent by default. You see the model everywhere in consumer products: a social feed that shows a post a beat late, a view counter that ticks up unevenly, a shopping cart that syncs across devices with a small delay. The practical skill is **classifying your data**: route money, bookings, and uniqueness checks to ACID storage, and let counters, feeds, logs, and caches live happily under BASE."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your app shows a 'likes' count on each post. The count is stored in a globally-distributed NoSQL database and read by millions of users worldwide. Occasionally two users see slightly different counts for a second or two.",
+      "question": "How should you think about this behavior?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It's expected BASE behavior — eventual consistency — and acceptable for a likes count.",
+          "correct": true,
+          "explanation": "A likes count is low-stakes and read at huge scale, exactly where BASE shines. Brief disagreement that converges in seconds is the intended trade for staying available and globally fast."
+        },
+        {
+          "id": "b",
+          "text": "It's a critical bug — you must switch the count to strict ACID transactions immediately.",
+          "correct": false,
+          "explanation": "Forcing strict consistency on a globally-distributed counter would cripple performance and availability for no real benefit. The data isn't important enough to justify it."
+        },
+        {
+          "id": "c",
+          "text": "It means the database has lost data.",
+          "correct": false,
+          "explanation": "No data is lost — the copies are simply syncing. Under BASE, soft state means values briefly differ before converging, which is different from data loss."
+        },
+        {
+          "id": "d",
+          "text": "It proves NoSQL is the wrong choice for this app.",
+          "correct": false,
+          "explanation": "On the contrary, this is NoSQL working as designed. The right move is to keep stakes-sensitive data on ACID storage, not to abandon NoSQL for low-stakes counts."
+        }
+      ]
+    }
+  },
+  {
+    "id": "replication",
+    "term": "Replication",
+    "shortDefinition": "Keeping copies of your data on multiple database servers so reads can scale and the system survives a server failure. The copies are kept in sync automatically.",
+    "analogy": "Like a newsroom syndicating its stories to partner papers. One newsroom writes the articles, and every partner prints the same edition. If one printing press breaks, readers still get the news from the others — though a late edit may take a moment to reach everyone.",
+    "relatedConcepts": [
+      "read-replica",
+      "eventual-consistency",
+      "failover",
+      "sharding"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Replication means maintaining the **same data on more than one server**. When data changes on one node, that change is propagated to the others so they all (eventually) hold the same thing. The big design question is *which copies are allowed to accept writes*, and there are two dominant answers."
+          },
+          {
+            "type": "text",
+            "content": "**Leader-follower** (also called *master-slave* or *primary-replica*): one server is the **leader** and accepts all writes. Every change is streamed to one or more **followers**, which are read-only copies. Reads can be spread across the followers to scale read capacity; writes all funnel through the single leader. This is the most common setup, and each follower is exactly a [[glossary:read-replica|read replica]]."
+          },
+          {
+            "type": "text",
+            "content": "**Multi-leader** (also called *master-master*): two or more servers each accept writes and replicate to one another. This helps when writers are spread across regions or you need writes to keep working even if one leader is down. The price is that two leaders can accept conflicting writes to the same record at the same time, and the system must **resolve those conflicts** — the hardest part of multi-leader setups."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Replication buys two things at once. **Read scaling**: most apps read far more than they write, so pointing reads at a pool of followers lets you serve far more traffic without touching the leader. **Availability**: if the leader dies, a follower can be promoted to take its place — a [[glossary:failover|failover]] — so the system keeps running instead of going dark."
+          },
+          {
+            "type": "callout",
+            "style": "tip",
+            "content": "Replication is usually the *first* database scaling move after a cache, because it's relatively cheap and low-risk: add followers, route reads to them, and your single database suddenly handles many times the read load."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Copies take time to update, and that delay — **replication lag** — is the central trade-off. A write lands on the leader, but a follower might be a few milliseconds (or, under load, seconds) behind. A read served from a lagging follower returns slightly stale data, which makes replicated reads [[glossary:eventual-consistency|eventually consistent]]."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "The classic bug is **read-your-own-writes** failure: a user updates their profile (write → leader), the page reloads (read → a follower that hasn't caught up), and the change appears to have vanished. The fix is to route a user's reads to the leader right after they write, or wait for the relevant follower to catch up — don't assume a fresh read reflects a fresh write."
+          },
+          {
+            "type": "text",
+            "content": "Multi-leader adds its own hazard: **write conflicts**. If two leaders accept different edits to the same row before syncing, the system must decide which wins — last-write-wins, merging, or app-level resolution — and there's no perfectly safe automatic answer."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Replication is the general mechanism; a [[glossary:read-replica|read replica]] is its most common application — a follower used purely to serve reads. Because copies lag, replicated reads are a live example of [[glossary:eventual-consistency|eventual consistency]]. Replication is also what makes [[glossary:failover|failover]] possible: you can't promote a backup unless a backup exists."
+          },
+          {
+            "type": "text",
+            "content": "It's worth contrasting with [[glossary:sharding|sharding]]. Replication *copies the whole dataset* to more servers (scaling reads and availability); sharding *splits the dataset* across servers (scaling writes and storage). Big systems combine them: shard the data, then replicate each shard."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "read-replica-set",
+            "caption": "Writes go to the leader; followers copy its data and serve reads (with a little lag)."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**PostgreSQL** and **MySQL** both ship with leader-follower streaming replication, and managed services like **Amazon RDS** make adding read replicas a click. You also choose *when* the leader considers a write done: **synchronous** replication waits for a follower to confirm (safer, slower), while **asynchronous** replication doesn't wait (faster, but a crash can lose the last few writes). Multi-leader and globally-distributed writes show up in systems like Cassandra and in multi-region database offerings, where conflict resolution becomes a first-class design concern."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "A user updates their display name. The write goes to the leader. Immediately afterward the app reloads their profile, and the read is routed to a follower that is 200ms behind. The user sees their old name and thinks the update failed.",
+      "question": "What's the cleanest fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Route the user's reads to the leader (or a caught-up follower) for a short window right after they write.",
+          "correct": true,
+          "explanation": "This is the read-your-own-writes pattern. Sending the just-written user's reads to the leader guarantees they see their own change, while everyone else still reads cheaply from followers."
+        },
+        {
+          "id": "b",
+          "text": "Remove all followers and serve every read from the leader.",
+          "correct": false,
+          "explanation": "That eliminates lag but throws away the entire benefit of replication — read scaling. You only need fresh reads for the user who just wrote, not for everyone."
+        },
+        {
+          "id": "c",
+          "text": "Switch to multi-leader replication.",
+          "correct": false,
+          "explanation": "Multi-leader lets more servers accept writes but does nothing about a follower lagging behind a read — and it introduces write conflicts. It's the wrong tool for this problem."
+        },
+        {
+          "id": "d",
+          "text": "Increase the cache TTL on profiles.",
+          "correct": false,
+          "explanation": "A longer cache TTL would make stale reads *more* likely, not less. The issue is replication lag plus read routing, not caching."
+        }
+      ]
+    }
+  },
+  {
+    "id": "denormalization",
+    "term": "Denormalization",
+    "shortDefinition": "Deliberately storing redundant copies of data so reads are fast, accepting the cost of more complex writes and the risk that the copies drift out of sync.",
+    "analogy": "Like writing the author's name on every book's spine instead of looking it up in a central catalog each time. Finding who wrote a book is now instant — but if an author changes their name, you have to update every spine, and miss one and your shelf disagrees with itself.",
+    "relatedConcepts": [
+      "relational-database",
+      "consistency",
+      "cache",
+      "nosql"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A well-designed [[glossary:relational-database|relational database]] is usually *normalized*: each fact is stored in exactly one place, and queries use joins to bring related facts together. Denormalization is the deliberate reverse — you **duplicate** some data so the query doesn't have to join. Instead of looking up an author's name from the authors table on every read, you store the name directly on each book row."
+          },
+          {
+            "type": "text",
+            "content": "The pattern shows up several ways: copying a frequently-needed field onto a related record, storing a pre-computed total (like an order's `item_count`) instead of counting on the fly, or precomputing an entire query result. A formal version is the **materialized view** — a query whose results the database stores and refreshes on a schedule, so reads hit the saved answer instead of recomputing it every time."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Joins and aggregations are expensive, and at scale they can dominate a query's cost. Denormalization trades a little extra storage and write work for **much faster reads** — the data arrives pre-assembled, exactly in the shape the query wants. For read-heavy workloads where the same expensive join runs constantly, that trade pays off enormously."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "In the [[glossary:nosql|NoSQL]] world, denormalization isn't an optimization — it's the default. Without joins, you *have* to store data pre-shaped for each access pattern, even if that means the same fact lives in several documents."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Every duplicated copy is now a thing you must keep in sync. A write that used to update one row may now have to update many, which makes writes slower and the code more complex. And the more places a fact lives, the more chances there are for those places to disagree."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "The classic denormalization pitfall is **update anomalies**: you change the author's name in one place but miss a copy somewhere else, and now your data contradicts itself with no single source of truth. Once copies drift, figuring out which one is *right* can be genuinely hard. Denormalize only where the read speedup clearly outweighs this [[glossary:consistency|consistency]] risk."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Denormalization is fundamentally a [[glossary:consistency|consistency]] trade: you accept that redundant copies can diverge in exchange for speed. That makes it a close cousin of a [[glossary:cache|cache]] — both keep extra copies of data to serve reads faster, and both force you to answer \"how do I keep the copy fresh?\" The difference is that a cache is a separate, temporary layer, while denormalized data lives permanently in the database itself."
+          },
+          {
+            "type": "text",
+            "content": "It also defines much of [[glossary:nosql|NoSQL]] data modeling, where the absence of joins makes storing pre-joined, redundant data the normal way to design — the opposite default from a [[glossary:relational-database|relational database]]."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "In SQL, **materialized views** in PostgreSQL and Oracle are the cleanest way to denormalize — the database stores a query's result and you refresh it on a schedule. Teams also maintain denormalized counters and summary columns updated by triggers or application code. In NoSQL, you design denormalization in from the start: embed related data in a MongoDB document, or duplicate fields across Cassandra tables built per query. The discipline is the same everywhere — normalize by default for correctness, and denormalize selectively, with a clear plan for keeping the copies in sync, only where reads demand it."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your app's feed shows each post with its author's name and avatar. Rendering the feed currently joins posts to the users table on every load, and that join has become the slowest part of the query under heavy read traffic.",
+      "question": "What's a reasonable optimization, and what must you watch for?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Denormalize: store the author's name and avatar on each post, and update those copies when a user changes their profile.",
+          "correct": true,
+          "explanation": "Copying the author fields onto the post removes the join, making the read fast. The trade-off you must handle is keeping the copies in sync when a profile changes — the classic denormalization cost."
+        },
+        {
+          "id": "b",
+          "text": "Add more read replicas so the join runs on more servers.",
+          "correct": false,
+          "explanation": "Replicas spread read load, but each one still runs the same expensive join. They help with volume, not with the per-query cost of the join itself."
+        },
+        {
+          "id": "c",
+          "text": "Normalize the schema further by splitting the users table.",
+          "correct": false,
+          "explanation": "More normalization means more joins, not fewer — the opposite of what's needed when the join is already the bottleneck."
+        },
+        {
+          "id": "d",
+          "text": "Denormalize and never update the copies, since profiles rarely change.",
+          "correct": false,
+          "explanation": "Skipping updates guarantees the copies drift out of sync — exactly the update-anomaly pitfall. Denormalizing is right; refusing to maintain the copies is not."
+        }
+      ]
+    }
+  },
+  {
+    "id": "federation",
+    "term": "Federation",
+    "shortDefinition": "Splitting one database into several, each owning a different feature or function (users, products, orders), so no single database carries the whole load. Also called functional partitioning.",
+    "analogy": "Like a growing company splitting its one overworked front desk into separate departments — HR, Sales, Support — each with its own desk and records. No single desk is overwhelmed, and each handles only the requests that belong to it.",
+    "relatedConcepts": [
+      "sharding",
+      "microservices",
+      "database",
+      "horizontal-scaling"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Federation — also called **functional partitioning** — splits one monolithic [[glossary:database|database]] into several smaller databases, divided **by feature or function**. Instead of one database holding users, products, and orders all together, you stand up a users database, a products database, and an orders database, each on its own server."
+          },
+          {
+            "type": "text",
+            "content": "The split follows the *shape of the application*, not the data volume. Each database owns a coherent slice of functionality, and the application routes each query to the database that owns that domain. Because each one now handles only its own traffic and holds only its own tables, each is smaller, sees less load, and can be tuned, backed up, and scaled independently."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "When a single database becomes the bottleneck, federation spreads the load across several without the complexity of [[glossary:sharding|sharding]]. Each functional database gets its own connection pool, cache, and hardware, so a spike in product browsing doesn't starve order writes. Smaller databases also mean smaller indexes, faster backups, and less write contention on any one server."
+          },
+          {
+            "type": "callout",
+            "style": "tip",
+            "content": "Federation is often the natural scaling step *before* sharding. If your tables divide cleanly along feature lines, splitting by function is simpler than splitting rows — reach for it first, and shard an individual database later only if one function alone outgrows its server."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Once data lives in separate databases, the connections *between* domains get harder. You can no longer write a single SQL join across users and orders — they're in different databases. You join in application code instead, and you lose the ability to wrap a change to two domains in one [[glossary:acid|ACID]] transaction."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Federation only helps if your data actually divides along functional lines. If two features are deeply intertwined — constantly joined and updated together — splitting them creates expensive cross-database calls and consistency headaches. And it does nothing for a *single* function that's too big or write-heavy on its own; that's a [[glossary:sharding|sharding]] problem, not a federation one."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The key contrast is with [[glossary:sharding|sharding]]: federation splits a database **by function** (different tables to different servers), while sharding splits a single table **by rows** (the same table's rows spread across servers). Federation answers \"too many different things in one database\"; sharding answers \"one thing too big for one server.\" They're complementary — federate first, then shard whichever functional database still outgrows its machine."
+          },
+          {
+            "type": "text",
+            "content": "Federation is also the database side of [[glossary:microservices|microservices]]: when each service owns its own database (a database-per-service), you've effectively federated. It's another flavor of [[glossary:horizontal-scaling|horizontal scaling]] — more servers sharing the work — just divided by feature rather than by raw capacity."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "federation-split",
+            "caption": "Federation splits a database by feature area, so each one carries less load."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Federation shows up most clearly in a [[glossary:microservices|microservices]] architecture, where each service is given its own database and no service reaches into another's tables — forcing all cross-domain access through APIs. Even within a single application, teams split off a heavy subsystem (say, analytics or notifications) into its own database to protect the core. The trade-off to plan for is the same each time: you gain isolation and independent scaling, but you give up cross-domain joins and transactions, so federate along boundaries where the data is genuinely loosely coupled."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your single database holds users, products, and orders. It's overloaded, but no single table is too large for one machine — the problem is that all three feature areas hammer the same server at once. The three areas are mostly independent.",
+      "question": "What's the appropriate scaling move?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Federate: split into separate users, products, and orders databases, each on its own server.",
+          "correct": true,
+          "explanation": "The data divides cleanly by function and no single table is too big, so functional partitioning spreads the combined load across servers with far less complexity than sharding."
+        },
+        {
+          "id": "b",
+          "text": "Shard the database by a key like user ID.",
+          "correct": false,
+          "explanation": "Sharding splits rows of a single table across servers — the fix when one table is too big. Here no table is oversized; the load comes from multiple functions sharing a server, which federation addresses more simply."
+        },
+        {
+          "id": "c",
+          "text": "Add read replicas and route all reads to them.",
+          "correct": false,
+          "explanation": "Replicas help only if the pressure is read load. The scenario describes combined load from three feature areas including writes, which replicas can't relieve — every replica still applies all writes."
+        },
+        {
+          "id": "d",
+          "text": "Vertically scale to a much larger single server.",
+          "correct": false,
+          "explanation": "A bigger box buys time but hits a ceiling, and it keeps three independent workloads contending on one machine. Splitting them by function is the more durable fix."
+        }
+      ]
+    }
+  },
+  {
+    "id": "cap-theorem",
+    "term": "CAP Theorem",
+    "shortDefinition": "In a distributed system you can't have perfect Consistency, Availability, and Partition tolerance all at once. Since network partitions are unavoidable, the real choice is consistency vs. availability when one happens.",
+    "analogy": "Like two clerks at branch offices when the phone line between them dies. Either they refuse to update records until the line is back (staying in agreement), or they keep serving customers separately (staying open) and reconcile later. They can't do both.",
+    "relatedConcepts": [
+      "consistency",
+      "strong-consistency",
+      "eventual-consistency",
+      "availability-nines"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The CAP theorem describes a hard limit on any system that keeps copies of data on more than one machine. It names three properties:\n\n- **Consistency (C)** — every read sees the most recent write, no matter which copy answers. This is [[glossary:strong-consistency|strong consistency]].\n- **Availability (A)** — every request gets a (non-error) response, even if it might not reflect the very latest write.\n- **Partition tolerance (P)** — the system keeps working even when the network between copies drops messages or splits into isolated groups."
+          },
+          {
+            "type": "text",
+            "content": "The theorem says you can guarantee at most **two of the three** at the same time. But that framing is misleading on its own. In any real distributed system, the network *will* fail — cables get cut, switches reboot, a data center loses its link. A **partition** is not something you can opt out of, so **P is mandatory**. That collapses the choice into a single, concrete decision: *when a partition happens, do you sacrifice consistency or availability?*"
+          },
+          {
+            "type": "reveal",
+            "label": "So what does the choice actually look like during a partition?",
+            "content": "Imagine two database replicas that can no longer talk to each other, and a write arrives at one of them. A **CP** system refuses to confirm the write (or refuses reads on the other side) because it can't guarantee the copies agree — it stays correct by becoming partly unavailable. An **AP** system accepts the write on both sides and keeps answering everyone, knowing the two sides have now diverged and must be reconciled once the link returns."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "CAP matters because it forces an honest conversation that's easy to dodge until production. On a single server there is no CAP problem — one copy of the data is trivially consistent and the only failure is total. The moment you add a [[glossary:read-replica|replica]], a second region, or a distributed database for scale, you've signed up for partitions, and the theorem tells you that you must decide *in advance* what your system does when the network splits."
+          },
+          {
+            "type": "text",
+            "content": "The decision is rarely all-or-nothing for a whole company — it's made **per piece of data**. Money, inventory, and seat counts usually demand consistency: it's better to show an error than to let two people buy the last item. Likes, feeds, comments, and presence indicators usually demand availability: it's better to show a slightly stale number than to go down. Naming this trade per feature is what separates a system that degrades gracefully from one that fails in surprising ways."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "CAP only bites *during a partition*. When the network is healthy — which is most of the time — a well-built system can deliver both strong consistency and high availability. CAP is a statement about behavior under failure, not a permanent tax on every request."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A **CP** system chooses correctness over uptime. During a partition it returns errors or blocks rather than risk a stale or conflicting answer. You get data you can trust, but some users see failures until the network heals. This is the right call when a wrong answer is worse than no answer — financial ledgers, unique-username checks, the last seat on a flight."
+          },
+          {
+            "type": "text",
+            "content": "An **AP** system chooses uptime over freshness. During a partition every side keeps accepting reads and writes, so nobody sees an outage — but the copies diverge, and you must reconcile them afterward (last-write-wins, vector clocks, or CRDTs). You trade temporary disagreement for staying online. This is the right call when being down costs more than being briefly stale — shopping carts, social feeds, telemetry."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "CAP is **not** \"pick any 2 of 3, permanently.\" You can't drop partition tolerance — the network decides that for you. And outside a partition you aren't forced to give up either C or A. The real, narrow statement is: *when a partition occurs, a distributed system must choose between consistency and availability.* Treating it as a one-time menu of three is the classic misreading."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "CAP is the failure-time view of the [[glossary:consistency|consistency]] spectrum. A **CP** system is leaning on [[glossary:strong-consistency|strong consistency]]: it would rather refuse a request than serve an out-of-date value. An **AP** system is embracing [[glossary:eventual-consistency|eventual consistency]]: it keeps serving and lets the copies converge once the partition clears. So the abstract C-vs-A choice in CAP is the same decision you make when you pick a consistency model for a specific piece of data."
+          },
+          {
+            "type": "text",
+            "content": "It also connects directly to [[glossary:availability-nines|availability]]. Choosing AP is choosing to protect your uptime numbers during network trouble; choosing CP means accepting downtime in exchange for never being wrong. A more nuanced cousin, **PACELC**, extends CAP to say: during a Partition choose A or C, **Else** (when healthy) choose between Latency and Consistency — which is why even a fully connected system that wants strong consistency still pays a [[glossary:latency-vs-throughput|latency]] cost to coordinate."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Databases declare their lean. **CP-leaning** stores favor consistency under partition: **MongoDB** (with majority writes), **HBase**, **etcd**, **ZooKeeper**, and consensus-based systems like **Google Spanner** and **CockroachDB** will reject or block rather than serve divergent data. **AP-leaning** stores favor availability: **Cassandra**, **DynamoDB** (in its default mode), **Riak**, and **CouchDB** keep accepting requests during a partition and reconcile afterward."
+          },
+          {
+            "type": "text",
+            "content": "Many modern systems are **tunable**, so CAP becomes a per-query setting rather than a fixed identity. Cassandra and DynamoDB let you ask for a quorum or strong read when correctness matters, and a fast one-replica read when availability matters. The practical takeaway: don't ask \"is my database CP or AP?\" — ask \"for *this* operation, during a partition, do I want an error or a possibly-stale answer?\""
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your e-commerce platform spans two data centers. The network link between them goes down for 90 seconds. During that window, customers in both regions keep browsing and adding items to their carts, and orders keep flowing.",
+      "question": "For the checkout step that decrements the last unit of inventory, which CAP choice should that specific operation make during the partition?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Choose consistency (CP): refuse or block the final-inventory decrement until the copies can agree, even if some customers see an error.",
+          "correct": true,
+          "explanation": "Correct. Overselling the last unit is worse than a brief error, so this operation should sacrifice availability to stay consistent during the partition — the CP choice."
+        },
+        {
+          "id": "b",
+          "text": "Choose availability (AP): let both regions sell the last unit and reconcile afterward.",
+          "correct": false,
+          "explanation": "AP keeps checkout up, but during a partition both regions could sell the same last unit, causing overselling. For scarce inventory, the stale-data risk of AP is exactly what you must avoid."
+        },
+        {
+          "id": "c",
+          "text": "Drop partition tolerance so the question doesn't arise.",
+          "correct": false,
+          "explanation": "You can't drop partition tolerance — the network failed on its own. In a distributed system P is mandatory; CAP forces a choice between C and A, not the option to ignore partitions."
+        },
+        {
+          "id": "d",
+          "text": "It doesn't matter; CAP only applies when the network is healthy.",
+          "correct": false,
+          "explanation": "The opposite is true. CAP's trade-off bites precisely *during* a partition; when the network is healthy a system can offer both consistency and availability."
+        }
+      ]
+    }
+  },
+  {
+    "id": "latency-vs-throughput",
+    "term": "Latency vs. Throughput",
+    "shortDefinition": "Latency is how long one operation takes; throughput is how many operations finish per unit of time. They measure different things and are often in tension — improving one can hurt the other.",
+    "analogy": "Like a highway. Latency is how long it takes one car to drive from A to B. Throughput is how many cars pass a point per hour. A wider road moves far more cars per hour (high throughput) even if each individual car's trip isn't any faster.",
+    "relatedConcepts": [
+      "cache",
+      "message-queue",
+      "performance-vs-scalability",
+      "async"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**Latency** is a *duration*: the time from starting a single operation to getting its result — a request's round trip, a query's run time, a page's load. It's measured in time units (milliseconds, microseconds) and answers \"how long did *this one* take?\"\n\n**Throughput** is a *rate*: the number of operations the system completes in a window — requests per second, transactions per minute, megabytes per second. It answers \"how *much* can the system get through?\""
+          },
+          {
+            "type": "text",
+            "content": "They're easy to conflate because both feel like \"speed,\" but they're independent axes. A system can have low latency and low throughput (a single fast worker that can only do one thing at a time), or high latency and high throughput (a slow but massively parallel pipeline that finishes huge batches). Because latency varies request to request, throughput is usually reported as an average while latency is reported as **percentiles** — p50 (median), p95, p99 — since the slowest few requests are what users actually feel."
+          },
+          {
+            "type": "callout",
+            "style": "tip",
+            "content": "A rough mental model: **throughput ≈ concurrency ÷ latency**. If each request takes 100 ms (latency) and you can run 50 in parallel (concurrency), you finish about 500 per second (throughput). This is why you can raise throughput either by making each operation faster *or* by doing more of them at once."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Confusing the two leads to optimizing the wrong thing. If users complain the app feels *sluggish*, that's a **latency** problem — and adding more servers won't fix a single slow request. If the system *falls over under load* but each request is fine when it's quiet, that's a **throughput** problem — and shaving milliseconds off one request won't help it absorb the crowd."
+          },
+          {
+            "type": "text",
+            "content": "Different goals need different fixes. You lower latency with [[glossary:cache|caching]], closer data ([[glossary:cdn|CDNs]]), faster algorithms, and fewer network hops on the critical path. You raise throughput with parallelism, batching, [[glossary:horizontal-scaling|horizontal scaling]], and [[glossary:async|asynchronous]] processing. Knowing which number is failing tells you which toolbox to open."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "Users feel **latency**; operators budget for **throughput**. A great system optimizes the latency of the operations a human waits on, and the throughput of the firehose of work happening behind the scenes."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The two are often in direct tension, and **batching** is the clearest example. Grouping many small operations into one big one cuts per-item overhead and dramatically raises throughput — but each item now waits for the batch to fill up before it's processed, which raises that item's latency. A payment processor that flushes transactions once per second handles enormous volume, yet every individual transaction waits up to a second longer than if it were sent immediately."
+          },
+          {
+            "type": "text",
+            "content": "The same trade shows up elsewhere:\n\n- **Queues** smooth bursts and protect downstream systems (great for throughput and stability) but add waiting time to each item (worse latency).\n- **Running near full capacity** maximizes throughput utilization, but queuing theory says latency spikes sharply as a system approaches 100% load.\n- **Compression / bigger payloads** can move more data per second while making any single request take longer to assemble and ship."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Don't chase peak throughput by running your servers near 100% utilization. As a system approaches saturation, queue depths explode and **tail latency** (p99) goes through the roof — the system is technically \"efficient\" while feeling broken to real users. Leave headroom on purpose."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "This trade-off is the engine behind several patterns. A [[glossary:message-queue|message queue]] is a throughput-and-resilience tool that deliberately accepts added latency: producers hand off work and move on, consumers drain the queue at their own pace, and bursts get absorbed instead of overwhelming the system. That's the [[glossary:async|asynchronous]] bargain — give up immediate, low-latency completion in exchange for higher sustained throughput."
+          },
+          {
+            "type": "text",
+            "content": "On the latency side, a [[glossary:cache|cache]] is the canonical fix: serving from memory instead of disk or network turns a slow lookup into an instant one. And the whole distinction feeds into [[glossary:performance-vs-scalability|performance vs. scalability]] — latency is mostly a *performance* question (fast for one user), while sustaining throughput as load grows is mostly a *scalability* question (stays fast for many users)."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Concrete numbers help anchor the intuition. Reading from memory takes ~100 nanoseconds; a round trip across a data center is ~0.5 ms; a round trip across the Atlantic is ~150 ms; a disk seek is several milliseconds. Those are **latency** facts no amount of scaling changes — which is why CDNs and caches exist to avoid the long trips entirely."
+          },
+          {
+            "type": "text",
+            "content": "**Batching** trades latency for throughput everywhere: databases group writes into a single fsync, Kafka producers buffer messages (the `linger.ms` setting literally tunes how long to wait to build a bigger, higher-throughput batch), and GPUs process inference in batches to maximize utilization. The dial is explicit — a bigger batch or longer linger means more throughput and more per-item latency. Meanwhile latency-sensitive paths (a checkout button, an autocomplete dropdown) are tuned the opposite way: small payloads, no queuing, p99 watched like a hawk."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your analytics service ingests billions of small events per day. Engineers add a step that buffers incoming events and writes them to the database in batches of 10,000 instead of one at a time. After the change, total events processed per second jumps sharply, but each individual event now takes a bit longer to show up in reports.",
+      "question": "How best describes what the batching change did?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It raised throughput at the cost of per-event latency — the classic batching trade-off.",
+          "correct": true,
+          "explanation": "Exactly. Batching cuts per-item overhead so more events finish per second (higher throughput), but each event waits for its batch to fill, adding latency. The two metrics moved in opposite directions, which is the textbook tension."
+        },
+        {
+          "id": "b",
+          "text": "It improved both latency and throughput at the same time.",
+          "correct": false,
+          "explanation": "Latency got worse, not better — each event now waits for its batch. The scenario explicitly says individual events take longer, so this isn't a free win on both axes."
+        },
+        {
+          "id": "c",
+          "text": "It improved latency at the cost of throughput.",
+          "correct": false,
+          "explanation": "This is backwards. Batching raised throughput (more events per second) and hurt latency (each event slower), not the other way around."
+        },
+        {
+          "id": "d",
+          "text": "It only changed scalability, leaving both latency and throughput unaffected.",
+          "correct": false,
+          "explanation": "Both metrics clearly changed — throughput rose and latency rose. Batching is precisely a latency-vs-throughput lever, not a no-op on those numbers."
+        }
+      ]
+    }
+  },
+  {
+    "id": "performance-vs-scalability",
+    "term": "Performance vs. Scalability",
+    "shortDefinition": "Performance asks \"is it fast for a single user right now?\" Scalability asks \"does it stay fast as users and load grow?\" They're different problems with different fixes.",
+    "analogy": "Like a popular restaurant. Performance is how quickly one diner gets their meal on a quiet night. Scalability is whether the kitchen can still serve everyone in reasonable time when 300 people show up at once. A great chef (fast) can still run a kitchen that collapses under a crowd.",
+    "relatedConcepts": [
+      "horizontal-scaling",
+      "vertical-scaling",
+      "latency-vs-throughput",
+      "load-balancer"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**Performance** is about how a system behaves for a *single* unit of work in isolation: how fast one request completes when nothing else is competing for resources. It's largely a question of [[glossary:latency-vs-throughput|latency]] — the raw speed of the code path, the query, the round trip.\n\n**Scalability** is about how that behavior *holds up as load increases*: more users, more requests, more data. A system is scalable if adding resources lets it handle proportionally more work without performance falling off a cliff."
+          },
+          {
+            "type": "text",
+            "content": "The cleanest way to see the difference is to watch what happens to response time as load climbs:\n\n- A system with **good performance but poor scalability** is fast at 1 user and grinds to a halt at 10,000 — every request fights over one shared resource.\n- A system with **poor performance but good scalability** is mediocre at 1 user but stays *equally* mediocre at 10,000 — it spreads load cleanly, it just isn't tuned.\n- The goal is **both**: fast for one user, and still fast for a million."
+          },
+          {
+            "type": "callout",
+            "style": "tip",
+            "content": "A useful definition: a system scales well if **performance stays roughly flat as you add load, provided you add resources**. If response time degrades even when you throw more hardware at it, you have a scalability problem — not a performance one."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Teams routinely solve the wrong problem because they don't separate these. A startup optimizes a function from 50 ms to 30 ms (a performance win) while the architecture still funnels every request through one database that will melt at launch (a scalability time bomb). Conversely, a team buys a huge cluster to \"scale\" when the real issue is one absurdly slow query — a performance fix that no amount of extra servers will paper over."
+          },
+          {
+            "type": "text",
+            "content": "The fixes come from genuinely different toolboxes. **Performance** problems are solved by making the single path faster: better algorithms, [[glossary:cache|caching]], an [[glossary:index|index]] on the slow query, fewer network hops. **Scalability** problems are solved by changing the *shape* of the system so load can spread: [[glossary:horizontal-scaling|horizontal scaling]] behind a [[glossary:load-balancer|load balancer]], [[glossary:sharding|sharding]] the data, removing shared bottlenecks. Diagnosing which one you have decides which path is even worth trying."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "A blunt test: if the system is slow even with a single user, you have a **performance** problem. If it's fast with one user but degrades as users pile on, you have a **scalability** problem. The symptom (\"it's slow\") is the same; the cause and cure are not."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The trade-off is that the two goals can pull in opposite directions. The architectures that scale best often add overhead that *hurts* single-user performance. Splitting a fast [[glossary:monolith|monolith]] into [[glossary:microservices|microservices]] lets teams and load scale independently — but now one user's request hops across the network between services, so its latency goes *up*. Adding a [[glossary:load-balancer|load balancer]], a queue, or a replication layer all add a little distance to every request in exchange for the ability to grow."
+          },
+          {
+            "type": "text",
+            "content": "Scaling strategy itself involves a trade. [[glossary:vertical-scaling|Vertical scaling]] (a bigger machine) often *improves* single-user performance and is dead simple, but it hits a hard ceiling and a single point of failure. [[glossary:horizontal-scaling|Horizontal scaling]] (more machines) has nearly unlimited headroom but forces you to handle distribution, coordination, and consistency — complexity that can slow the individual request down."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Don't reach for distributed, \"web-scale\" architecture before you need it. Premature scaling adds latency and operational complexity for load you don't have yet — often the result is a system that's *both* slow for your handful of real users and over-engineered. Make it fast for one user first; scale when the numbers actually demand it."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "This pairing sits on top of [[glossary:latency-vs-throughput|latency vs. throughput]]: performance is mostly a latency story (one operation, fast), while scalability is mostly a throughput story (many operations per second, sustained as load grows). The two scaling approaches are the levers — [[glossary:vertical-scaling|vertical scaling]] tends to help performance, [[glossary:horizontal-scaling|horizontal scaling]] is the primary path to scalability."
+          },
+          {
+            "type": "text",
+            "content": "Most scalability techniques are really about removing a shared bottleneck so load can spread. A [[glossary:load-balancer|load balancer]] spreads requests across many servers; [[glossary:sharding|sharding]] spreads data across many databases; a [[glossary:read-replica|read replica]] spreads read traffic. Each one is a scalability move, and several of them quietly cost a bit of per-request performance — which is exactly the tension this concept names."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A concrete contrast: suppose a report page runs a query that takes 4 seconds. That's a **performance** problem for every single user, and the fix is an [[glossary:index|index]], a rewritten query, or a cached result — adding servers does nothing because each one runs the same slow query. Now suppose each request is a snappy 50 ms but the single database maxes out its connections at 2,000 concurrent users. That's a **scalability** problem, and the fix is read replicas, a cache layer, or sharding so the load has somewhere to spread."
+          },
+          {
+            "type": "text",
+            "content": "In real engineering you measure them separately. **Load testing** tools (k6, Locust, JMeter) plot response time against rising concurrent users — a flat line means it scales; an upward curve reveals the bottleneck. Single-request **profiling** (flame graphs, query `EXPLAIN` plans, traces) finds where one request spends its time. The mature workflow is: profile to make one request fast, then load-test to confirm it stays fast as the crowd arrives."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "A dashboard loads in 300 ms when you're the only person testing it. But during the Monday-morning rush, when thousands of employees open it at once, load times climb to 15 seconds — even though each request, viewed alone, still does the same work. Adding a faster CPU to the single server barely helps.",
+      "question": "What kind of problem is this, and what's the right class of fix?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A scalability problem — spread the load (horizontal scaling, replicas, caching the shared resource) so the system stays fast as users pile on.",
+          "correct": true,
+          "explanation": "Right. It's fast for one user and degrades as load grows, with a bigger CPU barely helping — the signature of a scalability bottleneck. The fix is changing the system's shape so load can spread, not tuning a single request."
+        },
+        {
+          "id": "b",
+          "text": "A performance problem — profile and optimize the single request path to shave milliseconds.",
+          "correct": false,
+          "explanation": "Each request is already fast (300 ms) in isolation; the slowdown only appears under load. Micro-optimizing one fast request won't address a bottleneck that only shows up when thousands hit it at once."
+        },
+        {
+          "id": "c",
+          "text": "A latency problem unrelated to load — add a CDN to cut network round trips.",
+          "correct": false,
+          "explanation": "Network latency wouldn't suddenly balloon from 300 ms to 15 s only during the rush. The trigger is concurrent load, which points to scalability, not a fixed per-request network cost a CDN would address."
+        },
+        {
+          "id": "d",
+          "text": "There's no real problem; 15 seconds under peak load is unavoidable for any system.",
+          "correct": false,
+          "explanation": "It's very avoidable — that degradation under load is exactly what scalable architectures (replicas, caches, horizontal scaling behind a load balancer) are designed to prevent."
+        }
+      ]
+    }
+  },
+  {
+    "id": "availability-nines",
+    "term": "Availability (Nines)",
+    "shortDefinition": "A way to measure uptime as a percentage — \"three nines\" is 99.9%, \"four nines\" is 99.99%. Each extra nine shrinks your allowed downtime roughly tenfold and is far harder to reach.",
+    "analogy": "Like a 24/7 convenience store advertising how rarely it's closed. \"Open 99% of the year\" still means dark doors for over three days. \"99.99%\" means under an hour all year. Every extra nine is a much bigger promise — and much more expensive to keep.",
+    "relatedConcepts": [
+      "redundancy",
+      "failover",
+      "disaster-recovery",
+      "cap-theorem"
+    ],
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Availability is the share of time a system is up and serving requests, written as a percentage. Because the interesting differences live far out in the decimals, people count the **nines**: 99% is \"two nines,\" 99.9% is \"three nines,\" 99.99% is \"four nines,\" 99.999% is \"five nines.\" Each added nine cuts the allowed downtime by about **10×**."
+          },
+          {
+            "type": "text",
+            "content": "The percentage only means something once you translate it into a **downtime budget** — how much outage it permits per year:\n\n- **99% (two nines)** → ~3.65 days/year (~7.2 hours/month)\n- **99.9% (three nines)** → ~8.77 hours/year (~43 minutes/month)\n- **99.99% (four nines)** → ~52.6 minutes/year (~4.3 minutes/month)\n- **99.999% (five nines)** → ~5.26 minutes/year (~26 seconds/month)\n\nThat budget is the right unit for planning: a single bad deploy can blow a whole year's three-nines allowance in one afternoon."
+          },
+          {
+            "type": "callout",
+            "style": "tip",
+            "content": "Quick conversion: downtime per year ≈ (1 − availability) × 525,600 minutes. So 99.9% → 0.001 × 525,600 ≈ 526 minutes ≈ 8.8 hours. Keep this handy — it turns an abstract percentage into a number you can actually budget against."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Nines turn a vague promise (\"highly available\") into a measurable, negotiable target. They're the language of **SLAs** (service-level agreements) — the uptime a vendor contractually owes, often with refunds if they miss it — and **SLOs**, the internal goals a team holds itself to. Stating a target as a number forces the real question: *how much downtime per year is acceptable, and what will it cost to get there?*"
+          },
+          {
+            "type": "text",
+            "content": "The cost curve is steep and nonlinear. Going from two nines to three might just need a [[glossary:health-check|health check]] and quick restarts. Three to four demands real [[glossary:redundancy|redundancy]] and automated [[glossary:failover|failover]]. Four to five means multi-region, no-single-point-of-failure architecture and rehearsed [[glossary:disaster-recovery|disaster recovery]] — often doubling cost and complexity for a few extra minutes of yearly uptime."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "More nines isn't automatically better — it's a business decision. A blog at three nines is fine; a payment network at five nines is non-negotiable. The skill is matching the (expensive) target to what the product and its users actually require, not chasing nines for their own sake."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The headline trade-off is **cost and complexity per nine**. Each nine roughly multiplies the engineering effort: more redundant components, more automated failover, more regions, more monitoring, more on-call rigor. Past a point you're spending enormous sums to claw back minutes a year that your users may never notice."
+          },
+          {
+            "type": "text",
+            "content": "The subtler trap is how availability **combines across components**, because it does *not* simply average:\n\n- **In series (a dependency chain):** availabilities **multiply**, so the total is always *lower* than the weakest link. If a request must pass through three components each at 99.9%, overall availability is 0.999 × 0.999 × 0.999 ≈ **99.7%** — worse than any single piece.\n- **In parallel (redundant copies):** you multiply the *failure* probabilities, so the total is *higher* than any single piece. Two redundant 99% components fail only if *both* fail: 1 − (0.01 × 0.01) = **99.99%**."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "The classic mistake is assuming availability averages. Stacking nine services that are each \"99.9%\" in a dependency chain doesn't give you 99.9% — it gives ~99.1% (0.999⁹), because serial availabilities **multiply downward**. Every dependency you add on the critical path quietly *lowers* your ceiling. Redundancy raises it; serial dependencies erode it."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Nines are the *measurement*; the techniques that move the number are reliability patterns. [[glossary:redundancy|Redundancy]] is the foundation — parallel copies are precisely what makes combined availability go *up* instead of down. [[glossary:failover|Failover]] is how you actually collect on that redundancy fast enough to stay inside your downtime budget, and [[glossary:disaster-recovery|disaster recovery]] is the plan for the rare, large failures that threaten the most demanding nines."
+          },
+          {
+            "type": "text",
+            "content": "Availability also sits on the other side of the [[glossary:cap-theorem|CAP]] trade-off: choosing **AP** (availability over consistency) during a partition is, quite literally, choosing to protect these nines at the risk of stale data, while choosing **CP** accepts downtime — and a dent in your availability number — to stay correct. The two are the same decision viewed through different lenses."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Cloud SLAs are stated in nines. A typical managed database or compute SLA promises **99.9%** or **99.99%**; premium multi-region configurations advertise higher. Note what an SLA *means*: it's a refund commitment, not a guarantee of zero downtime — at 99.99% the provider is openly telling you to expect up to ~52 minutes of outage a year. Reading the SLA tells you the downtime to design around."
+          },
+          {
+            "type": "text",
+            "content": "The serial-multiplication math is why teams audit their **dependency chain**: if your service is 99.99% but it hard-depends on a third-party API at 99.9%, your real ceiling is ≈ 99.89% no matter how good your own code is. Practical responses are to remove non-essential dependencies from the critical path, add redundancy on the ones that remain, or apply [[glossary:graceful-degradation|graceful degradation]] so a flaky dependency degrades a feature instead of taking the whole system down. Google's SRE practice formalizes the budget side of this as an **error budget** — the allowed downtime is spent deliberately on releases and risk."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your checkout service is rock-solid at 99.99% availability on its own. But to complete a purchase, every request must call three external dependencies in sequence — a tax API, a payment gateway, and a fraud-check service — each independently rated at 99.9% availability.",
+      "question": "Roughly what end-to-end availability can checkout actually achieve, and why?",
+      "options": [
+        {
+          "id": "a",
+          "text": "About 99.7% — serial dependencies multiply (0.9999 × 0.999 × 0.999 × 0.999 ≈ 0.997), so the chain is lower than its weakest link.",
+          "correct": true,
+          "explanation": "Correct. Components in series multiply their availabilities, pulling the total below every individual piece. Three 99.9% dependencies plus your own service land the chain near 99.7% — far short of your service's own 99.99%."
+        },
+        {
+          "id": "b",
+          "text": "99.99% — the service's own availability sets the ceiling regardless of its dependencies.",
+          "correct": false,
+          "explanation": "Dependencies on the critical path can only lower your effective availability, never raise it. Each serial call you must make multiplies in, so the weaker 99.9% dependencies drag the whole chain below 99.99%."
+        },
+        {
+          "id": "c",
+          "text": "About 99.92% — average the four components' availabilities.",
+          "correct": false,
+          "explanation": "Availability in series doesn't average; it multiplies. Averaging overstates the result and misses the core point that every added serial dependency erodes the total."
+        },
+        {
+          "id": "d",
+          "text": "Higher than 99.99% — chaining multiple services adds redundancy and improves uptime.",
+          "correct": false,
+          "explanation": "These services are in series (all required), not redundant. Redundancy (parallel copies of the *same* role) raises availability; required serial dependencies lower it."
         }
       ]
     }

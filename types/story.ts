@@ -97,7 +97,8 @@ export type ConceptCategory =
   | "data"
   | "reliability"
   | "realtime"
-  | "architecture";
+  | "architecture"
+  | "networking";
 
 export type ConceptVisualKey =
   | "waves"

@@ -387,6 +387,169 @@ function icon(id: string, a: string): ReactNode {
         </>
       );
 
+    // ---------- Networking & APIs ----------
+    case "api":
+      return (
+        <>
+          <rect x="30" y="30" width="40" height="40" fill={ink} />
+          <rect x="42" y="16" width="6" height="14" fill={a} />
+          <rect x="54" y="16" width="6" height="14" fill={a} />
+          <rect x="42" y="70" width="6" height="14" fill={a} />
+          <rect x="54" y="70" width="6" height="14" fill={a} />
+        </>
+      );
+    case "http":
+      return (
+        <>
+          <g fill={ink}>
+            <rect x="24" y="38" width="34" height="6" />
+            <polygon points="72,41 58,33 58,49" />
+          </g>
+          <g fill={a}>
+            <rect x="42" y="58" width="34" height="6" />
+            <polygon points="28,61 42,53 42,69" />
+          </g>
+        </>
+      );
+    case "rest":
+      return (
+        <>
+          <rect x="26" y="30" width="48" height="12" fill={a} />
+          <rect x="26" y="46" width="48" height="12" fill={ink} />
+          <rect x="26" y="62" width="48" height="12" fill={ink} />
+        </>
+      );
+    case "dns":
+      return (
+        <>
+          <circle cx="42" cy="50" r="22" fill={ink} />
+          <rect x="64" y="45" width="22" height="10" fill={a} />
+        </>
+      );
+    case "rpc":
+      return (
+        <>
+          <rect x="16" y="38" width="22" height="24" fill={ink} />
+          <rect x="62" y="38" width="22" height="24" fill={ink} />
+          <g fill={a}>
+            <rect x="40" y="47" width="14" height="6" />
+            <polygon points="62,50 52,44 52,56" />
+          </g>
+        </>
+      );
+    case "tcp-udp":
+      return (
+        <>
+          <rect x="20" y="38" width="60" height="8" fill={ink} />
+          <g fill={a}>
+            <rect x="20" y="56" width="14" height="8" />
+            <rect x="43" y="56" width="14" height="8" />
+            <rect x="66" y="56" width="14" height="8" />
+          </g>
+        </>
+      );
+    case "reverse-proxy":
+      return (
+        <>
+          <rect x="50" y="28" width="34" height="44" fill={ink} />
+          <rect x="30" y="22" width="10" height="56" fill={a} />
+        </>
+      );
+
+    // ---------- Data & Consistency (breadth) ----------
+    case "nosql":
+      return (
+        <>
+          <circle cx="36" cy="38" r="11" fill={ink} />
+          <circle cx="65" cy="44" r="9" fill={ink} />
+          <circle cx="48" cy="65" r="13" fill={a} />
+        </>
+      );
+    case "sql-vs-nosql":
+      return (
+        <>
+          <rect x="20" y="30" width="26" height="40" fill={ink} />
+          <circle cx="66" cy="40" r="7" fill={a} />
+          <circle cx="66" cy="60" r="7" fill={a} />
+        </>
+      );
+    case "acid":
+      return (
+        <>
+          <polygon points="40,26 60,26 60,44 78,74 22,74" fill={ink} />
+          <rect x="32" y="60" width="36" height="12" fill={a} />
+        </>
+      );
+    case "base":
+      return (
+        <>
+          <rect x="22" y="58" width="56" height="16" fill={ink} />
+          <path d="M22 48 q14 -14 28 0 q14 14 28 0 v6 H22 Z" fill={a} />
+        </>
+      );
+    case "replication":
+      return (
+        <>
+          <rect x="20" y="34" width="24" height="32" fill={ink} />
+          <rect x="56" y="34" width="24" height="32" fill={ink} />
+          <g fill={a}>
+            <rect x="44" y="43" width="12" height="5" />
+            <rect x="44" y="53" width="12" height="5" />
+          </g>
+        </>
+      );
+    case "denormalization":
+      return (
+        <>
+          <rect x="24" y="28" width="34" height="34" fill={ink} />
+          <rect x="42" y="46" width="34" height="34" fill={a} />
+        </>
+      );
+    case "federation":
+      return (
+        <>
+          <circle cx="50" cy="50" r="24" fill={ink} />
+          <path d="M50 50 L50 26 A24 24 0 0 1 74 50 Z" fill={a} />
+        </>
+      );
+    case "cap-theorem":
+      return (
+        <>
+          <polygon points="50,24 78,72 22,72" fill={ink} />
+          <circle cx="50" cy="26" r="8" fill={a} />
+        </>
+      );
+
+    // ---------- Core trade-offs ----------
+    case "latency-vs-throughput":
+      return (
+        <>
+          <rect x="20" y="44" width="60" height="14" fill={ink} />
+          <circle cx="32" cy="51" r="5" fill={a} />
+        </>
+      );
+    case "performance-vs-scalability":
+      return (
+        <>
+          <g fill={ink}>
+            <rect x="24" y="54" width="12" height="20" />
+            <rect x="44" y="42" width="12" height="32" />
+          </g>
+          <rect x="64" y="28" width="12" height="46" fill={a} />
+        </>
+      );
+    case "availability-nines":
+      return (
+        <>
+          <g fill={ink}>
+            <rect x="22" y="42" width="10" height="16" />
+            <rect x="38" y="42" width="10" height="16" />
+            <rect x="54" y="42" width="10" height="16" />
+          </g>
+          <rect x="70" y="42" width="10" height="16" fill={a} />
+        </>
+      );
+
     default:
       return (
         <>

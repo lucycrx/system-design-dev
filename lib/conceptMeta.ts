@@ -30,6 +30,7 @@ export const CONCEPT_CATEGORIES: {
   { id: "reliability", label: "Reliability", color: BLUE, shape: "half-circle" },
   { id: "realtime", label: "Real-time & Async", color: RED, shape: "quarter-arc" },
   { id: "architecture", label: "Architecture", color: YELLOW, shape: "circle" },
+  { id: "networking", label: "Networking & APIs", color: YELLOW, shape: "quarter-arc" },
 ];
 
 export const CATEGORY_BY_ID: Record<
@@ -102,6 +103,30 @@ export const CONCEPT_META: Record<
   microservices: { category: "architecture", visual: "orbit" },
   monolith: { category: "architecture", visual: "split" },
   "api-gateway": { category: "architecture", visual: "converge" },
+
+  // Networking & APIs
+  api: { category: "networking", visual: "converge" },
+  http: { category: "networking", visual: "flow" },
+  rest: { category: "networking", visual: "grid" },
+  dns: { category: "networking", visual: "converge" },
+  rpc: { category: "networking", visual: "flow" },
+  "tcp-udp": { category: "networking", visual: "split" },
+  "reverse-proxy": { category: "networking", visual: "gate" },
+
+  // Data & Consistency (breadth)
+  nosql: { category: "data", visual: "grow" },
+  "sql-vs-nosql": { category: "data", visual: "mirror" },
+  acid: { category: "data", visual: "grid" },
+  base: { category: "data", visual: "waves" },
+  replication: { category: "data", visual: "mirror" },
+  denormalization: { category: "data", visual: "grow" },
+  federation: { category: "data", visual: "distribute" },
+  "cap-theorem": { category: "data", visual: "split" },
+
+  // Core trade-offs
+  "latency-vs-throughput": { category: "performance", visual: "pulse" },
+  "performance-vs-scalability": { category: "foundations", visual: "grow" },
+  "availability-nines": { category: "reliability", visual: "pulse" },
 };
 
 /** Fallback for any term missing from CONCEPT_META. */
