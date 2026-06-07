@@ -115,26 +115,39 @@ function PathCard({
 }
 
 export function PathCards({
+  conceptCount,
   storyCount,
   moduleCount,
   lessonCount,
 }: {
+  conceptCount: number;
   storyCount: number;
   moduleCount: number;
   lessonCount: number;
 }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-3">
       <PathCard
-        href="/stories"
-        label="Narrative"
+        href="/concepts"
+        label="Reference"
         labelColor="var(--color-accent)"
-        title="Build Stories"
-        description="Follow a product from first deploy to production crisis. System design concepts arrive when the story demands them."
-        meta={`${storyCount} ${storyCount === 1 ? "story" : "stories"}`}
+        title="Concepts"
+        description="The building blocks behind every app that scales — each in plain English, with a real-world analogy and an animated visual."
+        meta={`${conceptCount} concepts`}
         accentColor="var(--color-accent)"
         accentBg="var(--color-accent-dim)"
         delay={0}
+      />
+      <PathCard
+        href="/stories"
+        label="Narrative"
+        labelColor="var(--color-green)"
+        title="Build Stories"
+        description="Follow a product from first deploy to production crisis. System design concepts arrive when the story demands them."
+        meta={`${storyCount} ${storyCount === 1 ? "story" : "stories"}`}
+        accentColor="var(--color-green)"
+        accentBg="var(--color-green-dim)"
+        delay={120}
       />
       <PathCard
         href="/curriculum"
@@ -145,7 +158,7 @@ export function PathCards({
         meta={`${moduleCount} ${moduleCount === 1 ? "module" : "modules"} · ${lessonCount} lessons`}
         accentColor="var(--color-blue)"
         accentBg="var(--color-blue-dim)"
-        delay={120}
+        delay={240}
       />
     </div>
   );
