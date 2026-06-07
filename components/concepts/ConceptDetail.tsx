@@ -1,8 +1,10 @@
 import Link from "next/link";
-import type { ConceptCategory, GlossaryTerm } from "@/types/story";
+import type { ConceptCategory, Diagram, GlossaryTerm } from "@/types/story";
 import { CATEGORY_BY_ID } from "@/lib/conceptMeta";
 import { Shape } from "@/components/ui/Shape";
+import { LessonQuiz } from "@/components/curriculum/LessonQuiz";
 import { ConceptVisual } from "./ConceptVisual";
+import { ConceptSection } from "./ConceptSection";
 
 interface RelatedConcept {
   id: string;
@@ -14,9 +16,17 @@ interface Props {
   term: GlossaryTerm;
   related: RelatedConcept[];
   story: { slug: string; title: string; stageId: string } | null;
+  glossaryMap: Record<string, GlossaryTerm>;
+  diagrams: Record<string, Diagram>;
 }
 
-export function ConceptDetail({ term, related, story }: Props) {
+export function ConceptDetail({
+  term,
+  related,
+  story,
+  glossaryMap,
+  diagrams,
+}: Props) {
   const category = CATEGORY_BY_ID[term.category];
 
   return (
@@ -63,6 +73,16 @@ export function ConceptDetail({ term, related, story }: Props) {
         <p className="text-[15px] text-text/85 leading-[1.7]">{term.analogy}</p>
       </div>
 
+      {/* Deep dive — the rich article */}
+      {term.deepDive?.map((section) => (
+        <ConceptSection
+          key={section.heading}
+          section={section}
+          glossaryMap={glossaryMap}
+          diagrams={diagrams}
+        />
+      ))}
+
       {/* See it in action */}
       {story && (
         <Link
@@ -102,6 +122,13 @@ export function ConceptDetail({ term, related, story }: Props) {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Knowledge check */}
+      {term.quiz && (
+        <div className="mt-12 pt-8 border-t border-text/10">
+          <LessonQuiz quiz={term.quiz} />
         </div>
       )}
     </div>

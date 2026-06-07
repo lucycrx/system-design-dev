@@ -113,6 +113,23 @@ export type ConceptVisualKey =
   | "split"
   | "curve";
 
+/** Fixed, ordered section headings for a concept deep dive. */
+export type ConceptSectionHeading =
+  | "how-it-works"
+  | "why-it-matters" // the "so what"
+  | "trade-offs"
+  | "how-it-connects" // how it interfaces with other components
+  | "in-practice"; // real technologies / examples
+
+/**
+ * One labeled section of a concept deep dive. Reuses the story `Block` union so
+ * text, callouts, reveals, and inline diagrams render through existing components.
+ */
+export interface ConceptSection {
+  heading: ConceptSectionHeading;
+  blocks: Block[];
+}
+
 export interface GlossaryTerm {
   id: string;
   term: string;
@@ -123,6 +140,10 @@ export interface GlossaryTerm {
     storyId: string;
     stageId: string;
   };
+  /** Optional richer article: ordered labeled sections with embedded blocks. */
+  deepDive?: ConceptSection[];
+  /** Optional end-of-article knowledge check. Same shape as a curriculum quiz. */
+  quiz?: Lesson["quiz"];
   /** Populated by the content loader from lib/conceptMeta.ts */
   category: ConceptCategory;
   /** Populated by the content loader from lib/conceptMeta.ts */

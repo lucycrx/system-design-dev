@@ -1,0 +1,132 @@
+{
+  "cache-flow": {
+    "id": "cache-flow",
+    "title": "Cache-aside pattern",
+    "description": "The app checks the cache first and only falls back to the database on a miss",
+    "nodes": [
+      {
+        "id": "client",
+        "type": "client",
+        "label": "Client",
+        "position": { "x": 0, "y": 120 },
+        "explanation": "A user's browser or app making a request for data"
+      },
+      {
+        "id": "app",
+        "type": "server",
+        "label": "App Server",
+        "position": { "x": 240, "y": 120 },
+        "explanation": "Your application. On each read it checks the cache first; only on a miss does it query the database, then stores the result back in the cache."
+      },
+      {
+        "id": "cache",
+        "type": "cache",
+        "label": "Cache",
+        "position": { "x": 500, "y": 0 },
+        "explanation": "A fast in-memory store holding recently used data. Answers in microseconds when the data is present (a cache hit).",
+        "technology": "Redis / Memcached"
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 500, "y": 240 },
+        "explanation": "The source of truth on disk. Slower, but always correct. Hit only when the cache misses."
+      }
+    ],
+    "edges": [
+      { "id": "e-client-app", "source": "client", "target": "app", "style": "solid" },
+      { "id": "e-app-cache", "source": "app", "target": "cache", "label": "1. check cache", "style": "solid", "animated": true },
+      { "id": "e-app-db", "source": "app", "target": "database", "label": "2. on miss", "style": "dashed" }
+    ]
+  },
+  "load-balancer-fanout": {
+    "id": "load-balancer-fanout",
+    "title": "One entry point, many servers",
+    "description": "The load balancer spreads requests across identical servers and routes around unhealthy ones",
+    "nodes": [
+      {
+        "id": "client",
+        "type": "client",
+        "label": "Clients",
+        "position": { "x": 0, "y": 160 },
+        "explanation": "All incoming traffic points at one address — the load balancer — instead of any individual server."
+      },
+      {
+        "id": "lb",
+        "type": "load-balancer",
+        "label": "Load Balancer",
+        "position": { "x": 240, "y": 160 },
+        "explanation": "Distributes each request across the pool of servers (e.g. round-robin or least-connections) and runs health checks so it never sends traffic to a dead server.",
+        "technology": "NGINX / HAProxy / ALB"
+      },
+      {
+        "id": "server-1",
+        "type": "server",
+        "label": "Server 1",
+        "position": { "x": 520, "y": 0 },
+        "explanation": "One of several interchangeable servers running the same application code."
+      },
+      {
+        "id": "server-2",
+        "type": "server",
+        "label": "Server 2",
+        "position": { "x": 520, "y": 160 },
+        "explanation": "Another identical server. If it fails a health check, the load balancer simply stops routing to it."
+      },
+      {
+        "id": "server-3",
+        "type": "server",
+        "label": "Server 3",
+        "position": { "x": 520, "y": 320 },
+        "explanation": "Adding more servers behind the balancer is how the system scales horizontally."
+      }
+    ],
+    "edges": [
+      { "id": "e-client-lb", "source": "client", "target": "lb", "style": "solid", "animated": true },
+      { "id": "e-lb-s1", "source": "lb", "target": "server-1", "style": "solid", "animated": true },
+      { "id": "e-lb-s2", "source": "lb", "target": "server-2", "style": "solid", "animated": true },
+      { "id": "e-lb-s3", "source": "lb", "target": "server-3", "style": "solid", "animated": true }
+    ]
+  },
+  "sharding-split": {
+    "id": "sharding-split",
+    "title": "Data split across shards",
+    "description": "A shard key decides which database holds each row",
+    "nodes": [
+      {
+        "id": "router",
+        "type": "server",
+        "label": "Router",
+        "position": { "x": 0, "y": 160 },
+        "explanation": "Application logic (or a proxy) that reads the shard key on each request and routes it to the shard that owns that data."
+      },
+      {
+        "id": "shard-a",
+        "type": "database",
+        "label": "Shard A",
+        "position": { "x": 320, "y": 0 },
+        "explanation": "Holds users A–H. A complete, independent database — just a slice of the whole."
+      },
+      {
+        "id": "shard-b",
+        "type": "database",
+        "label": "Shard B",
+        "position": { "x": 320, "y": 160 },
+        "explanation": "Holds users I–P. Its own server, CPU, and disk — so load is split, not stacked."
+      },
+      {
+        "id": "shard-c",
+        "type": "database",
+        "label": "Shard C",
+        "position": { "x": 320, "y": 320 },
+        "explanation": "Holds users Q–Z. Add a shard and you add capacity for both data and traffic."
+      }
+    ],
+    "edges": [
+      { "id": "e-router-a", "source": "router", "target": "shard-a", "label": "A–H", "style": "solid", "animated": true },
+      { "id": "e-router-b", "source": "router", "target": "shard-b", "label": "I–P", "style": "solid", "animated": true },
+      { "id": "e-router-c", "source": "router", "target": "shard-c", "label": "Q–Z", "style": "solid", "animated": true }
+    ]
+  }
+}

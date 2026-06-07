@@ -145,6 +145,114 @@
     "firstAppearance": {
       "storyId": "online-store",
       "stageId": "stage-2"
+    },
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A cache sits **between** whatever is asking for data and the slow source of truth behind it. The first time a piece of data is requested, the system fetches it from the original source — a [[glossary:database|database]], an API, or disk — and stores a copy in fast memory. Every request after that is served from the copy. That's a **cache hit**. When the data isn't there, it's a **cache miss**, and the system pays the full cost of going to the source."
+          },
+          {
+            "type": "text",
+            "content": "The most common arrangement is **cache-aside**: your application checks the cache first and, only on a miss, reads the source and writes the result back for next time. Two other patterns trade freshness for simplicity: **write-through** updates the cache and the source together on every write, while **write-back** updates the cache immediately and the source later. Three knobs control any cache:\n\n- **TTL (time-to-live)** — how long a copy is allowed to live before it's considered stale.\n- **Eviction policy** — what to drop when memory fills up. **LRU** (least-recently-used) is the usual default.\n- **Hit ratio** — the share of requests served from cache. The whole point is to keep this high."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Reading from memory is **orders of magnitude faster** than reading from disk or crossing the network — microseconds instead of milliseconds. For data that's read far more often than it changes, a cache turns a slow, repeated lookup into an instant one."
+          },
+          {
+            "type": "text",
+            "content": "Just as important, a cache **absorbs traffic**. In most systems a small slice of the data is requested constantly — the homepage, a trending product, a popular profile. Serving those from cache means your database only sees the requests that actually miss, so it can stay small and cheap while the app handles far more load."
+          },
+          {
+            "type": "callout",
+            "style": "tip",
+            "content": "Rule of thumb: cache data that is **read often and changes rarely**. The bigger the gap between read rate and write rate, the more a cache pays off."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A cache is a *copy*, and copies drift out of date. The central question is always: how stale is too stale? A short TTL keeps data fresh but lowers your hit ratio; a long TTL is faster but risks serving wrong answers. You're trading **freshness for speed**, and only your use case can say where the line is."
+          },
+          {
+            "type": "text",
+            "content": "Caching also adds real costs:\n\n- **Stale reads** — users may see out-of-date data until the copy expires.\n- **Extra moving parts** — another system to run, size, and monitor.\n- **Cold starts & stampedes** — right after a deploy or eviction, many misses can hit the database at once (a *thundering herd*)."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "There are only two hard things in computer science: cache invalidation and naming things. Knowing **when** to throw away a stale copy is the part that bites teams — plan your invalidation strategy before you add the cache, not after."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A cache rarely lives alone — it's a layer that shows up at several points in a system. Closest to the user, a [[glossary:cdn|CDN]] is itself a cache for static files spread around the globe. Inside your system, a cache sits between the app and the [[glossary:database|database]], shielding it from repeated reads. It's usually backed by an [[glossary:in-memory-store|in-memory store]] like Redis, and it complements [[glossary:read-replica|read replicas]]: replicas scale out the database itself, while a cache avoids touching the database at all."
+          },
+          {
+            "type": "text",
+            "content": "Caching is also where you confront [[glossary:consistency|consistency]] head-on. The moment you keep a copy, you accept that it can disagree with the source — so a cache is a deliberate choice to favor speed over perfectly fresh data."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "cache-flow",
+            "caption": "Cache-aside: the app checks the cache first and only reaches the database on a miss."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**Redis** and **Memcached** are the workhorses for application caches — fast key-value stores that sit beside your servers. At the edge, **CDNs** like Cloudflare and Fastly cache static assets, and browsers cache responses based on HTTP `Cache-Control` headers. Databases add their own layers too: query caches and buffer pools keep hot pages in memory. Most real systems stack several of these at once — browser, CDN, application cache, and database cache — each catching what the layer in front of it missed."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your product-detail page reads the same item from the database on every visit, and an item's details change at most once a day. Under traffic, the database is becoming the bottleneck.",
+      "question": "What's the most effective first move?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Put a cache in front of the database and serve item details from it with a short TTL.",
+          "correct": true,
+          "explanation": "Exactly the case caching is built for: data read constantly but changed rarely. The cache absorbs the repeated reads, and a short TTL keeps it fresh enough for once-a-day changes."
+        },
+        {
+          "id": "b",
+          "text": "Shard the database by product ID.",
+          "correct": false,
+          "explanation": "Sharding helps when the data set is too big for one server. Here the problem is repeated reads of the same hot items — splitting the data does little for that."
+        },
+        {
+          "id": "c",
+          "text": "Add more application servers behind the load balancer.",
+          "correct": false,
+          "explanation": "More app servers just send more queries to the same database. The bottleneck is the database read load, not application compute."
+        },
+        {
+          "id": "d",
+          "text": "Switch the database to eventual consistency.",
+          "correct": false,
+          "explanation": "A consistency model changes how copies agree, not how many reads hit the database. It doesn't reduce the read load causing the bottleneck."
+        }
+      ]
     }
   },
   {
@@ -176,6 +284,111 @@
     "firstAppearance": {
       "storyId": "online-store",
       "stageId": "stage-3"
+    },
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A load balancer is the **single front door** to a pool of identical servers. Clients connect to one address — the load balancer — and it decides, request by request, which server in the pool should handle each one. The servers behind it never talk to clients directly."
+          },
+          {
+            "type": "text",
+            "content": "How it picks a server depends on its **algorithm**:\n\n- **Round-robin** — hand requests out in turn, one server after another.\n- **Least-connections** — send the next request to whichever server is least busy.\n- **IP-hash** — always route a given client to the same server (useful when servers hold session state).\n\nAt the same time it runs **[[glossary:health-check|health checks]]** — small, repeated pings to each server. The instant a server stops responding, the balancer takes it out of rotation and stops sending it traffic, so users never land on a dead machine."
+          },
+          {
+            "type": "reveal",
+            "label": "Layer 4 vs Layer 7 — what's the difference?",
+            "content": "A **Layer 4** balancer routes on raw connection info (IP and port) — fast and simple, but blind to what the request contains. A **Layer 7** balancer reads the actual HTTP request, so it can route by URL path, headers, or cookies (e.g. send `/api` to one pool and `/images` to another). Layer 7 is more flexible; Layer 4 is lighter."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "A single server has a hard ceiling — only so many CPUs, so much memory, so many open connections. Once you hit it, the only way up is *out*: run several servers and spread the load across them. But the moment you have more than one server, something has to decide who handles each request. That's the load balancer. It's the piece that makes [[glossary:horizontal-scaling|horizontal scaling]] actually work."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "The load balancer also unlocks **zero-downtime operations**: because it can pull a server out of rotation, you can deploy new code or restart a machine one server at a time while the others keep serving traffic."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The catch is that the load balancer now sits in front of *everything*. If it goes down, your whole application is unreachable — so the thing you added for reliability becomes a **single point of failure** unless you make it redundant too (typically a standby balancer ready to take over)."
+          },
+          {
+            "type": "text",
+            "content": "Two more costs to weigh:\n\n- **An extra hop** — every request passes through one more system, adding a little latency.\n- **State gets awkward** — if a server remembers something about a user between requests, a round-robin balancer might send their next request to a *different* server that knows nothing about them."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "Keep your servers **stateless** so any server can handle any request. If you can't, you're forced into *sticky sessions* (pinning a user to one server), which undercuts even balancing and breaks when that server dies. Push [[glossary:state|state]] into a shared store instead."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "The load balancer sits between your clients and a fleet of [[glossary:server|servers]], and it's the linchpin of several other ideas. It depends on [[glossary:health-check|health checks]] to know which servers are alive, works with [[glossary:redundancy|redundancy]] and [[glossary:failover|failover]] to route around failures, and is what makes [[glossary:horizontal-scaling|horizontal scaling]] possible in the first place. In larger systems an [[glossary:api-gateway|API gateway]] often sits alongside it, adding auth and routing on top of plain load distribution."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "load-balancer-fanout",
+            "caption": "One entry point fans requests out across identical servers and skips any that fail their health check."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "**NGINX** and **HAProxy** are the classic software load balancers you run yourself. In the cloud, managed options like **AWS ELB/ALB/NLB** and **Google Cloud Load Balancing** handle scaling and redundancy for you. **Envoy** is common inside microservice meshes. Even **DNS** can balance load at a coarse level by handing out different server addresses. Most large systems layer several: DNS spreading traffic across regions, then a load balancer spreading it across servers within each region."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "It's Black Friday. Your single application server is pegged at 100% CPU and requests are timing out. You need more capacity, and you can't afford downtime.",
+      "question": "What's the right move?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Put a load balancer in front and run several identical servers behind it.",
+          "correct": true,
+          "explanation": "This is horizontal scaling: spread the load across many servers through one entry point. You can also add and remove servers without downtime, which is exactly what a traffic spike needs."
+        },
+        {
+          "id": "b",
+          "text": "Move the single server to a much bigger machine.",
+          "correct": false,
+          "explanation": "Vertical scaling buys time but still leaves one server — one ceiling and one point of failure. And resizing usually means a restart, i.e. downtime."
+        },
+        {
+          "id": "c",
+          "text": "Add a cache in front of the database.",
+          "correct": false,
+          "explanation": "A cache helps if the database is the bottleneck. Here the application server's CPU is maxed, so reducing database reads won't free up the compute that's actually saturated."
+        },
+        {
+          "id": "d",
+          "text": "Shard the database across several servers.",
+          "correct": false,
+          "explanation": "Sharding scales the database, not the application tier. The bottleneck is application CPU, which sharding doesn't touch."
+        }
+      ]
     }
   },
   {
@@ -315,6 +528,111 @@
     "firstAppearance": {
       "storyId": "online-store",
       "stageId": "stage-5"
+    },
+    "deepDive": [
+      {
+        "heading": "how-it-works",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Sharding splits one big database into several smaller ones, called **shards**, each living on its own server and holding a different **subset of the rows**. Every shard is a complete, independent database — it just stores a slice of the whole. Together they hold everything; apart, each one is smaller, faster, and cheaper to run."
+          },
+          {
+            "type": "text",
+            "content": "The key decision is the **shard key** — the column that decides which shard a row belongs to (say, `user_id`). When a request comes in, a router reads the shard key and sends the query straight to the shard that owns that data. There are three common ways to map keys to shards:\n\n- **Range-based** — A–H on shard 1, I–P on shard 2, and so on. Simple, but ranges can fill unevenly.\n- **Hash-based** — hash the key and use the result to pick a shard. Spreads data evenly, but related rows scatter.\n- **Directory-based** — a lookup table records where each key lives. Flexible, but the directory itself must be fast and reliable."
+          },
+          {
+            "type": "reveal",
+            "label": "Why teams reach for consistent hashing",
+            "content": "With plain hash-based sharding, *adding* a shard changes the math for almost every key, forcing a massive reshuffle of data. **Consistent hashing** arranges shards on a ring so that adding or removing one only moves the keys near it — a small fraction of the data — instead of nearly all of it. It's the standard trick for sharding systems that need to grow without huge migrations."
+          }
+        ]
+      },
+      {
+        "heading": "why-it-matters",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Most scaling tricks for databases only help with **reads**. A [[glossary:cache|cache]] avoids reads; a [[glossary:read-replica|read replica]] copies the whole database so more servers can answer reads. But none of them help when the data is simply **too big for one machine**, or when the **write** load exceeds what a single server can handle. Sharding is the answer to both: it splits storage *and* write throughput across many servers."
+          },
+          {
+            "type": "callout",
+            "style": "insight",
+            "content": "Reach for sharding when you've outgrown a single database on the two axes nothing else fixes: **total data size** and **write volume**. If your problem is read load, try a cache or read replicas first — they're far simpler."
+          }
+        ]
+      },
+      {
+        "heading": "trade-offs",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Sharding is powerful but it's the heaviest tool in the box, and it makes the database harder to work with:\n\n- **Cross-shard queries get expensive** — a query that spans shards has to fan out to all of them and combine the results. Joins across shards may not be possible at all.\n- **Transactions across shards are hard** — keeping a change atomic across two servers is far harder than on one.\n- **Resharding is painful** — once a shard key is chosen, changing it or rebalancing data later is a major migration."
+          },
+          {
+            "type": "callout",
+            "style": "warning",
+            "content": "The biggest risk is a **hot shard**: pick a shard key that clumps (like region, or a celebrity user) and one shard takes most of the traffic while the others sit idle. A good shard key spreads both data *and* load evenly — choose it carefully, because it's the hardest thing to change later."
+          }
+        ]
+      },
+      {
+        "heading": "how-it-connects",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Sharding is [[glossary:horizontal-scaling|horizontal scaling]] applied to data — more servers instead of a bigger one. It's worth contrasting with a [[glossary:read-replica|read replica]]: a replica copies the *entire* database so extra servers can serve reads, while sharding *splits* the data so servers share both reads and writes. The two are often combined: shard the data, then add replicas of each shard. A [[glossary:cache|cache]] still sits in front to absorb hot reads, and each shard keeps its own [[glossary:index|indexes]] to stay fast internally."
+          },
+          {
+            "type": "text",
+            "content": "Sharding also raises the stakes on [[glossary:consistency|consistency]]: with data spread across servers, keeping everything in agreement — especially for operations that touch more than one shard — is one of the central challenges of a distributed database."
+          },
+          {
+            "type": "diagram",
+            "diagramId": "sharding-split",
+            "caption": "A shard key routes each row to the shard that owns it — splitting both storage and load."
+          }
+        ]
+      },
+      {
+        "heading": "in-practice",
+        "blocks": [
+          {
+            "type": "text",
+            "content": "Some databases shard for you: **MongoDB** has built-in sharding, and **Cassandra** and **DynamoDB** distribute data by a partition key automatically. For traditional SQL databases, tools like **Vitess** (MySQL, the system behind YouTube) and **Citus** (PostgreSQL) add sharding on top. Because sharding adds so much complexity, the common advice is to delay it as long as you can — squeeze everything you can out of a bigger machine, caching, and read replicas first, and shard only when you genuinely must."
+          }
+        ]
+      }
+    ],
+    "quiz": {
+      "scenario": "Your database is straining: the data no longer fits comfortably on one machine, and write traffic alone is maxing out the server. You already run a cache and read replicas, and neither has helped.",
+      "question": "What's the appropriate next step?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Shard the database, using a key that spreads data and load evenly across servers.",
+          "correct": true,
+          "explanation": "Sharding is the tool for exactly this: too much data and too many writes for one machine. Splitting across shards scales storage and write throughput — the two things a cache and read replicas can't fix."
+        },
+        {
+          "id": "b",
+          "text": "Add more read replicas.",
+          "correct": false,
+          "explanation": "Replicas only scale reads, and every replica still has to apply all the writes. They do nothing for write load or total data size — and you've already tried them."
+        },
+        {
+          "id": "c",
+          "text": "Add a larger cache in front of the database.",
+          "correct": false,
+          "explanation": "A cache reduces reads, but the bottleneck here is write volume and data size. Caching can't absorb writes or shrink the data set."
+        },
+        {
+          "id": "d",
+          "text": "Move the database to a machine with a bigger disk and more CPU.",
+          "correct": false,
+          "explanation": "Vertical scaling buys a little time but hits a ceiling fast, and when both data size and write load exceed one machine, splitting the data across servers is the durable fix."
+        }
+      ]
     }
   },
   {

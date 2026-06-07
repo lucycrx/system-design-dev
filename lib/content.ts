@@ -49,6 +49,12 @@ export function getDiagrams(storySlug: string): Record<string, Diagram> {
   return JSON.parse(fs.readFileSync(filePath, "utf-8"));
 }
 
+export function getConceptDiagrams(): Record<string, Diagram> {
+  const filePath = path.join(CONTENT_DIR, "diagrams", "concepts.json");
+  if (!fs.existsSync(filePath)) return {};
+  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+}
+
 export function getDiagramsForStage(
   storySlug: string,
   blocks: Block[]

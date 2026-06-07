@@ -27,7 +27,22 @@ const NODE_TYPES = ["client", "server", "database", "cache", "queue", "load-bala
 const CALLOUT_STYLES = ["insight", "analogy", "warning", "tip"];
 const DIFFICULTIES = ["beginner", "intermediate", "advanced"];
 const SECTION_HEADINGS = ["what", "why", "how", "when"];
+const CONCEPT_SECTION_HEADINGS = ["how-it-works", "why-it-matters", "trade-offs", "how-it-connects", "in-practice"];
 const MODULE_COLORS = ["accent", "blue", "green", "orange", "pink", "purple"];
+
+function validateQuiz(quiz: unknown, path: string, errors: string[]) {
+  if (!isObject(quiz)) {
+    errors.push(`${path}: quiz is not an object`);
+    return;
+  }
+  check(errors, isString(quiz.question), `${path}: quiz missing question`);
+  if (isArray(quiz.options)) {
+    const correct = (quiz.options as Record<string, unknown>[]).filter((o) => o.correct === true);
+    check(errors, correct.length === 1, `${path}: quiz must have exactly 1 correct option, found ${correct.length}`);
+  } else {
+    errors.push(`${path}: quiz missing options array`);
+  }
+}
 
 function validateBlock(block: unknown, path: string, errors: string[]) {
   if (!isObject(block)) {
@@ -278,6 +293,35 @@ export function validateGlossary(data: unknown): ValidationResult {
     check(errors, isString(term.shortDefinition), `${tp}: missing shortDefinition`);
     check(errors, isString(term.analogy), `${tp}: missing analogy`);
     check(errors, isArray(term.relatedConcepts), `${tp}: missing relatedConcepts array`);
+
+    // Optional deep dive: ordered labeled sections with embedded blocks
+    if (term.deepDive !== undefined) {
+      if (isArray(term.deepDive)) {
+        for (let j = 0; j < (term.deepDive as unknown[]).length; j++) {
+          const section = (term.deepDive as unknown[])[j];
+          const sp = `${tp}.deepDive[${j}]`;
+          if (!isObject(section)) {
+            errors.push(`${sp}: not an object`);
+            continue;
+          }
+          check(errors, isString(section.heading) && CONCEPT_SECTION_HEADINGS.includes(section.heading as string), `${sp}: invalid heading "${section.heading}"`);
+          if (isArray(section.blocks)) {
+            for (let k = 0; k < (section.blocks as unknown[]).length; k++) {
+              validateBlock((section.blocks as unknown[])[k], `${sp}.blocks[${k}]`, errors);
+            }
+          } else {
+            errors.push(`${sp}: missing blocks array`);
+          }
+        }
+      } else {
+        errors.push(`${tp}: deepDive must be an array`);
+      }
+    }
+
+    // Optional end-of-article knowledge check
+    if (term.quiz !== undefined) {
+      validateQuiz(term.quiz, tp, errors);
+    }
   }
 
   return { valid: errors.length === 0, errors };

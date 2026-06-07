@@ -4,6 +4,7 @@ import {
   getGlossaryTerms,
   getGlossaryTerm,
   getGlossaryMap,
+  getConceptDiagrams,
   getStory,
 } from "@/lib/content";
 import { ConceptDetail } from "@/components/concepts/ConceptDetail";
@@ -45,10 +46,14 @@ export default async function ConceptDetailPage({
     ? getStory(term.firstAppearance.storyId)
     : null;
 
+  const diagrams = getConceptDiagrams();
+
   return (
     <ConceptDetail
       term={term}
       related={related}
+      glossaryMap={map}
+      diagrams={diagrams}
       story={
         story && term.firstAppearance
           ? {
