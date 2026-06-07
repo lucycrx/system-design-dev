@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { GlossaryTerm } from "@/types/story";
 import { CATEGORY_BY_ID } from "@/lib/conceptMeta";
 import { Shape } from "@/components/ui/Shape";
-import { ConceptVisual } from "./ConceptVisual";
+import { ConceptIcon } from "./ConceptIcon";
 
 const INK = "#1A1A1A";
 
@@ -48,17 +48,18 @@ export function ConceptCard({ term, index }: { term: GlossaryTerm; index: number
         borderColor: hovered ? category.color : "rgba(26,26,26,0.10)",
       }}
     >
-      {/* Animated visual — ink by default, reveals the category primary on hover */}
+      {/* Static filled icon — ink mass reveals the category primary on hover */}
       <div
-        className="relative h-28 sm:h-32 border-b flex items-center justify-center px-6 py-4"
+        className="relative h-28 sm:h-32 border-b flex items-center justify-center px-6 py-5"
         style={{ borderColor: "rgba(26,26,26,0.10)" }}
       >
-        <ConceptVisual
-          visual={term.visual}
-          color={hovered ? category.color : INK}
-          playing={visible}
-          transition
-        />
+        <div className="h-full w-auto aspect-square">
+          <ConceptIcon
+            id={term.id}
+            color={hovered ? category.color : INK}
+            accent={category.color}
+          />
+        </div>
       </div>
 
       {/* Copy */}

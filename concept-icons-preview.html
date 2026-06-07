@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concept Icons — Style Comparison</title>
+<style>
+  :root {
+    --paper: #F4F1EA;
+    --ink: #1A1A1A;
+    --muted: #6B6B6B;
+    --red: #D62828;
+    --blue: #1D4E89;
+    --yellow: #F4C430;
+    --border: rgba(26,26,26,0.10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 12px;
+  }
+  header {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 56px 32px 24px;
+  }
+  header h1 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 0.95;
+    margin: 12px 0 16px;
+    max-width: 18ch;
+  }
+  header p { color: var(--muted); max-width: 60ch; line-height: 1.6; font-size: 15px; }
+  .legend { display: flex; gap: 18px; margin-top: 20px; flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 12px; height: 12px; }
+
+  .matrix {
+    max-width: 1100px;
+    margin: 24px auto 80px;
+    padding: 0 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 150px repeat(4, 1fr);
+    border: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .head {
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    border-bottom: 1px solid var(--ink);
+    z-index: 2;
+  }
+  .cell {
+    border-bottom: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    padding: 18px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cell:first-child {
+    border-left: none;
+    justify-content: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .head .cell { padding: 16px 12px; }
+  .concept-name { font-weight: 600; font-size: 14px; font-family: "Poppins", sans-serif; letter-spacing: -0.01em; }
+  .concept-id { color: var(--muted); font-size: 11px; font-family: ui-monospace, monospace; }
+  .icon { width: 64px; height: 64px; color: var(--ink); transition: transform .4s cubic-bezier(.16,1,.3,1); }
+  .cell:hover .icon { transform: scale(1.12); }
+  .icon svg { width: 100%; height: 100%; display: block; }
+  .stylehead { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+  .stylehead small { color: var(--muted); font-size: 10px; text-transform: none; letter-spacing: 0; font-family: "Inter", sans-serif; }
+  .footnote { max-width: 1100px; margin: 0 auto; padding: 0 32px 80px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+  .scale-row { display: flex; align-items: center; gap: 28px; margin-top: 10px; }
+  .scale-row .icon { color: var(--ink); }
+</style>
+</head>
+<body>
+<header>
+  <div class="mono" style="color:var(--muted)">System Design School · icon study</div>
+  <h1>Concept icons — four styles, one set</h1>
+  <p>Each row is a concept; each column is a candidate icon style for the /concepts grid.
+     All are flat, geometric, <code>currentColor</code> SVG in the Bauhaus palette (ink on paper,
+     one primary accent each) — static, so 40 of them cost nothing to render. Pick a column.</p>
+  <div class="legend mono">
+    <span><span class="sw" style="background:var(--red)"></span>Red</span>
+    <span><span class="sw" style="background:var(--blue)"></span>Blue</span>
+    <span><span class="sw" style="background:var(--yellow)"></span>Yellow</span>
+    <span><span class="sw" style="background:var(--ink)"></span>Ink</span>
+  </div>
+</header>
+
+<div class="matrix">
+  <div class="grid">
+    <!-- header row -->
+    <div class="head cell"><span class="mono" style="color:var(--muted)">Concept</span></div>
+    <div class="head cell"><span class="stylehead"><span class="mono">A · Filled</span><small>solid Bauhaus shapes</small></span></div>
+    <div class="head cell"><span class="stylehead"><span class="mono">B · Diagram</span><small>nodes + edges</small></span></div>
+    <div class="head cell"><span class="stylehead"><span class="mono">C · Dot-matrix</span><small>dot grids</small></span></div>
+    <div class="head cell"><span class="stylehead"><span class="mono">D · Line</span><small>outline glyphs</small></span></div>
+
+    <!-- ============ client-server (BLUE) ============ -->
+    <div class="cell"><span class="concept-name">Client–Server</span><span class="concept-id">client-server</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="26" cy="50" r="13" fill="currentColor"/>
+      <rect x="60" y="35" width="30" height="30" fill="currentColor"/>
+      <rect x="40" y="46" width="20" height="8" fill="#1D4E89"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <line x1="30" y1="50" x2="70" y2="50" stroke="currentColor" stroke-width="3"/>
+      <circle cx="30" cy="50" r="7" fill="currentColor"/>
+      <rect x="62" y="42" width="16" height="16" fill="#1D4E89"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><circle cx="22" cy="42" r="3.4"/><circle cx="34" cy="42" r="3.4"/><circle cx="22" cy="58" r="3.4"/><circle cx="34" cy="58" r="3.4"/></g>
+      <g fill="#1D4E89"><circle cx="46" cy="50" r="3"/><circle cx="54" cy="50" r="3"/></g>
+      <g fill="currentColor"><circle cx="66" cy="38" r="3.4"/><circle cx="78" cy="38" r="3.4"/><circle cx="66" cy="50" r="3.4"/><circle cx="78" cy="50" r="3.4"/><circle cx="66" cy="62" r="3.4"/><circle cx="78" cy="62" r="3.4"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <rect x="16" y="38" width="22" height="24" fill="none" stroke="currentColor" stroke-width="3"/>
+      <rect x="62" y="38" width="22" height="24" fill="none" stroke="currentColor" stroke-width="3"/>
+      <line x1="38" y1="50" x2="60" y2="50" stroke="#1D4E89" stroke-width="3"/>
+      <path d="M55 45 L61 50 L55 55" fill="none" stroke="#1D4E89" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ database (YELLOW) ============ -->
+    <div class="cell"><span class="concept-name">Database</span><span class="concept-id">database</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <path d="M26 32 V68 a24 8 0 0 0 48 0 V32 Z" fill="currentColor"/>
+      <ellipse cx="50" cy="32" rx="24" ry="8" fill="#F4C430"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <path d="M30 36 V64 a20 7 0 0 0 40 0 V36" fill="none" stroke="currentColor" stroke-width="3"/>
+      <ellipse cx="50" cy="36" rx="20" ry="7" fill="none" stroke="currentColor" stroke-width="3"/>
+      <circle cx="50" cy="52" r="4" fill="#F4C430"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="#F4C430"><circle cx="38" cy="32" r="3.2"/><circle cx="50" cy="32" r="3.2"/><circle cx="62" cy="32" r="3.2"/></g>
+      <g fill="currentColor"><circle cx="38" cy="46" r="3.2"/><circle cx="50" cy="46" r="3.2"/><circle cx="62" cy="46" r="3.2"/>
+      <circle cx="38" cy="58" r="3.2"/><circle cx="50" cy="58" r="3.2"/><circle cx="62" cy="58" r="3.2"/>
+      <circle cx="42" cy="69" r="3.2"/><circle cx="50" cy="70" r="3.2"/><circle cx="58" cy="69" r="3.2"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <ellipse cx="50" cy="34" rx="22" ry="7" fill="none" stroke="currentColor" stroke-width="3"/>
+      <path d="M28 34 V66 a22 7 0 0 0 44 0 V34" fill="none" stroke="currentColor" stroke-width="3"/>
+      <path d="M28 50 a22 7 0 0 0 44 0" fill="none" stroke="#F4C430" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ cache (RED) ============ -->
+    <div class="cell"><span class="concept-name">Cache</span><span class="concept-id">cache</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <rect x="36" y="26" width="36" height="36" fill="currentColor"/>
+      <rect x="26" y="44" width="28" height="28" fill="#D62828"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <rect x="48" y="28" width="26" height="26" fill="none" stroke="currentColor" stroke-width="3"/>
+      <line x1="40" y1="58" x2="55" y2="44" stroke="currentColor" stroke-width="2.5"/>
+      <rect x="26" y="48" width="22" height="22" fill="#D62828"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><circle cx="46" cy="28" r="3.2"/><circle cx="58" cy="28" r="3.2"/><circle cx="70" cy="28" r="3.2"/>
+      <circle cx="46" cy="40" r="3.2"/><circle cx="58" cy="40" r="3.2"/><circle cx="70" cy="40" r="3.2"/></g>
+      <g fill="#D62828"><circle cx="30" cy="54" r="3.6"/><circle cx="44" cy="54" r="3.6"/><circle cx="30" cy="68" r="3.6"/><circle cx="44" cy="68" r="3.6"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <rect x="38" y="26" width="34" height="34" fill="none" stroke="currentColor" stroke-width="3"/>
+      <rect x="28" y="42" width="28" height="28" fill="none" stroke="#D62828" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ load-balancer (BLUE) ============ -->
+    <div class="cell"><span class="concept-name">Load Balancer</span><span class="concept-id">load-balancer</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <path d="M22 50 L70 28 M22 50 L70 50 M22 50 L70 72" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <rect x="14" y="42" width="16" height="16" fill="#1D4E89"/>
+      <g fill="currentColor"><rect x="70" y="22" width="16" height="12"/><rect x="70" y="44" width="16" height="12"/><rect x="70" y="66" width="16" height="12"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <path d="M30 50 L68 28 M30 50 L68 50 M30 50 L68 72" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <circle cx="30" cy="50" r="8" fill="#1D4E89"/>
+      <g fill="currentColor"><circle cx="70" cy="28" r="5"/><circle cx="70" cy="50" r="5"/><circle cx="70" cy="72" r="5"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="#1D4E89"><circle cx="24" cy="50" r="3.6"/><circle cx="34" cy="50" r="3.6"/></g>
+      <g fill="currentColor">
+        <circle cx="66" cy="28" r="3.4"/><circle cx="78" cy="28" r="3.4"/>
+        <circle cx="66" cy="50" r="3.4"/><circle cx="78" cy="50" r="3.4"/>
+        <circle cx="66" cy="72" r="3.4"/><circle cx="78" cy="72" r="3.4"/>
+      </g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <path d="M28 50 L60 30 M28 50 L60 50 M28 50 L60 70" stroke="#1D4E89" stroke-width="3" fill="none"/>
+      <circle cx="26" cy="50" r="4" fill="currentColor"/>
+      <g fill="none" stroke="currentColor" stroke-width="3"><rect x="60" y="24" width="14" height="12"/><rect x="60" y="44" width="14" height="12"/><rect x="60" y="64" width="14" height="12"/></g>
+    </svg></div></div>
+
+    <!-- ============ cdn (YELLOW) ============ -->
+    <div class="cell"><span class="concept-name">CDN</span><span class="concept-id">cdn</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g stroke="currentColor" stroke-width="2.5"><line x1="50" y1="50" x2="50" y2="24"/><line x1="50" y1="50" x2="73" y2="37"/><line x1="50" y1="50" x2="73" y2="63"/><line x1="50" y1="50" x2="50" y2="76"/><line x1="50" y1="50" x2="27" y2="63"/><line x1="50" y1="50" x2="27" y2="37"/></g>
+      <circle cx="50" cy="50" r="9" fill="currentColor"/>
+      <g fill="#F4C430"><rect x="44" y="18" width="12" height="12"/><rect x="69" y="31" width="11" height="11"/><rect x="69" y="58" width="11" height="11"/><rect x="44" y="70" width="12" height="12"/><rect x="20" y="58" width="11" height="11"/><rect x="20" y="31" width="11" height="11"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g stroke="currentColor" stroke-width="2.5"><line x1="50" y1="50" x2="50" y2="26"/><line x1="50" y1="50" x2="72" y2="40"/><line x1="50" y1="50" x2="72" y2="62"/><line x1="50" y1="50" x2="28" y2="62"/><line x1="50" y1="50" x2="28" y2="40"/></g>
+      <circle cx="50" cy="50" r="7" fill="#F4C430"/>
+      <g fill="currentColor"><circle cx="50" cy="24" r="4.5"/><circle cx="74" cy="38" r="4.5"/><circle cx="74" cy="64" r="4.5"/><circle cx="26" cy="64" r="4.5"/><circle cx="26" cy="38" r="4.5"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="4" fill="currentColor"/>
+      <g fill="currentColor"><circle cx="50" cy="32" r="3"/><circle cx="68" cy="40" r="3"/><circle cx="68" cy="60" r="3"/><circle cx="50" cy="68" r="3"/><circle cx="32" cy="60" r="3"/><circle cx="32" cy="40" r="3"/></g>
+      <g fill="#F4C430"><circle cx="50" cy="18" r="3"/><circle cx="78" cy="34" r="3"/><circle cx="78" cy="66" r="3"/><circle cx="50" cy="82" r="3"/><circle cx="22" cy="66" r="3"/><circle cx="22" cy="34" r="3"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g stroke="currentColor" stroke-width="2.5"><line x1="50" y1="50" x2="50" y2="28"/><line x1="50" y1="50" x2="70" y2="62"/><line x1="50" y1="50" x2="30" y2="62"/></g>
+      <circle cx="50" cy="50" r="8" fill="none" stroke="#F4C430" stroke-width="3"/>
+      <g fill="none" stroke="currentColor" stroke-width="3"><circle cx="50" cy="24" r="5"/><circle cx="72" cy="66" r="5"/><circle cx="28" cy="66" r="5"/></g>
+    </svg></div></div>
+
+    <!-- ============ sharding (RED) ============ -->
+    <div class="cell"><span class="concept-name">Sharding</span><span class="concept-id">sharding</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="27" fill="currentColor"/>
+      <path d="M50 50 L50 23 A27 27 0 0 1 73 63 Z" fill="#D62828"/>
+      <g stroke="#F4F1EA" stroke-width="3"><line x1="50" y1="50" x2="50" y2="23"/><line x1="50" y1="50" x2="73" y2="63"/><line x1="50" y1="50" x2="27" y2="63"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="24" fill="none" stroke="currentColor" stroke-width="3"/>
+      <g stroke="currentColor" stroke-width="3"><line x1="50" y1="26" x2="50" y2="74"/><line x1="29" y1="62" x2="71" y2="62"/></g>
+      <circle cx="62" cy="38" r="5" fill="#D62828"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><circle cx="50" cy="26" r="3"/><circle cx="38" cy="30" r="3"/><circle cx="30" cy="40" r="3"/>
+        <circle cx="62" cy="30" r="3"/><circle cx="70" cy="40" r="3"/>
+        <circle cx="28" cy="60" r="3"/><circle cx="36" cy="70" r="3"/><circle cx="48" cy="74" r="3"/></g>
+      <g fill="#D62828"><circle cx="64" cy="62" r="3"/><circle cx="70" cy="58" r="3"/><circle cx="60" cy="72" r="3"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" stroke-width="3"/>
+      <g stroke="currentColor" stroke-width="3"><line x1="50" y1="50" x2="50" y2="25"/><line x1="50" y1="50" x2="72" y2="62"/><line x1="50" y1="50" x2="28" y2="62"/></g>
+      <path d="M50 25 A25 25 0 0 1 72 62" fill="none" stroke="#D62828" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ read-replica (BLUE) ============ -->
+    <div class="cell"><span class="concept-name">Read Replica</span><span class="concept-id">read-replica</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <rect x="22" y="28" width="30" height="30" fill="currentColor"/>
+      <rect x="48" y="44" width="30" height="30" fill="#1D4E89"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="32" cy="40" r="9" fill="currentColor"/>
+      <circle cx="66" cy="62" r="9" fill="#1D4E89"/>
+      <path d="M40 46 L58 56" stroke="currentColor" stroke-width="2.5"/>
+      <path d="M53 52 L58 56 L53 59" fill="none" stroke="currentColor" stroke-width="2.5"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><circle cx="26" cy="34" r="3.4"/><circle cx="38" cy="34" r="3.4"/><circle cx="26" cy="46" r="3.4"/><circle cx="38" cy="46" r="3.4"/></g>
+      <g fill="#1D4E89"><circle cx="58" cy="54" r="3.4"/><circle cx="70" cy="54" r="3.4"/><circle cx="58" cy="66" r="3.4"/><circle cx="70" cy="66" r="3.4"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <rect x="22" y="28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3"/>
+      <rect x="48" y="44" width="28" height="28" fill="none" stroke="#1D4E89" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ message-queue (YELLOW) ============ -->
+    <div class="cell"><span class="concept-name">Message Queue</span><span class="concept-id">message-queue</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><rect x="16" y="40" width="16" height="20"/><rect x="36" y="40" width="16" height="20"/><rect x="56" y="40" width="16" height="20"/></g>
+      <path d="M76 50 L88 50 M83 45 L88 50 L83 55" fill="none" stroke="#F4C430" stroke-width="3.5"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <line x1="24" y1="50" x2="70" y2="50" stroke="currentColor" stroke-width="2.5"/>
+      <g fill="currentColor"><circle cx="24" cy="50" r="6"/><circle cx="42" cy="50" r="6"/><circle cx="60" cy="50" r="6"/></g>
+      <path d="M72 50 L84 50 M79 45 L84 50 L79 55" fill="none" stroke="#F4C430" stroke-width="3"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="#F4C430"><circle cx="22" cy="44" r="3.4"/><circle cx="22" cy="56" r="3.4"/></g>
+      <g fill="currentColor"><circle cx="38" cy="44" r="3.4"/><circle cx="38" cy="56" r="3.4"/>
+        <circle cx="54" cy="44" r="3.4"/><circle cx="54" cy="56" r="3.4"/>
+        <circle cx="70" cy="44" r="3.4"/><circle cx="70" cy="56" r="3.4"/></g>
+      <path d="M80 50 L88 50 M85 47 L88 50 L85 53" fill="none" stroke="currentColor" stroke-width="2.5"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="none" stroke="currentColor" stroke-width="3"><rect x="16" y="40" width="16" height="20"/><rect x="36" y="40" width="16" height="20"/><rect x="56" y="40" width="16" height="20"/></g>
+      <path d="M76 50 L88 50 M83 45 L88 50 L83 55" fill="none" stroke="#F4C430" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ websockets (RED) ============ -->
+    <div class="cell"><span class="concept-name">WebSockets</span><span class="concept-id">websockets</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="22" cy="50" r="10" fill="currentColor"/>
+      <circle cx="78" cy="50" r="10" fill="currentColor"/>
+      <rect x="34" y="46" width="32" height="8" fill="#D62828"/>
+      <path d="M40 38 L32 50 L40 62 M60 38 L68 50 L60 62" fill="none" stroke="#D62828" stroke-width="3.5"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="24" cy="50" r="8" fill="currentColor"/>
+      <circle cx="76" cy="50" r="8" fill="currentColor"/>
+      <path d="M34 50 L66 50" stroke="#D62828" stroke-width="3"/>
+      <path d="M41 44 L34 50 L41 56 M59 44 L66 50 L59 56" fill="none" stroke="#D62828" stroke-width="3"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><circle cx="20" cy="44" r="3.4"/><circle cx="20" cy="56" r="3.4"/>
+        <circle cx="80" cy="44" r="3.4"/><circle cx="80" cy="56" r="3.4"/></g>
+      <g fill="#D62828"><circle cx="36" cy="50" r="3"/><circle cx="50" cy="50" r="3"/><circle cx="64" cy="50" r="3"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <circle cx="22" cy="50" r="9" fill="none" stroke="currentColor" stroke-width="3"/>
+      <circle cx="78" cy="50" r="9" fill="none" stroke="currentColor" stroke-width="3"/>
+      <path d="M33 50 L67 50" stroke="#D62828" stroke-width="3"/>
+      <path d="M40 44 L33 50 L40 56 M60 44 L67 50 L60 56" fill="none" stroke="#D62828" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ rate-limiting (BLUE) ============ -->
+    <div class="cell"><span class="concept-name">Rate Limiting</span><span class="concept-id">rate-limiting</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <polygon points="24,26 76,26 57,52 57,64 43,64 43,52" fill="currentColor"/>
+      <g fill="currentColor"><circle cx="34" cy="20" r="3.5"/><circle cx="50" cy="20" r="3.5"/><circle cx="66" cy="20" r="3.5"/></g>
+      <circle cx="50" cy="78" r="5" fill="#1D4E89"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <line x1="24" y1="50" x2="76" y2="50" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="24" cy="50" r="6" fill="currentColor"/>
+      <circle cx="76" cy="50" r="6" fill="currentColor"/>
+      <rect x="47" y="34" width="6" height="32" fill="#1D4E89"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><circle cx="28" cy="26" r="3.2"/><circle cx="40" cy="26" r="3.2"/><circle cx="52" cy="26" r="3.2"/><circle cx="64" cy="26" r="3.2"/><circle cx="34" cy="40" r="3.2"/><circle cx="50" cy="40" r="3.2"/><circle cx="66" cy="40" r="3.2"/></g>
+      <rect x="30" y="52" width="40" height="4" fill="currentColor"/>
+      <g fill="#1D4E89"><circle cx="44" cy="70" r="3.4"/><circle cx="56" cy="70" r="3.4"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <polygon points="24,28 76,28 57,52 57,64 43,64 43,52" fill="none" stroke="currentColor" stroke-width="3"/>
+      <circle cx="50" cy="78" r="5" fill="none" stroke="#1D4E89" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ microservices (YELLOW) ============ -->
+    <div class="cell"><span class="concept-name">Microservices</span><span class="concept-id">microservices</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <rect x="26" y="26" width="20" height="20" fill="currentColor"/>
+      <rect x="54" y="26" width="20" height="20" fill="currentColor"/>
+      <rect x="26" y="54" width="20" height="20" fill="currentColor"/>
+      <rect x="54" y="54" width="20" height="20" fill="#F4C430"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g stroke="currentColor" stroke-width="2.5"><line x1="32" y1="32" x2="68" y2="32"/><line x1="32" y1="32" x2="32" y2="68"/><line x1="68" y1="32" x2="68" y2="68"/><line x1="32" y1="68" x2="68" y2="68"/><line x1="32" y1="32" x2="68" y2="68"/></g>
+      <g fill="currentColor"><circle cx="32" cy="32" r="6"/><circle cx="68" cy="32" r="6"/><circle cx="32" cy="68" r="6"/></g>
+      <circle cx="68" cy="68" r="6" fill="#F4C430"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><circle cx="30" cy="30" r="3.4"/><circle cx="40" cy="30" r="3.4"/><circle cx="30" cy="40" r="3.4"/><circle cx="40" cy="40" r="3.4"/>
+        <circle cx="60" cy="30" r="3.4"/><circle cx="70" cy="30" r="3.4"/><circle cx="60" cy="40" r="3.4"/><circle cx="70" cy="40" r="3.4"/>
+        <circle cx="30" cy="60" r="3.4"/><circle cx="40" cy="60" r="3.4"/><circle cx="30" cy="70" r="3.4"/><circle cx="40" cy="70" r="3.4"/></g>
+      <g fill="#F4C430"><circle cx="60" cy="60" r="3.4"/><circle cx="70" cy="60" r="3.4"/><circle cx="60" cy="70" r="3.4"/><circle cx="70" cy="70" r="3.4"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="none" stroke="currentColor" stroke-width="3"><rect x="26" y="26" width="20" height="20"/><rect x="54" y="26" width="20" height="20"/><rect x="26" y="54" width="20" height="20"/></g>
+      <rect x="54" y="54" width="20" height="20" fill="none" stroke="#F4C430" stroke-width="3"/>
+    </svg></div></div>
+
+    <!-- ============ api-gateway (RED) ============ -->
+    <div class="cell"><span class="concept-name">API Gateway</span><span class="concept-id">api-gateway</span></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><rect x="14" y="28" width="16" height="9"/><rect x="14" y="46" width="16" height="9"/><rect x="14" y="64" width="16" height="9"/></g>
+      <path d="M30 32 L48 50 M30 50 L48 50 M30 68 L48 50" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <rect x="48" y="28" width="9" height="44" fill="#D62828"/>
+      <path d="M57 50 L72 50 M67 45 L72 50 L67 55" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <path d="M26 30 L50 50 M26 50 L50 50 M26 70 L50 50 M50 50 L74 50" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <g fill="currentColor"><circle cx="24" cy="30" r="5"/><circle cx="24" cy="50" r="5"/><circle cx="24" cy="70" r="5"/><circle cx="76" cy="50" r="5"/></g>
+      <circle cx="50" cy="50" r="8" fill="#D62828"/>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <g fill="currentColor"><circle cx="20" cy="30" r="3.2"/><circle cx="30" cy="30" r="3.2"/>
+        <circle cx="20" cy="50" r="3.2"/><circle cx="30" cy="50" r="3.2"/>
+        <circle cx="20" cy="70" r="3.2"/><circle cx="30" cy="70" r="3.2"/></g>
+      <g fill="#D62828"><circle cx="50" cy="40" r="3.4"/><circle cx="50" cy="50" r="3.4"/><circle cx="50" cy="60" r="3.4"/></g>
+      <g fill="currentColor"><circle cx="72" cy="50" r="3.2"/><circle cx="82" cy="50" r="3.2"/></g>
+    </svg></div></div>
+    <div class="cell"><div class="icon"><svg viewBox="0 0 100 100">
+      <path d="M22 30 L48 50 M22 50 L48 50 M22 70 L48 50 M52 50 L78 50" stroke="currentColor" stroke-width="3" fill="none"/>
+      <line x1="50" y1="28" x2="50" y2="72" stroke="#D62828" stroke-width="3"/>
+    </svg></div></div>
+
+  </div>
+</div>
+
+<div class="footnote">
+  <strong>Notes.</strong> Every icon is one inline SVG using <code>currentColor</code> for the ink parts and a single
+  flat primary accent — no gradients, shadows, or animation. In the live grid the ink would shift to the category
+  primary on hover (a 500ms color transition), preserving the “reveal” feel of the current animated visuals at zero
+  per-frame cost. Scale check (style D shown at 28px / 48px / 96px):
+  <div class="scale-row">
+    <div class="icon" style="width:28px;height:28px"><svg viewBox="0 0 100 100"><rect x="36" y="26" width="34" height="34" fill="none" stroke="currentColor" stroke-width="3"/><rect x="28" y="42" width="28" height="28" fill="none" stroke="#D62828" stroke-width="3"/></svg></div>
+    <div class="icon" style="width:48px;height:48px"><svg viewBox="0 0 100 100"><rect x="36" y="26" width="34" height="34" fill="none" stroke="currentColor" stroke-width="3"/><rect x="28" y="42" width="28" height="28" fill="none" stroke="#D62828" stroke-width="3"/></svg></div>
+    <div class="icon" style="width:96px;height:96px"><svg viewBox="0 0 100 100"><rect x="36" y="26" width="34" height="34" fill="none" stroke="currentColor" stroke-width="3"/><rect x="28" y="42" width="28" height="28" fill="none" stroke="#D62828" stroke-width="3"/></svg></div>
+  </div>
+</div>
+</body>
+</html>
