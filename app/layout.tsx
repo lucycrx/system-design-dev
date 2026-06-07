@@ -1,19 +1,31 @@
 import type { Metadata } from "next";
-import { DM_Sans, DM_Mono } from "next/font/google";
+import { Space_Grotesk, Poppins, Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { StickyTabsWrapper } from "@/components/ui/StickyTabsWrapper";
 import { ScrollProgressBar } from "@/components/ui/ScrollProgressBar";
+import { DifferenceCursor } from "@/components/ui/DifferenceCursor";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const dmMono = DM_Mono({
-  variable: "--font-dm-mono",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const spaceMono = Space_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -28,11 +40,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${dmMono.variable}`}>
+    <html
+      lang="en"
+      className={`${spaceGrotesk.variable} ${poppins.variable} ${inter.variable} ${spaceMono.variable}`}
+    >
       <body
-        className="min-h-screen bg-bg text-text font-sans antialiased"
+        className="min-h-screen bg-bg text-text font-sans antialiased pt-16"
         style={{ animation: "bodyReveal 0.4s ease forwards" }}
       >
+        <DifferenceCursor />
         <ScrollProgressBar />
         <StickyTabsWrapper />
         {children}

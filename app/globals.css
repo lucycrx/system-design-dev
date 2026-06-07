@@ -1,46 +1,66 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Colors — cornflower blue + maroon palette */
-  --color-bg: #FFFFFF;
-  --color-surface: #F7F9FC;
-  --color-surface-hover: #E3E9F1;
-  --color-accent: #4A7FD4;
-  --color-accent-dark: #335FA8;
-  --color-accent-dim: #4A7FD414;
-  --color-accent-mid: #4A7FD430;
-  --color-accent-glow: rgba(74, 127, 212, 0.25);
+  /* ---- Bauhaus Editorial palette ---- */
+  /* Neutrals: warm paper + ink carry ~85% of the surface */
+  --color-bg: #F4F1EA;          /* paper */
+  --color-surface: #ECE8DD;     /* slightly deeper paper */
+  --color-surface-hover: #E3DDCE;
+  --color-text: #1A1A1A;        /* ink */
+  --color-text-muted: #6B6B6B;  /* secondary / metadata */
+  --color-text-dim: #6B6B6B;
+  --color-border: rgba(26, 26, 26, 0.10);
 
-  /* Terminal / code block colors */
-  --color-terminal-bg: #0F1117;
-  --color-terminal-border: #2A2D35;
-  --color-terminal-text: #E8ECF0;
-  --color-terminal-muted: #555555;
-  --color-text: #141820;
-  --color-text-muted: #4E5869;
-  --color-text-dim: #6B7580;
-  --color-border: #CDD5DE;
-  --color-blue: #6B2233;
-  --color-blue-dim: #6B223314;
-  --color-pink: #8B3A3A;
-  --color-pink-dim: #8B3A3A1A;
-  --color-green: #2D7A5A;
-  --color-green-dim: #2D7A5A14;
-  --color-orange: #A88A30;
-  --color-orange-dim: #A88A301A;
-  --color-purple: #505A6E;
-  --color-purple-dim: #505A6E1A;
-  --color-sage: #607A72;
-  --color-sage-dim: #607A721A;
-  --color-queue: #5E5E85;
-  --color-queue-dim: #5E5E851A;
+  /* The three Bauhaus primaries — flat, functional, never decorative */
+  --color-red: #D62828;
+  --color-red-dim: rgba(214, 40, 40, 0.10);
+  --color-blue-primary: #1D4E89;
+  --color-blue-primary-dim: rgba(29, 78, 137, 0.10);
+  --color-yellow: #F4C430;
+  --color-yellow-dim: rgba(244, 196, 48, 0.14);
+
+  /* Footer ink block */
+  --color-footer-bg: #1A1A1A;
+
+  /* ---- Legacy semantic tokens, re-mapped onto the new palette ----
+     Names are unchanged so the ~40 existing components stay in-palette
+     without edits; values now resolve to paper/ink/3-primaries only. */
+  --color-accent: #1D4E89;                       /* brand primary -> blue */
+  --color-accent-dark: #143A66;
+  --color-accent-dim: rgba(29, 78, 137, 0.10);
+  --color-accent-mid: rgba(29, 78, 137, 0.22);
+  --color-accent-glow: rgba(29, 78, 137, 0.22);
+
+  --color-blue: #D62828;                          /* was maroon -> red */
+  --color-blue-dim: rgba(214, 40, 40, 0.10);
+  --color-pink: #D62828;                          /* error/incorrect -> red */
+  --color-pink-dim: rgba(214, 40, 40, 0.10);
+  --color-green: #1D4E89;                          /* positive/correct -> blue */
+  --color-green-dim: rgba(29, 78, 137, 0.10);
+  --color-orange: #F4C430;                          /* warning/why -> yellow */
+  --color-orange-dim: rgba(244, 196, 48, 0.14);
+  --color-purple: #6B6B6B;                          /* -> ink secondary */
+  --color-purple-dim: rgba(26, 26, 26, 0.06);
+  --color-sage: #6B6B6B;
+  --color-sage-dim: rgba(26, 26, 26, 0.06);
+  --color-queue: #6B6B6B;
+  --color-queue-dim: rgba(26, 26, 26, 0.06);
+
+  /* Terminal / code block colors (kept dark for code legibility) */
+  --color-terminal-bg: #1A1A1A;
+  --color-terminal-border: #2E2E2E;
+  --color-terminal-text: #F4F1EA;
+  --color-terminal-muted: #6B6B6B;
 
   /* Easing */
   --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Fonts */
-  --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
-  --font-mono: var(--font-dm-mono), "DM Mono", monospace;
+  /* ---- Fonts: Space Grotesk (display) / Poppins (subhead) / Inter (body) ---- */
+  --font-display: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-subhead: var(--font-poppins), "Poppins", sans-serif;
+  --font-sans: var(--font-inter), "Inter", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", "Menlo", monospace;
 }
 
 /* Smooth scrolling */
@@ -301,24 +321,83 @@ html {
   color: transparent;
 }
 
-/* Editorial heading style — used on major page titles */
-.heading-editorial {
+/* ---- Bauhaus type scale ---- */
+/* Display / hero — Space Grotesk, heavy, tight */
+.heading-hero,
+.heading-display {
+  font-family: var(--font-display);
   font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: -0.025em;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
 }
 
-/* Hero heading — dramatic scale */
-.heading-hero {
-  font-weight: 800;
+/* Section / page titles — Space Grotesk */
+.heading-editorial {
+  font-family: var(--font-display);
+  font-weight: 700;
   line-height: 0.95;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.04em;
 }
 
-/* Mono label style — used for section labels, metadata, badges */
+/* Short subheadings / card titles — Poppins */
+.subhead {
+  font-family: var(--font-subhead);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Mono label — section labels, metadata, badges */
 .label-mono {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/* ---- Bauhaus motion utilities ---- */
+/* Staggered reveal: wrap text in .reveal-up > span, set --i per span */
+.reveal-up {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+.reveal-up > span {
+  display: inline-block;
+  transform: translateY(110%);
+  animation: reveal-up-in 1s var(--ease-premium) forwards;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+@keyframes reveal-up-in {
+  to { transform: translateY(0); }
+}
+
+/* Marquee pauses when its container is hovered */
+.marquee-track {
+  animation: marquee 30s linear infinite;
+}
+.marquee-pause:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Grayscale -> color media reveal (700ms) for image/visual hovers */
+.media-hover {
+  filter: grayscale(100%);
+  transform: scale(1);
+  transition: filter 700ms var(--ease-premium), transform 700ms var(--ease-premium);
+}
+.media-hover:hover {
+  filter: grayscale(0%);
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up > span { animation: none; transform: none; }
+  .marquee-track { animation: none; }
+  .media-hover { transition: none; }
+}
+
+/* Fine-pointer only: hide native cursor when the difference cursor is active */
+html.cursor-none,
+html.cursor-none * {
+  cursor: none !important;
 }

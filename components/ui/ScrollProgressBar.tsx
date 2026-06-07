@@ -38,11 +38,10 @@ export function ScrollProgressBar() {
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label="Page scroll progress"
-      className="fixed top-0 left-0 h-[2px] z-50"
+      className="fixed top-0 left-0 h-[3px] z-[60]"
       style={{
         width: `${width}%`,
-        background:
-          "linear-gradient(to right, var(--color-accent), var(--color-green))",
+        background: "var(--color-red)",
         willChange: "width",
       }}
     />
