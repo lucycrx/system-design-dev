@@ -9,6 +9,7 @@ import { Shape, ShapeDrift } from "@/components/ui/Shape";
 const RED = "#D62828";
 const BLUE = "#1D4E89";
 const YELLOW = "#F4C430";
+const PAPER = "#F4F1EA";
 
 // A visually-varied slice spanning all six categories, shown on the homepage.
 const FEATURED_IDS = [
@@ -22,7 +23,9 @@ const FEATURED_IDS = [
 
 // Headline split into words; one word carries a primary accent. Each letter
 // slides up with a staggered delay via the global .reveal-up utility.
-function Headline() {
+// `tone="paper"` renders an all-paper copy for the knockout overlay (see hero).
+function Headline({ tone = "default" }: { tone?: "default" | "paper" }) {
+  const paper = tone === "paper";
   const words: { text: string; color?: string }[] = [
     { text: "Learn" },
     { text: "how" },
@@ -36,12 +39,44 @@ function Headline() {
         <span key={wi} className="inline-block whitespace-nowrap mr-[0.22em]">
           {[...w.text].map((ch, ci) => (
             <span key={ci} className="reveal-up">
-              <span style={{ "--i": i++, color: w.color } as CSSProperties}>{ch}</span>
+              <span style={{ "--i": i++, color: paper ? PAPER : w.color } as CSSProperties}>{ch}</span>
             </span>
           ))}
         </span>
       ))}
     </h1>
+  );
+}
+
+// Hero copy block — rendered twice: the base (ink + red accent) and a paper
+// `overlay` copy that the knockout mask reveals only over the dark shapes.
+function HeroContent({ overlay = false }: { overlay?: boolean }) {
+  const light = overlay ? "text-[#F4F1EA]" : "text-text-muted";
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-8">
+      <p className={`label-mono mb-5 ${light}`}>System Design School</p>
+      <Headline tone={overlay ? "paper" : "default"} />
+      <p className={`subhead text-lg sm:text-xl leading-snug max-w-xl mt-6 ${light}`}>
+        The ideas behind every system that handles millions of users —
+        caching, load balancing, sharding, queues — in plain English.
+      </p>
+      <div className={`mt-7 flex flex-wrap gap-3 ${overlay ? "invisible" : ""}`}>
+        <Link
+          href="/concepts"
+          data-cursor
+          className="bg-text text-bg px-7 py-3.5 label-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5"
+        >
+          Browse Concepts
+        </Link>
+        <Link
+          href="/stories"
+          data-cursor
+          className="border border-text/20 hover:border-text text-text px-7 py-3.5 label-mono transition-colors duration-500"
+        >
+          Build Stories
+        </Link>
+      </div>
+    </div>
   );
 }
 
@@ -67,7 +102,9 @@ export default function HomePage() {
       <div className="flex flex-col min-h-[calc(100svh-4rem)]">
       {/* Hero — asymmetric, flat drifting shapes behind the type */}
       <section className="relative overflow-hidden flex-1 flex items-center">
-        {/* Oversized background shapes (parallax drift, bleeding off edges) */}
+        {/* Oversized background shapes (parallax drift, bleeding off edges).
+            The blue circle + red square are the "dark" shapes the knockout
+            mask below mirrors. */}
         <ShapeDrift speed={0.18} className="pointer-events-none absolute inset-0">
           <Shape
             type="circle"
@@ -75,13 +112,10 @@ export default function HomePage() {
             size={560}
             style={{ position: "absolute", top: "-12%", right: "-120px", opacity: 0.9 }}
           />
-          {/* Hidden on mobile: at narrow widths it overlaps the red "scale."
-              word in the headline (red-on-red), hiding part of the title. */}
           <Shape
             type="square"
             color={RED}
             size={96}
-            className="hidden sm:block"
             style={{ position: "absolute", top: "30%", left: "5%" }}
           />
         </ShapeDrift>
@@ -94,28 +128,22 @@ export default function HomePage() {
           />
         </ShapeDrift>
 
-        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-8">
-          <p className="label-mono text-text-muted mb-5">System Design School</p>
-          <Headline />
-          <p className="subhead text-lg sm:text-xl text-text-muted leading-snug max-w-xl mt-6">
-            The ideas behind every system that handles millions of users —
-            caching, load balancing, sharding, queues — in plain English.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              href="/concepts"
-              data-cursor
-              className="bg-text text-bg px-7 py-3.5 label-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5"
-            >
-              Browse Concepts
-            </Link>
-            <Link
-              href="/stories"
-              data-cursor
-              className="border border-text/20 hover:border-text text-text px-7 py-3.5 label-mono transition-colors duration-500"
-            >
-              Build Stories
-            </Link>
+        {/* Base copy: ink text + red accent */}
+        <div className="relative z-10 w-full">
+          <HeroContent />
+        </div>
+
+        {/* Knockout overlay: a paper copy of the same copy, revealed by the
+            mask ONLY where the text crosses the dark blue circle / red square,
+            so those overlaps flip to high-contrast cream instead of vanishing.
+            The mask geometry mirrors the two shapes in the section's coordinate
+            space; it aligns at the top of the page where the hero is read. */}
+        <div
+          aria-hidden
+          className="cs-knockout pointer-events-none absolute inset-0 z-20 flex items-center"
+        >
+          <div className="w-full">
+            <HeroContent overlay />
           </div>
         </div>
       </section>
