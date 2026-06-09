@@ -75,10 +75,13 @@ export default function HomePage() {
             size={560}
             style={{ position: "absolute", top: "-12%", right: "-120px", opacity: 0.9 }}
           />
+          {/* Hidden on mobile: at narrow widths it overlaps the red "scale."
+              word in the headline (red-on-red), hiding part of the title. */}
           <Shape
             type="square"
             color={RED}
             size={96}
+            className="hidden sm:block"
             style={{ position: "absolute", top: "30%", left: "5%" }}
           />
         </ShapeDrift>
