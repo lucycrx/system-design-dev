@@ -6,10 +6,20 @@ import type { GlossaryTerm } from "@/types/story";
 import { CATEGORY_BY_ID } from "@/lib/conceptMeta";
 import { Shape } from "@/components/ui/Shape";
 import { ConceptIcon } from "./ConceptIcon";
+import { ConceptIconScatter } from "./ConceptIconScatter";
 
 const INK = "#1A1A1A";
 
-export function ConceptCard({ term, index }: { term: GlossaryTerm; index: number }) {
+export function ConceptCard({
+  term,
+  index,
+  animate = false,
+}: {
+  term: GlossaryTerm;
+  index: number;
+  /** Opt in to the scatter-in icon animation (landing page only). */
+  animate?: boolean;
+}) {
   const [visible, setVisible] = useState(false);
   const [hovered, setHovered] = useState(false);
   const ref = useRef<HTMLAnchorElement>(null);
@@ -54,11 +64,19 @@ export function ConceptCard({ term, index }: { term: GlossaryTerm; index: number
         style={{ borderColor: "rgba(26,26,26,0.10)" }}
       >
         <div className="h-full w-auto aspect-square">
-          <ConceptIcon
-            id={term.id}
-            color={hovered ? category.color : INK}
-            accent={category.color}
-          />
+          {animate ? (
+            <ConceptIconScatter
+              id={term.id}
+              color={hovered ? category.color : INK}
+              accent={category.color}
+            />
+          ) : (
+            <ConceptIcon
+              id={term.id}
+              color={hovered ? category.color : INK}
+              accent={category.color}
+            />
+          )}
         </div>
       </div>
 

@@ -26,7 +26,13 @@ function ring(cx: number, cy: number, R: number, r: number): string {
   );
 }
 
-function icon(id: string, a: string): ReactNode {
+/**
+ * The raw filled shapes for a concept, as a fragment. Exported so the animated
+ * scatter variant (ConceptIconScatter) can reuse the exact same geometry for
+ * both its clip silhouette and its solid layer — one source of truth.
+ * `a` is the accent color; ink mass uses `currentColor`.
+ */
+export function conceptIconShapes(id: string, a: string): ReactNode {
   const ink = "currentColor";
   switch (id) {
     // ---------- Foundations ----------
@@ -577,7 +583,7 @@ export function ConceptIcon({ id, color, accent, className }: Props) {
       preserveAspectRatio="xMidYMid meet"
       style={style}
     >
-      {icon(id, accent ?? "currentColor")}
+      {conceptIconShapes(id, accent ?? "currentColor")}
     </svg>
   );
 }

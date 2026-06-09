@@ -169,7 +169,7 @@ export default function HomePage() {
 
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((term, i) => (
-            <ConceptCard key={term.id} term={term} index={i} />
+            <ConceptCard key={term.id} term={term} index={i} animate />
           ))}
         </div>
       </section>

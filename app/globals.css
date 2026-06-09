@@ -315,6 +315,57 @@ html {
   }
 }
 
+/* ---- Concept icon scatter (landing-page reveal) ---- */
+/* Ink particles clipped to the icon silhouette scatter in and resolve into the
+   solid icon, which then rests. Gated by `.is-revealed` (set on scroll-in). */
+.concept-scatter .cs-solid {
+  opacity: 0;
+  transform: scale(0.94);
+  transform-origin: 50px 50px;
+}
+.concept-scatter .cs-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+}
+.concept-scatter.is-revealed .cs-solid {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.34s,
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.34s;
+}
+.concept-scatter.is-revealed .cs-dot {
+  animation: cs-fly 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay);
+}
+@keyframes cs-fly {
+  0% {
+    transform: translate(var(--ox), var(--oy)) scale(0.34);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.92;
+  }
+  70% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .concept-scatter .cs-solid {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .concept-scatter .cs-dot {
+    display: none;
+  }
+}
+
 /* Stroke text utility */
 .text-stroke-accent {
   -webkit-text-stroke: 1.5px var(--color-accent);
