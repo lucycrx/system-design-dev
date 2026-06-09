@@ -27,8 +27,8 @@ interface Props {
 // distance-based stagger delay for the ripple.
 const STEP = 7.6; // grid spacing — sparser = smoother on small icons
 const SPREAD = 30; // scatter travel distance
-const STAGGER = 7; // ms per unit of distance from centre
-const CAP = 440; // max stagger delay
+const STAGGER = 11; // ms per unit of distance from centre
+const CAP = 760; // max stagger delay — widens the ripple so it's easy to catch
 const R = 4.4; // dot radius
 
 const DOTS: { cx: number; cy: number; ox: number; oy: number; delay: number }[] =
