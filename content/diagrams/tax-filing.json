@@ -1,0 +1,209 @@
+{
+  "tax-filing-stage-1": {
+    "id": "tax-filing-stage-1",
+    "title": "The Starting Point",
+    "description": "One server runs the tax math, one database remembers the return",
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Filer Browser",
+        "position": { "x": 0, "y": 235 },
+        "explanation": "The taxpayer's browser, where they answer interview questions and enter the numbers from their W-2"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "Tax App",
+        "position": { "x": 420, "y": 235 },
+        "explanation": "A single server that runs the interview, calculates the return, and saves progress to the database"
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 840, "y": 235 },
+        "explanation": "Stores each in-progress and filed return so a user can leave and come back without losing their work"
+      }
+    ],
+    "edges": [
+      { "id": "e-client-server", "source": "client-1", "target": "server", "label": "enter return", "style": "solid", "animated": true },
+      { "id": "e-server-database", "source": "server", "target": "database", "label": "save progress", "style": "solid" },
+      { "id": "e-database-server", "source": "database", "target": "server", "label": "load return", "style": "dashed" }
+    ]
+  },
+  "tax-filing-stage-2": {
+    "id": "tax-filing-stage-2",
+    "title": "Engine and E-File",
+    "description": "Tax logic moves to a dedicated engine; filing happens through a queue",
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Filer Browser",
+        "position": { "x": 0, "y": 235 },
+        "explanation": "The taxpayer's browser, now handling multi-state returns, itemized deductions, and business income"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "App Server",
+        "position": { "x": 250, "y": 235 },
+        "explanation": "Handles logins, the interview, and saving progress, then hands the numbers to the calculation engine"
+      },
+      {
+        "id": "calc-engine",
+        "type": "server",
+        "label": "Calc Engine",
+        "position": { "x": 500, "y": 70 },
+        "explanation": "A dedicated engine where federal and each state's tax rules live as separate modules, so one state's change can't break another",
+        "isNew": true
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 500, "y": 400 },
+        "explanation": "Stores in-progress returns, filed returns, and the submission status of each filing"
+      },
+      {
+        "id": "queue",
+        "type": "queue",
+        "label": "Filing Queue",
+        "position": { "x": 740, "y": 235 },
+        "explanation": "Holds 'submit this return' jobs so the user gets an instant confirmation instead of waiting on the IRS",
+        "isNew": true
+      },
+      {
+        "id": "efile-worker",
+        "type": "background-job",
+        "label": "E-File Worker",
+        "position": { "x": 970, "y": 120 },
+        "explanation": "Pulls jobs off the queue and submits each return to the IRS and state agencies, retrying when they're slow or down",
+        "isNew": true
+      },
+      {
+        "id": "irs",
+        "type": "external-service",
+        "label": "IRS / States",
+        "position": { "x": 970, "y": 360 },
+        "explanation": "Government e-file systems that accept or reject each return, often slowly and sometimes offline",
+        "isNew": true
+      }
+    ],
+    "edges": [
+      { "id": "e-client-server", "source": "client-1", "target": "server", "label": "enter return", "style": "solid", "animated": true },
+      { "id": "e-server-calc", "source": "server", "target": "calc-engine", "label": "compute", "style": "solid", "animated": true },
+      { "id": "e-server-database", "source": "server", "target": "database", "label": "save", "style": "solid" },
+      { "id": "e-server-queue", "source": "server", "target": "queue", "label": "file", "style": "solid", "animated": true },
+      { "id": "e-queue-worker", "source": "queue", "target": "efile-worker", "style": "solid" },
+      { "id": "e-worker-irs", "source": "efile-worker", "target": "irs", "label": "submit", "style": "solid" }
+    ]
+  },
+  "tax-filing-stage-3": {
+    "id": "tax-filing-stage-3",
+    "title": "Deadline Night",
+    "description": "A load balancer fans out to many servers and engines, with a cache and read replica",
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Filer Browser",
+        "position": { "x": 0, "y": 240 },
+        "explanation": "One of millions of taxpayers all trying to file before midnight on April 15"
+      },
+      {
+        "id": "load-balancer",
+        "type": "load-balancer",
+        "label": "Load Balancer",
+        "position": { "x": 190, "y": 240 },
+        "explanation": "Spreads incoming requests across many identical app servers and routes around any that crash under load",
+        "isNew": true
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "App Server",
+        "position": { "x": 400, "y": 110 },
+        "explanation": "One of many identical app servers handling filers in parallel during the deadline rush"
+      },
+      {
+        "id": "server-2",
+        "type": "server",
+        "label": "App Server",
+        "position": { "x": 400, "y": 370 },
+        "explanation": "Another identical app server sharing the deadline-night load with the first",
+        "isNew": true
+      },
+      {
+        "id": "calc-engine",
+        "type": "server",
+        "label": "Calc Engine",
+        "position": { "x": 640, "y": 20 },
+        "explanation": "The tax calculation engine, also scaled out so the heavy math runs in parallel across many machines"
+      },
+      {
+        "id": "cache",
+        "type": "cache",
+        "label": "Rules Cache",
+        "position": { "x": 640, "y": 240 },
+        "explanation": "Holds shared tax tables — federal brackets, state rate schedules, form definitions — in memory so engines don't reload them per return",
+        "isNew": true,
+        "technology": "Redis"
+      },
+      {
+        "id": "queue",
+        "type": "queue",
+        "label": "Filing Queue",
+        "position": { "x": 640, "y": 460 },
+        "explanation": "Buffers filing jobs so a midnight surge of submissions doesn't overwhelm the IRS or block users"
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Primary DB",
+        "position": { "x": 880, "y": 130 },
+        "explanation": "Handles all writes — saving progress and recording filed returns — with locks that guarantee a return is filed exactly once",
+        "technology": "PostgreSQL"
+      },
+      {
+        "id": "read-replica",
+        "type": "database",
+        "label": "Read Replica",
+        "position": { "x": 880, "y": 350 },
+        "explanation": "A synchronized copy that serves the constant reloads of in-progress returns, keeping that traffic off the primary",
+        "isNew": true
+      },
+      {
+        "id": "efile-worker",
+        "type": "background-job",
+        "label": "E-File Worker",
+        "position": { "x": 1120, "y": 460 },
+        "explanation": "Submits queued returns to the IRS and states, retrying as they allow, and emails the user when each is accepted"
+      },
+      {
+        "id": "irs",
+        "type": "external-service",
+        "label": "IRS / States",
+        "position": { "x": 1120, "y": 240 },
+        "explanation": "Government e-file systems that accept or reject each return, often slowly and sometimes offline"
+      }
+    ],
+    "edges": [
+      { "id": "e-client-lb", "source": "client-1", "target": "load-balancer", "label": "all requests", "style": "solid", "animated": true },
+      { "id": "e-lb-server", "source": "load-balancer", "target": "server", "label": "distribute", "style": "solid", "animated": true },
+      { "id": "e-lb-server2", "source": "load-balancer", "target": "server-2", "label": "distribute", "style": "solid", "animated": true },
+      { "id": "e-server-calc", "source": "server", "target": "calc-engine", "style": "solid" },
+      { "id": "e-server2-calc", "source": "server-2", "target": "calc-engine", "style": "solid" },
+      { "id": "e-calc-cache", "source": "calc-engine", "target": "cache", "label": "tax tables", "style": "solid", "animated": true },
+      { "id": "e-server-database", "source": "server", "target": "database", "label": "writes", "style": "solid" },
+      { "id": "e-server2-database", "source": "server-2", "target": "database", "label": "writes", "style": "solid" },
+      { "id": "e-server-replica", "source": "server", "target": "read-replica", "label": "reads", "style": "dashed" },
+      { "id": "e-server2-replica", "source": "server-2", "target": "read-replica", "label": "reads", "style": "dashed" },
+      { "id": "e-database-replica", "source": "database", "target": "read-replica", "label": "replication", "style": "dashed" },
+      { "id": "e-server-queue", "source": "server", "target": "queue", "label": "file", "style": "solid" },
+      { "id": "e-queue-worker", "source": "queue", "target": "efile-worker", "style": "solid" },
+      { "id": "e-worker-irs", "source": "efile-worker", "target": "irs", "label": "submit", "style": "solid" }
+    ]
+  }
+}

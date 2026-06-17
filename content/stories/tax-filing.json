@@ -1,0 +1,312 @@
+{
+  "id": "tax-filing",
+  "slug": "tax-filing",
+  "title": "Building TurboTax",
+  "subtitle": "From one W-2 to ten million returns on April 15",
+  "description": "Follow a tax-filing app as it grows from helping a single person file a simple federal return to processing millions of complex, multi-state returns in the final hours before the deadline. Along the way you'll learn how a calculation engine, asynchronous e-filing, and horizontal scaling keep tax season from melting down.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 26,
+  "concepts": ["client-server", "database", "state", "microservices", "message-queue", "async", "horizontal-scaling", "load-balancer", "cache", "read-replica", "rate-limiting", "race-condition", "graceful-degradation"],
+  "prerequisites": ["chat-app", "online-store"],
+  "layout": "scrollytelling",
+  "stages": [
+    {
+      "id": "stage-1",
+      "title": "One Filer, One W-2",
+      "userScale": "1 return",
+      "narrative": {
+        "setup": "You're building a tax app for the simplest possible case: a single person with one W-2 from one employer, taking the standard deduction. They answer a few questions, your app does the arithmetic, and they file a federal return. That's the whole product.",
+        "problem": null,
+        "resolution": null
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Your tax app is live. A user logs in, types in the numbers from their W-2 (wages, federal tax withheld), confirms they're taking the standard deduction, and your app calculates what they owe or what refund they get back.\n\nThe shape is the same [[glossary:client-server|client-server model]] every app uses. The browser is the **client**, your **[[node:server|server]]** runs the tax math, and a **[[node:database|database]]** stores the return so the user can come back and finish it later."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: a paper worksheet",
+          "content": "Think of your app as a smart version of the IRS paper worksheet. **The client** is the person holding the pen. **The server** is the worksheet's instructions — \"take line 1, subtract line 4, look up the result in the tax table.\" **The database** is the filing cabinet where the finished worksheet gets stored. At this scale, one worksheet and one drawer is all you need."
+        },
+        {
+          "type": "text",
+          "content": "A return isn't a single action — it's a session that spans days. Someone starts on Monday, hunts for a document, and comes back Thursday to finish. So the server has to save the half-finished return as **[[glossary:state|state]]** in the database after every step.\n\n1. User enters their wages — the server saves it to the database\n2. User comes back later — the server loads the saved return\n3. User hits **File** — the server runs the final calculation and records the result\n\nEverything the user types has to survive them closing the laptop."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "tax-filing-stage-1",
+          "caption": "The whole product: a browser, a server that does the tax math, and a database that remembers the return"
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "Tax software is different from most apps in one important way: being fast doesn't matter much, but being **correct** matters enormously. A chat app that drops a message is annoying. A tax app that miscalculates a return creates a legal problem for the user. Correctness is the product."
+        },
+        {
+          "type": "callout",
+          "style": "tip",
+          "content": "At this stage, resist the urge to build for fifty states and every edge case. A single-W-2, standard-deduction return covers a huge share of real filers. Ship the simple case, get real returns flowing, and let actual users tell you which complications to handle next."
+        },
+        {
+          "type": "checkpoint",
+          "question": "A user fills in half their return, closes the browser, and comes back two days later. What has to be true for their progress to still be there?",
+          "options": [
+            {
+              "id": "a",
+              "text": "The browser kept the numbers in memory while it was closed",
+              "correct": false,
+              "explanation": "A closed browser keeps nothing. Anything held only in the browser or in the server's memory is gone the moment either one restarts."
+            },
+            {
+              "id": "b",
+              "text": "The server saved the in-progress return to the database as the user went",
+              "correct": true,
+              "explanation": "Because a return is a multi-day session, the server has to persist each step to the database. When the user returns, the server reloads that saved state and they pick up where they left off."
+            },
+            {
+              "id": "c",
+              "text": "Nothing — they'll have to start over every visit",
+              "correct": false,
+              "explanation": "That would make the product unusable. Saving progress is the entire reason the database exists in this design."
+            }
+          ]
+        }
+      ],
+      "suggestedQuestions": [
+        "Where exactly does the tax calculation happen — the browser or the server?",
+        "Why not just do the math in the browser and skip the server?",
+        "What does it mean to 'save state' for a tax return?"
+      ]
+    },
+    {
+      "id": "stage-2",
+      "title": "Fifty States and a Side Hustle",
+      "userScale": "50,000 returns/day",
+      "narrative": {
+        "setup": "Word spreads and your users get more complicated. Now they itemize deductions, report freelance income, sell stock, and — the big one — earn money in more than one state. Someone who lives in New Jersey but works in New York has to file three returns: federal, NJ, and NY, each with its own rules.",
+        "problem": "The clean little calculation you wrote for one W-2 has turned into a tangle. Federal rules, fifty different state rule sets, and dozens of income types are all jammed into one server. Every time a state changes its tax brackets, you're editing the same code that handles federal returns — and risking breaking everything. On top of that, filing is no longer instant: you have to electronically submit each return to the IRS and to each state agency, and those systems are slow and sometimes down.",
+        "resolution": "You pull the tax logic out into a dedicated calculation engine so each jurisdiction's rules live in their own module. And you stop making users wait for the IRS: filing requests go onto a queue, and a background worker submits them and tracks each one until it's accepted."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "A multi-state return is really several returns that share data. Your New-Jersey-resident-working-in-New-York user needs a federal return, a New York non-resident return, and a New Jersey resident return that credits the tax already paid to New York. Each has different brackets, different deductions, different forms.\n\nCramming federal logic, fifty state rule sets, and every income type into one [[node:server|server]] becomes unmaintainable fast."
+        },
+        {
+          "type": "text",
+          "content": "The fix is to split the tax brain out from the app. Your **[[node:server|app server]]** still handles logins, the interview questions, and saving progress. But the actual computation moves to a separate **[[node:calc-engine|calculation engine]]** where federal and each state's rules live as independent modules.\n\nThis is a step toward [[glossary:microservices|microservices]]: when New York changes its brackets, you update the New York module and nothing else. The federal logic — and the other 49 states — are untouched."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: specialist accountants",
+          "content": "At first you were the sole accountant doing everything. Now you've hired specialists: one who only knows federal rules, one for each state. The **app server** is the office manager who greets the client, gathers their documents, and hands the file to the right specialists. The **calculation engine** is the room full of specialists, each an expert in exactly one rulebook. When a state rewrites its tax code, only that one specialist has to relearn anything."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "tax-filing-stage-2",
+          "caption": "The tax math moves into a dedicated engine, and filing happens asynchronously through a queue",
+          "highlightNodes": ["calc-engine", "queue", "efile-worker", "irs"],
+          "animateFlow": ["client-1", "server", "calc-engine"]
+        },
+        {
+          "type": "text",
+          "content": "There's a second problem: **filing itself**. When a user hits File, you have to electronically transmit their return to the IRS and to each state agency. These government systems are slow, rate-limited, and occasionally down for maintenance. If your server waits for the IRS to respond before showing the user a confirmation, the user stares at a spinner for 40 seconds — or sees an error when the IRS is overloaded.\n\nSo you stop waiting. The user's File request drops a job onto a **[[glossary:message-queue|queue]]**, and the app instantly tells them \"Your return has been submitted — we'll email you when it's accepted.\""
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: the post office counter",
+          "content": "Filing synchronously is like mailing a certified letter and refusing to leave the post office counter until the recipient signs for it — you'd be standing there for days. Filing through a queue is how it actually works: you hand the letter to the clerk, get a tracking number, and walk away. A **background worker** is the postal system that delivers it, retries if the address is busy, and notifies you when it's signed for."
+        },
+        {
+          "type": "text",
+          "content": "A **[[node:efile-worker|background worker]]** pulls jobs off the queue and submits each return to the right agency. This is [[glossary:async|asynchronous]] processing, and it buys you three things:\n\n1. **The user isn't blocked** — they get an instant confirmation instead of a spinner\n2. **Retries are automatic** — if the IRS is down, the worker waits and tries again later without losing the return\n3. **You control the pace** — you submit at whatever rate the IRS accepts, even when thousands of users file at once"
+        },
+        {
+          "type": "callout",
+          "style": "warning",
+          "content": "Asynchronous filing changes what \"done\" means. Submitted is not the same as accepted. The IRS can reject a return hours later — a mismatched name, a duplicate Social Security number, a wrong prior-year figure. Your system has to track every return through submitted, accepted, or rejected, and tell the user clearly which state it's in. \"I clicked File\" is not the same as \"the government has my return.\""
+        },
+        {
+          "type": "checkpoint",
+          "question": "Why route the IRS submission through a queue and a background worker instead of submitting it directly when the user clicks File?",
+          "options": [
+            {
+              "id": "a",
+              "text": "It makes the tax calculation more accurate",
+              "correct": false,
+              "explanation": "The queue has nothing to do with accuracy — that's the calculation engine's job. The queue is about decoupling the user's click from a slow, unreliable external system."
+            },
+            {
+              "id": "b",
+              "text": "So the user gets an instant response and the worker can retry against the slow, sometimes-down IRS without losing the return",
+              "correct": true,
+              "explanation": "The queue decouples the user's action from the external system. The user is freed immediately, and the worker can retry on its own schedule when the IRS is overloaded or offline — without dropping anyone's return."
+            },
+            {
+              "id": "c",
+              "text": "Queues are required to talk to any external service",
+              "correct": false,
+              "explanation": "Plenty of external calls happen synchronously. A queue earns its place specifically when the external system is slow or unreliable and you don't want the user waiting on it."
+            }
+          ]
+        },
+        {
+          "type": "challenge",
+          "scenario": "A user files their return at 9:00 PM. The worker submits it to the IRS, but the IRS system is down for maintenance and the request fails. At 9:01 PM the worker retries and it fails again. The user, seeing nothing happen, clicks File a second time, dropping another job on the queue for the same return.",
+          "question": "How do you keep this from submitting the same return to the IRS twice once the system comes back up?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Give each return a unique filing ID and have the worker check 'has this return already been accepted?' before every submission",
+              "correct": true,
+              "explanation": "This makes submission idempotent: no matter how many times the job runs, the return reaches the IRS at most once. The worker keys on the return's filing ID and refuses to submit one that's already in flight or accepted. Double-filing a tax return is a serious problem, so this guard is essential.",
+              "conceptLink": "race-condition"
+            },
+            {
+              "id": "b",
+              "text": "Remove the retry logic so a failed submission never tries again",
+              "correct": false,
+              "explanation": "That trades one problem for a worse one. Without retries, every return filed during the IRS maintenance window would silently fail and never reach the government at all."
+            },
+            {
+              "id": "c",
+              "text": "Disable the File button for 10 minutes after the first click",
+              "correct": false,
+              "explanation": "A UI delay might reduce duplicate clicks, but it doesn't prevent them — and it does nothing about the worker's own retries. Correctness has to be guaranteed in the system, not in the button."
+            }
+          ]
+        },
+        {
+          "type": "reveal",
+          "label": "Deep dive: why a calculation engine instead of just more code in the server",
+          "content": "You could keep piling tax logic into the app server. The reason not to comes down to three forces specific to tax software:\n\n**Rules change every year, per jurisdiction.** Federal brackets, standard deductions, and credits change annually, and all fifty states change on their own schedules. Isolating each rulebook means a New York change can't accidentally break a federal calculation.\n\n**The same engine gets reused.** Tax estimates, the live refund meter as the user types, and the final filed return should all run through the exact same calculation logic. A separate engine guarantees the preview and the filed return can never disagree.\n\n**It can be tested in isolation.** A calculation engine with clean inputs and outputs can be run against thousands of known correct returns automatically. That regression suite is how you sleep at night during tax season — you can prove a code change didn't alter any result it shouldn't have."
+        }
+      ],
+      "suggestedQuestions": [
+        "How does the system know a multi-state return is 'done' if the IRS responds hours later?",
+        "What happens to a return on the queue if the worker crashes mid-submission?",
+        "Why keep the app server and calculation engine separate instead of one big service?"
+      ]
+    },
+    {
+      "id": "stage-3",
+      "title": "April 15, 11:59 PM",
+      "userScale": "10,000,000 returns",
+      "narrative": {
+        "setup": "It's the night of the deadline. Tax filing isn't steady traffic — it's a wall. Most of the year is quiet, then a huge share of all returns arrive in the final week, and a startling number in the final hour before midnight on April 15. Ten million people are logged in at once, all doing math-heavy work and all trying to file before the clock runs out.",
+        "problem": "Your single app server and single calculation engine, fine for a normal Tuesday, are buried. Response times climb to 30 seconds. The calculation engine is pinned at 100% CPU recomputing the same federal brackets for millions of returns. The database is drowning because every keystroke in the interview triggers a save and a reload. Some users get errors at 11:55 PM — and a return filed one minute after midnight can mean penalties.",
+        "resolution": "You put a load balancer in front of many identical app servers and calculation engines, scaling out horizontally. You cache the tax rules and bracket tables that every return shares. You add a read replica so all those progress-reloads stop hammering the primary database. And you add rate limiting to keep bots and runaway retries from stealing capacity from real filers."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Tax season is the hardest kind of load: a sharp, predictable spike. One server — even with your clean calculation engine and queue — can't absorb ten million simultaneous filers. One machine has a ceiling on CPU, memory, and connections.\n\nThe answer is [[glossary:horizontal-scaling|horizontal scaling]]: run many identical app servers and many calculation engines side by side, instead of trying to build one impossibly large machine."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: opening more tax offices",
+          "content": "On April 15 you don't make your one accountant work a thousand times faster — that's impossible. You open a hundred identical offices, each fully staffed, and a dispatcher out front sends each arriving client to whichever office has a free desk. Every office follows the same rulebook, so it doesn't matter which one you walk into. That dispatcher is a load balancer."
+        },
+        {
+          "type": "text",
+          "content": "A [[glossary:load-balancer|load balancer]] sits in front of your fleet and spreads incoming requests across all the [[node:server|app servers]]. If one server crashes under the strain, the load balancer's health checks notice and route around it. The user just sees turbotax.com — they have no idea there are two hundred servers behind it.\n\nThe calculation engines scale out the same way, so the heavy tax math runs in parallel across many machines."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "tax-filing-stage-3",
+          "caption": "The deadline-night architecture: a load balancer fans out to many servers and engines, with a cache, a read replica, and the async filing pipeline",
+          "highlightNodes": ["load-balancer", "server-2", "cache", "read-replica"],
+          "animateFlow": ["client-1", "load-balancer", "server", "calc-engine"]
+        },
+        {
+          "type": "text",
+          "content": "Now a subtler bottleneck shows up: every return recomputes the **same** things. The 2024 federal tax brackets, the standard deduction amounts, each state's rate tables — these are identical for millions of users and change once a year.\n\nA [[glossary:cache|cache]] (Redis) holds these shared tax tables and rules in memory. Instead of every calculation engine reloading the brackets from the database for every return, they read them from the cache in microseconds. The first lookup populates the cache; the next ten million are nearly free."
+        },
+        {
+          "type": "callout",
+          "style": "warning",
+          "content": "Cache the things that are the same for everyone — bracket tables, form definitions, rate schedules. Never cache the things that are unique and must be exact, like a specific person's income or their filed result. The line is the same one every tax engineer obsesses over: shared and slow-changing is safe to cache; personal and precise is not."
+        },
+        {
+          "type": "text",
+          "content": "The [[node:database|database]] is still under pressure, because saving and reloading in-progress returns is constant during the interview. But that traffic is overwhelmingly **reads** — loading a return far outnumbers finalizing one.\n\nA [[glossary:read-replica|read replica]] is a synchronized copy of the database. Servers reload in-progress returns from the replica and send the writes — saving progress, recording a filed return — to the primary. That split keeps the primary free for the writes that truly matter."
+        },
+        {
+          "type": "text",
+          "content": "Last problem: not all the load is real filers. Some IPs hammer the site hundreds of times a second — scrapers, and your own retry logic going haywire when something is slow. Every wasted request is capacity stolen from a real person trying to beat the deadline.\n\n[[glossary:rate-limiting|Rate limiting]] caps how many requests one client can make in a window. Cross the line and you get a `429 Too Many Requests` until you slow down."
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "When the worst happens and you still can't keep up, the goal becomes [[glossary:graceful-degradation|graceful degradation]]: protect the one thing that matters. Let the live refund estimate go stale or queue up filings, but never let a user's saved progress vanish or a finished return fail to record. Degrade the nice-to-haves; defend correctness to the last."
+        },
+        {
+          "type": "checkpoint",
+          "question": "Why is caching the federal bracket tables safe, but caching a user's calculated refund amount dangerous?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Bracket tables are small and refunds are large",
+              "correct": false,
+              "explanation": "Size isn't the issue. A refund figure is tiny. What matters is whether the data is shared and stable, or personal and exact."
+            },
+            {
+              "id": "b",
+              "text": "The bracket tables are identical for everyone and change once a year; a refund is unique per person and must reflect their latest inputs exactly",
+              "correct": true,
+              "explanation": "Shared, slow-changing reference data is the ideal thing to cache — compute once, serve to millions. A personal result depends on the exact numbers the user just entered, so serving a cached version risks showing someone the wrong refund."
+            },
+            {
+              "id": "c",
+              "text": "Caching personal data is illegal",
+              "correct": false,
+              "explanation": "It's a correctness problem, not a legal one. A cached refund could simply be stale — wrong the instant the user edits an input — which is reason enough never to cache it."
+            }
+          ]
+        },
+        {
+          "type": "challenge",
+          "scenario": "At 11:58 PM, a user clicks File. The load balancer happens to send their browser's automatic retry to a second app server a moment later, because the first response was slow. Now two servers are processing 'file this return' for the same return at nearly the same instant, and both ask the calculation engine to finalize and submit it.",
+          "question": "How do you guarantee this return gets filed exactly once, even with two servers acting on it simultaneously?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Use a database transaction with a lock on that return so only one server can move it from 'in progress' to 'filed', and the second sees it's already filed",
+              "correct": true,
+              "explanation": "This is a classic [[glossary:race-condition|race condition]], and the database is built to resolve it. A row-level lock makes 'mark this return filed' atomic: the first server wins and transitions the return, the second finds it already filed and stops. The user files once, no matter how many servers race.",
+              "conceptLink": "race-condition"
+            },
+            {
+              "id": "b",
+              "text": "Route every File request through a single dedicated server to avoid conflicts",
+              "correct": false,
+              "explanation": "That throws away horizontal scaling at the exact moment you need it most — the deadline. The database's locking exists precisely so many servers can safely act on the same data."
+            },
+            {
+              "id": "c",
+              "text": "Add a few seconds of delay before processing any File request so the duplicate has time to clear",
+              "correct": false,
+              "explanation": "Delays don't prevent races — both requests could still arrive within the same window, and you've made the deadline-night experience slower for everyone."
+            }
+          ]
+        },
+        {
+          "type": "reveal",
+          "label": "Deep dive: the full deadline-night path of a single return",
+          "content": "Here's what happens when a user clicks File at 11:59 PM:\n\n1. **DNS** resolves turbotax.com to the load balancer\n2. **Rate limiter** checks this client hasn't blown past its request quota; if it has, it gets a `429`\n3. **Load balancer** picks a healthy app server from the fleet\n4. **App server** loads the in-progress return from the **read replica**\n5. **Calculation engine** finalizes the math, reading the shared bracket tables from the **cache** — not the database\n6. **App server** takes a **lock** on the return in the **primary database** and marks it filed, so a racing duplicate can't double-file\n7. A filing job goes onto the **queue**; the app instantly confirms to the user\n8. **Background workers** submit to the IRS and state agencies, retrying as those systems allow, and email the user when each return is accepted\n\nEach layer you added across the three stages solves one specific pressure of that night. Together they turn a one-W-2 weekend project into a system that can take ten million returns in the hours before a hard, unmovable deadline."
+        },
+        {
+          "type": "reveal",
+          "label": "Deep dive: why predictable spikes are their own kind of hard",
+          "content": "Tax season is unusual because the spike is enormous but also **known in advance** — you can see April 15 coming for a year. That changes the engineering playbook:\n\n**Pre-scale, don't react.** You don't wait for traffic to climb and then add servers; autoscaling is too slow for a wall of traffic that arrives in minutes. You provision the fleet ahead of the deadline and tear it down afterward.\n\n**Load-test against the peak.** Long before April, you replay synthetic deadline-night traffic at full volume to find the bottleneck that only appears at ten million returns — usually the database or a shared lock, not the servers.\n\n**Plan the failure modes.** With a hard deadline, 'the site is slow' has legal consequences for users. So you decide in advance what to shed first (the refund-estimate preview), what to queue (filings), and what must never fail (saved progress and recording a filed return)."
+        }
+      ],
+      "suggestedQuestions": [
+        "How far ahead of April 15 do you have to add the extra servers?",
+        "What happens to returns still on the queue at midnight — are they filed on time?",
+        "If the primary database is the bottleneck, why not just add more app servers?"
+      ]
+    }
+  ]
+}
