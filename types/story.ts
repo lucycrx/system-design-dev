@@ -49,13 +49,27 @@ export interface RevealBlock {
   content: string; // Markdown
 }
 
+export interface TradeoffOption {
+  name: string; // Short name of the option, e.g. "Cache aggressively"
+  pros: string[]; // What you gain
+  cons: string[]; // What you give up
+}
+
+export interface TradeoffBlock {
+  type: "tradeoff";
+  decision: string; // The fork in the road, phrased as a question
+  options: TradeoffOption[]; // 2-3 competing approaches
+  choice: string; // Markdown: what this story chose, why, and what it traded away
+}
+
 export type Block =
   | TextBlock
   | DiagramBlock
   | CalloutBlock
   | CheckpointBlock
   | ChallengeBlock
-  | RevealBlock;
+  | RevealBlock
+  | TradeoffBlock;
 
 // ---- Stage and Story ----
 

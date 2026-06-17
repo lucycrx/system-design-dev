@@ -118,6 +118,23 @@
           "content": "The database is a **separate system** from your server. This is a fundamental pattern: **separate compute (server) from storage (database)**. If your server crashes, your data is safe."
         },
         {
+          "type": "tradeoff",
+          "decision": "Keep messages in the server's memory, or write them to a database?",
+          "options": [
+            {
+              "name": "In memory only",
+              "pros": ["Dead simple — no extra system to run", "Fastest possible reads and writes"],
+              "cons": ["Everything is lost on restart or crash", "Can't grow past one server's RAM"]
+            },
+            {
+              "name": "Write to a database",
+              "pros": ["Messages survive restarts and crashes", "History is queryable and effectively unlimited"],
+              "cons": ["Each write now touches disk — slightly slower", "One more system to run and back up"]
+            }
+          ],
+          "choice": "Write every message to the database. For a chat app, **losing a message is the one thing you can never do**, so a few milliseconds of extra write time is an easy price to pay. This isn't a universal rule, though: data that's genuinely disposable — a live typing indicator, say — is often better left in memory."
+        },
+        {
           "type": "challenge",
           "scenario": "Users in the 'general' chat room complain that loading history takes 5+ seconds. The room has 50,000 messages, and your server fetches ALL of them every time someone opens the room.",
           "question": "What's the smartest first fix?",
@@ -190,6 +207,28 @@
         {
           "type": "text",
           "content": "With WebSockets:\n\n1. User opens the app → browser opens a persistent connection to the server\n2. When someone sends a message, [[node:server|the server]] **pushes it instantly** to every connected client\n3. No more asking. No more waiting. Messages appear instantly.\n\nThis is how Slack, Discord, and WhatsApp Web all work."
+        },
+        {
+          "type": "tradeoff",
+          "decision": "How should clients find out about new messages?",
+          "options": [
+            {
+              "name": "Polling",
+              "pros": ["Simple; works over plain HTTP everywhere", "No long-lived connections to manage"],
+              "cons": ["Wasted requests when nothing is new", "Messages lag by the poll interval"]
+            },
+            {
+              "name": "Long-polling / SSE",
+              "pros": ["Near-instant without constant requests", "Simpler than full WebSockets"],
+              "cons": ["Mostly one-way: server to client", "Awkward for fast back-and-forth"]
+            },
+            {
+              "name": "WebSockets",
+              "pros": ["Instant, two-way push", "No repeated request overhead"],
+              "cons": ["Each open connection costs server memory", "Reconnects and scaling need real care"]
+            }
+          ],
+          "choice": "Use WebSockets. A chat is a two-way, real-time conversation — exactly what they're built for — and the cost (persistent connections, reconnect handling) buys instant delivery. For a one-way feed like a stock ticker, the simpler SSE would often be the better pick. The right transport depends on the shape of the traffic, not on which option is the most advanced."
         },
         {
           "type": "diagram",

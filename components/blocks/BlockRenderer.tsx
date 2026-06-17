@@ -5,6 +5,7 @@ import { CheckpointBlock } from "./CheckpointBlock";
 import { ChallengeBlock } from "./ChallengeBlock";
 import { RevealBlock } from "./RevealBlock";
 import { DiagramBlock } from "./DiagramBlock";
+import { TradeoffBlock } from "./TradeoffBlock";
 
 interface Props {
   blocks: Block[];
@@ -28,6 +29,8 @@ export function BlockRenderer({ blocks, glossaryMap }: Props) {
             return <RevealBlock key={i} block={block} />;
           case "diagram":
             return <DiagramBlock key={i} block={block} />;
+          case "tradeoff":
+            return <TradeoffBlock key={i} block={block} />;
           default:
             return null;
         }

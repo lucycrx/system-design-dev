@@ -8,6 +8,7 @@ import { CalloutBlock } from "@/components/blocks/CalloutBlock";
 import { CheckpointBlock } from "@/components/blocks/CheckpointBlock";
 import { ChallengeBlock } from "@/components/blocks/ChallengeBlock";
 import { RevealBlock } from "@/components/blocks/RevealBlock";
+import { TradeoffBlock } from "@/components/blocks/TradeoffBlock";
 import { FlipCounter } from "./FlipCounter";
 import { GrowthChart } from "./GrowthChart";
 import { ScrollyDiagram } from "./ScrollyDiagram";
@@ -356,6 +357,8 @@ function renderBlock(block: Block, glossaryMap: Record<string, GlossaryTerm>, se
       return <ChallengeBlock block={block} />;
     case "reveal":
       return <RevealBlock block={block} />;
+    case "tradeoff":
+      return <TradeoffBlock block={block} />;
     default:
       return null;
   }

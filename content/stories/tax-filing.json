@@ -49,6 +49,23 @@
           "content": "At this stage, resist the urge to build for fifty states and every edge case. A single-W-2, standard-deduction return covers a huge share of real filers. Ship the simple case, get real returns flowing, and let actual users tell you which complications to handle next."
         },
         {
+          "type": "tradeoff",
+          "decision": "Should the tax calculation run in the browser or on the server?",
+          "options": [
+            {
+              "name": "In the browser",
+              "pros": ["Instant feedback as the user types", "No server load for the math"],
+              "cons": ["The logic is exposed and can be tampered with", "Users run whatever version they last loaded", "You can't trust the number it produces"]
+            },
+            {
+              "name": "On the server",
+              "pros": ["One authoritative, trusted result", "Fix a rule once and everyone gets it", "The filed number can't be forged"],
+              "cons": ["A round-trip for each calculation", "The server carries the compute cost"]
+            }
+          ],
+          "choice": "Run the authoritative calculation on the server. For tax software the filed number carries legal weight, so it has to be **trusted and consistent** — you can't let the client decide what someone owes. Many apps still run a lightweight copy in the browser for a snappy live estimate, but the number that actually gets filed is always the server's."
+        },
+        {
           "type": "checkpoint",
           "question": "A user fills in half their return, closes the browser, and comes back two days later. What has to be true for their progress to still be there?",
           "options": [
@@ -121,6 +138,23 @@
         {
           "type": "text",
           "content": "A **[[node:efile-worker|background worker]]** pulls jobs off the queue and submits each return to the right agency. This is [[glossary:async|asynchronous]] processing, and it buys you three things:\n\n1. **The user isn't blocked** — they get an instant confirmation instead of a spinner\n2. **Retries are automatic** — if the IRS is down, the worker waits and tries again later without losing the return\n3. **You control the pace** — you submit at whatever rate the IRS accepts, even when thousands of users file at once"
+        },
+        {
+          "type": "tradeoff",
+          "decision": "When a user clicks File, submit to the IRS right then, or hand it to a queue?",
+          "options": [
+            {
+              "name": "Submit synchronously",
+              "pros": ["The user gets a real accepted/rejected answer on the spot", "Nothing extra to build"],
+              "cons": ["User waits on a slow government system", "Errors out when the IRS is overloaded or down", "A filing surge has nowhere to go"]
+            },
+            {
+              "name": "Queue + background worker",
+              "pros": ["Instant acknowledgement to the user", "Automatic retries when the IRS is down", "You submit at whatever rate it accepts"],
+              "cons": ["'Submitted' no longer means 'accepted'", "You must track and surface each return's status"]
+            }
+          ],
+          "choice": "Put filings on a queue. The IRS and state systems are slow and sometimes offline, so blocking a user on them is a bad trade — far better to acknowledge instantly and let a worker push the return through with retries. The price is real: you now have to track every return through submitted to accepted or rejected, and tell the user plainly where it stands."
         },
         {
           "type": "callout",
@@ -202,6 +236,23 @@
         {
           "type": "text",
           "content": "Tax season is the hardest kind of load: a sharp, predictable spike. One server — even with your clean calculation engine and queue — can't absorb ten million simultaneous filers. One machine has a ceiling on CPU, memory, and connections.\n\nThe answer is [[glossary:horizontal-scaling|horizontal scaling]]: run many identical app servers and many calculation engines side by side, instead of trying to build one impossibly large machine."
+        },
+        {
+          "type": "tradeoff",
+          "decision": "Deadline night is a wall of traffic. How do you stand up enough capacity?",
+          "options": [
+            {
+              "name": "One giant machine (vertical)",
+              "pros": ["No architectural changes", "Nothing to coordinate across servers"],
+              "cons": ["A hard ceiling you eventually hit", "A single point of failure on the biggest night", "Paid for year-round, used a few weeks"]
+            },
+            {
+              "name": "Many machines (horizontal)",
+              "pros": ["Add as much capacity as the night needs", "One server dying doesn't take the site down"],
+              "cons": ["Servers must hold no local state", "Needs a load balancer and capacity planning"]
+            }
+          ],
+          "choice": "Scale horizontally, and **pre-provision** the fleet ahead of April 15 rather than autoscaling into the spike — a wall of traffic arrives faster than new machines can boot. Tear it down afterward so you aren't paying for peak capacity in July. The cost you take on is designing every server to be stateless, so any of them can handle any request."
         },
         {
           "type": "reveal",

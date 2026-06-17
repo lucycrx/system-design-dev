@@ -121,6 +121,23 @@
           "content": "If Redis crashes, that data is gone. For driver locations, this is fine -- the next GPS ping repopulates in seconds. But never put data you can't afford to lose (like payment records) in an in-memory store alone."
         },
         {
+          "type": "tradeoff",
+          "decision": "Where should rapidly-changing driver locations live?",
+          "options": [
+            {
+              "name": "Main database",
+              "pros": ["One system to run", "Durable and queryable"],
+              "cons": ["~1,700 writes/sec of throwaway data", "Starves the queries that actually matter"]
+            },
+            {
+              "name": "In-memory store (Redis)",
+              "pros": ["Handles the write storm easily", "Stale positions auto-expire — no cleanup"],
+              "cons": ["Data is gone if it crashes", "Another system to operate"]
+            }
+          ],
+          "choice": "Keep locations in Redis; keep trips, payments, and profiles in the database. Locations are **ephemeral** — losing them costs a single GPS ping — so trading durability for speed is the right call here. That same trade would be reckless for payment records. Match the store to the data, not to a one-size-fits-all rule."
+        },
+        {
           "type": "text",
           "content": "## Fixing the race condition\n\nThe matching logic does: **Read** (is driver available?) → **Decide** (yes!) → **Write** (mark unavailable). Between steps 1 and 3, another request sneaks in.\n\nThe fix: [[glossary:consistency|optimistic locking]] -- making the check-and-write an **atomic operation** that can't be interrupted."
         },
@@ -132,6 +149,23 @@
         {
           "type": "text",
           "content": "In practice:\n\n1. Read the driver's record, including a version number (e.g., version 5)\n2. Decide to assign the driver\n3. Write the assignment, but **only if the version is still 5**\n4. If it is, success -- version becomes 6\n5. If another request already changed it to 6, the write fails and your code retries with the next driver\n\nRedis makes this even easier with built-in atomic commands -- \"set this value only if it's currently X\" in a single operation."
+        },
+        {
+          "type": "tradeoff",
+          "decision": "How do you stop two riders from being matched to the same driver?",
+          "options": [
+            {
+              "name": "Pessimistic lock",
+              "pros": ["Conflicts are impossible — lock first, then act"],
+              "cons": ["Requests queue up behind the lock", "A match in one city can block one in another"]
+            },
+            {
+              "name": "Optimistic lock",
+              "pros": ["High concurrency — no waiting in the common case", "Only the rare true conflict pays a cost"],
+              "cons": ["Your code has to detect the conflict and retry"]
+            }
+          ],
+          "choice": "Use optimistic locking. Two riders competing for the *same* driver at the *same instant* is rare, so it's wasteful to make every match wait its turn behind a lock. You take on retry logic in exchange for far higher throughput. If collisions were the norm rather than the exception, the pessimistic choice would flip to being the right one."
         },
         {
           "type": "checkpoint",
@@ -217,6 +251,23 @@
         {
           "type": "text",
           "content": "The solution: [[glossary:microservices|microservices]] -- independent services that each handle one part of the business:\n\n- [[node:matching|Matching Service]] -- finds and assigns drivers\n- [[node:payment|Payment Service]] -- handles charges, refunds, payouts\n- [[node:notification|Notification Service]] -- push notifications and SMS\n- **Pricing Service** -- fares and surge pricing\n- **Trip Service** -- trip lifecycle and history\n\nEach runs independently with its own database. If the [[node:payment|Payment Service]] crashes, riders can still get matched."
+        },
+        {
+          "type": "tradeoff",
+          "decision": "Stay a single application, or split into microservices?",
+          "options": [
+            {
+              "name": "Keep the monolith",
+              "pros": ["One thing to deploy and reason about", "Easy transactions across features", "No network hops between modules"],
+              "cons": ["One bug can crash everything", "The whole app scales as a single unit", "50 engineers contend in one codebase"]
+            },
+            {
+              "name": "Split into microservices",
+              "pros": ["A failure stays contained to one service", "Each service scales and ships on its own"],
+              "cons": ["Network calls fail and add latency", "Data is spread across many databases", "Much heavier operational overhead"]
+            }
+          ],
+          "choice": "Split the monolith. At this many features, fifty engineers, and a payment bug that just took down ride matching, fault isolation is worth the added complexity. Crucially, this would have been the **wrong** call back in stage 1 — the same decision flips with scale. Microservices are a fix for a reliability and team-size problem, not a default you reach for early."
         },
         {
           "type": "text",
