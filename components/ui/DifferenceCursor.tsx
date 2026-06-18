@@ -55,6 +55,8 @@ export function DifferenceCursor() {
       }
       const overInteractive = !!(e.target as Element | null)?.closest?.(interactiveSel);
       scale = overInteractive ? 2 : 1;
+      // Restart the follow loop if it idled itself to a stop.
+      if (!raf) raf = requestAnimationFrame(tick);
     }
 
     function onLeave() {
@@ -65,13 +67,29 @@ export function DifferenceCursor() {
     }
 
     function tick() {
-      const ease = reduced ? 1 : 0.18;
+      const ease = reduced ? 1 : 0.45;
       curX += (mouseX - curX) * ease;
       curY += (mouseY - curY) * ease;
-      curScale += (scale - curScale) * 0.2;
+      curScale += (scale - curScale) * 0.35;
       const t = `translate(${curX}px, ${curY}px) translate(-50%, -50%) scale(${curScale})`;
       fill!.style.transform = t;
       ring!.style.transform = t;
+      // Stop the loop once the cursor has caught up. Leaving the blended fill
+      // re-compositing the backdrop every frame while idle is the real cost;
+      // onMove restarts the loop on the next movement.
+      const settled =
+        Math.abs(mouseX - curX) < 0.1 &&
+        Math.abs(mouseY - curY) < 0.1 &&
+        Math.abs(scale - curScale) < 0.01;
+      if (settled) {
+        curX = mouseX;
+        curY = mouseY;
+        curScale = scale;
+        fill!.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%) scale(${curScale})`;
+        ring!.style.transform = fill!.style.transform;
+        raf = 0;
+        return;
+      }
       raf = requestAnimationFrame(tick);
     }
 
