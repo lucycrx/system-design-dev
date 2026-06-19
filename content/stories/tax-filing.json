@@ -3,10 +3,10 @@
   "slug": "tax-filing",
   "title": "Building TurboTax",
   "subtitle": "From one W-2 to ten million returns on April 15",
-  "description": "Follow a tax-filing app as it grows from helping a single person file a simple federal return to processing millions of complex, multi-state returns in the final hours before the deadline. Along the way you'll learn how a calculation engine, asynchronous e-filing, and horizontal scaling keep tax season from melting down.",
+  "description": "Follow a tax-filing app as it grows from helping one person file a simple federal return into a full product: a guided interview that adapts to each filer, an engine that hunts for every deduction, official PDF forms, e-filing into government systems that are slow and sometimes offline, a vault for years of sensitive data, payments in and refunds out — and finally the horizontal scaling that keeps it all standing in the final hours before the deadline.",
   "difficulty": "advanced",
-  "estimatedMinutes": 26,
-  "concepts": ["client-server", "database", "state", "microservices", "message-queue", "async", "horizontal-scaling", "load-balancer", "cache", "read-replica", "rate-limiting", "race-condition", "graceful-degradation"],
+  "estimatedMinutes": 45,
+  "concepts": ["client-server", "database", "state", "persistence", "microservices", "api", "message-queue", "async", "retry", "horizontal-scaling", "load-balancer", "cache", "read-replica", "rate-limiting", "race-condition", "graceful-degradation"],
   "prerequisites": ["chat-app", "online-store"],
   "layout": "scrollytelling",
   "stages": [
@@ -15,14 +15,14 @@
       "title": "One Filer, One W-2",
       "userScale": "1 return",
       "narrative": {
-        "setup": "You're building a tax app for the simplest possible case: a single person with one W-2 from one employer, taking the standard deduction. They answer a few questions, your app does the arithmetic, and they file a federal return. That's the whole product.",
+        "setup": "You're building a tax app for the simplest possible case: a single person with one W-2 from one employer, taking the standard deduction. They create an account, answer a few questions, your app does the arithmetic, and they file a federal return. That's the whole product.",
         "problem": null,
         "resolution": null
       },
       "blocks": [
         {
           "type": "text",
-          "content": "Your tax app is live. A user logs in, types in the numbers from their W-2 (wages, federal tax withheld), confirms they're taking the standard deduction, and your app calculates what they owe or what refund they get back.\n\nThe shape is the same [[glossary:client-server|client-server model]] every app uses. The browser is the **client**, your **[[node:server|server]]** runs the tax math, and a **[[node:database|database]]** stores the return so the user can come back and finish it later."
+          "content": "Your tax app is live. A user creates an account, logs in, types in the numbers from their W-2 (wages, federal tax withheld), confirms they're taking the standard deduction, and your app calculates what they owe or what refund they get back.\n\nThe shape is the same [[glossary:client-server|client-server model]] every app uses. The browser is the **client**, your **[[node:server|server]]** runs the tax math, and a **[[node:database|database]]** stores the return so the user can come back and finish it later."
         },
         {
           "type": "reveal",
@@ -34,19 +34,24 @@
           "content": "A return isn't a single action — it's a session that spans days. Someone starts on Monday, hunts for a document, and comes back Thursday to finish. So the server has to save the half-finished return as **[[glossary:state|state]]** in the database after every step.\n\n1. User enters their wages — the server saves it to the database\n2. User comes back later — the server loads the saved return\n3. User hits **File** — the server runs the final calculation and records the result\n\nEverything the user types has to survive them closing the laptop."
         },
         {
+          "type": "text",
+          "content": "There's one thing you can't skip even on day one: **identity**. A tax return is built out of the most sensitive data a person has — their Social Security number, their income, their dependents. You can't let just anyone open it, and you can't let the wrong person see it.\n\nSo before any of the tax flow, the user signs in. A small **[[node:auth|login]]** step checks their password, hands the browser a session, and from then on every request carries proof of who they are. The return they're editing is tied to that identity, and the database stores it as **[[glossary:persistence|persisted]]**, protected data — not a public document."
+        },
+        {
           "type": "diagram",
           "diagramId": "tax-filing-stage-1",
-          "caption": "The whole product: a browser, a server that does the tax math, and a database that remembers the return"
+          "caption": "The whole product: a login gate, a server that does the tax math, and a database that remembers the return",
+          "highlightNodes": ["auth"]
         },
         {
           "type": "callout",
           "style": "insight",
-          "content": "Tax software is different from most apps in one important way: being fast doesn't matter much, but being **correct** matters enormously. A chat app that drops a message is annoying. A tax app that miscalculates a return creates a legal problem for the user. Correctness is the product."
+          "content": "Tax software is different from most apps in two important ways. First, being fast matters less than being **correct** — a chat app that drops a message is annoying, but a tax app that miscalculates a return creates a legal problem for the user. Second, the data is uniquely **sensitive** — a leaked draft message is embarrassing, a leaked return is identity theft. Correctness and confidentiality are the product, and both start on day one."
         },
         {
           "type": "callout",
           "style": "tip",
-          "content": "At this stage, resist the urge to build for fifty states and every edge case. A single-W-2, standard-deduction return covers a huge share of real filers. Ship the simple case, get real returns flowing, and let actual users tell you which complications to handle next."
+          "content": "At this stage, resist the urge to build for fifty states and every edge case. A single-W-2, standard-deduction return covers a huge share of real filers. Ship the simple case, get real returns flowing, and let actual users tell you which complications to handle next. The login can stay simple too — one email and password — as long as the data behind it is treated as sensitive from the start."
         },
         {
           "type": "tradeoff",
@@ -77,9 +82,9 @@
             },
             {
               "id": "b",
-              "text": "The server saved the in-progress return to the database as the user went",
+              "text": "The server saved the in-progress return to the database, tied to the user's identity, as they went",
               "correct": true,
-              "explanation": "Because a return is a multi-day session, the server has to persist each step to the database. When the user returns, the server reloads that saved state and they pick up where they left off."
+              "explanation": "Because a return is a multi-day session, the server has to persist each step to the database under the signed-in user's identity. When they log back in, the server reloads that saved state and they pick up where they left off."
             },
             {
               "id": "c",
@@ -92,52 +97,162 @@
       ],
       "suggestedQuestions": [
         "Where exactly does the tax calculation happen — the browser or the server?",
-        "Why not just do the math in the browser and skip the server?",
+        "Why does a tax app need login on day one when other apps add it later?",
         "What does it mean to 'save state' for a tax return?"
       ]
     },
     {
       "id": "stage-2",
-      "title": "Fifty States and a Side Hustle",
-      "userScale": "50,000 returns/day",
+      "title": "The Guided Interview",
+      "userScale": "50K returns/day",
       "narrative": {
-        "setup": "Word spreads and your users get more complicated. Now they itemize deductions, report freelance income, sell stock, and — the big one — earn money in more than one state. Someone who lives in New Jersey but works in New York has to file three returns: federal, NJ, and NY, each with its own rules.",
-        "problem": "The clean little calculation you wrote for one W-2 has turned into a tangle. Federal rules, fifty different state rule sets, and dozens of income types are all jammed into one server. Every time a state changes its tax brackets, you're editing the same code that handles federal returns — and risking breaking everything. On top of that, filing is no longer instant: you have to electronically submit each return to the IRS and to each state agency, and those systems are slow and sometimes down.",
-        "resolution": "You pull the tax logic out into a dedicated calculation engine so each jurisdiction's rules live in their own module. And you stop making users wait for the IRS: filing requests go onto a queue, and a background worker submits them and tracks each one until it's accepted."
+        "setup": "Word spreads and your users get more complicated. Now they itemize deductions, report freelance income, sell stock, and — the big one — earn money in more than one state. Someone who lives in New Jersey but works in New York has to file three returns: federal, NJ, and NY, each with its own rules. They don't know any of that. Your job is to ask the right questions and quietly do the hard part.",
+        "problem": "Two things break at once. First, you can't show everyone the same form anymore — the questions a freelancer needs are useless to a retiree, and asking all of them would drown every user. Second, your clean little calculation has turned into a tangle of federal rules, fifty state rule sets, and dozens of income types jammed into one server. And there's a quieter failure: users are overpaying, because they don't know which deductions and credits they qualify for, and your app never tells them.",
+        "resolution": "You split the brain into three parts. A workflow engine drives a dynamic interview, deciding which question to ask next based on what the user has already said. A dedicated calculation engine holds each jurisdiction's rules as its own module. And a recommendation engine scans the return for every deduction and credit the filer qualifies for, optimizing for the largest legal refund."
       },
       "blocks": [
         {
           "type": "text",
-          "content": "A multi-state return is really several returns that share data. Your New-Jersey-resident-working-in-New-York user needs a federal return, a New York non-resident return, and a New Jersey resident return that credits the tax already paid to New York. Each has different brackets, different deductions, different forms.\n\nCramming federal logic, fifty state rule sets, and every income type into one [[node:server|server]] becomes unmaintainable fast."
+          "content": "The first thing that breaks is the interview itself. A single hardcoded form can't serve a freelancer with stock sales and a retiree with one pension — show everyone every question and you bury them; show everyone too few and you miss income.\n\nWhat you actually need is a flow that **branches**. \"Did you have any income other than a W-2?\" If no, skip eleven screens. If yes, \"Was any of it self-employment?\" — and now a whole sub-interview about business expenses opens up. The path through the app is different for every filer."
         },
         {
           "type": "text",
-          "content": "The fix is to split the tax brain out from the app. Your **[[node:server|app server]]** still handles logins, the interview questions, and saving progress. But the actual computation moves to a separate **[[node:calc-engine|calculation engine]]** where federal and each state's rules live as independent modules.\n\nThis is a step toward [[glossary:microservices|microservices]]: when New York changes its brackets, you update the New York module and nothing else. The federal logic — and the other 49 states — are untouched."
+          "content": "So you build a **[[node:workflow|workflow engine]]**: a separate service that owns the decision of *what comes next*. The browser stops being in charge of the flow. Instead it asks the engine, \"given everything this user has told me so far, what's the next screen?\" The engine consults the rules, looks at the answers, and replies with the next question — or with \"you're done.\"\n\nThis is the key inversion: the front end becomes a **thin renderer**. It doesn't know the tax interview; it just draws whatever the workflow engine tells it to draw. The logic of the interview lives in one place you can change without touching the UI."
         },
         {
           "type": "reveal",
-          "label": "Real-world analogy: specialist accountants",
-          "content": "At first you were the sole accountant doing everything. Now you've hired specialists: one who only knows federal rules, one for each state. The **app server** is the office manager who greets the client, gathers their documents, and hands the file to the right specialists. The **calculation engine** is the room full of specialists, each an expert in exactly one rulebook. When a state rewrites its tax code, only that one specialist has to relearn anything."
+          "label": "Real-world analogy: a great accountant's follow-up questions",
+          "content": "A bad tax preparer hands you a 40-page form and says \"fill in everything that applies.\" A great one asks one question at a time and *listens*: \"Any kids? — Okay, how old? — Did you pay for childcare?\" Each answer decides the next question. The **workflow engine** is that great preparer's instinct, encoded. The screen in front of you is just the preparer's mouth — it says whatever the brain decides to ask next. Change how the brain thinks, and every conversation changes, without retraining the mouth."
+        },
+        {
+          "type": "text",
+          "content": "The second thing that breaks is the math. A multi-state return is really several returns that share data: your New-Jersey-resident-working-in-New-York user needs a federal return, a New York non-resident return, and a New Jersey resident return that credits the tax already paid to New York. Each has different brackets, different deductions, different forms.\n\nCramming federal logic, fifty state rule sets, and every income type into one server becomes unmaintainable fast. So you pull the math out into a dedicated **[[node:calc-engine|calculation engine]]** where federal and each state's rules live as independent modules. This is a step toward [[glossary:microservices|microservices]]: when New York changes its brackets, you update the New York module and nothing else — the federal logic and the other 49 states are untouched."
+        },
+        {
+          "type": "text",
+          "content": "The third problem is the one users can't see: they're leaving money on the table. Someone with a side gig might not know that a home-office deduction, mileage, or the Earned Income Tax Credit applies to them. A plain calculator computes whatever they enter and stops there.\n\nSo you add a **[[node:recommender|refund optimizer]]** — a recommendation engine that looks at the whole return and asks, \"what is this person eligible for that they haven't claimed?\" It surfaces deductions and credits, models the impact of each, and steers the interview toward the combination that produces the **largest legal refund**. This is the \"maximize your refund\" promise, and it's a distinct piece of logic from the calculation engine: the calc engine answers *what is the tax given these inputs*, the optimizer answers *which inputs are we missing*."
         },
         {
           "type": "diagram",
           "diagramId": "tax-filing-stage-2",
-          "caption": "The tax math moves into a dedicated engine, and filing happens asynchronously through a queue",
-          "highlightNodes": ["calc-engine", "queue", "efile-worker", "irs"],
-          "animateFlow": ["client-1", "server", "calc-engine"]
+          "caption": "The app server delegates to three specialists: a workflow engine that drives the interview, a calc engine that does the math, and a refund optimizer that hunts for deductions",
+          "highlightNodes": ["workflow", "calc-engine", "recommender"],
+          "animateFlow": ["client-1", "server", "workflow"]
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: specialist accountants",
+          "content": "At first you were the sole accountant doing everything. Now you've hired specialists. The **app server** is the office manager who greets the client and routes the work. The **workflow engine** is the intake specialist who knows exactly which question to ask next. The **calculation engine** is the room of rule experts, each fluent in one rulebook. And the **refund optimizer** is the seasoned advisor who glances at your file and says \"wait — you never claimed the childcare credit.\" Each is an expert in exactly one job, so improving one doesn't risk breaking the others."
+        },
+        {
+          "type": "tradeoff",
+          "decision": "Should the interview flow be hardcoded in the front end, or driven by a separate workflow engine?",
+          "options": [
+            {
+              "name": "Hardcoded in the UI",
+              "pros": ["Simple for a handful of screens", "No extra service to run", "Fast — no round-trip to ask what's next"],
+              "cons": ["Every tax-law change means a UI redeploy", "Logic gets copy-pasted across web and mobile", "Impossible to test the flow on its own"]
+            },
+            {
+              "name": "A workflow engine drives it",
+              "pros": ["One source of truth for the interview", "Web and mobile render the same flow", "Change the questions without shipping a new app", "The flow can be tested in isolation"],
+              "cons": ["Another service to build and run", "The UI must ask the engine what to show next"]
+            }
+          ],
+          "choice": "Drive the interview from a workflow engine. Tax rules change every year and the same flow has to run identically on web and mobile, so the interview logic can't live baked into one client. Centralizing it lets you update questions as laws change without redeploying the apps, and lets you test the entire flow as data. The cost is a real one — the UI now leans on the engine to tell it what to show — but it's the same trade that put the calculation on the server in Stage 1: keep the authoritative logic in one place you control."
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "Notice the pattern across all three services: the front end keeps getting thinner. The workflow engine decides *what to ask*, the calc engine decides *what it adds up to*, the optimizer decides *what to suggest* — and the browser just renders the answers. When the interface is a thin shell over engines you control, you can change the product's behavior for millions of users without anyone installing an update."
+        },
+        {
+          "type": "checkpoint",
+          "question": "Why move the interview's branching logic into a workflow engine instead of coding it into the front-end screens?",
+          "options": [
+            {
+              "id": "a",
+              "text": "It makes the screens render faster",
+              "correct": false,
+              "explanation": "It usually adds a round-trip, not removes one. The win isn't speed — it's having one authoritative copy of the interview logic."
+            },
+            {
+              "id": "b",
+              "text": "So the interview is defined once and can change with tax law without redeploying the web and mobile apps, and can be tested on its own",
+              "correct": true,
+              "explanation": "The flow is the part of a tax app that changes most — every year, and per jurisdiction. Centralizing it in an engine means one update covers every client, and the branching can be tested as data instead of by clicking through screens."
+            },
+            {
+              "id": "c",
+              "text": "Front-end code can't express if/else branching",
+              "correct": false,
+              "explanation": "It absolutely can. The problem isn't capability — it's that hardcoding the flow scatters tax logic across clients and ties every rule change to an app release."
+            }
+          ]
+        },
+        {
+          "type": "reveal",
+          "label": "Deep dive: why three engines instead of one big service",
+          "content": "You could keep piling logic into the app server. The reason to split it into a workflow engine, a calculation engine, and a refund optimizer comes down to forces specific to tax software:\n\n**They change on different schedules.** The interview flow changes when the product team rewords questions. The calculation rules change when Congress and fifty legislatures change the law. The optimizer changes when you discover a credit you weren't surfacing. Separating them means each can evolve without retesting the others.\n\n**The calc engine gets reused everywhere.** The live refund meter as the user types, the optimizer's \"what if you claimed this\" simulations, and the final filed return must all run through the *exact same* calculation logic. A separate engine guarantees the preview and the filed return can never disagree.\n\n**Each can be tested in isolation.** A calculation engine with clean inputs and outputs can be run against thousands of known-correct returns automatically. That regression suite is how you sleep at night during tax season — you can prove a code change didn't alter any result it shouldn't have."
+        }
+      ],
+      "suggestedQuestions": [
+        "How does the workflow engine decide which question to show next?",
+        "Why keep the calculation engine and the refund optimizer separate — don't they both do tax math?",
+        "How can the live estimate and the filed return be guaranteed to match?"
+      ]
+    },
+    {
+      "id": "stage-3",
+      "title": "Producing and Filing the Return",
+      "userScale": "1M returns/season",
+      "narrative": {
+        "setup": "The numbers are right and the optimizer has found every credit. Now comes the part the user actually came for: turning their answers into an official return and getting it into the government's hands. That sounds simple. It is not.",
+        "problem": "A tax return isn't a row in your database — it's specific government forms, filled out exactly, that the user needs a copy of and the IRS needs transmitted. Worse, the systems you transmit to are slow, rate-limited, occasionally down for maintenance, and — for some states and forms — don't offer an electronic interface at all. If your server waits on the IRS before confirming, users stare at spinners and hit errors during the busiest hours. And nobody is telling the user what happened after they clicked File.",
+        "resolution": "A PDF service renders the official forms — both the copy the filer keeps and the document that gets transmitted. Filing goes through a queue and a background worker that submits to, and retrieves acknowledgements from, the government APIs, retrying when they're slow. When an API is down or doesn't exist, the worker falls back to a durable store of the computed return and either retries later or produces a paper return to mail. And an email service keeps the filer informed at every step."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "First, you have to **produce the document**. Behind the friendly interview, a tax return is a precise set of government forms — a 1040 with its schedules, each state's forms — that must be filled out to the line. The user wants a copy they can save, print, or show a lender. And the electronic transmission to the IRS is itself built from a structured rendering of those same forms.\n\nSo you add a **[[node:pdf|PDF service]]**: it takes the finished, calculated return and renders the exact official forms — pixel-correct, every line in the right box. One job, done in one place, used both for the filer's record copy and as the source for what gets transmitted."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: the print shop with the official stencils",
+          "content": "Your interview is a friendly conversation; the IRS only accepts answers on its own rigid forms. The **PDF service** is the back-office print shop that owns the official stencils. You hand it the finished numbers; it stamps them onto the exact government forms, identical every time. Keeping it as one service means there's a single place that knows what a valid 1040 looks like — when the form changes next year, you re-cut one stencil, not a dozen."
         },
         {
           "type": "text",
-          "content": "There's a second problem: **filing itself**. When a user hits File, you have to electronically transmit their return to the IRS and to each state agency. These government systems are slow, rate-limited, and occasionally down for maintenance. If your server waits for the IRS to respond before showing the user a confirmation, the user stares at a spinner for 40 seconds — or sees an error when the IRS is overloaded.\n\nSo you stop waiting. The user's File request drops a job onto a **[[glossary:message-queue|queue]]**, and the app instantly tells them \"Your return has been submitted — we'll email you when it's accepted.\""
+          "content": "Now the hard part: **filing**. When a user hits File, you have to transmit their return to the IRS and to each state agency through their [[glossary:api|e-file APIs]]. These government systems are slow, rate-limited, and occasionally down for maintenance. If your server waits for the IRS to respond before showing a confirmation, the user stares at a spinner for 40 seconds — or sees an error when the IRS is overloaded.\n\nSo you stop waiting. The File request drops a job onto a **[[glossary:message-queue|queue]]**, and the app instantly tells the user \"Your return has been submitted — we'll email you when it's accepted.\" A **[[node:efile-worker|background worker]]** pulls jobs off the queue and does the slow, unreliable work out of the user's sight. This is [[glossary:async|asynchronous]] processing, and it buys you three things: the user isn't blocked, [[glossary:retry|retries]] happen automatically when the IRS is down, and you submit at whatever rate the government will accept."
         },
         {
           "type": "reveal",
           "label": "Real-world analogy: the post office counter",
-          "content": "Filing synchronously is like mailing a certified letter and refusing to leave the post office counter until the recipient signs for it — you'd be standing there for days. Filing through a queue is how it actually works: you hand the letter to the clerk, get a tracking number, and walk away. A **background worker** is the postal system that delivers it, retries if the address is busy, and notifies you when it's signed for."
+          "content": "Filing synchronously is like mailing a certified letter and refusing to leave the post office counter until the recipient signs for it — you'd be standing there for days. Filing through a queue is how it actually works: you hand the letter to the clerk, get a tracking number, and walk away. The **background worker** is the postal system that delivers it, retries if the address is busy, and notifies you when it's signed for."
         },
         {
           "type": "text",
-          "content": "A **[[node:efile-worker|background worker]]** pulls jobs off the queue and submits each return to the right agency. This is [[glossary:async|asynchronous]] processing, and it buys you three things:\n\n1. **The user isn't blocked** — they get an instant confirmation instead of a spinner\n2. **Retries are automatic** — if the IRS is down, the worker waits and tries again later without losing the return\n3. **You control the pace** — you submit at whatever rate the IRS accepts, even when thousands of users file at once"
+          "content": "The government APIs aren't a one-way chute, either. The worker doesn't just **submit** — it also **retrieves**: the prior-year income figure used to verify identity, an Identity Protection PIN, and most importantly the **acknowledgement** that comes back hours later saying the return was accepted or rejected. Filing is a conversation with a system on the other side, not a fire-and-forget."
+        },
+        {
+          "type": "text",
+          "content": "But what about when the government system is simply *unavailable* — down for a maintenance window, or, for certain states and forms, offering no electronic interface at all? You can't lose the return, and you can't make the user wait for a system that won't answer.\n\nSo the worker has a **[[node:fallback-store|fallback path]]**. The fully computed return — every number, every form, the exact tax owed or refunded — is written to a durable store the moment it's ready, independent of whether the API is reachable. If the API is merely down, the worker retries from that store on its own schedule until it gets through. If a jurisdiction has no e-file API at all, the system falls back to generating a **paper return** (another job for the PDF service) for the filer to print and mail. Either way, the calculated result is preserved and the filing eventually completes — the unreliable external system never becomes a single point of data loss."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "tax-filing-stage-3",
+          "caption": "The return becomes official documents and reaches the government: a PDF service renders the forms, a queue and worker submit and retrieve through the e-file APIs, a fallback store guards against outages, and an email service keeps the filer informed",
+          "highlightNodes": ["pdf", "queue", "efile-worker", "fallback-store", "irs", "email"],
+          "animateFlow": ["client-1", "server", "queue", "efile-worker"]
+        },
+        {
+          "type": "text",
+          "content": "Finally, somebody has to keep the user in the loop. Because filing is asynchronous, the moment of \"done\" is split across hours: submitted now, accepted (or rejected) later. The user has closed the laptop. So you add an **[[node:email|email service]]** — a dedicated channel that sends the submission receipt, the acceptance confirmation, and, if the IRS bounces the return, a clear explanation of what to fix.\n\nMaking email its own service (rather than something the worker does inline) matters: sending mail is itself a slow, sometimes-failing external call, and you don't want a flaky mail provider to stall the filing pipeline. The worker hands off a \"notify this user\" job and moves on."
+        },
+        {
+          "type": "callout",
+          "style": "warning",
+          "content": "Asynchronous filing changes what \"done\" means. **Submitted is not the same as accepted.** The IRS can reject a return hours later — a mismatched name, a duplicate Social Security number, a wrong prior-year figure. Your system has to track every return through submitted, accepted, or rejected, and tell the user clearly which state it's in. \"I clicked File\" is not the same as \"the government has my return,\" and the email service is how you close that gap honestly."
         },
         {
           "type": "tradeoff",
@@ -146,44 +261,15 @@
             {
               "name": "Submit synchronously",
               "pros": ["The user gets a real accepted/rejected answer on the spot", "Nothing extra to build"],
-              "cons": ["User waits on a slow government system", "Errors out when the IRS is overloaded or down", "A filing surge has nowhere to go"]
+              "cons": ["User waits on a slow government system", "Errors out when the IRS is overloaded or down", "A filing surge has nowhere to go", "No graceful path when an API is unavailable"]
             },
             {
               "name": "Queue + background worker",
-              "pros": ["Instant acknowledgement to the user", "Automatic retries when the IRS is down", "You submit at whatever rate it accepts"],
+              "pros": ["Instant acknowledgement to the user", "Automatic retries when the IRS is down", "You submit at whatever rate it accepts", "A natural place to fall back to a durable store"],
               "cons": ["'Submitted' no longer means 'accepted'", "You must track and surface each return's status"]
             }
           ],
-          "choice": "Put filings on a queue. The IRS and state systems are slow and sometimes offline, so blocking a user on them is a bad trade — far better to acknowledge instantly and let a worker push the return through with retries. The price is real: you now have to track every return through submitted to accepted or rejected, and tell the user plainly where it stands."
-        },
-        {
-          "type": "callout",
-          "style": "warning",
-          "content": "Asynchronous filing changes what \"done\" means. Submitted is not the same as accepted. The IRS can reject a return hours later — a mismatched name, a duplicate Social Security number, a wrong prior-year figure. Your system has to track every return through submitted, accepted, or rejected, and tell the user clearly which state it's in. \"I clicked File\" is not the same as \"the government has my return.\""
-        },
-        {
-          "type": "checkpoint",
-          "question": "Why route the IRS submission through a queue and a background worker instead of submitting it directly when the user clicks File?",
-          "options": [
-            {
-              "id": "a",
-              "text": "It makes the tax calculation more accurate",
-              "correct": false,
-              "explanation": "The queue has nothing to do with accuracy — that's the calculation engine's job. The queue is about decoupling the user's click from a slow, unreliable external system."
-            },
-            {
-              "id": "b",
-              "text": "So the user gets an instant response and the worker can retry against the slow, sometimes-down IRS without losing the return",
-              "correct": true,
-              "explanation": "The queue decouples the user's action from the external system. The user is freed immediately, and the worker can retry on its own schedule when the IRS is overloaded or offline — without dropping anyone's return."
-            },
-            {
-              "id": "c",
-              "text": "Queues are required to talk to any external service",
-              "correct": false,
-              "explanation": "Plenty of external calls happen synchronously. A queue earns its place specifically when the external system is slow or unreliable and you don't want the user waiting on it."
-            }
-          ]
+          "choice": "Put filings on a queue. The IRS and state systems are slow and sometimes offline, so blocking a user on them is a bad trade — far better to acknowledge instantly and let a worker push the return through with retries, falling back to a durable store when an API is down. The price is real: you now have to track every return through submitted to accepted or rejected, and tell the user plainly where it stands."
         },
         {
           "type": "challenge",
@@ -192,7 +278,7 @@
           "options": [
             {
               "id": "a",
-              "text": "Give each return a unique filing ID and have the worker check 'has this return already been accepted?' before every submission",
+              "text": "Give each return a unique filing ID and have the worker check 'has this return already been accepted or in flight?' before every submission",
               "correct": true,
               "explanation": "This makes submission idempotent: no matter how many times the job runs, the return reaches the IRS at most once. The worker keys on the return's filing ID and refuses to submit one that's already in flight or accepted. Double-filing a tax return is a serious problem, so this guard is essential.",
               "conceptLink": "race-condition"
@@ -210,32 +296,124 @@
               "explanation": "A UI delay might reduce duplicate clicks, but it doesn't prevent them — and it does nothing about the worker's own retries. Correctness has to be guaranteed in the system, not in the button."
             }
           ]
-        },
-        {
-          "type": "reveal",
-          "label": "Deep dive: why a calculation engine instead of just more code in the server",
-          "content": "You could keep piling tax logic into the app server. The reason not to comes down to three forces specific to tax software:\n\n**Rules change every year, per jurisdiction.** Federal brackets, standard deductions, and credits change annually, and all fifty states change on their own schedules. Isolating each rulebook means a New York change can't accidentally break a federal calculation.\n\n**The same engine gets reused.** Tax estimates, the live refund meter as the user types, and the final filed return should all run through the exact same calculation logic. A separate engine guarantees the preview and the filed return can never disagree.\n\n**It can be tested in isolation.** A calculation engine with clean inputs and outputs can be run against thousands of known correct returns automatically. That regression suite is how you sleep at night during tax season — you can prove a code change didn't alter any result it shouldn't have."
         }
       ],
       "suggestedQuestions": [
-        "How does the system know a multi-state return is 'done' if the IRS responds hours later?",
-        "What happens to a return on the queue if the worker crashes mid-submission?",
-        "Why keep the app server and calculation engine separate instead of one big service?"
+        "Why render PDFs at all instead of just sending the IRS the raw numbers?",
+        "What happens to a return if a state's e-file system has no API?",
+        "Why make email its own service instead of having the worker send mail directly?"
       ]
     },
     {
-      "id": "stage-3",
-      "title": "April 15, 11:59 PM",
-      "userScale": "10,000,000 returns",
+      "id": "stage-4",
+      "title": "Identity and Money",
+      "userScale": "5M accounts",
       "narrative": {
-        "setup": "It's the night of the deadline. Tax filing isn't steady traffic — it's a wall. Most of the year is quiet, then a huge share of all returns arrive in the final week, and a startling number in the final hour before midnight on April 15. Ten million people are logged in at once, all doing math-heavy work and all trying to file before the clock runs out.",
-        "problem": "Your single app server and single calculation engine, fine for a normal Tuesday, are buried. Response times climb to 30 seconds. The calculation engine is pinned at 100% CPU recomputing the same federal brackets for millions of returns. The database is drowning because every keystroke in the interview triggers a save and a reload. Some users get errors at 11:55 PM — and a return filed one minute after midnight can mean penalties.",
-        "resolution": "You put a load balancer in front of many identical app servers and calculation engines, scaling out horizontally. You cache the tax rules and bracket tables that every return shares. You add a read replica so all those progress-reloads stop hammering the primary database. And you add rate limiting to keep bots and runaway retries from stealing capacity from real filers."
+        "setup": "You now hold years of returns for millions of people — Social Security numbers, every dollar of income, dependents, bank accounts. You also charge a fee to file, and you route refunds. This stage isn't about a new feature; it's about the two things that, done wrong, end the company: the sensitive data you guard, and the money that moves through you.",
+        "problem": "A single password is a thin gate on a vault of identity data, and attackers know tax accounts are gold. Users also hate re-typing — they want to sign in with accounts they already have and import their W-2 without copying numbers by hand. And once a return is filed, money has to move in two directions: your fee in, the government's refund out — without you ever quietly sitting on funds you shouldn't.",
+        "resolution": "You add real authentication: single sign-on and OAuth so users bring existing identities and authorize data imports, plus a second factor for accounts that hold this much PII. You move the most sensitive data into an isolated, encrypted vault separate from the app database. A payment service collects the filing fee. And a bank integration disperses the refund — including the option to deduct your fee straight from it."
       },
       "blocks": [
         {
           "type": "text",
-          "content": "Tax season is the hardest kind of load: a sharp, predictable spike. One server — even with your clean calculation engine and queue — can't absorb ten million simultaneous filers. One machine has a ceiling on CPU, memory, and connections.\n\nThe answer is [[glossary:horizontal-scaling|horizontal scaling]]: run many identical app servers and many calculation engines side by side, instead of trying to build one impossibly large machine."
+          "content": "In Stage 1 a password was enough to protect one draft return. Now the same login opens **years** of filed returns, Social Security numbers, and bank details for millions of people. That makes your accounts a prime target, and a password alone — reused, phished, or guessed — is far too thin a gate.\n\nSo authentication grows up. The **[[node:auth|auth service]]** becomes its own component, responsible for proving who someone is before the app server trusts a single request — and for doing it in more than one way."
+        },
+        {
+          "type": "text",
+          "content": "First, you stop forcing everyone to invent a new password. With **single sign-on (SSO)** and **OAuth**, a user can \"Sign in with Google\" or Apple: they prove their identity to a provider they already trust, and that provider vouches for them to you. You never see their Google password — you receive a signed token that says \"this is really them.\"\n\nOAuth does double duty here. Beyond login, it's how you let a user **import data without handing over passwords**. \"Connect your payroll provider to import your W-2\" works by the user authorizing your app, at the provider, to read just that one document — a scoped, revocable grant. The provider hands you a limited access token, never the user's credentials."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: the valet key",
+          "content": "A modern car comes with a valet key that opens the door and starts the engine but won't unlock the glovebox or the trunk. **OAuth** is that valet key. When you \"connect your payroll to import your W-2,\" you hand TurboTax a valet key to your payroll account — enough to read this year's W-2, nothing more — and you can take the key back anytime. You never give them the master key (your password). **SSO** is the flip side: instead of cutting a new key for every shop you visit, you carry one trusted key (your Google identity) that the shops agree to honor."
+        },
+        {
+          "type": "text",
+          "content": "Second, you add a **second factor (2FA)**. A password is something you *know*; a second factor is something you *have* — a code from an authenticator app, a prompt on your phone, a hardware key. Requiring both means a stolen password isn't enough to open someone's tax history.\n\nFor a vault of this sensitivity, 2FA isn't a nice-to-have — it's the difference between \"an attacker who phishes one password reads everything\" and \"a phished password is useless on its own.\" The auth service is where you enforce it, stepping up to the second factor on login, on sensitive changes, and on logins from new devices."
+        },
+        {
+          "type": "text",
+          "content": "Now the data itself. Not all of it is equally sensitive: a user's interview progress is ordinary app data, but their Social Security number and the bank account their refund lands in are the crown jewels. Keeping the crown jewels in the same table as everything else means one mistake exposes everything.\n\nSo you carve out a **[[node:pii-vault|PII vault]]** — an isolated, heavily-restricted store for the most sensitive fields, encrypted at rest, reachable only through a narrow interface, with its own tight access controls and audit logging. The app database holds a token in place of the real SSN; only the vault can turn that token back into the number, and only for the few operations that genuinely need it. Shrinking the blast radius like this is the whole game with PII."
+        },
+        {
+          "type": "text",
+          "content": "Then there's the money, moving in two directions. **In:** you charge a fee to file, so you add a **[[node:payment|payment service]]** (think Stripe) that collects the card payment, handles the sensitive card data so it never touches your servers, and tells the app when the charge succeeds. **Out:** once the IRS issues a refund, it has to reach the filer. A **[[node:bank|bank / ACH integration]]** routes that refund to the user's bank account, and powers the popular \"pay with your refund\" option — your fee is deducted from the refund before the rest is deposited, so the user pays nothing up front.\n\nThe rule with both directions is the same: be a conduit, not a reservoir. You move money promptly and visibly; you never quietly hold funds that belong to the user or the government."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "tax-filing-stage-4",
+          "caption": "The trust layer: an auth service backed by SSO/OAuth providers and 2FA, an isolated encrypted PII vault, a payment service collecting the fee, and a bank integration dispersing the refund",
+          "highlightNodes": ["auth", "idp", "pii-vault", "payment", "bank"],
+          "animateFlow": ["client-1", "auth", "server"]
+        },
+        {
+          "type": "tradeoff",
+          "decision": "Build authentication and payments in-house, or lean on specialized providers?",
+          "options": [
+            {
+              "name": "Build it yourself",
+              "pros": ["Total control over the experience", "No third-party fees", "No external dependency"],
+              "cons": ["You become responsible for storing passwords and card data securely", "You inherit a huge compliance and attack surface", "Years of work to match what providers do by default"]
+            },
+            {
+              "name": "Use SSO/OAuth providers and a payment processor",
+              "pros": ["Card data and federated identity never touch your servers", "Compliance (PCI, etc.) is largely the provider's burden", "Battle-tested security you couldn't build alone", "Faster to ship"],
+              "cons": ["Per-transaction and per-identity costs", "You depend on their uptime and policies", "Less control over edge cases"]
+            }
+          ],
+          "choice": "Lean on providers for the parts where a mistake is catastrophic. The safest credit-card data is the data you never store; the safest password is the one a federated identity provider holds instead of you. Offloading card handling to a payment processor and identity to SSO/OAuth shrinks both your attack surface and your compliance burden enormously. You still own the PII vault yourself — the tax data *is* your product — but you encrypt and isolate it rather than treating it like ordinary rows. The cost is real dependency and per-transaction fees, and it's the right trade when the downside of doing it yourself is a breach."
+        },
+        {
+          "type": "callout",
+          "style": "warning",
+          "content": "Identity and money have the largest blast radius in the whole system. A bug that shows the wrong refund estimate is embarrassing; a bug that leaks a vault of SSNs or misroutes a refund is existential. Treat these components differently from the rest: least-privilege access, encryption at rest, audit logging on every read of the vault, and a hard rule that sensitive card data and federated passwords never get stored by you at all."
+        },
+        {
+          "type": "challenge",
+          "scenario": "An attacker phishes a user's password and logs in from a new device, hoping to download three years of filed returns — full of Social Security numbers and bank details.",
+          "question": "Which design choices, working together, keep this from becoming a full breach of that user's data?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Require a second factor on the new-device login, and keep SSNs in the isolated, encrypted PII vault behind their own access controls — so a phished password alone unlocks neither the account nor the raw sensitive data",
+              "correct": true,
+              "explanation": "Defense in depth: 2FA means the stolen password isn't enough to get in, and even an authenticated session can't pull raw SSNs out of the vault without passing its separate, tightly-scoped access controls. Each layer shrinks the blast radius of the one in front of it failing.",
+              "conceptLink": "graceful-degradation"
+            },
+            {
+              "id": "b",
+              "text": "Email the user a warning after the attacker has already downloaded the returns",
+              "correct": false,
+              "explanation": "A notification after the fact is good practice, but it's detection, not prevention. By the time the email goes out, the data is gone. The protection has to stop the access, not just report it."
+            },
+            {
+              "id": "c",
+              "text": "Force everyone to change their password every 30 days",
+              "correct": false,
+              "explanation": "Frequent forced rotation tends to push users toward weaker, reused passwords and does nothing against a password phished today. A second factor and an isolated vault address the actual attack; a rotation policy doesn't."
+            }
+          ]
+        }
+      ],
+      "suggestedQuestions": [
+        "How does 'Sign in with Google' let me in without you ever seeing my Google password?",
+        "Why store SSNs in a separate vault instead of just encrypting the main database?",
+        "How does 'pay with your refund' work without TurboTax holding my money?"
+      ]
+    },
+    {
+      "id": "stage-5",
+      "title": "April 15, 11:59 PM",
+      "userScale": "10M returns, one night",
+      "narrative": {
+        "setup": "It's the night of the deadline. Tax filing isn't steady traffic — it's a wall. Most of the year is quiet, then a huge share of all returns arrive in the final week, and a startling number in the final hour before midnight on April 15. Ten million people are logged in at once, all doing math-heavy work, all running through the interview, the engines, the PDF service, payments — and all trying to file before the clock runs out.",
+        "problem": "Your single app server and single calculation engine, fine for a normal Tuesday, are buried. Response times climb to 30 seconds. The calculation engine is pinned at 100% CPU recomputing the same federal brackets for millions of returns. The database is drowning because every keystroke in the interview triggers a save and a reload. Some users get errors at 11:55 PM — and a return filed one minute after midnight can mean penalties.",
+        "resolution": "You put a load balancer in front of many identical app servers and engines, scaling out horizontally. You cache the tax rules and bracket tables that every return shares. You add a read replica so all those progress-reloads stop hammering the primary database. And you add rate limiting to keep bots and runaway retries from stealing capacity from real filers."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Tax season is the hardest kind of load: a sharp, predictable spike. One server — even with your clean engines and queue — can't absorb ten million simultaneous filers. One machine has a ceiling on CPU, memory, and connections.\n\nThe answer is [[glossary:horizontal-scaling|horizontal scaling]]: run many identical app servers and many calculation engines side by side, instead of trying to build one impossibly large machine. Everything you built in the last three stages — the workflow engine, the calc engine, the optimizer, the PDF service — gets replicated across the fleet."
         },
         {
           "type": "tradeoff",
@@ -265,7 +443,7 @@
         },
         {
           "type": "diagram",
-          "diagramId": "tax-filing-stage-3",
+          "diagramId": "tax-filing-stage-5",
           "caption": "The deadline-night architecture: a load balancer fans out to many servers and engines, with a cache, a read replica, and the async filing pipeline",
           "highlightNodes": ["load-balancer", "server-2", "cache", "read-replica"],
           "animateFlow": ["client-1", "load-balancer", "server", "calc-engine"]
@@ -290,7 +468,7 @@
         {
           "type": "callout",
           "style": "insight",
-          "content": "When the worst happens and you still can't keep up, the goal becomes [[glossary:graceful-degradation|graceful degradation]]: protect the one thing that matters. Let the live refund estimate go stale or queue up filings, but never let a user's saved progress vanish or a finished return fail to record. Degrade the nice-to-haves; defend correctness to the last."
+          "content": "When the worst happens and you still can't keep up, the goal becomes [[glossary:graceful-degradation|graceful degradation]]: protect the one thing that matters. Let the live refund estimate go stale, let the refund optimizer's suggestions wait, queue up filings — but never let a user's saved progress vanish or a finished return fail to record. Degrade the nice-to-haves; defend correctness to the last."
         },
         {
           "type": "checkpoint",
@@ -345,12 +523,12 @@
         {
           "type": "reveal",
           "label": "Deep dive: the full deadline-night path of a single return",
-          "content": "Here's what happens when a user clicks File at 11:59 PM:\n\n1. **DNS** resolves turbotax.com to the load balancer\n2. **Rate limiter** checks this client hasn't blown past its request quota; if it has, it gets a `429`\n3. **Load balancer** picks a healthy app server from the fleet\n4. **App server** loads the in-progress return from the **read replica**\n5. **Calculation engine** finalizes the math, reading the shared bracket tables from the **cache** — not the database\n6. **App server** takes a **lock** on the return in the **primary database** and marks it filed, so a racing duplicate can't double-file\n7. A filing job goes onto the **queue**; the app instantly confirms to the user\n8. **Background workers** submit to the IRS and state agencies, retrying as those systems allow, and email the user when each return is accepted\n\nEach layer you added across the three stages solves one specific pressure of that night. Together they turn a one-W-2 weekend project into a system that can take ten million returns in the hours before a hard, unmovable deadline."
+          "content": "Here's what happens when a user clicks File at 11:59 PM — every component from all five stages, in order:\n\n1. **DNS** resolves turbotax.com to the load balancer\n2. **Rate limiter** checks this client hasn't blown past its request quota; if it has, it gets a `429`\n3. **Auth service** confirms the session is valid (and that the user cleared 2FA earlier)\n4. **Load balancer** picks a healthy app server from the fleet\n5. **App server** loads the in-progress return from the **read replica**; the **workflow engine** has already walked the user to the end of the interview\n6. **Calculation engine** finalizes the math, reading the shared bracket tables from the **cache** — not the database — while the **refund optimizer** has confirmed every credit is claimed\n7. **PDF service** renders the official forms for the filer's records and for transmission\n8. **Payment service** collects the filing fee (or it's marked to come out of the refund)\n9. **App server** takes a **lock** on the return in the **primary database** and marks it filed, so a racing duplicate can't double-file\n10. A filing job goes onto the **queue**; the app instantly confirms to the user\n11. **Background workers** submit to the **IRS and state APIs** (falling back to the durable store if one is down), and the **email service** notifies the user when each return is accepted\n12. When the refund is issued, the **bank / ACH integration** routes it to the user's account\n\nEach layer you added across the five stages solves one specific pressure of that night. Together they turn a one-W-2 weekend project into a system that can take ten million returns in the hours before a hard, unmovable deadline."
         },
         {
           "type": "reveal",
           "label": "Deep dive: why predictable spikes are their own kind of hard",
-          "content": "Tax season is unusual because the spike is enormous but also **known in advance** — you can see April 15 coming for a year. That changes the engineering playbook:\n\n**Pre-scale, don't react.** You don't wait for traffic to climb and then add servers; autoscaling is too slow for a wall of traffic that arrives in minutes. You provision the fleet ahead of the deadline and tear it down afterward.\n\n**Load-test against the peak.** Long before April, you replay synthetic deadline-night traffic at full volume to find the bottleneck that only appears at ten million returns — usually the database or a shared lock, not the servers.\n\n**Plan the failure modes.** With a hard deadline, 'the site is slow' has legal consequences for users. So you decide in advance what to shed first (the refund-estimate preview), what to queue (filings), and what must never fail (saved progress and recording a filed return)."
+          "content": "Tax season is unusual because the spike is enormous but also **known in advance** — you can see April 15 coming for a year. That changes the engineering playbook:\n\n**Pre-scale, don't react.** You don't wait for traffic to climb and then add servers; autoscaling is too slow for a wall of traffic that arrives in minutes. You provision the fleet ahead of the deadline and tear it down afterward.\n\n**Load-test against the peak.** Long before April, you replay synthetic deadline-night traffic at full volume to find the bottleneck that only appears at ten million returns — usually the database or a shared lock, not the servers.\n\n**Plan the failure modes.** With a hard deadline, 'the site is slow' has legal consequences for users. So you decide in advance what to shed first (the refund-estimate preview, the optimizer's suggestions), what to queue (filings), and what must never fail (saved progress and recording a filed return)."
         }
       ],
       "suggestedQuestions": [

@@ -2,31 +2,41 @@
   "tax-filing-stage-1": {
     "id": "tax-filing-stage-1",
     "title": "The Starting Point",
-    "description": "One server runs the tax math, one database remembers the return",
+    "description": "A login gate, one server that runs the tax math, one database that remembers the return",
     "nodes": [
       {
         "id": "client-1",
         "type": "client",
         "label": "Filer Browser",
-        "position": { "x": 0, "y": 235 },
-        "explanation": "The taxpayer's browser, where they answer interview questions and enter the numbers from their W-2"
+        "position": { "x": 0, "y": 250 },
+        "explanation": "The taxpayer's browser, where they sign in, answer interview questions, and enter the numbers from their W-2"
+      },
+      {
+        "id": "auth",
+        "type": "auth",
+        "label": "Login",
+        "position": { "x": 360, "y": 70 },
+        "explanation": "Checks the user's password and issues a session, so every request that follows carries proof of who they are — a tax return is full of sensitive data and can't be opened by just anyone",
+        "isNew": true
       },
       {
         "id": "server",
         "type": "server",
         "label": "Tax App",
-        "position": { "x": 420, "y": 235 },
+        "position": { "x": 470, "y": 250 },
         "explanation": "A single server that runs the interview, calculates the return, and saves progress to the database"
       },
       {
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 840, "y": 235 },
-        "explanation": "Stores each in-progress and filed return so a user can leave and come back without losing their work"
+        "position": { "x": 900, "y": 250 },
+        "explanation": "Stores each in-progress and filed return — sensitive, persisted data tied to the signed-in user — so they can leave and come back without losing their work"
       }
     ],
     "edges": [
+      { "id": "e-client-auth", "source": "client-1", "target": "auth", "label": "sign in", "style": "solid" },
+      { "id": "e-auth-server", "source": "auth", "target": "server", "label": "verified session", "style": "dashed" },
       { "id": "e-client-server", "source": "client-1", "target": "server", "label": "enter return", "style": "solid", "animated": true },
       { "id": "e-server-database", "source": "server", "target": "database", "label": "save progress", "style": "solid" },
       { "id": "e-database-server", "source": "database", "target": "server", "label": "load return", "style": "dashed" }
@@ -34,74 +44,230 @@
   },
   "tax-filing-stage-2": {
     "id": "tax-filing-stage-2",
-    "title": "Engine and E-File",
-    "description": "Tax logic moves to a dedicated engine; filing happens through a queue",
+    "title": "The Guided Interview",
+    "description": "The app server delegates to a workflow engine, a calc engine, and a refund optimizer",
     "nodes": [
       {
         "id": "client-1",
         "type": "client",
         "label": "Filer Browser",
-        "position": { "x": 0, "y": 235 },
-        "explanation": "The taxpayer's browser, now handling multi-state returns, itemized deductions, and business income"
+        "position": { "x": 0, "y": 250 },
+        "explanation": "A thin renderer: it draws whatever the workflow engine says to show next, instead of knowing the tax interview itself"
       },
       {
         "id": "server",
         "type": "server",
         "label": "App Server",
-        "position": { "x": 250, "y": 235 },
-        "explanation": "Handles logins, the interview, and saving progress, then hands the numbers to the calculation engine"
+        "position": { "x": 250, "y": 250 },
+        "explanation": "Handles the session and orchestrates the three engines, then saves progress to the database"
+      },
+      {
+        "id": "workflow",
+        "type": "server",
+        "label": "Workflow Engine",
+        "position": { "x": 520, "y": 60 },
+        "explanation": "Owns the decision of what to ask next: given the user's answers so far, it returns the next screen. The interview branches differently for every filer, and lives here so it can change with tax law without redeploying the apps",
+        "isNew": true
       },
       {
         "id": "calc-engine",
         "type": "server",
         "label": "Calc Engine",
-        "position": { "x": 500, "y": 70 },
-        "explanation": "A dedicated engine where federal and each state's tax rules live as separate modules, so one state's change can't break another",
+        "position": { "x": 520, "y": 250 },
+        "explanation": "Federal and each state's tax rules live as separate modules, so one state's change can't break another. Answers 'what is the tax given these inputs?'",
+        "isNew": true
+      },
+      {
+        "id": "recommender",
+        "type": "agent",
+        "label": "Refund Optimizer",
+        "position": { "x": 520, "y": 440 },
+        "explanation": "Scans the whole return for deductions and credits the filer qualifies for and steers toward the largest legal refund. Answers 'which inputs are we missing?'",
         "isNew": true
       },
       {
         "id": "database",
         "type": "database",
         "label": "Database",
-        "position": { "x": 500, "y": 400 },
-        "explanation": "Stores in-progress returns, filed returns, and the submission status of each filing"
+        "position": { "x": 880, "y": 250 },
+        "explanation": "Stores in-progress and filed returns, tied to the signed-in user"
+      }
+    ],
+    "edges": [
+      { "id": "e-client-server", "source": "client-1", "target": "server", "label": "answers", "style": "solid", "animated": true },
+      { "id": "e-server-workflow", "source": "server", "target": "workflow", "label": "next step?", "style": "solid", "animated": true },
+      { "id": "e-workflow-server", "source": "workflow", "target": "server", "label": "show this screen", "style": "dashed" },
+      { "id": "e-server-calc", "source": "server", "target": "calc-engine", "label": "compute", "style": "solid" },
+      { "id": "e-server-recommender", "source": "server", "target": "recommender", "label": "find deductions", "style": "solid" },
+      { "id": "e-server-database", "source": "server", "target": "database", "label": "save", "style": "solid" }
+    ]
+  },
+  "tax-filing-stage-3": {
+    "id": "tax-filing-stage-3",
+    "title": "Producing and Filing",
+    "description": "A PDF service renders the forms; a queue and worker submit and retrieve through the government APIs, with a fallback store and an email service",
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Filer Browser",
+        "position": { "x": 0, "y": 250 },
+        "explanation": "The taxpayer, who wants a copy of the official return and a clear answer on whether the government accepted it"
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "App Server",
+        "position": { "x": 230, "y": 250 },
+        "explanation": "Takes the finished return, asks the PDF service to render it, and drops a filing job on the queue"
+      },
+      {
+        "id": "pdf",
+        "type": "server",
+        "label": "PDF Service",
+        "position": { "x": 470, "y": 60 },
+        "explanation": "Renders the exact official government forms — pixel-correct — for both the filer's record copy and the electronic transmission. Also produces paper returns to mail where no e-file API exists",
+        "isNew": true
       },
       {
         "id": "queue",
         "type": "queue",
         "label": "Filing Queue",
-        "position": { "x": 740, "y": 235 },
-        "explanation": "Holds 'submit this return' jobs so the user gets an instant confirmation instead of waiting on the IRS",
+        "position": { "x": 470, "y": 250 },
+        "explanation": "Holds 'submit this return' jobs so the user gets an instant confirmation instead of waiting on the slow IRS",
         "isNew": true
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 230, "y": 440 },
+        "explanation": "Stores in-progress returns, filed returns, and the submission status of each filing"
       },
       {
         "id": "efile-worker",
         "type": "background-job",
         "label": "E-File Worker",
-        "position": { "x": 970, "y": 120 },
-        "explanation": "Pulls jobs off the queue and submits each return to the IRS and state agencies, retrying when they're slow or down",
+        "position": { "x": 720, "y": 130 },
+        "explanation": "Pulls jobs off the queue and submits each return to the government APIs, retrying when they're slow or down, and retrieving acknowledgements",
+        "isNew": true
+      },
+      {
+        "id": "fallback-store",
+        "type": "storage",
+        "label": "Fallback Store",
+        "position": { "x": 720, "y": 370 },
+        "explanation": "Durably holds the fully computed return — every number and form — the moment it's ready, independent of whether an API is reachable. The worker retries from here when a system is down, so an external outage never loses a return",
         "isNew": true
       },
       {
         "id": "irs",
         "type": "external-service",
         "label": "IRS / States",
-        "position": { "x": 970, "y": 360 },
-        "explanation": "Government e-file systems that accept or reject each return, often slowly and sometimes offline",
+        "position": { "x": 990, "y": 130 },
+        "explanation": "Government e-file APIs the worker both submits to and retrieves from (prior-year figures, acceptance acks) — often slow, sometimes offline, and for some jurisdictions absent entirely",
+        "isNew": true
+      },
+      {
+        "id": "email",
+        "type": "external-service",
+        "label": "Email Service",
+        "position": { "x": 990, "y": 370 },
+        "explanation": "A dedicated channel that sends the submission receipt, the acceptance confirmation, and any rejection reason — its own service so a flaky mail provider can't stall the filing pipeline",
         "isNew": true
       }
     ],
     "edges": [
-      { "id": "e-client-server", "source": "client-1", "target": "server", "label": "enter return", "style": "solid", "animated": true },
-      { "id": "e-server-calc", "source": "server", "target": "calc-engine", "label": "compute", "style": "solid", "animated": true },
-      { "id": "e-server-database", "source": "server", "target": "database", "label": "save", "style": "solid" },
-      { "id": "e-server-queue", "source": "server", "target": "queue", "label": "file", "style": "solid", "animated": true },
-      { "id": "e-queue-worker", "source": "queue", "target": "efile-worker", "style": "solid" },
-      { "id": "e-worker-irs", "source": "efile-worker", "target": "irs", "label": "submit", "style": "solid" }
+      { "id": "e-client-server", "source": "client-1", "target": "server", "label": "file", "style": "solid", "animated": true },
+      { "id": "e-server-pdf", "source": "server", "target": "pdf", "label": "render forms", "style": "solid" },
+      { "id": "e-server-queue", "source": "server", "target": "queue", "label": "enqueue filing", "style": "solid", "animated": true },
+      { "id": "e-server-database", "source": "server", "target": "database", "label": "save status", "style": "solid" },
+      { "id": "e-queue-worker", "source": "queue", "target": "efile-worker", "style": "solid", "animated": true },
+      { "id": "e-worker-irs", "source": "efile-worker", "target": "irs", "label": "submit / retrieve", "style": "solid" },
+      { "id": "e-worker-fallback", "source": "efile-worker", "target": "fallback-store", "label": "store if down", "style": "dashed" },
+      { "id": "e-worker-email", "source": "efile-worker", "target": "email", "label": "notify", "style": "solid" },
+      { "id": "e-email-client", "source": "email", "target": "client-1", "label": "accepted", "style": "dashed" }
     ]
   },
-  "tax-filing-stage-3": {
-    "id": "tax-filing-stage-3",
+  "tax-filing-stage-4": {
+    "id": "tax-filing-stage-4",
+    "title": "Identity and Money",
+    "description": "An auth service backed by SSO/OAuth and 2FA, an isolated PII vault, a payment service, and a bank integration",
+    "nodes": [
+      {
+        "id": "client-1",
+        "type": "client",
+        "label": "Filer Browser",
+        "position": { "x": 0, "y": 250 },
+        "explanation": "Signs in with an existing identity, clears a second factor, pays the fee, and receives the refund"
+      },
+      {
+        "id": "auth",
+        "type": "auth",
+        "label": "Auth Service",
+        "position": { "x": 240, "y": 250 },
+        "explanation": "Proves identity before the app server trusts any request — verifies passwords or federated tokens, and enforces a second factor (2FA) on logins from new devices and sensitive changes",
+        "isNew": true
+      },
+      {
+        "id": "idp",
+        "type": "external-service",
+        "label": "Google / Apple SSO",
+        "position": { "x": 240, "y": 60 },
+        "explanation": "Identity providers the user already trusts. Via SSO/OAuth they vouch for the user — you receive a signed token, never their password — and OAuth also authorizes scoped data imports like pulling a W-2 from payroll",
+        "isNew": true
+      },
+      {
+        "id": "server",
+        "type": "server",
+        "label": "App Server",
+        "position": { "x": 500, "y": 250 },
+        "explanation": "Only acts on requests the auth service has verified; routes sensitive fields to the vault and money to the payment and bank integrations"
+      },
+      {
+        "id": "pii-vault",
+        "type": "storage",
+        "label": "PII Vault",
+        "position": { "x": 760, "y": 70 },
+        "explanation": "An isolated, encrypted store for the crown jewels — SSNs, past returns, bank details — reachable only through a narrow, audited interface. The main database holds a token in place of the real SSN",
+        "isNew": true
+      },
+      {
+        "id": "payment",
+        "type": "external-service",
+        "label": "Payment (Stripe)",
+        "position": { "x": 760, "y": 250 },
+        "explanation": "Collects the filing fee and handles the card data so it never touches your servers — shrinking both the attack surface and the compliance burden",
+        "isNew": true
+      },
+      {
+        "id": "bank",
+        "type": "external-service",
+        "label": "Bank / ACH",
+        "position": { "x": 760, "y": 430 },
+        "explanation": "Routes the IRS-issued refund to the user's bank account, and powers 'pay with your refund' by deducting the fee before the rest is deposited. A conduit, never a reservoir",
+        "isNew": true
+      },
+      {
+        "id": "database",
+        "type": "database",
+        "label": "Database",
+        "position": { "x": 500, "y": 440 },
+        "explanation": "Holds ordinary app data and tokenized references to the vault — never raw SSNs or card numbers"
+      }
+    ],
+    "edges": [
+      { "id": "e-client-auth", "source": "client-1", "target": "auth", "label": "sign in + 2FA", "style": "solid", "animated": true },
+      { "id": "e-auth-idp", "source": "auth", "target": "idp", "label": "OAuth / SSO", "style": "dashed" },
+      { "id": "e-auth-server", "source": "auth", "target": "server", "label": "verified", "style": "dashed" },
+      { "id": "e-server-vault", "source": "server", "target": "pii-vault", "label": "encrypt / store", "style": "solid" },
+      { "id": "e-server-payment", "source": "server", "target": "payment", "label": "charge fee", "style": "solid" },
+      { "id": "e-server-bank", "source": "server", "target": "bank", "label": "route refund", "style": "solid", "animated": true },
+      { "id": "e-server-database", "source": "server", "target": "database", "label": "save", "style": "solid" }
+    ]
+  },
+  "tax-filing-stage-5": {
+    "id": "tax-filing-stage-5",
     "title": "Deadline Night",
     "description": "A load balancer fans out to many servers and engines, with a cache and read replica",
     "nodes": [
@@ -179,7 +345,7 @@
         "type": "background-job",
         "label": "E-File Worker",
         "position": { "x": 1120, "y": 460 },
-        "explanation": "Submits queued returns to the IRS and states, retrying as they allow, and emails the user when each is accepted"
+        "explanation": "Submits queued returns to the IRS and states, retrying as they allow, and triggers the email when each is accepted"
       },
       {
         "id": "irs",
