@@ -33,7 +33,7 @@ const BASELINE = 100;
 const PLOT_H = BASELINE - PLOT_TOP; // 84
 const INNER_LEFT = 52;
 const INNER_RIGHT = 414;
-const MIN_BAR_H = 4; // so the smallest stage (e.g. "1") is still visible
+const MIN_BAR_H = 2.5; // a visible stub for stages that are tiny next to the max
 
 interface Bar {
   cx: number;
@@ -47,23 +47,34 @@ interface Bar {
 interface ChartModel {
   bars: Bar[];
   gridYs: { y: number; label: string | null }[];
-  axisTop: string;
+}
+
+/**
+ * Round an axis maximum up to a "nice" number (1/2/5 × 10ⁿ) and pick a tick
+ * count that subdivides it into round steps.
+ */
+function niceAxis(maxV: number): { axisMax: number; ticks: number } {
+  const exp = Math.floor(Math.log10(maxV));
+  const base = Math.pow(10, exp);
+  const lead = maxV / base;
+  if (lead <= 1) return { axisMax: 1 * base, ticks: 5 }; // steps of 0.2
+  if (lead <= 2) return { axisMax: 2 * base, ticks: 4 }; // steps of 0.5
+  if (lead <= 5) return { axisMax: 5 * base, ticks: 5 }; // steps of 1
+  return { axisMax: 10 * base, ticks: 5 }; // steps of 2
 }
 
 function buildModel(stages: Stage[]): ChartModel {
   const values = stages.map((s) => parseUserScale(s.userScale));
   const maxV = Math.max(...values, 1);
-  // Round the top of the axis up to the next power of ten.
-  const maxExp = Math.max(1, Math.ceil(Math.log10(maxV)));
-  const axisMax = Math.pow(10, maxExp);
+  const { axisMax, ticks } = niceAxis(maxV);
 
   const slot = (INNER_RIGHT - INNER_LEFT) / stages.length;
   const barW = Math.min(slot * 0.46, 32);
 
-  const heightFor = (v: number) => {
-    const frac = Math.log10(Math.max(v, 1)) / maxExp; // 0 … 1
-    return Math.max(frac * PLOT_H, MIN_BAR_H);
-  };
+  // Linear height: bar heights are exactly proportional to the user counts,
+  // so a 10M bar is twice a 5M bar. A small floor keeps tiny early stages
+  // visible as a stub (their exact value is on the label beneath them).
+  const heightFor = (v: number) => Math.max((v / axisMax) * PLOT_H, MIN_BAR_H);
 
   const bars: Bar[] = stages.map((s, i) => {
     const cx = INNER_LEFT + (i + 0.5) * slot;
@@ -71,16 +82,15 @@ function buildModel(stages: Stage[]): ChartModel {
     return { cx, x: cx - barW / 2, y: BASELINE - h, w: barW, h, label: formatMag(values[i]) };
   });
 
-  // One gridline per power of ten; label only the top, bottom, and a midpoint
-  // so the axis stays uncluttered.
-  const midExp = Math.round(maxExp / 2);
-  const gridYs = Array.from({ length: maxExp + 1 }, (_, exp) => {
-    const y = BASELINE - (exp / maxExp) * PLOT_H;
-    const labelled = exp === 0 || exp === maxExp || exp === midExp;
-    return { y, label: labelled ? formatMag(Math.pow(10, exp)) : null };
+  // Evenly spaced linear gridlines; label the bottom, top, and midpoint.
+  const mid = Math.round(ticks / 2);
+  const gridYs = Array.from({ length: ticks + 1 }, (_, i) => {
+    const y = BASELINE - (i / ticks) * PLOT_H;
+    const labelled = i === 0 || i === ticks || i === mid;
+    return { y, label: labelled ? formatMag((i / ticks) * axisMax) : null };
   });
 
-  return { bars, gridYs, axisTop: formatMag(axisMax) };
+  return { bars, gridYs };
 }
 
 export function GrowthChart({ stages, activeStageIndex }: Props) {
