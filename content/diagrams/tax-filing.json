@@ -185,8 +185,7 @@
       { "id": "e-queue-worker", "source": "queue", "target": "efile-worker", "style": "solid", "animated": true },
       { "id": "e-worker-irs", "source": "efile-worker", "target": "irs", "label": "submit / retrieve", "style": "solid" },
       { "id": "e-worker-fallback", "source": "efile-worker", "target": "fallback-store", "label": "store if down", "style": "dashed" },
-      { "id": "e-worker-email", "source": "efile-worker", "target": "email", "label": "notify", "style": "solid" },
-      { "id": "e-email-client", "source": "email", "target": "client-1", "label": "accepted", "style": "dashed" }
+      { "id": "e-worker-email", "source": "efile-worker", "target": "email", "label": "notify filer", "style": "solid" }
     ]
   },
   "tax-filing-stage-4": {
@@ -357,8 +356,8 @@
     ],
     "edges": [
       { "id": "e-client-lb", "source": "client-1", "target": "load-balancer", "label": "all requests", "style": "solid", "animated": true },
-      { "id": "e-lb-server", "source": "load-balancer", "target": "server", "label": "distribute", "style": "solid", "animated": true },
-      { "id": "e-lb-server2", "source": "load-balancer", "target": "server-2", "label": "distribute", "style": "solid", "animated": true },
+      { "id": "e-lb-server", "source": "load-balancer", "target": "server", "label": "route", "style": "solid", "animated": true },
+      { "id": "e-lb-server2", "source": "load-balancer", "target": "server-2", "style": "solid", "animated": true },
       { "id": "e-server-calc", "source": "server", "target": "calc-engine", "style": "solid" },
       { "id": "e-server2-calc", "source": "server-2", "target": "calc-engine", "style": "solid" },
       { "id": "e-calc-cache", "source": "calc-engine", "target": "cache", "label": "tax tables", "style": "solid", "animated": true },
