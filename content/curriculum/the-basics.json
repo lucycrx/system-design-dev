@@ -9,6 +9,71 @@
   "color": "accent",
   "lessons": [
     {
+      "id": "how-to-reason-about-systems",
+      "title": "How to reason about any system",
+      "description": "Before any specific tool, a repeatable four-question method for thinking through how a system should work — the mental model the rest of system design hangs on.",
+      "estimatedMinutes": 7,
+      "sections": [
+        {
+          "heading": "what",
+          "content": "Most people approach system design backwards: they reach for a tool they've heard of (\"we should add a cache,\" \"let's use microservices\") before they understand the problem. Experienced engineers do the opposite — they run through the same four questions, in order, for *any* system:\n\n1. **What is it actually doing?** What are the core operations — what does a user create, read, update, or delete? Strip away the features and find the one or two things the system fundamentally has to do well.\n\n2. **Who's using it, and how much?** How many users? Is it read-heavy (everyone scrolls a feed) or write-heavy (everyone uploads)? Rough numbers are enough — 100 users, 100,000, or 100 million are completely different systems.\n\n3. **What breaks first?** As usage grows, where does it fall over? The single server pegged at 100% CPU? The database answering the same query a thousand times a second? The slow job blocking every request? There's almost always one bottleneck that gives way before the others.\n\n4. **What do you reach for?** Only now do you pick a tool — and you pick it to relieve the specific bottleneck you found. Database overloaded by reads? A cache or a read replica. Slow work blocking requests? A queue. One server maxed out? A load balancer and more servers.\n\nThat's the whole method. Understand the job, size the load, find what breaks, then — and only then — choose the fix."
+        },
+        {
+          "heading": "why",
+          "content": "This method matters more for builders than almost anything else on this site, for one reason: **it's the difference between directing your tools and being led by them.**\n\nWhen you ask an AI agent to \"make this scale\" or a teammate suggests an architecture, you need to evaluate the answer — not just accept it. The four questions give you that footing:\n\n- It stops you from **over-engineering**. The most common mistake is adding machinery (caches, queues, microservices) for a bottleneck you don't have yet. If question 3 doesn't surface a problem, you don't need a tool for it.\n- It tells you **where to look when something's slow**, because you already reasoned about what would break first.\n- It lets you **judge a proposed design** — including one an AI generated — by asking \"which bottleneck does this actually solve?\" If there's no clear answer, the design is decoration.\n\nMemorizing what a load balancer *is* makes you sound informed. Knowing *when* a system needs one makes you useful."
+        },
+        {
+          "heading": "how",
+          "content": "Let's run the four questions on a real example: a photo-sharing app that's starting to take off.\n\n**1. What is it actually doing?** Two core operations: users **upload** photos (writes) and users **view** photos in a feed (reads). Everything else — likes, comments, profiles — is a variation on those two.\n\n**2. Who's using it, and how much?** Say 1 million users. Each uploads a few photos a week but scrolls the feed many times a day. So it's overwhelmingly **read-heavy** — maybe 100 reads for every write. That single fact shapes everything.\n\n**3. What breaks first?** Two things strain. The database gets hammered by the same feed queries over and over (reads). And serving full-size images to everyone eats enormous bandwidth and makes pages load slowly, especially for users far from your server.\n\n**4. What do you reach for?** Match each bottleneck to its tool. For the repeated feed reads → a **cache** in front of the database, plus **read replicas** so reads don't fight writes. For the heavy images loading slowly worldwide → a **CDN** that serves them from servers near each user. Notice what we did *not* add: no message queue, no sharding, no microservices — because nothing in questions 1–3 called for them yet.\n\nThe answer fell out of the questions. That's the point: you didn't memorize a photo-app architecture, you *derived* one."
+        },
+        {
+          "heading": "when",
+          "content": "Reach for this method any time you're about to make — or evaluate — a decision about how a system is built:\n\n- **Before adding infrastructure.** New cache? New queue? Run question 3 first. If you can't name the bottleneck it relieves, you probably don't need it yet.\n- **When directing an AI agent.** Feed it the answers to questions 1 and 2 (\"this is a read-heavy app with ~1M users doing X\") and its suggestions get dramatically better and easier to check.\n- **When something is slow in production.** You already predicted what would break first — start there.\n- **When you're handed an architecture diagram.** Walk it backward: for each box, ask which bottleneck it solves. The boxes that don't answer are candidates to remove.\n\nThe best next step is to see the method in motion. The **Zero to Millions** Build Story walks a single app from one server to ten million users, and every stage is question 3 and question 4 playing out: something breaks, and a specific tool is reached for. Once you've seen the moves, this method is how you'll know which one to use, and when."
+        }
+      ],
+      "quiz": {
+        "question": "Which question should you answer first?",
+        "scenario": "A teammate says: \"Our app is getting slower. I think we should break it into microservices.\" The app is a simple internal dashboard used by about 200 employees, and you're not sure what's actually slow.",
+        "options": [
+          {
+            "id": "a",
+            "text": "Figure out what's actually breaking first (question 3) before reaching for any tool",
+            "correct": true,
+            "explanation": "Your teammate jumped straight to question 4 (a tool) without answering question 3 (the bottleneck). With only 200 users, the slowness is far more likely to be one slow database query or a missing index than anything microservices would fix. Find what's breaking first — the right tool follows from that, and it's almost certainly not microservices here."
+          },
+          {
+            "id": "b",
+            "text": "Agree and start planning the microservices migration",
+            "correct": false,
+            "explanation": "This accepts a tool before identifying the problem — exactly the trap the method is designed to prevent. Microservices solve organizational and scaling problems that a 200-user internal dashboard almost certainly doesn't have. You'd add enormous complexity and likely not fix the actual slowness."
+          },
+          {
+            "id": "c",
+            "text": "Add a cache, since caches make things faster",
+            "correct": false,
+            "explanation": "A cache is also a tool reached for before the bottleneck is known. It might help — or the slowness might be a write-heavy operation or a single bad query that a cache does nothing for. Answer question 3 first, then pick the fix that matches."
+          }
+        ]
+      },
+      "relatedStories": [
+        {
+          "storySlug": "zero-to-millions",
+          "stageId": "stage-1",
+          "label": "See this in action: Zero to Millions → the whole journey is questions 3 and 4 on repeat"
+        },
+        {
+          "storySlug": "chat-app",
+          "stageId": "stage-1",
+          "label": "See this in action: Building a Chat App → Just You and a Friend"
+        }
+      ],
+      "relatedGlossary": [
+        "client-server",
+        "latency-vs-throughput"
+      ],
+      "topicLabel": "The Method"
+    },
+    {
       "id": "client-and-server",
       "title": "What is a server and what is a client?",
       "description": "The two halves of every app: the part you see (client) and the part you don't (server).",

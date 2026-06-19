@@ -1,0 +1,419 @@
+{
+  "id": "zero-to-millions",
+  "slug": "zero-to-millions",
+  "title": "Zero to Millions",
+  "subtitle": "The scaling moves every app makes, in order",
+  "description": "Before you dive into any specific product, learn the map. Almost every system grows the same way — from one machine doing everything to a fleet spread across the world. This is the trunk those journeys branch from: the handful of moves that repeat, why each one happens, and what it costs you.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 20,
+  "concepts": [
+    "client-server",
+    "database",
+    "persistence",
+    "vertical-scaling",
+    "horizontal-scaling",
+    "load-balancer",
+    "state",
+    "cache",
+    "cdn",
+    "read-replica",
+    "message-queue",
+    "async",
+    "sharding",
+    "monitoring"
+  ],
+  "prerequisites": [],
+  "layout": "scrollytelling",
+  "stages": [
+    {
+      "id": "stage-1",
+      "title": "One Box Does Everything",
+      "userScale": "1 user",
+      "narrative": {
+        "setup": "Every system starts the same way: one machine, doing everything. Your app's code, the data it stores, the logic that ties them together — all of it lives on a single server. With one user (you), it's flawless.",
+        "problem": null,
+        "resolution": null
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "When you ship the first version of anything, it's one [[node:server|server]] handling one [[node:client-1|user]]. The browser asks for something, the server does the work and answers. This is the [[glossary:client-server|client-server model]], and every app on the internet is built on it."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: the food truck",
+          "content": "A brand-new system is a one-person food truck. The same person takes your order, cooks it, plates it, and hands it over. There's no kitchen staff, no separate prep station — one place, one worker, doing the whole job. It's wonderfully simple, and it works right up until the line gets long."
+        },
+        {
+          "type": "text",
+          "content": "That single box is quietly doing two very different jobs:\n\n1. **Compute** — running your app's logic (handling requests, doing calculations)\n2. **Storage** — keeping your data [[glossary:persistence|safe on disk]] so it survives a restart\n\nRight now they share one machine. Almost everything that follows is the story of carefully pulling these jobs apart so each can grow on its own."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "z2m-stage-1",
+          "caption": "The starting point — one server does compute and storage together"
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "Every system you admire — Instagram, Uber, your bank — started as one box like this. Scaling isn't about clever tricks. It's the disciplined, repeatable process of finding the one part that's overloaded and giving it room to breathe."
+        },
+        {
+          "type": "checkpoint",
+          "question": "As users start pouring in, what's the real reason this single box becomes a problem?",
+          "options": [
+            {
+              "id": "a",
+              "text": "One machine can only do so much work at once, and everything is competing for it",
+              "correct": true,
+              "explanation": "Exactly. Compute and storage are fighting over the same CPU, memory, and disk. When traffic climbs, they starve each other — and you can't grow one without growing the other. The fix is to start splitting jobs apart."
+            },
+            {
+              "id": "b",
+              "text": "The internet can't route to a single server",
+              "correct": false,
+              "explanation": "The internet routes to single servers just fine — that's the normal case. The pressure comes from too much work landing on one machine, not from networking."
+            },
+            {
+              "id": "c",
+              "text": "Single servers are inherently insecure",
+              "correct": false,
+              "explanation": "Security matters at every size, but it isn't what forces you to scale. What forces the issue is one machine running out of capacity."
+            }
+          ]
+        }
+      ],
+      "suggestedQuestions": [
+        "What actually is a 'server' — is it one physical computer?",
+        "Why not just keep making the one box bigger forever?",
+        "What does it mean for compute and storage to 'share' a machine?"
+      ]
+    },
+    {
+      "id": "stage-2",
+      "title": "Split Storage From Compute",
+      "userScale": "10,000 users",
+      "narrative": {
+        "setup": "Word spread. You have ten thousand users now, and the one box is straining. Worse, every time you deploy a code change you have to restart the server — and that same machine is holding all your data.",
+        "problem": "Compute and storage are tangled together. You can't restart the app without risking the data, and you can't give the database more disk without also paying for more compute you don't need.",
+        "resolution": "Make the first and most important split: move the database onto its own machine, separate from the server running your code."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "The first real architectural decision in any system's life: pull the [[glossary:database|database]] off the application server and onto its own machine. Now the [[node:server|server]] runs your code, and the [[node:database|database]] does nothing but store and serve data."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: a worker and a filing cabinet",
+          "content": "Imagine one clerk who keeps every document in his own arms while also serving customers. Drop the clerk and you lose the documents too. Move the files into a proper filing cabinet, and now the clerk can be swapped out, sent home, or cloned — the records stay exactly where they are."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "z2m-stage-2",
+          "caption": "The first split — storage moves to its own machine",
+          "highlightNodes": ["database"],
+          "animateFlow": ["client-1", "server", "database"]
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "**Separate compute from storage.** This is the single most important move in system design. Once the database stands alone, you can restart, redeploy, and eventually multiply your servers freely — and the data never flinches."
+        },
+        {
+          "type": "tradeoff",
+          "decision": "Keep everything on one box, or split storage onto its own machine?",
+          "options": [
+            {
+              "name": "Keep one box",
+              "pros": ["Nothing new to run or network", "Lowest possible latency between app and data"],
+              "cons": ["Can't restart the app without risking data", "Compute and storage must grow together, even when only one needs to"]
+            },
+            {
+              "name": "Split storage from compute",
+              "pros": ["Each side scales and restarts independently", "Sets up every later move — replicas, multiple servers, sharding"],
+              "cons": ["A network hop now sits between app and data", "Two systems to run, secure, and back up"]
+            }
+          ],
+          "choice": "Split them. The tiny network hop you add is the price of admission to every scaling move that follows — you simply can't grow a system whose compute and storage are fused. This is the rare decision that's almost always right, which is why nearly every system makes it early."
+        },
+        {
+          "type": "callout",
+          "style": "tip",
+          "content": "**See this exact move in context:** Building a Chat App → *100 Friends Join* watches a chat app lose every message to a restart, then fix it by giving data its own permanent home."
+        }
+      ],
+      "suggestedQuestions": [
+        "Does the network hop between server and database slow things down a lot?",
+        "What kind of database should the first split use?",
+        "Can the database itself become the bottleneck later?"
+      ]
+    },
+    {
+      "id": "stage-3",
+      "title": "Turn One Server Into Many",
+      "userScale": "100,000 users",
+      "narrative": {
+        "setup": "A hundred thousand users. Your lone application server is pegged at 100% CPU during peak hours. You upgraded it to a bigger machine once already, and it bought you a month.",
+        "problem": "A single server has a ceiling. You can keep buying a bigger one (vertical scaling), but the biggest machine money can buy still tops out — and if it dies, your whole app goes with it.",
+        "resolution": "Stop relying on one big server. Run several identical servers and put a load balancer in front to spread traffic across them."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "There are two ways to handle more load. [[glossary:vertical-scaling|Vertical scaling]] means a bigger machine — more CPU, more memory. [[glossary:horizontal-scaling|Horizontal scaling]] means *more* machines working side by side. Vertical is simpler; horizontal is how you go past the ceiling."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: one cashier or many",
+          "content": "You can train one cashier to scan faster and faster (vertical) — but there's a limit to human hands, and if that cashier calls in sick, the store stops. Or you open more lanes and station a greeter at the front directing each customer to the shortest line (horizontal). The greeter is your load balancer."
+        },
+        {
+          "type": "text",
+          "content": "Put a [[glossary:load-balancer|load balancer]] in front and run a pool of identical servers — [[node:server-1|Server 1]], [[node:server-2|Server 2]], [[node:server-3|Server 3]]. Every request hits the [[node:load-balancer|load balancer]] first, and it hands the request to whichever server is least busy. Need more capacity? Add another server to the pool."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "z2m-stage-3",
+          "caption": "A load balancer spreads traffic across identical servers",
+          "highlightNodes": ["load-balancer", "server-2", "server-3"],
+          "animateFlow": ["client-1", "load-balancer", "server-2"]
+        },
+        {
+          "type": "callout",
+          "style": "warning",
+          "content": "This only works if your servers are **stateless** — interchangeable. If Server 1 remembers that you're logged in but the next request lands on Server 2, you'll be logged out. So any [[glossary:state|state]] (sessions, uploads, who's connected) has to live in the shared database, not in one server's memory."
+        },
+        {
+          "type": "tradeoff",
+          "decision": "Scale up (a bigger server) or scale out (more servers)?",
+          "options": [
+            {
+              "name": "Scale up (vertical)",
+              "pros": ["No code changes — just a bigger machine", "Nothing to coordinate between servers"],
+              "cons": ["Hits a hard ceiling — the biggest box still has limits", "That one box is a single point of failure"]
+            },
+            {
+              "name": "Scale out (horizontal)",
+              "pros": ["Add capacity almost without limit", "One server dying no longer takes down the app"],
+              "cons": ["Servers must be stateless, which takes discipline", "Needs a load balancer and shared state to coordinate"]
+            }
+          ],
+          "choice": "Scale up first because it's free engineering-wise — then scale out before you hit the ceiling. Mature systems do both: each individual server is reasonably beefy (vertical), and there are many of them behind a load balancer (horizontal). The art is making your servers stateless early, so scaling out is there when you need it."
+        },
+        {
+          "type": "checkpoint",
+          "question": "Why must the servers behind a load balancer be stateless?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Because a user's requests can land on any server, so no single server can hold their session",
+              "correct": true,
+              "explanation": "Right. The load balancer sends each request to whichever server is free, so request #2 may hit a different server than request #1. If a server kept your login in its own memory, the next request wouldn't find it. Shared state lives in the database (or a shared cache) instead."
+            },
+            {
+              "id": "b",
+              "text": "Because stateless servers run faster",
+              "correct": false,
+              "explanation": "Statelessness isn't mainly about raw speed — it's about interchangeability. Any server must be able to handle any request, which only works if none of them hoard user-specific state."
+            },
+            {
+              "id": "c",
+              "text": "Because databases can't store session data",
+              "correct": false,
+              "explanation": "Databases store session data perfectly well — that's exactly where it should go. The point is that state must be *shared*, not trapped inside one server."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "tip",
+          "content": "**See this in context:** Building an Online Store → *Scaling Out* and Building TurboTax both put a load balancer in front of a server pool to survive their busiest day."
+        }
+      ],
+      "suggestedQuestions": [
+        "How does the load balancer decide which server to use?",
+        "Where exactly should session state live if not on the server?",
+        "What happens to in-progress requests when one server crashes?"
+      ]
+    },
+    {
+      "id": "stage-4",
+      "title": "Stop Doing the Same Work Twice",
+      "userScale": "1,000,000 users",
+      "narrative": {
+        "setup": "A million users. You have plenty of servers now, but they're all hammering the same database — and most of them are asking it the exact same questions over and over.",
+        "problem": "The database has become the bottleneck. The same popular data gets fetched thousands of times a second, and every request makes the database do the full lookup again from scratch.",
+        "resolution": "Stop repeating work. Put a cache in front of the database, push static files out to a CDN near your users, and add read replicas so reads don't fight with writes."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Most of what a busy system does is read the same things repeatedly — the same product page, the same profile, the same feed. A [[glossary:cache|cache]] keeps those hot results in memory so the [[node:server-1|servers]] can answer instantly without touching the [[node:database|database]] at all."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: keep the bestsellers on the counter",
+          "content": "A good barista doesn't walk to the stockroom every time someone orders the most popular drink — the ingredients for it sit right on the counter, an arm's reach away. The stockroom (your database) is still the source of truth, but the counter (the cache) handles the 90% of orders that are the same few things."
+        },
+        {
+          "type": "text",
+          "content": "Two more moves attack reads from different angles:\n\n- A [[glossary:cdn|CDN]] copies your static files (images, video, scripts) to servers physically near each user, so a photo loads from the same city instead of across the planet.\n- [[glossary:read-replica|Read replicas]] are copies of the database that handle read queries, leaving the primary free to focus on writes."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "z2m-stage-4",
+          "caption": "Cache, CDN, and a read replica take pressure off the primary database",
+          "highlightNodes": ["cache", "cdn", "read-replica"],
+          "animateFlow": ["server-1", "cache"]
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "Notice the shape of the problem: systems are overwhelmingly **read-heavy**. Caches, CDNs, and replicas all exist to absorb reads cheaply, so the one database that owns your **writes** never has to break a sweat answering the same question twice."
+        },
+        {
+          "type": "tradeoff",
+          "decision": "Cache aggressively, or always read fresh from the database?",
+          "options": [
+            {
+              "name": "Cache aggressively",
+              "pros": ["Most reads served from memory — blazing fast", "The database is shielded from repetitive load"],
+              "cons": ["Cached data can be stale — slightly out of date", "You must decide when and how to invalidate it"]
+            },
+            {
+              "name": "Always read fresh",
+              "pros": ["Every read is perfectly up to date", "No invalidation logic to get wrong"],
+              "cons": ["The database takes the full brunt of traffic", "Repeats expensive work that never changed"]
+            }
+          ],
+          "choice": "Cache the things that are read constantly and change rarely — and accept they may be a few seconds stale. The hard part isn't adding a cache, it's deciding what's safe to serve slightly old. A product description? Fine. An account balance at checkout? Read that one fresh. \"There are only two hard things in computer science: cache invalidation and naming things\" is a joke engineers tell because it's true."
+        },
+        {
+          "type": "challenge",
+          "scenario": "You cache each product page for an hour to take load off the database. It works beautifully — until a seller drops the price of a hot item and customers keep seeing the old, higher price for up to an hour.",
+          "question": "What's the cleanest fix?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Invalidate (clear) that product's cache entry the moment its price changes",
+              "correct": true,
+              "explanation": "This is cache invalidation done right: keep the long cache lifetime for speed, but actively evict an item the instant its underlying data changes. The next request rebuilds the cache with fresh data. You get speed and correctness.",
+              "conceptLink": "cache"
+            },
+            {
+              "id": "b",
+              "text": "Stop caching product pages entirely",
+              "correct": false,
+              "explanation": "That throws away the huge speed win to fix a rare event. The database is right back to answering the same query thousands of times a second."
+            },
+            {
+              "id": "c",
+              "text": "Lower the cache time to one second so stale data clears fast",
+              "correct": false,
+              "explanation": "A one-second cache barely caches anything — you've nearly turned it off, and the database load comes right back. Invalidate on change instead of guessing at a short lifetime."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "tip",
+          "content": "**See this in context:** Building an Online Store → *Adding Speed* introduces a cache and CDN exactly when a viral blog post sends traffic through the roof."
+        }
+      ],
+      "suggestedQuestions": [
+        "How does the cache know when its data is out of date?",
+        "What's the difference between a CDN and a cache?",
+        "If reads go to replicas, how do they stay in sync with the primary?"
+      ]
+    },
+    {
+      "id": "stage-5",
+      "title": "Decouple and Spread Out",
+      "userScale": "10,000,000 users",
+      "narrative": {
+        "setup": "Ten million users. Reads are handled. But now writes are spiking, some requests trigger slow work (sending emails, encoding video, running reports), and a single database can no longer even hold all your data.",
+        "problem": "Slow work is blocking fast requests — a user waits on a spinner while the server encodes their video. And one database, however beefy, can't store ten million users' worth of data on one machine.",
+        "resolution": "Decouple slow work from the request using a message queue, and split the data itself across many databases with sharding. Then watch the whole thing with monitoring."
+      },
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Not all work belongs in the moment. When a request triggers something slow, the server drops a job onto a [[glossary:message-queue|message queue]] and answers the user immediately. A separate pool of [[node:worker|background workers]] picks the job up and does it [[glossary:async|asynchronously]] — the user never waits."
+        },
+        {
+          "type": "reveal",
+          "label": "Real-world analogy: the order ticket rail",
+          "content": "In a busy kitchen, the waiter doesn't stand frozen at your table while your meal cooks. They clip your order onto a rail and move on. The line cooks (workers) pull tickets off the rail and cook at their own pace. The queue is that rail — it lets the fast job (taking the order) finish without waiting on the slow job (cooking)."
+        },
+        {
+          "type": "text",
+          "content": "Meanwhile the data itself has outgrown one machine. [[glossary:sharding|Sharding]] splits it across many [[node:shard-1|databases]] — users A–M on one [[node:shard-2|shard]], N–Z on another, say — so each holds a manageable slice. And because there are now dozens of moving parts, [[glossary:monitoring|monitoring]] watches every one, alerting you *before* users notice something's wrong."
+        },
+        {
+          "type": "diagram",
+          "diagramId": "z2m-stage-5",
+          "caption": "A queue moves slow work off the request path; sharding splits the data",
+          "highlightNodes": ["queue", "worker", "shard-1", "shard-2"],
+          "animateFlow": ["server-1", "queue", "worker"]
+        },
+        {
+          "type": "callout",
+          "style": "insight",
+          "content": "Step back and look at the whole journey. Every single move was the same instinct applied to a new victim: split compute from storage, split one server into many, split reads from writes, split slow work from fast, split one database into shards. **Scaling is the art of finding what's overloaded and giving it its own lane.**"
+        },
+        {
+          "type": "tradeoff",
+          "decision": "Do slow work right away (synchronously) or hand it to a queue (asynchronously)?",
+          "options": [
+            {
+              "name": "Synchronous",
+              "pros": ["Simple — the result is ready when the request returns", "No extra queue or workers to run"],
+              "cons": ["The user waits for the slowest step", "A spike in slow work ties up servers and stalls everything"]
+            },
+            {
+              "name": "Asynchronous (queue)",
+              "pros": ["Requests return instantly; slow work happens in the background", "Spikes get absorbed by the queue instead of crashing the app"],
+              "cons": ["The result isn't ready immediately — you need to notify or poll", "A queue and worker pool are more moving parts to operate"]
+            }
+          ],
+          "choice": "If the user genuinely needs the result this instant (a password check, a payment authorization), do it synchronously. If they don't (a confirmation email, a video encode, a generated report), queue it. Pushing slow, non-urgent work off the request path is one of the highest-leverage moves at scale — it's what keeps the app feeling fast even when it's doing enormous amounts of work."
+        },
+        {
+          "type": "checkpoint",
+          "question": "Across all five stages, what was the single repeating pattern?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Find the one overloaded part and split its job out so it can scale on its own",
+              "correct": true,
+              "explanation": "That's the whole game. Storage left compute, one server became many, reads split from writes, slow work split from fast, one database split into shards. Every scaling tool is a specific answer to 'what's overloaded, and how do I give it room?'"
+            },
+            {
+              "id": "b",
+              "text": "Replace simple technology with more advanced technology",
+              "correct": false,
+              "explanation": "Newer isn't the point — a queue isn't 'better' than a database, it does a different job. Each move was chosen to relieve a specific bottleneck, not to be more sophisticated."
+            },
+            {
+              "id": "c",
+              "text": "Buy progressively bigger machines",
+              "correct": false,
+              "explanation": "Bigger machines (vertical scaling) was just the first, smallest move — and the one with a ceiling. The real story was splitting jobs apart so you could add many machines, each doing less."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "tip",
+          "content": "**You now have the map.** Each Build Story walks one real product down this same road: a chat app to 2M users, an online store through Black Friday, a ride-sharing service going nationwide, and TurboTax surviving April 15. Pick one and watch the moves you just learned play out under real pressure."
+        }
+      ],
+      "suggestedQuestions": [
+        "How does a request get its result back if the work happens later in the background?",
+        "How do you query data once it's split across many shards?",
+        "What should monitoring actually watch for?"
+      ]
+    }
+  ]
+}
