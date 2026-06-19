@@ -48,27 +48,36 @@ export function CrossStageScrollytelling({
     if (firstDiag) setActiveDiagramId(firstDiag.diagramId);
   }, [stages]);
 
-  // IntersectionObserver to track which stage section is in view
+  // IntersectionObserver to track which stage section is in view.
+  // Uses a thin trigger band in the vertical middle of the viewport with
+  // threshold 0, so it stays correct no matter how tall a stage section is.
+  // (A ratio-based threshold breaks for sections taller than the band, whose
+  // intersection ratio can never reach the threshold.)
   useEffect(() => {
+    const activate = (idx: number) => {
+      if (isNaN(idx)) return;
+      setActiveStageIndex(idx);
+      const diagBlock = stages[idx]?.blocks.find(
+        (b): b is DiagramBlockType => b.type === "diagram"
+      );
+      if (diagBlock) setActiveDiagramId(diagBlock.diagramId);
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const idx = Number(entry.target.getAttribute("data-scrolly-stage"));
-            if (!isNaN(idx)) {
-              setActiveStageIndex(idx);
-              // Find the diagram for this stage
-              const diagBlock = stages[idx]?.blocks.find(
-                (b): b is DiagramBlockType => b.type === "diagram"
-              );
-              if (diagBlock) setActiveDiagramId(diagBlock.diagramId);
-            }
-          }
+        // Of the sections whose state just changed, take those now in the
+        // band and pick the topmost (first in document order).
+        const entering = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (entering.length > 0) {
+          activate(Number(entering[0].target.getAttribute("data-scrolly-stage")));
         }
       },
       {
-        rootMargin: "-35% 0px -35% 0px",
-        threshold: 0.1,
+        // Band spanning ~45%–55% of the viewport height.
+        rootMargin: "-45% 0px -45% 0px",
+        threshold: 0,
       }
     );
 
