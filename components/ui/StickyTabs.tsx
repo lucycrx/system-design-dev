@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { WORDMARK_SHORT } from "@/lib/site";
 
 const TABS = [
   { href: "/", label: "Home" },
-  { href: "/concepts", label: "Concepts", matchPrefix: true },
+  { href: "/example", label: "Example", matchPrefix: true },
   { href: "/stories", label: "Stories", matchPrefix: true },
-  { href: "/curriculum", label: "Curriculum", matchPrefix: true },
+  { href: "/concepts", label: "Concepts", matchPrefix: true },
 ] as const;
 
 const INK = "var(--color-text)";
@@ -34,7 +35,7 @@ export function StickyTabs() {
           className="font-display font-bold text-2xl lowercase shrink-0"
           style={{ color: INK, letterSpacing: "-0.06em" }}
         >
-          sd
+          {WORDMARK_SHORT}
         </Link>
 
         {/* Primary nav — always visible at every width. On very narrow

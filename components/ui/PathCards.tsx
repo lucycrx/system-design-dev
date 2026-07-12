@@ -97,16 +97,12 @@ function PathCard({
 export function PathCards({
   conceptCount,
   storyCount,
-  moduleCount,
-  lessonCount,
 }: {
   conceptCount: number;
   storyCount: number;
-  moduleCount: number;
-  lessonCount: number;
 }) {
   return (
-    <div className="grid gap-6 sm:gap-8 sm:grid-cols-3 items-start">
+    <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 items-start max-w-3xl">
       <PathCard
         href="/concepts"
         label="Reference"
@@ -128,17 +124,6 @@ export function PathCards({
         shape="square"
         offsetClass="sm:mt-12"
         delay={120}
-      />
-      <PathCard
-        href="/curriculum"
-        label="Structured"
-        title="Curriculum"
-        description="Lessons organized by topic, from fundamentals to advanced patterns. Start at the beginning or jump to what you need."
-        meta={`${moduleCount} ${moduleCount === 1 ? "module" : "modules"} · ${lessonCount} lessons`}
-        accentColor="#F4C430"
-        shape="triangle"
-        offsetClass="sm:mt-24"
-        delay={240}
       />
     </div>
   );

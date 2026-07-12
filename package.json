@@ -12,9 +12,12 @@
     "generate:curriculum": "npx tsx scripts/generate.ts curriculum",
     "generate:glossary": "npx tsx scripts/generate.ts glossary",
     "validate": "npx tsx scripts/validate.ts",
+    "validate:plugin": "npx tsx scripts/validate-plugin-links.ts",
     "promote": "npx tsx scripts/promote.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "@xyflow/react": "^12.10.2",
     "next": "16.2.1",
     "react": "19.2.4",

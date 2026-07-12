@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getModule, getAllModules } from "@/lib/content";
@@ -40,6 +41,17 @@ const MODULE_BORDER_COLORS: Record<string, string> = {
 
 interface Props {
   params: Promise<{ moduleSlug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { moduleSlug } = await params;
+  const mod = getModule(moduleSlug);
+  if (!mod) return { title: "Module Not Found" };
+  return {
+    title: mod.title,
+    description: mod.description,
+    alternates: { canonical: `/curriculum/${mod.slug}` },
+  };
 }
 
 export default async function ModulePage({ params }: Props) {

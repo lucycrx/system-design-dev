@@ -20,10 +20,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { termId } = await params;
   const term = getGlossaryTerm(termId);
-  if (!term) return { title: "Concept Not Found — System Design School" };
+  if (!term) return { title: "Concept Not Found" };
   return {
-    title: `${term.term} — System Design School`,
+    title: term.term,
     description: term.shortDefinition,
+    alternates: { canonical: `/concepts/${term.id}` },
   };
 }
 

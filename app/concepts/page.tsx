@@ -3,7 +3,8 @@ import { getGlossaryTerms } from "@/lib/content";
 import { ConceptsGrid } from "@/components/concepts/ConceptsGrid";
 
 export const metadata: Metadata = {
-  title: "Concepts — System Design School",
+  title: "Concepts",
+  alternates: { canonical: "/concepts" },
   description:
     "Browse the building blocks of system design — caching, load balancing, sharding, queues, and more — each explained in plain English with a real-world analogy.",
 };

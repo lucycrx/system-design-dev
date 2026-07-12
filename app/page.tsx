@@ -1,25 +1,21 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { GlossaryTerm } from "@/types/story";
-import { getAllStories, getAllModules, getGlossaryTerms } from "@/lib/content";
+import { getAllStories, getGlossaryTerms } from "@/lib/content";
 import { ConceptCard } from "@/components/concepts/ConceptCard";
 import { PathCards } from "@/components/ui/PathCards";
+import { InstallCommand } from "@/components/ui/InstallCommand";
+import { SubscribeForm } from "@/components/ui/SubscribeForm";
 import { Shape, ShapeDrift } from "@/components/ui/Shape";
+import { SITE_NAME, PLUGIN_REPO_URL } from "@/lib/site";
 
 const RED = "#D62828";
 const BLUE = "#1D4E89";
 const YELLOW = "#F4C430";
 const PAPER = "#F4F1EA";
 
-// A visually-varied slice spanning all six categories, shown on the homepage.
-const FEATURED_IDS = [
-  "client-server",
-  "cache",
-  "load-balancer",
-  "read-replica",
-  "message-queue",
-  "microservices",
-];
+// A visually-varied slice spanning several categories, shown on the homepage.
+const FEATURED_IDS = ["cache", "load-balancer", "message-queue"];
 
 // Headline split into words; one word carries a primary accent. Each letter
 // slides up with a staggered delay via the global .reveal-up utility.
@@ -27,14 +23,15 @@ const FEATURED_IDS = [
 function Headline({ tone = "default" }: { tone?: "default" | "paper" }) {
   const paper = tone === "paper";
   const words: { text: string; color?: string }[] = [
-    { text: "Learn" },
-    { text: "how" },
-    { text: "apps" },
-    { text: "scale.", color: RED },
+    { text: "See" },
+    { text: "what" },
+    { text: "you" },
+    { text: "actually" },
+    { text: "built.", color: RED },
   ];
   let i = 0;
   return (
-    <h1 className="heading-hero text-text" style={{ fontSize: "clamp(3rem, 9.5vw, 8.5rem)" }}>
+    <h1 className="heading-hero text-text" style={{ fontSize: "clamp(2.75rem, 8vw, 7rem)" }}>
       {words.map((w, wi) => (
         <span key={wi} className="inline-block whitespace-nowrap mr-[0.22em]">
           {[...w.text].map((ch, ci) => (
@@ -54,37 +51,57 @@ function HeroContent({ overlay = false }: { overlay?: boolean }) {
   const light = overlay ? "text-[#F4F1EA]" : "text-text-muted";
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
-      <p className={`label-mono mb-5 ${light}`}>System Design School</p>
+      <p className={`label-mono mb-5 ${light}`}>{SITE_NAME} · Claude Code skill</p>
       <Headline tone={overlay ? "paper" : "default"} />
       <p className={`subhead text-lg sm:text-xl leading-snug max-w-xl mt-6 ${light}`}>
-        The ideas behind every system that handles millions of users —
-        caching, load balancing, sharding, queues — in plain English.
+        A skill that scans your codebase and hands back an interactive map of your
+        architecture — components, data flow, and where it&apos;ll break at scale —
+        explained in plain English.
       </p>
       <div className={`mt-7 flex flex-wrap gap-3 ${overlay ? "invisible" : ""}`}>
         <Link
-          href="/concepts"
+          href="#install"
           data-cursor
           className="bg-text text-bg px-7 py-3.5 label-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5"
         >
-          Browse Concepts
+          Get the skill
         </Link>
         <Link
-          href="/stories"
+          href="/example"
           data-cursor
           className="border border-text/20 hover:border-text text-text px-7 py-3.5 label-mono transition-colors duration-500"
         >
-          Build Stories
+          See an example
         </Link>
       </div>
     </div>
   );
 }
 
+// One "what you get" feature, marked by a Bauhaus shape.
+function Feature({
+  shape,
+  color,
+  title,
+  body,
+}: {
+  shape: "circle" | "square" | "triangle";
+  color: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="border border-text/10 bg-bg p-6">
+      <Shape type={shape} color={color} size={20} className="mb-5" />
+      <h3 className="subhead text-lg text-text mb-2">{title}</h3>
+      <p className="text-[0.9375rem] text-text-muted leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const stories = getAllStories();
-  const modules = getAllModules();
   const terms = getGlossaryTerms();
-  const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
 
   const byId = new Map(terms.map((t) => [t.id, t]));
   const featured = FEATURED_IDS.map((id) => byId.get(id)).filter(
@@ -96,134 +113,183 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      {/* Hero + marquee fill exactly the first screen: nav (body pt-16) +
-          this wrapper = 100svh. flex-col keeps the marquee flush at the fold
-          regardless of its height. */}
+      {/* Hero + marquee fill the first screen. */}
       <div className="flex flex-col min-h-[calc(100svh-4rem)]">
-      {/* Hero — asymmetric, flat drifting shapes behind the type */}
-      <section className="relative overflow-hidden flex-1 flex items-center">
-        {/* Oversized background shapes (parallax drift, bleeding off edges).
-            The blue circle + red square are the "dark" shapes the knockout
-            mask below mirrors. */}
-        <ShapeDrift speed={0.18} className="pointer-events-none absolute inset-0">
-          <Shape
-            type="circle"
-            color={BLUE}
-            size={560}
-            style={{ position: "absolute", top: "-12%", right: "-120px", opacity: 0.9 }}
-          />
-          <Shape
-            type="square"
-            color={RED}
-            size={96}
-            style={{ position: "absolute", top: "30%", left: "5%" }}
-          />
-        </ShapeDrift>
-        <ShapeDrift speed={0.32} className="pointer-events-none absolute inset-0">
-          <Shape
-            type="triangle"
-            color={YELLOW}
-            size={120}
-            style={{ position: "absolute", bottom: "8%", right: "13%" }}
-          />
-        </ShapeDrift>
+        {/* Hero — asymmetric, flat drifting shapes behind the type */}
+        <section className="relative overflow-hidden flex-1 flex items-center">
+          <ShapeDrift speed={0.18} className="pointer-events-none absolute inset-0">
+            <Shape
+              type="circle"
+              color={BLUE}
+              size={560}
+              style={{ position: "absolute", top: "-12%", right: "-120px", opacity: 0.9 }}
+            />
+            <Shape
+              type="square"
+              color={RED}
+              size={96}
+              style={{ position: "absolute", top: "30%", left: "5%" }}
+            />
+          </ShapeDrift>
+          <ShapeDrift speed={0.32} className="pointer-events-none absolute inset-0">
+            <Shape
+              type="triangle"
+              color={YELLOW}
+              size={120}
+              style={{ position: "absolute", bottom: "8%", right: "13%" }}
+            />
+          </ShapeDrift>
 
-        {/* Base copy: ink text + red accent */}
-        <div className="relative z-10 w-full">
-          <HeroContent />
-        </div>
-
-        {/* Knockout overlay: a paper copy of the same copy, revealed by the
-            mask ONLY where the text crosses the dark blue circle / red square,
-            so those overlaps flip to high-contrast cream instead of vanishing.
-            The mask geometry mirrors the two shapes in the section's coordinate
-            space; it aligns at the top of the page where the hero is read. */}
-        <div
-          aria-hidden
-          className="cs-knockout pointer-events-none absolute inset-0 z-20 flex items-center"
-        >
-          <div className="w-full">
-            <HeroContent overlay />
+          {/* Base copy: ink text + red accent */}
+          <div className="relative z-10 w-full">
+            <HeroContent />
           </div>
-        </div>
-      </section>
 
-      {/* Marquee chromatic break — full-bleed red block */}
-      <section
-        className="marquee-pause overflow-hidden border-y border-text/10 py-5"
-        style={{ backgroundColor: RED }}
-      >
-        <div className="marquee-track flex w-max items-center gap-8 whitespace-nowrap">
-          {[...marqueeItems, ...marqueeItems].map((label, i) => (
-            <span key={i} className="flex items-center gap-8">
-              <span className="label-mono text-[#F4F1EA]" style={{ fontSize: "0.875rem" }}>
-                {label}
+          {/* Knockout overlay: a paper copy revealed only over the dark shapes. */}
+          <div
+            aria-hidden
+            className="cs-knockout pointer-events-none absolute inset-0 z-20 flex items-center"
+          >
+            <div className="w-full">
+              <HeroContent overlay />
+            </div>
+          </div>
+        </section>
+
+        {/* Marquee chromatic break — full-bleed red block */}
+        <section
+          className="marquee-pause overflow-hidden border-y border-text/10 py-5"
+          style={{ backgroundColor: RED }}
+        >
+          <div className="marquee-track flex w-max items-center gap-8 whitespace-nowrap">
+            {[...marqueeItems, ...marqueeItems].map((label, i) => (
+              <span key={i} className="flex items-center gap-8">
+                <span className="label-mono text-[#F4F1EA]" style={{ fontSize: "0.875rem" }}>
+                  {label}
+                </span>
+                <Shape type="circle" color="#F4F1EA" size={6} />
               </span>
-              <Shape type="circle" color="#F4F1EA" size={6} />
-            </span>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
       </div>
 
-      {/* Intro statement — triangle lead-in */}
-      <section className="max-w-3xl mx-auto px-6 py-20 sm:py-28">
-        <Shape type="triangle" color={YELLOW} size={28} className="mb-6" />
-        <p className="heading-editorial text-2xl sm:text-3xl lg:text-[2.5rem] text-text leading-[1.05]">
-          Most explanations of system design assume you already know the
-          jargon. This one doesn&apos;t. Every idea starts from a real problem,
-          a plain-English analogy, and a picture of what&apos;s actually{" "}
-          <span style={{ color: BLUE }}>happening</span>.
+      {/* Install */}
+      <section id="install" className="max-w-3xl mx-auto px-6 py-20 sm:py-28 scroll-mt-24">
+        <div className="flex items-center gap-4 mb-6">
+          <Shape type="square" color={RED} size={18} />
+          <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
+            Install in Claude Code
+          </h2>
+        </div>
+        <p className="subhead text-text-muted leading-relaxed mb-8 max-w-lg">
+          Two commands. It runs locally — your code never leaves your machine —
+          and opens the review in your browser when it&apos;s done.
+        </p>
+        <InstallCommand />
+        <p className="label-mono text-text-muted mt-4">
+          Then run <span className="text-text">/architecture-review</span> in any
+          repo.
         </p>
       </section>
 
-      {/* Featured concepts */}
+      {/* What you get */}
       <section className="max-w-6xl mx-auto px-6 pb-20 sm:pb-28">
-        <div className="flex items-baseline justify-between gap-4 mb-10 flex-wrap">
-          <div className="flex items-center gap-4">
-            <Shape type="square" color={RED} size={18} />
-            <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
-              Start with the concepts
-            </h2>
-          </div>
-          <Link
-            href="/concepts"
-            data-cursor
-            className="group label-mono text-text-muted hover:text-text transition-colors inline-flex items-center gap-1.5"
-          >
-            All {terms.length} concepts
-            <span className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
-              &rarr;
-            </span>
-          </Link>
+        <div className="flex items-center gap-4 mb-10">
+          <Shape type="circle" color={BLUE} size={18} />
+          <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
+            What you get
+          </h2>
         </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Feature
+            shape="circle"
+            color={BLUE}
+            title="An interactive map"
+            body="Your whole system as a browsable diagram — frontend, APIs, databases, caches, queues — with the data flow drawn between them."
+          />
+          <Feature
+            shape="square"
+            color={RED}
+            title="Plain-English risks"
+            body="Where the architecture will strain as you grow, each with a real-world analogy, the scale it bites at, and what the fix looks like."
+          />
+          <Feature
+            shape="triangle"
+            color={YELLOW}
+            title="A file you can share"
+            body="One self-contained HTML file. Drop it in Slack, pull it up in a meeting, or point at it while you explain the system."
+          />
+        </div>
+      </section>
 
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Example preview link-card */}
+      <section className="max-w-6xl mx-auto px-6 pb-20 sm:pb-28">
+        <Link
+          href="/example"
+          data-cursor
+          className="group block border border-text/15 bg-surface p-8 sm:p-10 transition-colors duration-500 hover:border-text/40"
+        >
+          <div className="flex items-center gap-3 mb-6 flex-wrap">
+            <span className="label-mono text-text-dim">Input</span>
+            <span className="font-mono text-[13px] text-text">facebookresearch/Hyperagents</span>
+            <span className="font-mono text-lg text-text-dim">&rarr;</span>
+            <span className="label-mono text-text-dim">Output</span>
+            <span className="font-mono text-[13px] text-text-muted">Interactive architecture review</span>
+          </div>
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
+              See a real example
+            </h2>
+            <span className="label-mono text-text-muted group-hover:text-text transition-colors inline-flex items-center gap-1.5">
+              Open
+              <span className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
+                &rarr;
+              </span>
+            </span>
+          </div>
+        </Link>
+      </section>
+
+      {/* Go deeper — demoted learning content */}
+      <section className="max-w-6xl mx-auto px-6 py-20 sm:py-28 border-t border-text/10">
+        <div className="flex items-center gap-4 mb-3">
+          <Shape type="triangle" color={YELLOW} size={18} />
+          <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
+            Want to go deeper?
+          </h2>
+        </div>
+        <p className="subhead text-text-muted leading-relaxed mb-12 max-w-lg">
+          When the review surfaces something you want to understand, the concepts
+          and stories behind it are here — every idea in plain English, from a
+          real problem.
+        </p>
+
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 mb-12">
           {featured.map((term, i) => (
             <ConceptCard key={term.id} term={term} index={i} animate />
           ))}
         </div>
+
+        <PathCards conceptCount={terms.length} storyCount={stories.length} />
       </section>
 
-      {/* Three ways to learn */}
-      <section className="max-w-6xl mx-auto px-6 py-20 sm:py-28 border-t border-text/10">
-        <div className="flex items-center gap-4 mb-3">
-          <Shape type="circle" color={BLUE} size={18} />
-          <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
-            Three ways to learn
-          </h2>
+      {/* Subscribe band */}
+      <section className="max-w-6xl mx-auto px-6 pb-20 sm:pb-28">
+        <div className="border-t border-text/10 pt-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <Shape type="square" color={BLUE} size={14} />
+              <h2 className="heading-editorial text-xl sm:text-2xl text-text">
+                New concepts and risk patterns
+              </h2>
+            </div>
+            <p className="text-sm text-text-muted leading-relaxed max-w-md">
+              Occasionally, when there&apos;s something worth reading. No spam.
+            </p>
+          </div>
+          <SubscribeForm />
         </div>
-        <p className="subhead text-text-muted leading-relaxed mb-12 max-w-lg">
-          Look up an idea, watch a product grow into it, or work through a
-          structured path — whatever fits how you learn.
-        </p>
-
-        <PathCards
-          conceptCount={terms.length}
-          storyCount={stories.length}
-          moduleCount={modules.length}
-          lessonCount={totalLessons}
-        />
       </section>
 
       {/* Footer — ink block with primary shape accents */}
@@ -245,37 +311,57 @@ export default function HomePage() {
 
         <div className="relative max-w-6xl mx-auto px-6 py-20 sm:py-24">
           <h2 className="heading-hero text-4xl sm:text-6xl max-w-2xl" style={{ color: "#F4F1EA" }}>
-            Ready to dig <span style={{ color: YELLOW }}>in?</span>
+            Ready to see <span style={{ color: YELLOW }}>it?</span>
           </h2>
           <p className="subhead mt-5 max-w-md text-[15px] leading-relaxed" style={{ color: "rgba(244,241,234,0.7)" }}>
-            Start with the concepts, then watch them come together as a real
-            product scales from two users to millions.
+            Install the skill, run it on any repo, and get a map of your system in
+            a couple of minutes.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/concepts"
+              href="#install"
               data-cursor
               className="px-7 py-3.5 label-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5"
               style={{ backgroundColor: "#F4F1EA", color: "#1A1A1A" }}
             >
-              Browse Concepts
+              Get the skill
             </Link>
             <Link
-              href="/curriculum"
+              href="/concepts"
               data-cursor
               className="px-7 py-3.5 label-mono border transition-colors duration-500"
               style={{ borderColor: "rgba(244,241,234,0.3)", color: "#F4F1EA" }}
             >
-              Curriculum
+              Browse Concepts
             </Link>
           </div>
 
-          <div className="mt-20 pt-8 flex items-center justify-between border-t" style={{ borderColor: "rgba(244,241,234,0.12)" }}>
-            <span className="label-mono" style={{ color: "rgba(244,241,234,0.7)" }}>
-              system-design-school
+          {/* Secondary links */}
+          <div className="mt-16 flex flex-wrap gap-x-8 gap-y-2">
+            {[
+              { href: "/example", label: "Example" },
+              { href: "/stories", label: "Build Stories" },
+              { href: "/concepts", label: "Concepts" },
+              { href: "/curriculum", label: "Curriculum" },
+            ].map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                data-cursor
+                className="label-mono transition-colors duration-300"
+                style={{ color: "rgba(244,241,234,0.6)" }}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-10 pt-8 flex items-center justify-between border-t" style={{ borderColor: "rgba(244,241,234,0.12)" }}>
+            <span className="font-display font-bold text-xl lowercase" style={{ color: "rgba(244,241,234,0.8)", letterSpacing: "-0.06em" }}>
+              {SITE_NAME.toLowerCase()}
             </span>
             <a
-              href="https://github.com/lucycrx/system-design-dev"
+              href={PLUGIN_REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
               data-cursor
@@ -286,7 +372,7 @@ export default function HomePage() {
             </a>
           </div>
           <p className="label-mono mt-4" style={{ color: "rgba(244,241,234,0.3)", fontSize: "0.75rem" }}>
-            &copy; 2026 System Design School
+            &copy; 2026 {SITE_NAME}
           </p>
         </div>
       </footer>

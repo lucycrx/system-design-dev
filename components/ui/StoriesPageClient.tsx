@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { Story } from "@/types/story";
 import { Shape, type ShapeType } from "./Shape";
+import { SubscribeForm } from "./SubscribeForm";
 
 const RED = "#D62828";
 const BLUE = "#1D4E89";
@@ -166,6 +167,20 @@ export function StoriesPageClient({ stories }: { stories: Story[] }) {
           <div className="border border-dashed border-text/15 p-8 flex items-center justify-center">
             <p className="label-mono text-text-muted">More stories coming soon</p>
           </div>
+        </div>
+
+        {/* Subscribe */}
+        <div className="mt-16 border-t border-text/10 pt-10">
+          <div className="flex items-center gap-3 mb-3">
+            <Shape type="circle" color={BLUE} size={14} />
+            <h2 className="heading-editorial text-xl text-text">
+              Get new Build Stories
+            </h2>
+          </div>
+          <p className="text-sm text-text-muted leading-relaxed max-w-md mb-5">
+            New stories, concepts, and risk patterns — occasionally, no spam.
+          </p>
+          <SubscribeForm />
         </div>
       </main>
     </>

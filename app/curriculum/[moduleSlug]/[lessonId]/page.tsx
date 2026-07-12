@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getModule, getAllModules } from "@/lib/content";
@@ -6,6 +7,18 @@ import { LessonQuiz } from "@/components/curriculum/LessonQuiz";
 
 interface Props {
   params: Promise<{ moduleSlug: string; lessonId: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { moduleSlug, lessonId } = await params;
+  const mod = getModule(moduleSlug);
+  const lesson = mod?.lessons.find((l) => l.id === lessonId);
+  if (!mod || !lesson) return { title: "Lesson Not Found" };
+  return {
+    title: `${lesson.title} — ${mod.title}`,
+    description: lesson.description,
+    alternates: { canonical: `/curriculum/${mod.slug}/${lesson.id}` },
+  };
 }
 
 export default async function LessonPage({ params }: Props) {

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Poppins, Inter, Space_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { StickyTabsWrapper } from "@/components/ui/StickyTabsWrapper";
 import { ScrollProgressBar } from "@/components/ui/ScrollProgressBar";
 import { DifferenceCursor } from "@/components/ui/DifferenceCursor";
+import { SITE_NAME, SITE_TAGLINE, SITE_URL, SITE_DESCRIPTION } from "@/lib/site";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -29,9 +32,20 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "System Design School \u2014 Learn How Apps Scale",
-  description:
-    "Learn system design one concept at a time. Caching, load balancing, sharding, queues, and more \u2014 each explained in plain English with real-world analogies and interactive Build Stories.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} \u2014 ${SITE_TAGLINE}`,
+    template: `%s \u2014 ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    siteName: SITE_NAME,
+    type: "website",
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({
@@ -52,6 +66,8 @@ export default function RootLayout({
         <ScrollProgressBar />
         <StickyTabsWrapper />
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
