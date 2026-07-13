@@ -3,7 +3,6 @@ import type { CSSProperties } from "react";
 import type { GlossaryTerm } from "@/types/story";
 import { getAllStories, getGlossaryTerms } from "@/lib/content";
 import { ConceptCard } from "@/components/concepts/ConceptCard";
-import { PathCards } from "@/components/ui/PathCards";
 import { InstallCommand } from "@/components/ui/InstallCommand";
 import { SubscribeForm } from "@/components/ui/SubscribeForm";
 import { Shape, ShapeDrift } from "@/components/ui/Shape";
@@ -99,6 +98,34 @@ function Feature({
   );
 }
 
+// Shared section header — one shape marker, one heading, optional subhead.
+// Keeps every section on the page to the same visual rhythm.
+function SectionHead({
+  shape,
+  color,
+  title,
+  subtitle,
+}: {
+  shape: "circle" | "square" | "triangle";
+  color: string;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="mb-10">
+      <div className="flex items-center gap-4">
+        <Shape type={shape} color={color} size={18} />
+        <h2 className="heading-editorial text-2xl sm:text-3xl text-text">{title}</h2>
+      </div>
+      {subtitle ? (
+        <p className="subhead text-text-muted leading-relaxed max-w-xl mt-4">
+          {subtitle}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export default function HomePage() {
   const stories = getAllStories();
   const terms = getGlossaryTerms();
@@ -175,32 +202,25 @@ export default function HomePage() {
       </div>
 
       {/* Install */}
-      <section id="install" className="max-w-3xl mx-auto px-6 py-20 sm:py-28 scroll-mt-24">
-        <div className="flex items-center gap-4 mb-6">
-          <Shape type="square" color={RED} size={18} />
-          <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
-            Install in Claude Code
-          </h2>
+      <section id="install" className="max-w-6xl mx-auto px-6 py-20 sm:py-28 scroll-mt-24">
+        <SectionHead
+          shape="square"
+          color={RED}
+          title="Install in Claude Code"
+          subtitle="Two commands. It runs locally — your code never leaves your machine — and opens the review in your browser when it's done."
+        />
+        <div className="max-w-3xl">
+          <InstallCommand />
+          <p className="label-mono text-text-muted mt-4">
+            Then run <span className="text-text">/architecture-review</span> in any
+            repo.
+          </p>
         </div>
-        <p className="subhead text-text-muted leading-relaxed mb-8 max-w-lg">
-          Two commands. It runs locally — your code never leaves your machine —
-          and opens the review in your browser when it&apos;s done.
-        </p>
-        <InstallCommand />
-        <p className="label-mono text-text-muted mt-4">
-          Then run <span className="text-text">/architecture-review</span> in any
-          repo.
-        </p>
       </section>
 
       {/* What you get */}
       <section className="max-w-6xl mx-auto px-6 pb-20 sm:pb-28">
-        <div className="flex items-center gap-4 mb-10">
-          <Shape type="circle" color={BLUE} size={18} />
-          <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
-            What you get
-          </h2>
-        </div>
+        <SectionHead shape="circle" color={BLUE} title="What you get" />
         <div className="grid gap-4 sm:grid-cols-3">
           <Feature
             shape="circle"
@@ -225,6 +245,7 @@ export default function HomePage() {
 
       {/* Example preview link-card */}
       <section className="max-w-6xl mx-auto px-6 pb-20 sm:pb-28">
+        <SectionHead shape="triangle" color={YELLOW} title="See a real example" />
         <Link
           href="/example"
           data-cursor
@@ -238,9 +259,9 @@ export default function HomePage() {
             <span className="font-mono text-[13px] text-text-muted">Interactive architecture review</span>
           </div>
           <div className="flex items-baseline justify-between gap-4">
-            <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
-              See a real example
-            </h2>
+            <span className="subhead text-xl sm:text-2xl text-text">
+              Open the Hyperagents review
+            </span>
             <span className="label-mono text-text-muted group-hover:text-text transition-colors inline-flex items-center gap-1.5">
               Open
               <span className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
@@ -253,33 +274,67 @@ export default function HomePage() {
 
       {/* Go deeper — demoted learning content */}
       <section className="max-w-6xl mx-auto px-6 py-20 sm:py-28 border-t border-text/10">
-        <div className="flex items-center gap-4 mb-3">
-          <Shape type="triangle" color={YELLOW} size={18} />
-          <h2 className="heading-editorial text-2xl sm:text-3xl text-text">
-            Want to go deeper?
-          </h2>
-        </div>
-        <p className="subhead text-text-muted leading-relaxed mb-12 max-w-lg">
-          When the review surfaces something you want to understand, the concepts
-          and stories behind it are here — every idea in plain English, from a
-          real problem.
-        </p>
+        <SectionHead
+          shape="circle"
+          color={BLUE}
+          title="Want to go deeper?"
+          subtitle="When the review surfaces something you want to understand, the ideas behind it are here — every concept in plain English, from a real problem."
+        />
 
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 mb-12">
+        {/* A few concepts to preview the glossary */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
           {featured.map((term, i) => (
             <ConceptCard key={term.id} term={term} index={i} animate />
           ))}
         </div>
 
-        <PathCards conceptCount={terms.length} storyCount={stories.length} />
+        {/* Two full-width entry points to the learning content */}
+        <div className="grid sm:grid-cols-2 border border-text/15 mt-4">
+          <Link
+            href="/concepts"
+            data-cursor
+            className="group flex items-center justify-between gap-4 p-6 sm:p-7 border-b sm:border-b-0 sm:border-r border-text/15 hover:bg-surface transition-colors duration-300"
+          >
+            <div>
+              <div className="flex items-center gap-3 mb-1.5">
+                <Shape type="circle" color={BLUE} size={13} />
+                <span className="subhead text-lg text-text">All concepts</span>
+              </div>
+              <span className="label-mono text-text-muted">
+                {terms.length} in plain English
+              </span>
+            </div>
+            <span className="text-text-muted text-lg font-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
+              &rarr;
+            </span>
+          </Link>
+          <Link
+            href="/stories"
+            data-cursor
+            className="group flex items-center justify-between gap-4 p-6 sm:p-7 hover:bg-surface transition-colors duration-300"
+          >
+            <div>
+              <div className="flex items-center gap-3 mb-1.5">
+                <Shape type="square" color={RED} size={13} />
+                <span className="subhead text-lg text-text">Build Stories</span>
+              </div>
+              <span className="label-mono text-text-muted">
+                {stories.length} scaling journeys
+              </span>
+            </div>
+            <span className="text-text-muted text-lg font-mono transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
+              &rarr;
+            </span>
+          </Link>
+        </div>
       </section>
 
       {/* Subscribe band */}
       <section className="max-w-6xl mx-auto px-6 pb-20 sm:pb-28">
         <div className="border-t border-text/10 pt-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <Shape type="square" color={BLUE} size={14} />
+            <div className="flex items-center gap-4 mb-3">
+              <Shape type="triangle" color={YELLOW} size={16} />
               <h2 className="heading-editorial text-xl sm:text-2xl text-text">
                 New concepts and risk patterns
               </h2>
